@@ -1,0 +1,45 @@
+<%# Details of an authorized key, in a modal opened from its row (modal_controller.js). %>
+<dialog data-modal-target="dialog" data-action="click->modal#backdropClose" aria-labelledby="<%= dialog_id %>-title"
+        class="key-details m-auto w-full max-w-xl rounded-xl border border-slate-200 bg-white p-0 text-left shadow-xl backdrop:bg-slate-900/40 backdrop:backdrop-blur-sm">
+  <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-4">
+    <div class="min-w-0">
+      <h2 id="<%= dialog_id %>-title" class="truncate text-base font-semibold <%= key.named? ? "text-slate-900" : "italic text-slate-500" %>"><%= key.name || "Sans nom" %></h2>
+      <p class="mt-0.5 font-mono text-xs text-slate-500"><%= account.path %></p>
+    </div>
+    <button type="button" data-action="modal#close" aria-label="Fermer" class="shrink-0 cursor-pointer rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+      <%= icon :x_mark, class: "h-5 w-5" %>
+    </button>
+  </div>
+
+  <div class="px-6 py-5">
+    <dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-sm">
+      <dt class="text-slate-500">Type</dt>
+      <dd class="font-mono text-slate-800"><%= key.type %></dd>
+      <dt class="text-slate-500">Empreinte</dt>
+      <dd class="key-fingerprint break-all font-mono text-xs leading-5 text-slate-800"><%= key.fingerprint %></dd>
+      <dt class="text-slate-500">Commentaire</dt>
+      <dd class="text-slate-800"><%= key.comment || tag.span("Aucun", class: "italic text-slate-400") %></dd>
+      <% if key.options %>
+        <dt class="text-slate-500">Options</dt>
+        <dd class="key-options break-all font-mono text-amber-700"><%= key.options %></dd>
+      <% end %>
+      <% if profile %>
+        <dt class="text-slate-500">Profil</dt>
+        <dd><%= link_to profile.name, profile_path(profile), data: { turbo_frame: "_top" }, class: "font-medium text-indigo-600 hover:text-indigo-500" %></dd>
+      <% end %>
+      <% if key.line_number %>
+        <dt class="text-slate-500">Ligne</dt>
+        <dd class="text-slate-800">n° <%= key.line_number %> du fichier</dd>
+      <% end %>
+    </dl>
+
+    <div class="mt-5" data-controller="clipboard">
+      <div class="flex items-end justify-between gap-4">
+        <label for="<%= dialog_id %>-line" class="text-sm font-medium text-slate-700">Ligne du fichier</label>
+        <%= render "settings/copy_button" %>
+      </div>
+      <textarea id="<%= dialog_id %>-line" readonly rows="3" data-clipboard-target="source"
+                class="mt-2 block w-full resize-none rounded-md border border-slate-300 bg-slate-50 px-3 py-2 font-mono text-xs text-slate-700"><%= key.to_line %></textarea>
+    </div>
+  </div>
+</dialog>

@@ -53,7 +53,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
         assert_select ".key-name", "Sans nom"
         assert_select ".key-badge", text: "Inconnue"
         assert_select ".key-master", 0
-        assert_select "p", text: /#{Regexp.escape(other.fingerprint)}/
+        assert_select "dialog.key-details .key-fingerprint", other.fingerprint
       end
       assert_select "li.authorized-key:nth-child(3)" do
         assert_select ".key-name", "alice@laptop"
@@ -84,7 +84,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
       get server_authorized_keys_path(servers(:web))
     end
 
-    assert_select "p[title=Options]", text: %(options : from="10.0.0.1",no-pty)
+    assert_select "dialog.key-details .key-options", %(from="10.0.0.1",no-pty)
   end
 
   test "shows an empty state when there are no keys" do
@@ -501,5 +501,41 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
 
     activity = Activity.of_kind(:key_removed).sole
     assert_equal [ "root", "bob", users(:one) ], [ activity.unix_user, activity.key_name, activity.user ]
+  end
+
+  test "keeps the type, fingerprint and options out of the rows, in a details modal" do
+    sign_in users(:one)
+    line = %(no-pty #{profiles(:alice).public_key})
+
+    stub_method(AuthorizedKeysReader, :call, keys_result(line)) do
+      get server_authorized_keys_path(servers(:web), account: "root")
+    end
+
+    key = AuthorizedKey.parse(line).sole
+    assert_select "li.authorized-key" do
+      assert_select "[data-controller=modal] button.key-details-button[data-action='modal#open'][title=?]", "Détails de la clé"
+      assert_select "dialog.key-details[data-modal-target=dialog]" do
+        assert_select "h2", "alice@laptop"
+        assert_select "p", "~root/.ssh/authorized_keys"
+        assert_select ".key-fingerprint", key.fingerprint
+        assert_select ".key-options", "no-pty"
+        assert_select "dd a[href=?][data-turbo-frame=_top]", profile_path(profiles(:alice)), text: "Alice"
+        assert_select "dd", text: "n° 1 du fichier"
+        assert_select "[data-controller=clipboard] textarea", line
+        assert_select "button[data-action='modal#close'][aria-label=Fermer]"
+      end
+    end
+    assert_select "li.authorized-key > div:first-of-type p", 0
+  end
+
+  test "each key gets its own dialog ids" do
+    sign_in users(:one)
+
+    stub_method(AuthorizedKeysReader, :call, keys_result(profiles(:alice).public_key, profiles(:ci).public_key)) do
+      get server_authorized_keys_path(servers(:web))
+    end
+
+    ids = css_select("dialog.key-details textarea").map { |textarea| textarea["id"] }
+    assert_equal 2, ids.uniq.size
   end
 end
