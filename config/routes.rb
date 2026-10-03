@@ -1,7 +1,16 @@
 Rails.application.routes.draw do
   devise_for :users
 
-  resources :servers, only: %i[new create]
+  resources :servers, only: %i[show new create edit update] do
+    resource :ping, only: :create, controller: "server_pings"
+    resource :ssh_check, only: :create, controller: "server_ssh_checks"
+  end
+  resource :server_pings, only: :create, path: "servers/pings"
+
+  resource :settings, only: :show
+  scope "settings" do
+    resource :ssh_key, only: :create
+  end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

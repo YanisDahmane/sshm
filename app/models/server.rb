@@ -1,8 +1,6 @@
 require "resolv"
 
 class Server < ApplicationRecord
-  encrypts :password
-
   HOSTNAME_REGEXP = /\A(?=.{1,253}\z)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\z/i
 
   normalizes :name, :host, :username, with: ->(value) { value.strip }
@@ -13,7 +11,15 @@ class Server < ApplicationRecord
   validates :username, presence: true
   validate :host_must_be_an_ip_or_hostname
 
+  before_update :reset_reachability, if: -> { will_save_change_to_host? || will_save_change_to_port? }
+
   private
+
+  # The last ping result no longer applies once the address changes.
+  def reset_reachability
+    self.reachable = nil
+    self.last_checked_at = nil
+  end
 
   def host_must_be_an_ip_or_hostname
     return if host.blank?

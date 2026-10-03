@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_10_03_151343) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_03_154554) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -19,10 +19,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_03_151343) do
     t.string "host", null: false
     t.integer "port", default: 22, null: false
     t.string "username", null: false
-    t.text "password"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "reachable"
+    t.datetime "last_checked_at"
     t.index ["name"], name: "index_servers_on_name", unique: true
+  end
+
+  create_table "ssh_keys", force: :cascade do |t|
+    t.text "public_key", null: false
+    t.text "private_key", null: false
+    t.string "fingerprint", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "users", force: :cascade do |t|

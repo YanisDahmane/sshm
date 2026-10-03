@@ -2,7 +2,7 @@ require "test_helper"
 
 class ServerTest < ActiveSupport::TestCase
   def build_server(**attributes)
-    Server.new({ name: "New", host: "10.0.0.1", username: "deploy", password: "pass" }.merge(attributes))
+    Server.new({ name: "New", host: "10.0.0.1", username: "deploy" }.merge(attributes))
   end
 
   test "fixtures are valid" do
@@ -59,21 +59,22 @@ class ServerTest < ActiveSupport::TestCase
     assert_equal "deploy", server.username
   end
 
-  test "password is optional" do
-    assert build_server(password: nil).valid?
+  test "changing the host or port resets the reachability status" do
+    server = servers(:web)
+    server.update!(host: "10.0.0.99")
+    assert_nil server.reachable
+    assert_nil server.last_checked_at
+
+    server = servers(:db)
+    server.update!(port: 2200)
+    assert_nil server.reachable
+    assert_nil server.last_checked_at
   end
 
-  test "password is encrypted at rest" do
-    server = build_server(password: "super-secret")
-    server.save!
-
-    raw = Server.connection.select_value("SELECT password FROM servers WHERE id = #{server.id}")
-    assert_not_includes raw, "super-secret"
-    assert_equal "super-secret", server.reload.password
-  end
-
-  test "fixture passwords are encrypted and readable" do
-    assert_equal "s3cret", servers(:web).password
-    assert servers(:web).encrypted_attribute?(:password)
+  test "changing other attributes keeps the reachability status" do
+    server = servers(:web)
+    server.update!(name: "Renamed", username: "ops")
+    assert server.reachable
+    assert_not_nil server.last_checked_at
   end
 end

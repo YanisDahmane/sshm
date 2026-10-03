@@ -26,6 +26,10 @@
         <% if user_signed_in? %>
           <div class="flex items-center gap-4">
             <span class="hidden text-sm text-slate-500 sm:inline"><%= current_user.email %></span>
+            <%= link_to settings_path, title: "Paramètres", aria: { label: "Paramètres" },
+                  class: "rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700" do %>
+              <%= icon :cog, class: "h-5 w-5" %>
+            <% end %>
             <%= button_to "Déconnexion", destroy_user_session_path, method: :delete,
                   class: "rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 cursor-pointer" %>
           </div>
@@ -34,7 +38,7 @@
     </nav>
 
     <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <%= render "shared/flash" %>
+      <div id="flash"><%= render "shared/flash" %></div>
       <%= yield %>
     </main>
   </body>

@@ -33,14 +33,8 @@
     <%= f.text_field :username, required: true, placeholder: "root", autocomplete: "off", spellcheck: false, class: "#{input_class} font-mono" %>
   </div>
 
-  <div>
-    <%= f.label :password, "Mot de passe", class: label_class %>
-    <%= f.password_field :password, autocomplete: "new-password", class: input_class %>
-    <p class="mt-1 text-xs text-slate-500">Facultatif. Stocké chiffré.</p>
-  </div>
-
   <div class="flex items-center justify-end gap-3 pt-2">
     <%= link_to "Annuler", root_path, class: "rounded-md px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" %>
-    <%= f.submit "Ajouter le serveur", class: "cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+    <%= f.submit server.persisted? ? "Enregistrer" : "Ajouter le serveur", class: "cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
   </div>
 <% end %>

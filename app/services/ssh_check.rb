@@ -1,0 +1,31 @@
+# Checks that the app can open an SSH session on a server and run a command,
+# by echoing a random token and comparing the output.
+class SshCheck
+  Result = Data.define(:success, :message, :details) do
+    def success? = success
+  end
+
+  def self.call(server, **connection_options)
+    token = "sshm-check-#{SecureRandom.hex(4)}"
+    output = SshConnection.open(server, **connection_options) { |ssh| ssh.exec!("echo #{token}").stdout.strip }
+
+    if output == token
+      Result.new(success: true, message: "Connexion SSH réussie", details: "#{server.username}@#{server.host} a répondu à `echo #{token}`.")
+    else
+      Result.new(success: false, message: "Réponse inattendue du serveur", details: "Attendu « #{token} », reçu « #{output.truncate(200)} ».")
+    end
+  rescue SshConnection::Error => e
+    Result.new(success: false, message: failure_message(e), details: e.message)
+  end
+
+  def self.failure_message(error)
+    case error
+    when SshConnection::MissingKeyError then "Aucune clé SSH configurée"
+    when SshConnection::AuthenticationError then "Clé SSH refusée par le serveur"
+    when SshConnection::HostKeyMismatchError then "L'empreinte du serveur a changé"
+    when SshConnection::CommandError then "La commande a échoué"
+    else "Connexion impossible"
+    end
+  end
+  private_class_method :failure_message
+end
