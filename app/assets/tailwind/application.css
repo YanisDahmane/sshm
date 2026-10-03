@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+/* Ping requests show their own loading state (see server_ping_controller.js). */
+html.hide-turbo-progress .turbo-progress-bar {
+  display: none !important;
+}
