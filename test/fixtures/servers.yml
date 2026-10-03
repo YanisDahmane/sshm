@@ -1,0 +1,19 @@
+web:
+  name: Web
+  host: 192.168.1.10
+  port: 22
+  username: deploy
+  password: s3cret
+
+db:
+  name: Database
+  host: db.example.com
+  port: 2222
+  username: admin
+  password: an0ther
+
+backup:
+  name: Backup
+  host: 10.0.0.5
+  port: 22
+  username: root
