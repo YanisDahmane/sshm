@@ -1,6 +1,11 @@
 class ServersController < ApplicationController
   before_action :set_server, only: %i[show edit update]
 
+  def index
+    @servers = Server.order(:name)
+    @insights = KeyInsights.new
+  end
+
   def show
   end
 
@@ -12,7 +17,7 @@ class ServersController < ApplicationController
     @server = Server.new(server_params)
 
     if @server.save
-      redirect_to root_path, notice: "Le serveur « #{@server.name} » a été ajouté."
+      redirect_to server_path(@server), notice: "Le serveur « #{@server.name} » a été ajouté. Installez-y la clé de SSHM puis testez la connexion."
     else
       render :new, status: :unprocessable_entity
     end

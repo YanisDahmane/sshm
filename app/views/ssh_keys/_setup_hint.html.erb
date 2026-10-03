@@ -1,0 +1,21 @@
+<%# Guides the user when SSH fails because of the app key: reason is :missing_key or :key_refused. %>
+<div class="ssh-setup-hint mt-3 rounded-md border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+  <% if reason == :missing_key %>
+    <p>SSHM n'a pas encore de clé SSH pour se connecter aux serveurs.</p>
+    <%= link_to "Générer la clé dans les paramètres", settings_path, data: { turbo_frame: "_top" },
+          class: "mt-3 inline-flex rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500" %>
+  <% elsif (ssh_key = SshKey.current) %>
+    <p>
+      Le serveur ne connaît pas encore la clé de SSHM. Connectez-vous-y en
+      <code class="rounded bg-white px-1 font-mono text-xs ring-1 ring-slate-200"><%= server.username %>@<%= server.host %></code>
+      et lancez cette commande, puis réessayez :
+    </p>
+    <div class="mt-3" data-controller="clipboard">
+      <div class="flex items-start gap-2">
+        <textarea readonly rows="2" data-clipboard-target="source" aria-label="Commande d'installation de la clé SSHM"
+                  class="block w-full resize-none rounded-md border border-slate-300 bg-slate-900 px-3 py-2 font-mono text-xs text-slate-100"><%= ssh_key_install_command(ssh_key) %></textarea>
+        <%= render "settings/copy_button" %>
+      </div>
+    </div>
+  <% end %>
+</div>

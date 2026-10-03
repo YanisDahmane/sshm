@@ -1,0 +1,12 @@
+<%# Number of keys matching no profile on the server's accounts, from the last key read. %>
+<% orphans = insights.orphans_by_server_id[server.id] %>
+<% if orphans.nil? %>
+  <span class="orphan-keys text-xs text-slate-400" title="Clés jamais lues : ouvrez le serveur ou lancez un scan">—</span>
+<% elsif orphans.empty? %>
+  <span class="orphan-keys text-xs text-slate-500">Aucune</span>
+<% else %>
+  <%= link_to server_path(server, anchor: "server-authorized-keys"), title: orphans.map { |key| key.name || "sans nom" }.join(", "),
+        class: "orphan-keys inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20 hover:bg-amber-100" do %>
+    <%= pluralize(orphans.size, "clé sans profil", plural: "clés sans profil") %>
+  <% end %>
+<% end %>

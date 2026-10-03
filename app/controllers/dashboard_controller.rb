@@ -1,7 +1,9 @@
 class DashboardController < ApplicationController
   def index
-    @servers = Server.order(:name)
-    @profiles = Profile.order(:name)
-    @ssh_key_configured = SshKey.exists?
+    @checklist = OnboardingChecklist.new
+    @insights = KeyInsights.new
+    @servers = Server.order(:name).to_a
+    @temporary_accesses = TemporaryAccess.active.includes(:server, :profile).order(:expires_at)
+    @profiles_count = Profile.count
   end
 end

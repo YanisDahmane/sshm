@@ -10,7 +10,7 @@ class SettingsTest < ApplicationSystemTestCase
   test "generating the first SSH key from the settings page" do
     SshKey.delete_all
     visit root_path
-    assert_selector "#missing-ssh-key"
+    assert_selector "#onboarding-ssh_key:not(.is-done)"
 
     find("nav a[title='Paramètres']").click
     click_on "Générer une clé SSH"
@@ -23,10 +23,10 @@ class SettingsTest < ApplicationSystemTestCase
     visit settings_path
     old_key = SshKey.current.public_key
 
-    dismiss_confirm { click_on "Régénérer la clé" }
+    dismiss_app_confirm { click_on "Régénérer la clé" }
     assert_field "ssh-public-key", with: old_key
 
-    accept_confirm { click_on "Régénérer la clé" }
+    accept_app_confirm { click_on "Régénérer la clé" }
     assert_text "Nouvelle clé SSH générée."
     assert_no_field "ssh-public-key", with: old_key
   end

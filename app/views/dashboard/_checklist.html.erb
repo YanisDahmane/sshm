@@ -1,0 +1,44 @@
+<%# Setup steps until everything is done (see OnboardingChecklist). %>
+<section id="onboarding" class="mt-6 rounded-xl border border-indigo-200 bg-indigo-50/50 p-6">
+  <div class="flex items-center justify-between gap-4">
+    <h2 class="text-lg font-semibold">Bien démarrer avec SSHM</h2>
+    <span class="text-sm font-medium text-indigo-700"><%= checklist.done_count %>/<%= checklist.steps.size %></span>
+  </div>
+  <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-indigo-100">
+    <div class="h-full rounded-full bg-indigo-600" style="width: <%= (100 * checklist.done_count / checklist.steps.size) %>%"></div>
+  </div>
+
+  <ol class="mt-5 space-y-3">
+    <% checklist.steps.each_with_index do |step, index| %>
+      <% current = step == checklist.current %>
+      <li id="onboarding-<%= step.key %>" class="onboarding-step flex gap-3 <%= step.done? ? "is-done" : "" %>">
+        <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold
+                     <%= step.done? ? "bg-emerald-600 text-white" : (current ? "bg-indigo-600 text-white" : "bg-white text-slate-500 ring-1 ring-slate-300") %>">
+          <%= step.done? ? icon(:check, class: "h-3.5 w-3.5") : index + 1 %>
+        </span>
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-medium <%= step.done? ? "text-slate-500 line-through" : "text-slate-900" %>"><%= step.title %></p>
+          <% if current %>
+            <p class="mt-0.5 text-sm text-slate-600"><%= step.description %></p>
+            <div class="mt-2">
+              <% case step.key %>
+              <% when :ssh_key %>
+                <%= button_to "Générer la clé", ssh_key_path, class: "cursor-pointer rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500" %>
+              <% when :server %>
+                <%= link_to "Ajouter un serveur", new_server_path, class: "inline-flex rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500" %>
+              <% when :install_key %>
+                <%= render "ssh_keys/setup_hint", server: Server.order(:name).first, reason: :key_refused %>
+                <%= link_to "Ouvrir #{Server.order(:name).first.name} pour tester", server_path(Server.order(:name).first),
+                      class: "mt-3 inline-flex rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500" %>
+              <% when :profile %>
+                <%= link_to "Créer un profil", new_profile_path, class: "inline-flex rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500" %>
+              <% when :authorize %>
+                <%= link_to "Choisir un serveur", servers_path, class: "inline-flex rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500" %>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </li>
+    <% end %>
+  </ol>
+</section>

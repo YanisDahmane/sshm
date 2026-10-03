@@ -67,7 +67,7 @@ class ServerAuthorizationsControllerTest < ActionDispatch::IntegrationTest
     post server_authorizations_path(servers(:web)), params: { profile_id: profiles(:alice).id }, as: :turbo_stream
 
     assert_turbo_stream action: :update, target: "flash" do
-      assert_select "div.bg-red-50", text: /Impossible d'autoriser « Alice » sur « Web » pour deploy : Connexion impossible/
+      assert_select "div.toast-alert", text: /Impossible d'autoriser « Alice » sur « Web » pour deploy : Connexion impossible/
     end
   end
 

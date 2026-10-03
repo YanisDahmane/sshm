@@ -4,7 +4,7 @@
   when false then [ "Injoignable", "bg-red-50 text-red-700 ring-red-600/20", "bg-red-500" ]
   else            [ "Inconnu", "bg-slate-100 text-slate-600 ring-slate-500/20", "bg-slate-400" ]
   end
-  title = server.last_checked_at ? "Vérifié #{l(server.last_checked_at, format: :short)}" : "Jamais vérifié"
+  title = server.last_checked_at ? "Vérifié #{relative_time_in_words(server.last_checked_at)} (#{l(server.last_checked_at, format: :short)})" : "Jamais vérifié"
 %>
 <span id="<%= dom_id(server, :status) %>" data-server-ping-target="badge"
       class="server-status inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset <%= classes %>" title="<%= title %>">

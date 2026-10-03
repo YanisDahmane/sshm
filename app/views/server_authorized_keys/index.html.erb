@@ -70,12 +70,29 @@
           <p class="mt-1 break-all font-mono text-xs text-red-700"><%= @result.error_details %></p>
         </div>
       </div>
+      <% if @result.reason %>
+        <%= render "ssh_keys/setup_hint", server: @server, reason: @result.reason %>
+      <% end %>
+      <%= link_to "Réessayer", server_authorized_keys_path(@server, account: @account.unix_user),
+            class: "retry-authorized-keys mt-3 inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" %>
     <% elsif @result.keys.empty? %>
       <p class="rounded-md border border-dashed border-slate-300 px-4 py-6 text-center text-sm text-slate-500">Aucune clé autorisée sur ce serveur.</p>
     <% else %>
+      <% if @orphan_keys.any? %>
+        <% one = @orphan_keys.one? %>
+        <div class="orphan-warning mb-3 flex gap-3 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-amber-500"></span>
+          <p>
+            <strong><%= pluralize(@orphan_keys.size, "clé ne correspond", plural: "clés ne correspondent") %> à aucun profil.</strong>
+            Si vous <%= one ? "la" : "les" %> reconnaissez, convertissez-<%= one ? "la" : "les" %> en profil avec le bouton
+            « Créer un profil » ; sinon supprimez-<%= one ? "la" : "les" %>.
+          </p>
+        </div>
+      <% end %>
       <ul class="authorized-keys divide-y divide-slate-100 rounded-md border border-slate-200">
         <% @result.keys.each do |key| %>
-          <li class="authorized-key flex items-start gap-3 px-4 py-3">
+          <% orphan = @orphan_keys.include?(key) %>
+          <li class="authorized-key flex items-start gap-3 px-4 py-3 <%= "is-orphan border-l-4 border-l-amber-400 bg-amber-50/40" if orphan %>">
             <%= icon :key, class: "mt-0.5 h-4 w-4 shrink-0 text-slate-400" %>
             <div class="min-w-0 flex-1">
               <div class="flex flex-wrap items-center gap-2">
@@ -94,14 +111,8 @@
                   <% end %>
                 <% end %>
                 <% if (access = @temporary_accesses[key.fingerprint]) %>
-                  <span class="key-expiry inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20"
-                        title="Expire le <%= l(access.expires_at, format: :long) %>">
-                    <% if access.expired? %>
-                      Expiré, suppression en cours
-                    <% else %>
-                      Expire dans <%= time_left_in_words(access.expires_at) %>
-                    <% end %>
-                  </span>
+                  <%= relative_time_tag access.expires_at, prefix: "Expire ", expired: "Expiré, suppression en cours",
+                        class: "key-expiry inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20" %>
                 <% end %>
                 <% if key.matches?(@app_key) %>
                   <span class="key-badge key-master rounded-full bg-indigo-600 px-2 py-0.5 text-xs font-semibold text-white" title="Clé SSH de l'application SSHM">Master</span>
@@ -112,12 +123,21 @@
                 <p class="mt-1 break-all font-mono text-xs text-amber-700" title="Options">options : <%= key.options %></p>
               <% end %>
             </div>
+            <% if orphan %>
+              <%= link_to new_profile_path(public_key: [ key.type, key.key, key.comment ].compact.join(" "), name: suggested_profile_name(key),
+                                           return_to: server_path(@server, anchor: "server-authorized-keys")),
+                    data: { turbo_frame: "_top" },
+                    class: "create-profile inline-flex shrink-0 items-center gap-1.5 rounded-md border border-indigo-200 bg-white px-2.5 py-1 text-xs font-medium text-indigo-700 shadow-sm hover:bg-indigo-50" do %>
+                <%= icon :user_plus, class: "h-4 w-4" %> Créer un profil
+              <% end %>
+            <% end %>
             <% unless key.matches?(@app_key) %>
               <%= button_to server_authorized_key_path(@server), method: :delete,
                     params: { key: key.key, name: key.name, account: @account.unix_user },
                     title: "Supprimer la clé", aria: { label: "Supprimer la clé #{key.name || "sans nom"}" },
                     form: { class: "shrink-0", data: { controller: "quiet-submit", turbo_frame: "_top",
-                                                       turbo_confirm: "Supprimer la clé « #{key.name || "sans nom"} » de « #{@server.name} » pour #{@account.unix_user} ? Elle ne pourra plus se connecter avec ce compte." } },
+                                                       turbo_confirm: "La clé « #{key.name || "sans nom"} » sera supprimée de « #{@server.name} » pour #{@account.unix_user}. Elle ne pourra plus se connecter avec ce compte.",
+                                                       confirm_label: "Supprimer la clé", confirm_variant: "danger" } },
                     class: "cursor-pointer rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:cursor-wait disabled:opacity-50" do %>
                 <%= icon :trash %>
               <% end %>

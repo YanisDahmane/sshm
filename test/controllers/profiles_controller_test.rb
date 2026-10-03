@@ -48,7 +48,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "create saves the profile and redirects to the dashboard" do
+  test "create saves the profile and redirects to its page" do
     sign_in users(:one)
 
     assert_difference "Profile.count", 1 do
@@ -58,7 +58,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     profile = Profile.find_by!(name: "Bob")
     assert_equal @key.public_key, profile.public_key
     assert_equal @key.fingerprint, profile.fingerprint
-    assert_redirected_to root_path
+    assert_redirected_to profile_path(profile)
     assert_equal "Le profil « Bob » a été ajouté.", flash[:notice]
   end
 
@@ -81,7 +81,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :unprocessable_entity
-    assert_select "#error_explanation li", text: /private key/
+    assert_select "#error_explanation li", text: /ressemble à une clé privée/
   end
 
   test "create refuses a key already used by another profile" do
@@ -91,7 +91,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
       post profiles_path, params: { profile: { name: "Alice bis", public_key: profiles(:alice).public_key } }
     end
     assert_response :unprocessable_entity
-    assert_select "#error_explanation li", text: /already used by another profile/
+    assert_select "#error_explanation li", text: "Cette clé est déjà utilisée par un autre profil"
   end
 
   test "show displays the profile and its key" do
@@ -165,15 +165,54 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Alice", profile.reload.name
   end
 
-  test "destroy deletes the profile and redirects to the dashboard" do
+  test "destroy deletes the profile and redirects to the profiles" do
     sign_in users(:one)
 
     assert_difference "Profile.count", -1 do
       delete profile_path(profiles(:alice))
     end
 
-    assert_redirected_to root_path
+    assert_redirected_to profiles_path
     assert_response :see_other
     assert_equal "Le profil « Alice » a été supprimé.", flash[:notice]
+  end
+
+  test "new can be prefilled from a server key, with a way back" do
+    sign_in users(:one)
+
+    get new_profile_path(public_key: @key.public_key, name: "bob", return_to: "/servers/1#server-authorized-keys")
+
+    assert_select "p.prefilled-hint"
+    assert_select "a[href=?]", "/servers/1#server-authorized-keys", text: "← Retour au serveur"
+    assert_select "form[action=?]", profiles_path do
+      assert_select "input[name='profile[name]'][value=bob]"
+      assert_select "textarea[name='profile[public_key]']", @key.public_key
+      assert_select "input[type=hidden][name=return_to][value=?]", "/servers/1#server-authorized-keys"
+      assert_select "a[href=?]", "/servers/1#server-authorized-keys", text: "Annuler"
+    end
+  end
+
+  test "create goes back to the given local path" do
+    sign_in users(:one)
+
+    post profiles_path, params: valid_params.merge(return_to: server_path(servers(:web), anchor: "server-authorized-keys"))
+
+    assert_redirected_to server_path(servers(:web), anchor: "server-authorized-keys")
+  end
+
+  test "create ignores a return path to another site" do
+    [ "https://evil.example", "//evil.example", "/\\evil.example", "javascript:alert(1)" ].each_with_index do |return_to, index|
+      sign_in users(:one)
+      post profiles_path, params: { profile: { name: "Bob #{index}", public_key: SshKeyGenerator.generate.public_key }, return_to: return_to }
+      assert_redirected_to profile_path(Profile.find_by!(name: "Bob #{index}")), "#{return_to} should be ignored"
+    end
+  end
+
+  test "new without a return path keeps the usual links" do
+    sign_in users(:one)
+    get new_profile_path(return_to: "https://evil.example")
+
+    assert_select "a[href=?]", profiles_path, text: "← Profils"
+    assert_select "input[name=return_to]", 0
   end
 end

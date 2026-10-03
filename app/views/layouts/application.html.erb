@@ -18,16 +18,31 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="h-full text-slate-900">
-    <nav class="border-b border-slate-200 bg-white">
-      <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <%= link_to "SSHM", root_path, class: "text-lg font-semibold tracking-tight" %>
+  <body class="h-full text-slate-900" <%= tag.attributes(user_signed_in? ? { data: { controller: "command-palette" } } : {}) %>>
+    <%= render "shared/flash_container" %>
+    <%= render "shared/confirm_dialog" %>
+    <%= render "shared/command_palette" if user_signed_in? %>
+    <nav class="border-b border-slate-200 bg-white" aria-label="Navigation principale">
+      <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center gap-6">
+          <%= link_to root_path, class: "flex items-center gap-2 text-lg font-semibold tracking-tight" do %>
+            <%= icon :key, class: "h-5 w-5 text-indigo-600" %> SSHM
+          <% end %>
+          <% if user_signed_in? %>
+            <div class="main-nav hidden items-center gap-1 sm:flex">
+              <%= nav_link_to "Dashboard", root_path, active: controller_name == "dashboard" %>
+              <%= nav_link_to "Serveurs", servers_path, active: controller_name.start_with?("server") %>
+              <%= nav_link_to "Profils", profiles_path, active: controller_name == "profiles" %>
+            </div>
+          <% end %>
+        </div>
 
         <% if user_signed_in? %>
-          <div class="flex items-center gap-4">
-            <span class="hidden text-sm text-slate-500 sm:inline"><%= current_user.email %></span>
-            <%= link_to settings_path, title: "Paramètres", aria: { label: "Paramètres" },
-                  class: "rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700" do %>
+          <div class="flex items-center gap-2 sm:gap-3">
+            <%= render "shared/command_palette_button" %>
+            <span class="hidden text-sm text-slate-500 lg:inline"><%= current_user.email %></span>
+            <%= link_to settings_path, title: "Paramètres", aria: { label: "Paramètres", current: (controller_name == "settings" ? "page" : nil) },
+                  class: "rounded-md p-1.5 hover:bg-slate-100 #{controller_name == "settings" ? "text-indigo-600" : "text-slate-500 hover:text-slate-700"}" do %>
               <%= icon :cog, class: "h-5 w-5" %>
             <% end %>
             <%= button_to "Déconnexion", destroy_user_session_path, method: :delete,
@@ -35,10 +50,16 @@
           </div>
         <% end %>
       </div>
+      <% if user_signed_in? %>
+        <div class="main-nav flex gap-1 border-t border-slate-100 px-4 py-2 sm:hidden">
+          <%= nav_link_to "Dashboard", root_path, active: controller_name == "dashboard" %>
+          <%= nav_link_to "Serveurs", servers_path, active: controller_name.start_with?("server") %>
+          <%= nav_link_to "Profils", profiles_path, active: controller_name == "profiles" %>
+        </div>
+      <% end %>
     </nav>
 
     <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div id="flash"><%= render "shared/flash" %></div>
       <%= yield %>
     </main>
   </body>

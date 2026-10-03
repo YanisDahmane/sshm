@@ -61,4 +61,13 @@ class ExpireTemporaryAccessJobTest < ActiveJob::TestCase
 
     assert_nothing_raised { ActiveJob::Base.execute(serialized) }
   end
+
+  test "removes the expired key from the account snapshot" do
+    access = create_temporary_access(expires_at: 1.minute.ago)
+    AccountSnapshot.record!(servers(:web), access.account, AuthorizedKey.parse([ profiles(:ci).public_key, profiles(:alice).public_key ].join("\n")))
+
+    stub_method(AuthorizedKeyRemoval, :call, removal(:removed)) { ExpireTemporaryAccessJob.perform_now(access) }
+
+    assert_equal [ profiles(:alice).fingerprint ], AccountSnapshot.sole.fingerprints
+  end
 end

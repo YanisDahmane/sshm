@@ -1,0 +1,7 @@
+<%# KPI tile: label, value, link; tone :ok / :warning / :neutral colours the value. %>
+<% tones = { ok: "text-emerald-700", warning: "text-amber-600", neutral: "text-slate-900" } %>
+<%= link_to path, id: id, class: "stat block rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-indigo-300 hover:shadow" do %>
+  <p class="text-sm font-medium text-slate-500"><%= label %></p>
+  <p class="stat-value mt-2 text-3xl font-semibold tracking-tight <%= tones.fetch(tone) %>"><%= value %></p>
+  <% if local_assigns[:hint] %><p class="mt-1 text-xs text-slate-400"><%= hint %></p><% end %>
+<% end %>

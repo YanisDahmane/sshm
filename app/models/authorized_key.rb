@@ -52,6 +52,9 @@ class AuthorizedKey
 
   def name = comment
 
+  # The authorized_keys line for this key.
+  def to_line = [ options, type, key, comment ].compact.join(" ")
+
   def named? = comment.present?
 
   def fingerprint

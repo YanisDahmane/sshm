@@ -1,132 +1,94 @@
 <% content_for :title, "Dashboard · SSHM" %>
 
-<h1 class="text-2xl font-bold tracking-tight">Dashboard</h1>
-
-<% unless @ssh_key_configured %>
-  <div id="missing-ssh-key" class="mt-6 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-    Aucune clé SSH n'est configurée : l'application ne peut pas encore se connecter aux serveurs.
-    <%= link_to "Générer une clé dans les paramètres", settings_path, class: "font-medium underline hover:text-amber-900" %>
+<div class="flex items-end justify-between gap-4">
+  <div>
+    <h1 class="text-2xl font-bold tracking-tight">Dashboard</h1>
+    <p class="mt-1 text-sm text-slate-500">
+      <% if @insights.scanned? %>
+        Clés lues <%= relative_time_tag @insights.last_read_at %>.
+      <% else %>
+        Les clés des serveurs n'ont pas encore été lues.
+      <% end %>
+    </p>
   </div>
+  <% if @servers.any? %>
+    <%= button_to server_scans_path,
+          class: "inline-flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" do %>
+      <%= icon :key, class: "h-4 w-4" %> Scanner les clés
+    <% end %>
+  <% end %>
+</div>
+
+<% unless @checklist.complete? %>
+  <%= render "dashboard/checklist", checklist: @checklist %>
 <% end %>
 
-<section class="mt-8" data-controller="server-ping">
-  <%= render "servers/checking_badge_template" %>
+<% online = @servers.count { |server| server.reachable } %>
+<% orphans = @insights.orphan_count %>
+<div id="stats" class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  <%= render "dashboard/stat", id: "stat-online", label: "Serveurs en ligne", path: servers_path,
+        value: "#{online}/#{@servers.size}", tone: (online < @servers.size ? :warning : :ok) %>
+  <%= render "dashboard/stat", id: "stat-orphans", label: "Clés sans profil", path: "#attention",
+        value: (@insights.scanned? ? orphans : "—"), tone: (orphans.positive? ? :warning : :ok),
+        hint: (@insights.scanned? ? nil : "Lancez un scan") %>
+  <%= render "dashboard/stat", id: "stat-temporary", label: "Accès temporaires en cours", path: "#temporary-accesses",
+        value: @temporary_accesses.size, tone: :neutral %>
+  <%= render "dashboard/stat", id: "stat-profiles", label: "Profils", path: profiles_path, value: @profiles_count, tone: :neutral %>
+</div>
 
-  <div class="flex items-center justify-between gap-4">
-    <div>
-      <h2 class="text-lg font-semibold">Serveurs</h2>
-      <p class="text-sm text-slate-500"><%= pluralize(@servers.size, "serveur", plural: "serveurs") %></p>
-    </div>
-    <div class="flex items-center gap-2">
-      <% if @servers.any? %>
-        <%= button_to server_pings_path,
-              form: { data: { controller: "quiet-submit", action: "turbo:submit-start->server-ping#start turbo:submit-end->server-ping#finish" } },
-              class: "group inline-flex cursor-pointer items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-wait disabled:opacity-60" do %>
-          <%= icon :arrow_path, class: "h-4 w-4 group-disabled:animate-spin" %>
-          Actualiser les statuts
+<div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+  <section id="temporary-accesses" class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <h2 class="text-lg font-semibold">Accès temporaires en cours</h2>
+    <% if @temporary_accesses.any? %>
+      <ul class="mt-4 divide-y divide-slate-100">
+        <% @temporary_accesses.each do |access| %>
+          <li id="<%= dom_id(access) %>" class="flex items-center justify-between gap-3 py-3 text-sm">
+            <div class="min-w-0">
+              <p class="truncate font-medium"><%= access.profile&.name || "Profil supprimé" %></p>
+              <p class="truncate text-xs text-slate-500">
+                <%= link_to access.server.name, server_path(access.server), class: "hover:text-indigo-600 hover:underline" %>
+                · <span class="font-mono"><%= access.unix_user %></span>
+              </p>
+            </div>
+            <%= relative_time_tag access.expires_at, prefix: "Expire ", expired: "Expiré, suppression en cours",
+                  class: "shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20" %>
+          </li>
         <% end %>
-      <% end %>
-      <%= link_to "Ajouter un serveur", new_server_path,
-            class: "rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
-    </div>
-  </div>
+      </ul>
+    <% else %>
+      <p class="mt-4 text-sm text-slate-500">Aucun accès temporaire. Choisissez une durée en autorisant un profil sur un serveur.</p>
+    <% end %>
+  </section>
 
-  <% if @servers.any? %>
-    <div class="mt-4 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-      <table id="servers" class="min-w-full divide-y divide-slate-200 text-sm">
-        <thead class="bg-slate-50 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
-          <tr>
-            <th scope="col" class="px-4 py-3">Statut</th>
-            <th scope="col" class="px-4 py-3">Nom</th>
-            <th scope="col" class="px-4 py-3">Hôte</th>
-            <th scope="col" class="px-4 py-3">Port</th>
-            <th scope="col" class="px-4 py-3">Utilisateur</th>
-            <th scope="col" class="px-4 py-3"><span class="sr-only">Actions</span></th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-          <% @servers.each do |server| %>
-            <tr id="<%= dom_id(server) %>" class="hover:bg-slate-50">
-              <td class="px-4 py-3"><%= render "servers/status", server: server %></td>
-              <td class="px-4 py-3 font-medium"><%= link_to server.name, server_path(server), class: "hover:text-indigo-600 hover:underline" %></td>
-              <td class="px-4 py-3 font-mono text-slate-700"><%= server.host %></td>
-              <td class="px-4 py-3 font-mono text-slate-700"><%= server.port %></td>
-              <td class="px-4 py-3 font-mono text-slate-700"><%= server.username %></td>
-              <td class="px-4 py-3">
-                <div class="flex items-center justify-end gap-1">
-                  <%= button_to server_ping_path(server),
-                        title: "Actualiser le statut", aria: { label: "Actualiser le statut de #{server.name}" },
-                        form: { data: { controller: "quiet-submit", action: "turbo:submit-start->server-ping#start turbo:submit-end->server-ping#finish",
-                                        server_ping_badge_param: dom_id(server, :status) } },
-                        class: "group cursor-pointer rounded-md p-1.5 text-slate-500 hover:bg-indigo-50 hover:text-indigo-600 disabled:cursor-wait disabled:opacity-60" do %>
-                    <%= icon :arrow_path, class: "h-4 w-4 group-disabled:animate-spin" %>
-                  <% end %>
-                  <%= link_to edit_server_path(server),
-                        title: "Modifier", aria: { label: "Modifier #{server.name}" },
-                        class: "rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700" do %>
-                    <%= icon :pencil_square %>
-                  <% end %>
-                </div>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
-  <% else %>
-    <div class="mt-4 rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
-      <p class="text-sm text-slate-500">Aucun serveur pour le moment.</p>
-      <%= link_to "Ajouter votre premier serveur", new_server_path, class: "mt-2 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
-    </div>
-  <% end %>
-</section>
-
-<section id="profiles-section" class="mt-12">
-  <div class="flex items-center justify-between gap-4">
-    <div>
-      <h2 class="text-lg font-semibold">Profils</h2>
-      <p class="text-sm text-slate-500"><%= pluralize(@profiles.size, "profil", plural: "profils") %></p>
-    </div>
-    <%= link_to "Ajouter un profil", new_profile_path,
-          class: "rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
-  </div>
-
-  <% if @profiles.any? %>
-    <div class="mt-4 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-      <table id="profiles" class="min-w-full divide-y divide-slate-200 text-sm">
-        <thead class="bg-slate-50 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
-          <tr>
-            <th scope="col" class="px-4 py-3">Nom</th>
-            <th scope="col" class="px-4 py-3">Type</th>
-            <th scope="col" class="px-4 py-3">Empreinte</th>
-            <th scope="col" class="px-4 py-3"><span class="sr-only">Actions</span></th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-          <% @profiles.each do |profile| %>
-            <tr id="<%= dom_id(profile) %>" class="hover:bg-slate-50">
-              <td class="px-4 py-3 font-medium"><%= link_to profile.name, profile_path(profile), class: "hover:text-indigo-600 hover:underline" %></td>
-              <td class="px-4 py-3 font-mono text-slate-700"><%= profile.authorized_key&.type %></td>
-              <td class="px-4 py-3 font-mono text-xs text-slate-500"><%= profile.fingerprint %></td>
-              <td class="px-4 py-3">
-                <div class="flex items-center justify-end gap-1">
-                  <%= link_to edit_profile_path(profile),
-                        title: "Modifier", aria: { label: "Modifier #{profile.name}" },
-                        class: "rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700" do %>
-                    <%= icon :pencil_square %>
-                  <% end %>
-                  <%= render "profiles/delete_button", profile: profile %>
-                </div>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
-  <% else %>
-    <div class="mt-4 rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
-      <p class="text-sm text-slate-500">Aucun profil pour le moment.</p>
-      <%= link_to "Ajouter votre premier profil", new_profile_path, class: "mt-2 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
-    </div>
-  <% end %>
-</section>
+  <section id="attention" class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <h2 class="text-lg font-semibold">À surveiller</h2>
+    <% attention = @servers.select { |server| server.reachable == false || server.ssh_ok == false || @insights.orphans_by_server_id[server.id].present? } %>
+    <% if attention.any? %>
+      <ul class="mt-4 divide-y divide-slate-100">
+        <% attention.each do |server| %>
+          <% orphans = @insights.orphans_by_server_id[server.id].to_a %>
+          <li id="attention-<%= dom_id(server) %>" class="py-3 text-sm">
+            <div class="flex items-center justify-between gap-3">
+              <%= link_to server.name, server_path(server), class: "truncate font-medium hover:text-indigo-600 hover:underline" %>
+              <div class="flex shrink-0 flex-wrap items-center justify-end gap-2">
+                <% if server.reachable == false %><%= render "servers/status", server: server %><% end %>
+                <% if server.ssh_ok == false %><%= render "servers/ssh_status", server: server %><% end %>
+                <% if orphans.any? %><%= render "servers/orphan_keys", server: server, insights: @insights %><% end %>
+              </div>
+            </div>
+            <% if orphans.any? %>
+              <p class="attention-orphans mt-1 truncate text-xs text-slate-500">
+                <%= orphans.first(3).map { |key| key.name || "sans nom" }.join(", ") %><%= " et #{orphans.size - 3} autre(s)" if orphans.size > 3 %>
+                — <%= link_to "convertir en profil", server_path(server, anchor: "server-authorized-keys"), class: "font-medium text-indigo-600 hover:text-indigo-500" %>
+              </p>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% elsif @servers.any? %>
+      <p class="mt-4 text-sm text-slate-500">Rien à signaler : serveurs joignables, connexion SSH OK et toutes les clés correspondent à un profil.</p>
+    <% else %>
+      <p class="mt-4 text-sm text-slate-500">Ajoutez un serveur pour commencer.</p>
+    <% end %>
+  </section>
+</div>

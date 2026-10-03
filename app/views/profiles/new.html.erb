@@ -1,10 +1,13 @@
 <% content_for :title, "Ajouter un profil · SSHM" %>
 
 <div class="mx-auto max-w-xl">
-  <%= link_to "← Retour au dashboard", root_path, class: "text-sm text-slate-500 hover:text-slate-700" %>
+  <%= link_to (@return_to ? "← Retour au serveur" : "← Profils"), @return_to || profiles_path, class: "text-sm text-slate-500 hover:text-slate-700" %>
   <h1 class="mt-2 text-2xl font-bold tracking-tight">Ajouter un profil</h1>
+  <% if @return_to && @profile.public_key.present? %>
+    <p class="prefilled-hint mt-2 text-sm text-slate-500">La clé trouvée sur le serveur est déjà remplie : choisissez simplement un nom.</p>
+  <% end %>
 
   <div class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-    <%= render "form", profile: @profile %>
+    <%= render "form", profile: @profile, return_to: @return_to %>
   </div>
 </div>

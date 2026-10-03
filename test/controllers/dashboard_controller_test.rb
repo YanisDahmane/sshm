@@ -29,108 +29,153 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "lists servers sorted by name" do
+  test "shows the setup checklist until every step is done" do
     sign_in users(:one)
     get root_path
 
-    assert_select "#servers tbody tr", Server.count
-    assert_select "#servers tbody tr:first-child td:nth-child(2)", "Backup"
-    assert_select "##{ActionView::RecordIdentifier.dom_id(servers(:web))}" do
-      assert_select "td", text: "192.168.1.10"
-      assert_select "td", text: "deploy"
-    end
-    assert_select "a[href=?]", new_server_path, text: "Ajouter un serveur"
-  end
-
-  test "shows an empty state when there are no servers" do
-    Server.delete_all
-    sign_in users(:one)
-    get root_path
-
-    assert_select "#servers", 0
-    assert_select "p", text: "Aucun serveur pour le moment."
-  end
-
-  test "shows the reachability status of each server" do
-    sign_in users(:one)
-    get root_path
-
-    assert_select "##{ActionView::RecordIdentifier.dom_id(servers(:web))} .server-status", text: "En ligne"
-    assert_select "##{ActionView::RecordIdentifier.dom_id(servers(:db))} .server-status", text: "Injoignable"
-    assert_select "##{ActionView::RecordIdentifier.dom_id(servers(:backup))} .server-status[title=?]", "Jamais vérifié", text: "Inconnu"
-  end
-
-  test "shows refresh buttons for all servers and for each server" do
-    sign_in users(:one)
-    get root_path
-
-    assert_select "form[action=?][method=post][data-action*='server-ping#start']", server_pings_path
-    assert_select "form[action=?][method=post][data-server-ping-badge-param=?]", server_ping_path(servers(:web)),
-                  ActionView::RecordIdentifier.dom_id(servers(:web), :status) do
-      assert_select "button[title=?] svg", "Actualiser le statut"
-    end
-  end
-
-  test "renders badges as Stimulus targets with a checking template" do
-    sign_in users(:one)
-    get root_path
-
-    assert_select "section[data-controller=server-ping]" do
-      assert_select "template[data-server-ping-target=checking]"
-      assert_select "##{ActionView::RecordIdentifier.dom_id(servers(:web), :status)}[data-server-ping-target=badge]"
-    end
-    assert_select "#flash"
-  end
-
-  test "shows an edit link for each server" do
-    sign_in users(:one)
-    get root_path
-
-    Server.find_each do |server|
-      assert_select "a[href=?][title=Modifier][aria-label=?] svg", edit_server_path(server), "Modifier #{server.name}"
-      assert_select "td a[href=?]", server_path(server), text: server.name
-    end
-  end
-
-  test "warns when no SSH key is configured" do
-    SshKey.delete_all
-    sign_in users(:one)
-    get root_path
-
-    assert_select "#missing-ssh-key a[href=?]", settings_path
-  end
-
-  test "does not warn when an SSH key is configured" do
-    sign_in users(:one)
-    get root_path
-
-    assert_select "#missing-ssh-key", 0
-  end
-
-  test "lists profiles sorted by name with their actions" do
-    sign_in users(:one)
-    get root_path
-
-    assert_select "#profiles-section a[href=?]", new_profile_path, text: "Ajouter un profil"
-    assert_select "#profiles tbody tr", 2
-    assert_select "#profiles tbody tr:first-child td:first-child", "Alice"
-    Profile.find_each do |profile|
-      assert_select "##{ActionView::RecordIdentifier.dom_id(profile)}" do
-        assert_select "td a[href=?]", profile_path(profile), text: profile.name
-        assert_select "td", text: "ssh-ed25519"
-        assert_select "td", text: profile.fingerprint
-        assert_select "a[href=?][title=Modifier]", edit_profile_path(profile)
-        assert_select "form[action=?][data-turbo-confirm] button[title=Supprimer]", profile_path(profile)
+    assert_select "#onboarding" do
+      assert_select ".onboarding-step", 5
+      assert_select "#onboarding-ssh_key.is-done"
+      assert_select "#onboarding-server.is-done"
+      assert_select "#onboarding-install_key:not(.is-done)" do
+        assert_select ".ssh-setup-hint textarea", text: /authorized_keys/
+        assert_select "a[href=?]", server_path(servers(:backup)), text: /Ouvrir Backup pour tester/
       end
     end
   end
 
-  test "shows an empty state when there are no profiles" do
-    Profile.delete_all
+  test "the checklist starts with generating the SSHM key" do
+    SshKey.delete_all
     sign_in users(:one)
     get root_path
 
-    assert_select "#profiles", 0
-    assert_select "#profiles-section p", text: "Aucun profil pour le moment."
+    assert_select "#onboarding-ssh_key:not(.is-done) form[action=?] button", ssh_key_path, text: "Générer la clé"
+  end
+
+  test "hides the checklist once everything is done" do
+    servers(:web).record_ssh_status!(true)
+    AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse(profiles(:alice).public_key))
+    sign_in users(:one)
+
+    get root_path
+
+    assert_select "#onboarding", 0
+  end
+
+  test "shows the key figures" do
+    unnamed = SshKeyGenerator.generate.public_key.split(" ").first(2).join(" ")
+    AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse(unnamed))
+    TemporaryAccess.create!(server: servers(:web), profile: profiles(:ci), unix_user: "deploy", key_blob: profiles(:ci).authorized_key.key,
+                            fingerprint: profiles(:ci).fingerprint, expires_at: 9.minutes.from_now)
+    sign_in users(:one)
+
+    get root_path
+
+    assert_select "a#stat-online[href=?] .stat-value", servers_path, "1/3"
+    assert_select "a#stat-orphans[href='#attention'] .stat-value", "1"
+    assert_select "#stat-temporary .stat-value", "1"
+    assert_select "a#stat-profiles[href=?] .stat-value", profiles_path, "2"
+  end
+
+  test "the keys without profile figure asks for a scan before any read" do
+    sign_in users(:one)
+    get root_path
+
+    assert_select "#stat-orphans .stat-value", "—"
+    assert_select "#stat-orphans", text: /Lancez un scan/
+    assert_select "form[action=?]", server_scans_path
+  end
+
+  test "lists the temporary accesses in progress" do
+    access = TemporaryAccess.create!(server: servers(:web), profile: profiles(:ci), unix_user: "deploy", key_blob: profiles(:ci).authorized_key.key,
+                                     fingerprint: profiles(:ci).fingerprint, expires_at: 9.minutes.from_now + 30.seconds)
+    sign_in users(:one)
+
+    get root_path
+
+    assert_select "#temporary-accesses ##{ActionView::RecordIdentifier.dom_id(access)}" do
+      assert_select "p", text: "CI"
+      assert_select "a[href=?]", server_path(servers(:web)), text: "Web"
+      assert_select "time[data-controller=relative-time]", text: "Expire dans 10 minutes"
+    end
+  end
+
+  test "lists the servers that need attention" do
+    servers(:backup).record_ssh_status!(false)
+    sign_in users(:one)
+
+    get root_path
+
+    assert_select "#attention li", 2
+    assert_select "#attention li", text: /Database/ # unreachable
+    assert_select "#attention li", text: /Backup/ do # key refused
+      assert_select ".ssh-status", text: /Clé refusée/
+    end
+  end
+
+  test "has the main navigation with the current page highlighted" do
+    sign_in users(:one)
+
+    get root_path
+    assert_select "nav .main-nav a[aria-current=page]", text: "Dashboard"
+    assert_select "nav .main-nav a[href=?]", servers_path, text: "Serveurs"
+    assert_select "nav .main-nav a[href=?]", profiles_path, text: "Profils"
+
+    get server_path(servers(:web))
+    assert_select "nav .main-nav a[aria-current=page]", text: "Serveurs"
+
+    get profiles_path
+    assert_select "nav .main-nav a[aria-current=page]", text: "Profils"
+  end
+
+  test "includes the quick search, its button and the confirm dialog when signed in" do
+    sign_in users(:one)
+    get root_path
+
+    assert_select "body[data-controller=command-palette]"
+    assert_select "dialog#command-palette script[type='application/json']", text: /"label":"Web"/
+    assert_select "button.command-palette-button[data-action='command-palette#open']"
+    assert_select "dialog#confirm-dialog button[data-confirm-accept]"
+    assert_select "#flash[aria-live=polite]"
+  end
+
+  test "no quick search on the sign in page" do
+    get new_user_session_path
+
+    assert_select "dialog#command-palette", 0
+    assert_select "#flash"
+  end
+
+  test "flash messages are rendered as toasts" do
+    sign_in users(:one)
+    post server_scans_path
+    follow_redirect!
+
+    assert_select "#flash .toast.toast-notice[data-controller=toast][role=status]", text: /Scan des clés lancé/ do
+      assert_select "button[data-action='toast#dismiss'][aria-label=Fermer]"
+    end
+  end
+
+  test "warns about keys without profile in the attention list, with their names" do
+    keys = [ "alice2@laptop", "bob@desktop", nil, "dave@ci" ].map { |comment| SshKeyGenerator.generate(comment: comment.to_s).public_key.strip }
+    AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse(keys.join("\n")))
+    sign_in users(:one)
+
+    get root_path
+
+    assert_select "#attention-#{ActionView::RecordIdentifier.dom_id(servers(:web))}" do
+      assert_select ".orphan-keys", text: "4 clés sans profil"
+      assert_select ".attention-orphans", text: /alice2@laptop, bob@desktop, sans nom et 1 autre\(s\)/
+      assert_select ".attention-orphans a[href=?]", server_path(servers(:web), anchor: "server-authorized-keys"), text: "convertir en profil"
+    end
+  end
+
+  test "a named key without profile is to watch too" do
+    AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse(SshKeyGenerator.generate(comment: "bob@desktop").public_key))
+    sign_in users(:one)
+
+    get root_path
+
+    assert_select "#attention-#{ActionView::RecordIdentifier.dom_id(servers(:web))} .attention-orphans", text: /bob@desktop/
   end
 end

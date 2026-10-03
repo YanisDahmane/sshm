@@ -1,0 +1,13 @@
+<%# Last known SSH login result (see Server#record_ssh_status!). %>
+<% if server.ssh_ok.nil? %>
+  <span class="ssh-status text-xs text-slate-400" title="Connexion SSH jamais testée">—</span>
+<% elsif server.ssh_ok %>
+  <span class="ssh-status inline-flex items-center gap-1 text-xs font-medium text-emerald-700" title="Connexion SSH réussie <%= relative_time_in_words(server.ssh_checked_at) %>">
+    <%= icon :check, class: "h-3.5 w-3.5" %> OK
+  </span>
+<% else %>
+  <%= link_to server_path(server), title: "La clé de SSHM a été refusée #{relative_time_in_words(server.ssh_checked_at)}",
+        class: "ssh-status inline-flex items-center gap-1 text-xs font-medium text-red-700 hover:underline" do %>
+    <%= icon :x_mark, class: "h-3.5 w-3.5" %> Clé refusée
+  <% end %>
+<% end %>

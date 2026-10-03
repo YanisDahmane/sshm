@@ -1,0 +1,8 @@
+<ul class="bulk-results mt-4 divide-y divide-slate-100 rounded-md border border-slate-200 text-sm">
+  <% results.each do |result| %>
+    <li class="bulk-result flex items-start gap-3 px-4 py-2 <%= result.status == :error ? "is-error" : "is-success" %>">
+      <%= icon(result.status == :error ? :x_mark : :check, class: "mt-0.5 h-4 w-4 shrink-0 #{result.status == :error ? "text-red-600" : "text-emerald-600"}") %>
+      <span><span class="font-medium"><%= result.server.name %></span> · <span class="font-mono"><%= result.unix_user %></span> : <%= result.message %></span>
+    </li>
+  <% end %>
+</ul>

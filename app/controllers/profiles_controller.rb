@@ -1,18 +1,27 @@
 class ProfilesController < ApplicationController
   before_action :set_profile, only: %i[show edit update destroy]
 
+  def index
+    @profiles = Profile.order(:name)
+  end
+
   def show
   end
 
+  # Can be prefilled (e.g. from a server's key without profile) with
+  # `public_key`, `name` and a local `return_to` path.
   def new
-    @profile = Profile.new
+    @profile = Profile.new(name: params[:name], public_key: params[:public_key])
+    @return_to = safe_return_to
   end
 
   def create
     @profile = Profile.new(profile_params)
 
+    @return_to = safe_return_to
+
     if @profile.save
-      redirect_to root_path, notice: "Le profil « #{@profile.name} » a été ajouté."
+      redirect_to @return_to || profile_path(@profile), notice: "Le profil « #{@profile.name} » a été ajouté."
     else
       render :new, status: :unprocessable_entity
     end
@@ -31,10 +40,16 @@ class ProfilesController < ApplicationController
 
   def destroy
     @profile.destroy!
-    redirect_to root_path, notice: "Le profil « #{@profile.name} » a été supprimé.", status: :see_other
+    redirect_to profiles_path, notice: "Le profil « #{@profile.name} » a été supprimé.", status: :see_other
   end
 
   private
+
+  # Only local paths, to avoid redirecting to another site.
+  def safe_return_to
+    path = params[:return_to].to_s
+    path if path.start_with?("/") && !path.start_with?("//") && !path.include?("\\")
+  end
 
   def set_profile
     @profile = Profile.find(params[:id])

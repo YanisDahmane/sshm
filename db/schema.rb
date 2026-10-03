@@ -10,9 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_10_03_163057) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_03_194214) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "account_snapshots", force: :cascade do |t|
+    t.bigint "server_id", null: false
+    t.string "unix_user", null: false
+    t.text "content", default: "", null: false
+    t.datetime "read_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["server_id", "unix_user"], name: "index_account_snapshots_on_server_id_and_unix_user", unique: true
+    t.index ["server_id"], name: "index_account_snapshots_on_server_id"
+  end
 
   create_table "profiles", force: :cascade do |t|
     t.string "name", null: false
@@ -33,6 +44,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_03_163057) do
     t.datetime "updated_at", null: false
     t.boolean "reachable"
     t.datetime "last_checked_at"
+    t.boolean "ssh_ok"
+    t.datetime "ssh_checked_at"
     t.index ["name"], name: "index_servers_on_name", unique: true
   end
 
@@ -72,6 +85,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_03_163057) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "account_snapshots", "servers", on_delete: :cascade
   add_foreign_key "temporary_accesses", "profiles", on_delete: :nullify
   add_foreign_key "temporary_accesses", "servers", on_delete: :cascade
 end

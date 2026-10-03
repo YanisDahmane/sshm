@@ -1,6 +1,7 @@
 <%= button_to profile_path(profile), method: :delete,
       title: "Supprimer", aria: { label: "Supprimer #{profile.name}" },
-      form: { data: { turbo_confirm: "Supprimer le profil « #{profile.name} » ?" } },
+      form: { data: { turbo_confirm: "Le profil « #{profile.name} » sera supprimé. Ses clés déjà installées sur les serveurs n'en seront pas retirées.",
+                      confirm_label: "Supprimer", confirm_variant: "danger" } },
       class: local_assigns.fetch(:class, "cursor-pointer rounded-md p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-600") do %>
   <%= icon :trash %>
   <%= local_assigns[:label] %>

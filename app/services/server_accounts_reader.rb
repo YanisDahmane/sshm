@@ -4,7 +4,8 @@
 class ServerAccountsReader
   NO_LOGIN_SHELLS = %r{/(nologin|false|sync|shutdown|halt)\z}
 
-  Result = Data.define(:accounts, :error_title, :error_details) do
+  Result = Data.define(:accounts, :error_title, :error_details, :reason) do
+    def initialize(accounts:, error_title:, error_details:, reason: nil) = super
     def success? = error_title.nil?
   end
 
@@ -15,7 +16,7 @@ class ServerAccountsReader
 
     Result.new(accounts: accounts_from(server, passwd), error_title: nil, error_details: nil)
   rescue SshConnection::Error => e
-    Result.new(accounts: [ AuthorizedKeysAccount.login(server) ], error_title: e.title, error_details: e.message)
+    Result.new(accounts: [ AuthorizedKeysAccount.login(server) ], error_title: e.title, error_details: e.message, reason: e.reason)
   end
 
   def self.accounts_from(server, passwd)

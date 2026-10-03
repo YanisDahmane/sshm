@@ -1,7 +1,8 @@
 # Checks that the app can open an SSH session on a server and run a command,
 # by echoing a random token and comparing the output.
 class SshCheck
-  Result = Data.define(:success, :message, :details) do
+  Result = Data.define(:success, :message, :details, :reason) do
+    def initialize(success:, message:, details:, reason: nil) = super
     def success? = success
   end
 
@@ -15,6 +16,6 @@ class SshCheck
       Result.new(success: false, message: "Réponse inattendue du serveur", details: "Attendu « #{token} », reçu « #{output.truncate(200)} ».")
     end
   rescue SshConnection::Error => e
-    Result.new(success: false, message: e.title, details: e.message)
+    Result.new(success: false, message: e.title, details: e.message, reason: e.reason)
   end
 end

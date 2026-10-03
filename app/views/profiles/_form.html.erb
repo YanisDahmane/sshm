@@ -3,6 +3,7 @@
 
 <%= form_with model: profile, class: "space-y-5" do |f| %>
   <%= render "shared/form_errors", record: profile %>
+  <%= hidden_field_tag :return_to, return_to if local_assigns[:return_to] %>
 
   <div>
     <%= f.label :name, "Nom", class: label_class %>
@@ -20,7 +21,7 @@
   </div>
 
   <div class="flex items-center justify-end gap-3 pt-2">
-    <%= link_to "Annuler", profile.persisted? ? profile_path(profile) : root_path, class: "rounded-md px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" %>
+    <%= link_to "Annuler", local_assigns[:return_to] || (profile.persisted? ? profile_path(profile) : profiles_path), class: "rounded-md px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" %>
     <%= f.submit profile.persisted? ? "Enregistrer" : "Ajouter le profil", class: "cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
   </div>
 <% end %>

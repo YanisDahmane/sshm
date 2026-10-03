@@ -30,10 +30,10 @@ class AuthorizedKeyRemovalSystemTest < ApplicationSystemTestCase
           assert_selector "li.authorized-key", count: 2
           assert_selector "li.authorized-key:first-child button[title='Supprimer la clé']", count: 0
 
-          dismiss_confirm { find("li.authorized-key", text: "bob@desktop").click_on("Supprimer la clé") }
+          dismiss_app_confirm { find("li.authorized-key", text: "bob@desktop").click_on("Supprimer la clé") }
           assert_selector "li.authorized-key", count: 2
 
-          accept_confirm { find("li.authorized-key", text: "bob@desktop").click_on("Supprimer la clé") }
+          accept_app_confirm { find("li.authorized-key", text: "bob@desktop").click_on("Supprimer la clé") }
           assert_selector "li.authorized-key", count: 1
           assert_selector ".key-master", text: "Master"
         end

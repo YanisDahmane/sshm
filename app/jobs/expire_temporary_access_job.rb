@@ -17,5 +17,6 @@ class ExpireTemporaryAccessJob < ApplicationJob
     raise RemovalFailed, "#{result.error_title}: #{result.error_details}" unless result.success?
 
     access.end!
+    AccountSnapshot.find_by(server: access.server, unix_user: access.unix_user)&.forget!(access.key_blob)
   end
 end

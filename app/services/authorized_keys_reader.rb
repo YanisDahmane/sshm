@@ -2,7 +2,8 @@
 # parses it into AuthorizedKey objects. A missing file means no keys. Never
 # raises: failures are returned in the Result.
 class AuthorizedKeysReader
-  Result = Data.define(:keys, :error_title, :error_details) do
+  Result = Data.define(:keys, :error_title, :error_details, :reason) do
+    def initialize(keys:, error_title:, error_details:, reason: nil) = super
     def success? = error_title.nil?
   end
 
@@ -15,7 +16,7 @@ class AuthorizedKeysReader
     Result.new(keys: AuthorizedKey.parse(output), error_title: nil, error_details: nil)
   rescue SshConnection::Error => e
     title, details = account.error_for(e)
-    Result.new(keys: [], error_title: title, error_details: details)
+    Result.new(keys: [], error_title: title, error_details: details, reason: e.reason)
   end
 
   def self.read_script(home)

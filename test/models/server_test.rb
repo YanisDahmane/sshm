@@ -77,4 +77,24 @@ class ServerTest < ActiveSupport::TestCase
     assert server.reachable
     assert_not_nil server.last_checked_at
   end
+
+  test "record_ssh_status! stores the result without touching updated_at" do
+    server = servers(:web)
+
+    assert_no_changes -> { server.reload.updated_at } do
+      server.record_ssh_status!(true)
+    end
+    assert server.ssh_ok
+    assert_not_nil server.ssh_checked_at
+  end
+
+  test "changing the host resets the SSH status too" do
+    server = servers(:web)
+    server.record_ssh_status!(true)
+
+    server.update!(host: "10.0.0.99")
+
+    assert_nil server.ssh_ok
+    assert_nil server.ssh_checked_at
+  end
 end

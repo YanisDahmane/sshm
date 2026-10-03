@@ -1,7 +1,7 @@
 <% content_for :title, "Modifier #{@server.name_was} · SSHM" %>
 
 <div class="mx-auto max-w-xl">
-  <%= link_to "← Retour au dashboard", root_path, class: "text-sm text-slate-500 hover:text-slate-700" %>
+  <%= link_to "← Serveurs", servers_path, class: "text-sm text-slate-500 hover:text-slate-700" %>
   <h1 class="mt-2 text-2xl font-bold tracking-tight">Modifier « <%= @server.name_was %> »</h1>
 
   <div class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">

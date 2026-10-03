@@ -237,7 +237,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     delete server_authorized_key_path(servers(:web)), params: { key: ssh_keys(:main).public_key.split(" ")[1], name: "sshm" }, as: :turbo_stream
 
     assert_turbo_stream action: :update, target: "flash" do
-      assert_select "div.bg-red-50", text: /Suppression interdite/
+      assert_select "div.toast-alert", text: /Suppression interdite/
     end
   end
 
@@ -368,7 +368,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
       get server_authorized_keys_path(servers(:web))
     end
 
-    assert_select "li.authorized-key:nth-child(1) .key-expiry[title=?]", "Expire le #{I18n.l(access.expires_at, format: :long)}", text: /Expire dans 10 minutes/
+    assert_select "li.authorized-key:nth-child(1) .key-expiry[title=?]", I18n.l(access.expires_at, format: :long), text: /Expire dans 10 minutes/
     assert_select "li.authorized-key:nth-child(2) .key-expiry", 0
   end
 
@@ -418,5 +418,76 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert access.reload.active?
+  end
+
+  test "highlights the keys without profile and offers to convert them" do
+    sign_in users(:one)
+    unnamed = SshKeyGenerator.generate.public_key.split(" ").first(2).join(" ")
+    bob = SshKeyGenerator.generate(comment: "bob@desktop").public_key
+    ci_unnamed = profiles(:ci).public_key.split(" ").first(2).join(" ")
+
+    stub_method(AuthorizedKeysReader, :call, keys_result(ssh_keys(:main).public_key, unnamed, %(no-pty #{bob}), ci_unnamed)) do
+      get server_authorized_keys_path(servers(:web))
+    end
+
+    assert_select ".orphan-warning", text: /2 clés ne correspondent à aucun profil/
+    assert_select "li.authorized-key.is-orphan", 2
+    assert_select "li.authorized-key:nth-child(1) a.create-profile", 0
+    assert_select "li.authorized-key:nth-child(4) a.create-profile", 0
+    return_to = server_path(servers(:web), anchor: "server-authorized-keys")
+    assert_select "li.authorized-key:nth-child(2) a.create-profile[data-turbo-frame=_top][href=?]",
+                  new_profile_path(public_key: unnamed, return_to: return_to), text: /Créer un profil/
+    assert_select "li.authorized-key:nth-child(3) a.create-profile[href=?]",
+                  new_profile_path(public_key: bob, name: "bob", return_to: return_to)
+  end
+
+  test "no warning when every key is identified" do
+    sign_in users(:one)
+
+    stub_method(AuthorizedKeysReader, :call, keys_result(ssh_keys(:main).public_key, profiles(:alice).public_key)) do
+      get server_authorized_keys_path(servers(:web))
+    end
+
+    assert_select ".orphan-warning", 0
+    assert_select "li.is-orphan", 0
+    assert_select "a.create-profile", 0
+  end
+
+  test "records the snapshot and the SSH status on a successful read" do
+    sign_in users(:one)
+
+    stub_method(AuthorizedKeysReader, :call, keys_result(profiles(:alice).public_key)) do
+      get server_authorized_keys_path(servers(:web), account: "root")
+    end
+
+    snapshot = AccountSnapshot.find_by!(server: servers(:web), unix_user: "root")
+    assert_equal [ profiles(:alice).fingerprint ], snapshot.fingerprints
+    assert servers(:web).reload.ssh_ok
+  end
+
+  test "records a refused key and guides the user to install the SSHM key" do
+    sign_in users(:one)
+    refused = AuthorizedKeysReader::Result.new(keys: [], error_title: "Clé SSH refusée par le serveur", error_details: "x", reason: :key_refused)
+
+    stub_method(AuthorizedKeysReader, :call, refused) do
+      get server_authorized_keys_path(servers(:web))
+    end
+
+    assert_equal false, servers(:web).reload.ssh_ok
+    assert_select ".ssh-setup-hint textarea", text: /#{Regexp.escape(ssh_keys(:main).public_key)}/
+    assert_select "a.retry-authorized-keys[href=?]", server_authorized_keys_path(servers(:web), account: "deploy")
+    assert_equal 0, AccountSnapshot.count
+  end
+
+  test "points to the settings when there is no SSHM key" do
+    sign_in users(:one)
+    missing = AuthorizedKeysReader::Result.new(keys: [], error_title: "Aucune clé SSH configurée", error_details: "x", reason: :missing_key)
+
+    stub_method(AuthorizedKeysReader, :call, missing) do
+      get server_authorized_keys_path(servers(:web))
+    end
+
+    assert_select ".ssh-setup-hint a[href=?][data-turbo-frame=_top]", settings_path
+    assert_nil servers(:web).reload.ssh_ok
   end
 end

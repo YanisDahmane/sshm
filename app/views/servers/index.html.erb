@@ -1,0 +1,83 @@
+<% content_for :title, "Serveurs · SSHM" %>
+
+<section data-controller="server-ping">
+  <%= render "servers/checking_badge_template" %>
+
+  <div class="flex items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight">Serveurs</h1>
+      <p class="text-sm text-slate-500"><%= pluralize(@servers.size, "serveur", plural: "serveurs") %></p>
+    </div>
+    <div class="flex flex-wrap items-center justify-end gap-2">
+      <% if @servers.any? %>
+        <%= button_to server_scans_path,
+              title: "Lire les clés de tous les comptes de tous les serveurs",
+              class: "inline-flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" do %>
+          <%= icon :key, class: "h-4 w-4" %>
+          Scanner les clés
+        <% end %>
+        <%= button_to server_pings_path,
+              form: { data: { controller: "quiet-submit", action: "turbo:submit-start->server-ping#start turbo:submit-end->server-ping#finish" } },
+              class: "group inline-flex cursor-pointer items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-wait disabled:opacity-60" do %>
+          <%= icon :arrow_path, class: "h-4 w-4 group-disabled:animate-spin" %>
+          Actualiser les statuts
+        <% end %>
+      <% end %>
+      <%= link_to "Ajouter un serveur", new_server_path,
+            class: "rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+    </div>
+  </div>
+
+  <% if @servers.any? %>
+    <div class="mt-4 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+      <table id="servers" class="min-w-full divide-y divide-slate-200 text-sm">
+        <thead class="bg-slate-50 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
+          <tr>
+            <th scope="col" class="px-4 py-3">Statut</th>
+            <th scope="col" class="px-4 py-3">Nom</th>
+            <th scope="col" class="px-4 py-3">Hôte</th>
+            <th scope="col" class="px-4 py-3">Port</th>
+            <th scope="col" class="px-4 py-3">Utilisateur</th>
+            <th scope="col" class="px-4 py-3">SSH</th>
+            <th scope="col" class="px-4 py-3">Clés sans profil</th>
+            <th scope="col" class="px-4 py-3"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <% @servers.each do |server| %>
+            <tr id="<%= dom_id(server) %>" class="hover:bg-slate-50">
+              <td class="px-4 py-3"><%= render "servers/status", server: server %></td>
+              <td class="px-4 py-3 font-medium"><%= link_to server.name, server_path(server), class: "hover:text-indigo-600 hover:underline" %></td>
+              <td class="px-4 py-3 font-mono text-slate-700"><%= server.host %></td>
+              <td class="px-4 py-3 font-mono text-slate-700"><%= server.port %></td>
+              <td class="px-4 py-3 font-mono text-slate-700"><%= server.username %></td>
+              <td class="px-4 py-3"><%= render "servers/ssh_status", server: server %></td>
+              <td class="px-4 py-3"><%= render "servers/orphan_keys", server: server, insights: @insights %></td>
+              <td class="px-4 py-3">
+                <div class="flex items-center justify-end gap-1">
+                  <%= button_to server_ping_path(server),
+                        title: "Actualiser le statut", aria: { label: "Actualiser le statut de #{server.name}" },
+                        form: { data: { controller: "quiet-submit", action: "turbo:submit-start->server-ping#start turbo:submit-end->server-ping#finish",
+                                        server_ping_badge_param: dom_id(server, :status) } },
+                        class: "group cursor-pointer rounded-md p-1.5 text-slate-500 hover:bg-indigo-50 hover:text-indigo-600 disabled:cursor-wait disabled:opacity-60" do %>
+                    <%= icon :arrow_path, class: "h-4 w-4 group-disabled:animate-spin" %>
+                  <% end %>
+                  <%= link_to edit_server_path(server),
+                        title: "Modifier", aria: { label: "Modifier #{server.name}" },
+                        class: "rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700" do %>
+                    <%= icon :pencil_square %>
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="mt-4 rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
+      <p class="text-sm text-slate-500">Aucun serveur pour le moment.</p>
+      <%= link_to "Ajouter votre premier serveur", new_server_path, class: "mt-2 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+    </div>
+  <% end %>
+</section>

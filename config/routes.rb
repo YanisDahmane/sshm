@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   devise_for :users
 
-  resources :servers, only: %i[show new create edit update] do
+  resources :servers, only: %i[index show new create edit update] do
     resource :ping, only: :create, controller: "server_pings"
     resource :ssh_check, only: :create, controller: "server_ssh_checks"
     resources :authorized_keys, only: :index, controller: "server_authorized_keys"
@@ -9,8 +9,12 @@ Rails.application.routes.draw do
     resources :authorizations, only: :create, controller: "server_authorizations"
   end
   resource :server_pings, only: :create, path: "servers/pings"
+  resource :server_scans, only: :create, path: "servers/scans"
 
-  resources :profiles, except: :index
+  resources :profiles do
+    resources :accesses, only: :create, controller: "profile_accesses"
+    resource :access, only: :destroy, controller: "profile_accesses"
+  end
 
   resource :settings, only: :show
   scope "settings" do

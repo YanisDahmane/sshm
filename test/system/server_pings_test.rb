@@ -8,7 +8,7 @@ class ServerPingsTest < ApplicationSystemTestCase
   setup do
     Server.update_all(host: "127.0.0.1", port: closed_port)
     sign_in users(:one)
-    visit root_path
+    visit servers_path
     # Survives Turbo Stream updates, lost on a full page visit.
     execute_script("window.noFullReload = true")
   end

@@ -12,8 +12,11 @@ require "net/ssh"
 # key aborts the connection.
 class SshConnection
   # Each error has a short French `title` to show in the UI next to its message.
+  # `reason` lets the UI guide the user: :key_refused (install the app key on
+  # the server) or :missing_key (generate it in the settings).
   class Error < StandardError
     def title = "Erreur SSH"
+    def reason = nil
   end
 
   class ConnectionError < Error
@@ -22,6 +25,7 @@ class SshConnection
 
   class AuthenticationError < Error
     def title = "Clé SSH refusée par le serveur"
+    def reason = :key_refused
   end
 
   class HostKeyMismatchError < Error
@@ -30,6 +34,7 @@ class SshConnection
 
   class MissingKeyError < Error
     def title = "Aucune clé SSH configurée"
+    def reason = :missing_key
   end
 
   class CommandError < Error

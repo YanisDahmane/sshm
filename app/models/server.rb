@@ -13,12 +13,19 @@ class Server < ApplicationRecord
 
   before_update :reset_reachability, if: -> { will_save_change_to_host? || will_save_change_to_port? }
 
+  # Remembers whether the app could log in over SSH (see SshCheck); `nil` = unknown.
+  def record_ssh_status!(ok)
+    update_columns(ssh_ok: ok, ssh_checked_at: Time.current)
+  end
+
   private
 
-  # The last ping result no longer applies once the address changes.
+  # The last ping and SSH results no longer apply once the address changes.
   def reset_reachability
     self.reachable = nil
     self.last_checked_at = nil
+    self.ssh_ok = nil
+    self.ssh_checked_at = nil
   end
 
   def host_must_be_an_ip_or_hostname

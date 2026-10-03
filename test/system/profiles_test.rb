@@ -12,13 +12,13 @@ class ProfilesTest < ApplicationSystemTestCase
     key = SshKeyGenerator.generate(comment: "bob@desktop")
     visit root_path
 
+    within("nav") { click_on "Profils", match: :first }
     click_on "Ajouter un profil"
     fill_in "Nom", with: "Bob"
     fill_in "Clé SSH publique", with: key.public_key
     click_on "Ajouter le profil"
 
     assert_text "Le profil « Bob » a été ajouté."
-    within("#profiles") { click_on "Bob" }
     assert_selector "#profile-fingerprint", text: key.fingerprint
 
     click_on "Modifier"
@@ -26,21 +26,21 @@ class ProfilesTest < ApplicationSystemTestCase
     click_on "Enregistrer"
     assert_text "Le profil « Bob Martin » a été modifié."
 
-    accept_confirm { click_on "Supprimer" }
+    accept_app_confirm { click_on "Supprimer" }
     assert_text "Le profil « Bob Martin » a été supprimé."
     assert_no_selector "#profiles", text: "Bob Martin"
   end
 
-  test "deleting from the dashboard can be cancelled" do
-    visit root_path
+  test "deleting from the profiles page can be cancelled" do
+    visit profiles_path
 
     within("##{dom_id(profiles(:alice))}") do
-      dismiss_confirm { click_on "Supprimer" }
+      dismiss_app_confirm { click_on "Supprimer" }
     end
     assert_selector "#profiles", text: "Alice"
 
     within("##{dom_id(profiles(:alice))}") do
-      accept_confirm { click_on "Supprimer" }
+      accept_app_confirm { click_on "Supprimer" }
     end
     assert_text "Le profil « Alice » a été supprimé."
   end
@@ -51,6 +51,6 @@ class ProfilesTest < ApplicationSystemTestCase
     fill_in "Clé SSH publique", with: "not a key"
     click_on "Ajouter le profil"
 
-    assert_selector "#error_explanation", text: "must be a single SSH public key"
+    assert_selector "#error_explanation", text: "doit être une seule clé publique"
   end
 end

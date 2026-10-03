@@ -10,8 +10,8 @@ class ServerShowTest < ApplicationSystemTestCase
     sign_in users(:one)
   end
 
-  test "opening a server from the dashboard" do
-    visit root_path
+  test "opening a server from the servers page" do
+    visit servers_path
     click_on "Web"
 
     assert_selector "h1", text: "Web"

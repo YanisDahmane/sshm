@@ -1,6 +1,15 @@
-<% if notice.present? %>
-  <div class="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"><%= notice %></div>
-<% end %>
-<% if alert.present? %>
-  <div class="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"><%= alert %></div>
+<%# Toasts for notice / alert; rendered inside the fixed #flash container (also the Turbo Stream target). %>
+<% { notice: notice, alert: alert }.compact_blank.each do |type, message| %>
+  <div data-controller="toast" role="<%= type == :alert ? "alert" : "status" %>"
+       class="toast pointer-events-auto flex w-full items-start gap-3 rounded-lg border bg-white px-4 py-3 text-sm shadow-lg transition duration-300 ease-out
+              data-[state=hidden]:translate-x-4 data-[state=hidden]:opacity-0
+              <%= type == :alert ? "toast-alert border-red-200 text-red-800" : "toast-notice border-emerald-200 text-emerald-800" %>"
+       data-state="hidden" data-action="mouseenter->toast#pause mouseleave->toast#resume">
+    <%= icon(type == :alert ? :x_mark : :check, class: "mt-0.5 h-4 w-4 shrink-0") %>
+    <p class="flex-1"><%= message %></p>
+    <button type="button" data-action="toast#dismiss" aria-label="Fermer"
+            class="-mr-1 shrink-0 cursor-pointer rounded p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+      <%= icon :x_mark %>
+    </button>
+  </div>
 <% end %>

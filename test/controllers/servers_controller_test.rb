@@ -34,7 +34,7 @@ class ServersControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "create saves the server and redirects to the dashboard" do
+  test "create saves the server and redirects to its page" do
     sign_in users(:one)
 
     assert_difference "Server.count", 1 do
@@ -43,9 +43,9 @@ class ServersControllerTest < ActionDispatch::IntegrationTest
 
     server = Server.find_by!(name: "Staging")
     assert_equal [ "staging.example.com", 2222, "deploy" ], [ server.host, server.port, server.username ]
-    assert_redirected_to root_path
+    assert_redirected_to server_path(server)
     follow_redirect!
-    assert_select "div", text: "Le serveur « Staging » a été ajouté."
+    assert_select "#flash", text: /Le serveur « Staging » a été ajouté./
   end
 
   test "create re-renders the form with errors when invalid" do
