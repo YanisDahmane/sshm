@@ -1,0 +1,4 @@
+# 2FA is mandatory for admins by default; the enforcement tests turn it on
+# explicitly, so the other tests can sign in as users(:one) without 2FA.
+main:
+  require_admin_two_factor: false

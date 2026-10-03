@@ -1,5 +1,12 @@
 Rails.application.routes.draw do
-  devise_for :users
+  devise_for :users, controllers: { sessions: "users/sessions" }
+  resource :two_factor_challenge, only: %i[new create]
+  resource :account, only: %i[show] do
+    patch :password
+  end
+  resource :two_factor, only: %i[new create destroy], path: "account/two_factor", controller: "two_factor_settings" do
+    post :backup_codes
+  end
   resource :setup, only: %i[new create]
   get "invitations/:token", to: "invitations#show", as: :invitation_acceptance
   post "invitations/:token", to: "invitations#accept"
@@ -25,9 +32,11 @@ Rails.application.routes.draw do
       member do
         post :deactivate
         post :reactivate
+        post :reset_two_factor
       end
     end
     resources :invitations, only: %i[create destroy]
+    resource :security, only: :update
     resource :notifications, only: :show
     resources :notification_channels, except: %i[index show], path: "notifications/channels" do
       post :test, on: :member

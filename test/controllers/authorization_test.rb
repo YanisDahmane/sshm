@@ -34,7 +34,9 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
       "ping all servers" => -> { post server_pings_path },
       "profiles index" => -> { get profiles_path },
       "profile page" => -> { get profile_path(profiles(:alice)) },
-      "activities" => -> { get activities_path }
+      "activities" => -> { get activities_path },
+      "own account" => -> { get account_path },
+      "set up 2FA" => -> { get new_two_factor_path }
     },
     operate: {
       "new server" => -> { get new_server_path },
@@ -70,7 +72,9 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
       "revoke an invitation" => -> { delete settings_invitation_path(Invitation.create!(email: "x@example.com", invited_by: users(:one))) },
       "change a user's role" => -> { patch settings_user_path(users(:viewer)), params: { user: { role: "operator", profile_id: "" } } },
       "deactivate a user" => -> { post deactivate_settings_user_path(users(:viewer)) },
-      "reactivate a user" => -> { post reactivate_settings_user_path(users(:viewer)) }
+      "reactivate a user" => -> { post reactivate_settings_user_path(users(:viewer)) },
+      "reset a user's 2FA" => -> { post reset_two_factor_settings_user_path(users(:viewer)) },
+      "require 2FA for admins" => -> { patch settings_security_path, params: { app_setting: { require_admin_two_factor: "0" } } }
     }
   }.freeze
 

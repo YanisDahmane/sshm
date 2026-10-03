@@ -74,3 +74,7 @@ gem "bcrypt_pbkdf", "~> 1.1"
 # French translations (dates, validation errors, Devise)
 gem "rails-i18n", "~> 8.0"
 gem "devise-i18n", "~> 1.13"
+
+# Two-factor authentication (TOTP) with QR codes
+gem "rotp", "~> 6.3"
+gem "rqrcode", "~> 3.1"

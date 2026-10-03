@@ -41,10 +41,10 @@
         <% if user_signed_in? %>
           <div class="flex items-center gap-2 sm:gap-3">
             <%= render "shared/command_palette_button" %>
-            <span class="hidden items-center gap-2 text-sm text-slate-500 lg:inline-flex">
+            <%= link_to account_path, title: "Mon compte", class: "account-link hidden items-center gap-2 rounded-md px-2 py-1 text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700 lg:inline-flex" do %>
               <%= current_user.email %>
               <span class="user-role rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600"><%= current_user.role_label %></span>
-            </span>
+            <% end %>
             <% if can?(:administer) %>
               <%= link_to settings_path, title: "Paramètres", aria: { label: "Paramètres", current: (controller_path.start_with?("settings") ? "page" : nil) },
                     class: "rounded-md p-1.5 hover:bg-slate-100 #{controller_path.start_with?("settings") ? "text-indigo-600" : "text-slate-500 hover:text-slate-700"}" do %>

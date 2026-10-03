@@ -1,0 +1,27 @@
+<% content_for :title, "Activer la double authentification · SSHM" %>
+
+<div class="mx-auto max-w-xl">
+  <%= link_to "← Mon compte", account_path, class: "text-sm text-slate-500 hover:text-slate-700" %>
+  <h1 class="mt-2 text-2xl font-bold tracking-tight">Activer la double authentification</h1>
+
+  <div class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <ol class="space-y-6 text-sm text-slate-700">
+      <li>
+        <p class="font-medium">1. Scannez ce QR code avec votre application d'authentification</p>
+        <div class="two-factor-qr mt-3 inline-block rounded-md border border-slate-200 bg-white p-3">
+          <%= image_tag "data:image/svg+xml;base64,#{Base64.strict_encode64(@qr_code)}", alt: "QR code de double authentification", class: "h-48 w-48" %>
+        </div>
+        <p class="mt-2 text-xs text-slate-500">Impossible de scanner ? Saisissez cette clé : <code class="two-factor-secret select-all font-mono text-slate-700"><%= @secret.scan(/.{4}/).join(" ") %></code></p>
+      </li>
+      <li>
+        <p class="font-medium">2. Saisissez le code affiché par l'application</p>
+        <%# Plain submit: the response shows the backup codes directly (Turbo only accepts redirects after a form). %>
+        <%= form_with url: two_factor_path, data: { turbo: false }, class: "mt-3 flex flex-wrap items-end gap-3" do |f| %>
+          <%= f.text_field :code, required: true, autofocus: true, autocomplete: "one-time-code", inputmode: "numeric", placeholder: "123 456", aria: { label: "Code de confirmation" },
+                class: "w-40 rounded-md border border-slate-300 px-3 py-2 text-center font-mono tracking-widest shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" %>
+          <%= f.submit "Activer", class: "cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+        <% end %>
+      </li>
+    </ol>
+  </div>
+</div>

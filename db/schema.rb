@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_03_212709) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_03_212941) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -39,6 +39,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_212709) do
     t.index ["profile_id"], name: "index_activities_on_profile_id"
     t.index ["server_id"], name: "index_activities_on_server_id"
     t.index ["user_id"], name: "index_activities_on_user_id"
+  end
+
+  create_table "app_settings", force: :cascade do |t|
+    t.boolean "require_admin_two_factor", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "automations", force: :cascade do |t|
@@ -147,6 +153,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_212709) do
     t.datetime "last_sign_in_at"
     t.string "current_sign_in_ip"
     t.string "last_sign_in_ip"
+    t.text "otp_secret"
+    t.datetime "otp_enabled_at"
+    t.jsonb "otp_backup_codes", default: [], null: false
+    t.integer "otp_last_used_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["profile_id"], name: "index_users_on_profile_id", unique: true, where: "(profile_id IS NOT NULL)"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true

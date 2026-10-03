@@ -1,0 +1,17 @@
+<% content_for :title, "Codes de secours · SSHM" %>
+
+<div class="mx-auto max-w-xl">
+  <h1 class="text-2xl font-bold tracking-tight">Codes de secours</h1>
+  <div class="mt-6 rounded-xl border border-amber-200 bg-white p-6 shadow-sm" data-controller="clipboard">
+    <p class="text-sm text-slate-700">
+      Conservez ces codes en lieu sûr (gestionnaire de mots de passe). Chacun permet <strong>une</strong> connexion si vous perdez votre téléphone.
+      <strong>Ils ne seront plus affichés.</strong>
+    </p>
+    <textarea readonly rows="<%= @backup_codes.size / 2 %>" data-clipboard-target="source" aria-label="Codes de secours"
+              class="backup-codes mt-4 block w-full resize-none rounded-md border border-slate-300 bg-slate-50 px-3 py-2 font-mono text-sm leading-7 text-slate-800"><%= @backup_codes.each_slice(2).map { |pair| pair.join("    ") }.join("\n") %></textarea>
+    <div class="mt-4 flex items-center justify-between gap-3">
+      <%= render "settings/copy_button" %>
+      <%= link_to "J'ai enregistré mes codes", account_path, class: "rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+    </div>
+  </div>
+</div>

@@ -2,6 +2,7 @@ require "test_helper"
 
 class SettingsUsersTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
+  include TwoFactorHelpers
 
   test "lists the users and the pending invitations with their link" do
     invitation = Invitation.create!(email: "dave@example.com", role: :operator, invited_by: users(:one))
@@ -18,7 +19,7 @@ class SettingsUsersTest < ActionDispatch::IntegrationTest
       assert_select "select[name='user[profile_id]'] option:first-child[value='']", "Aucun profil"
       assert_select "select[name='user[profile_id]'] option[selected]", 0
       assert_select "form[action=?][data-turbo-confirm]", deactivate_settings_user_path(users(:operator))
-      assert_select "p", text: "Jamais connecté"
+      assert_select "p", text: /Jamais connecté\s+· 2FA désactivée/
     end
     assert_select "li.pending-invitation", 1 do
       assert_select "p", text: /dave@example.com\s+Opérateur/
@@ -137,5 +138,30 @@ class SettingsUsersTest < ActionDispatch::IntegrationTest
 
     assert_equal 1, users(:viewer).reload.sign_in_count
     assert_not_nil users(:viewer).last_sign_in_at
+  end
+
+  test "an admin makes 2FA optional or mandatory for admins" do
+    users(:one).tap { |admin| enable_two_factor(admin) }
+    sign_in users(:one)
+
+    patch settings_security_path, params: { app_setting: { require_admin_two_factor: "1" } }
+    assert AppSetting.current.require_admin_two_factor
+    assert_equal "La double authentification est désormais obligatoire pour les administrateurs.", flash[:notice]
+
+    patch settings_security_path, params: { app_setting: { require_admin_two_factor: "0" } }
+    assert_not AppSetting.current.reload.require_admin_two_factor
+  end
+
+  test "an admin resets the 2FA of someone who lost it" do
+    enable_two_factor(users(:operator))
+    sign_in users(:one)
+
+    get settings_users_path
+    assert_select "##{ActionView::RecordIdentifier.dom_id(users(:operator))} .user-two-factor", "2FA activée"
+
+    post reset_two_factor_settings_user_path(users(:operator))
+
+    assert_not users(:operator).reload.two_factor_enabled?
+    assert_equal "2FA de operator@example.com réinitialisée par one@example.com", Activity.of_kind(:two_factor_disabled).sole.summary
   end
 end

@@ -3,6 +3,8 @@ class User < ApplicationRecord
   # everyone else through an Invitation.
   devise :database_authenticatable, :recoverable, :rememberable, :validatable, :trackable
 
+  include TwoFactorAuthenticatable
+
   ROLE_LABELS = { "admin" => "Admin", "operator" => "Opérateur", "viewer" => "Lecture" }.freeze
 
   # What each permission level allows (see Authorization):
@@ -30,6 +32,9 @@ class User < ApplicationRecord
   def role_label = ROLE_LABELS.fetch(role)
 
   def deactivated? = deactivated_at.present?
+
+  # Admins must enable 2FA when the setting requires it (see ApplicationController).
+  def two_factor_required? = admin? && !two_factor_enabled? && AppSetting.current.require_admin_two_factor
 
   def deactivate! = update!(deactivated_at: Time.current)
 

@@ -26,6 +26,9 @@ class Activity < ApplicationRecord
     Kind.new(:user_role_changed, "Rôle modifié", :security, :warning, "Le rôle d'un utilisateur a changé."),
     Kind.new(:user_deactivated, "Utilisateur désactivé", :security, :warning, "Un compte a été désactivé : il ne peut plus se connecter."),
     Kind.new(:user_reactivated, "Utilisateur réactivé", :security, :warning, "Un compte désactivé peut de nouveau se connecter."),
+    Kind.new(:two_factor_enabled, "2FA activée", :security, :info, "Un utilisateur a activé la double authentification."),
+    Kind.new(:two_factor_disabled, "2FA désactivée", :security, :critical, "La double authentification d'un utilisateur a été désactivée ou réinitialisée."),
+    Kind.new(:two_factor_backup_code_used, "Code de secours utilisé", :security, :warning, "Un utilisateur s'est connecté avec un code de secours."),
     Kind.new(:profile_created, "Profil créé", :configuration, :info, "Un profil a été créé."),
     Kind.new(:profile_deleted, "Profil supprimé", :configuration, :info, "Un profil a été supprimé."),
     Kind.new(:ssh_key_generated, "Clé SSHM générée", :security, :critical, "La clé SSH de SSHM a été générée ou régénérée."),
@@ -87,6 +90,9 @@ class Activity < ApplicationRecord
     when :user_role_changed then "Rôle de #{data["email"]} : #{data["from"]} → #{data["to"]}"
     when :user_deactivated then "#{data["email"]} désactivé"
     when :user_reactivated then "#{data["email"]} réactivé"
+    when :two_factor_enabled then "2FA activée pour #{data["email"]}"
+    when :two_factor_disabled then data["reset_by"] ? "2FA de #{data["email"]} réinitialisée par #{data["reset_by"]}" : "2FA désactivée pour #{data["email"]}"
+    when :two_factor_backup_code_used then "#{data["email"]} s'est connecté avec un code de secours (#{data["left"]} restant(s))"
     when :profile_created then "Profil « #{profile_name} » créé"
     when :profile_deleted then "Profil « #{profile_name} » supprimé"
     when :ssh_key_generated then data["regenerated"] ? "Clé SSHM régénérée" : "Clé SSHM générée"
