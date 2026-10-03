@@ -10,9 +10,29 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_04_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_04_110000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "access_requests", force: :cascade do |t|
+    t.bigint "requester_id", null: false
+    t.bigint "profile_id"
+    t.bigint "server_id", null: false
+    t.string "unix_user", null: false
+    t.integer "duration_minutes", null: false
+    t.text "reason", null: false
+    t.string "status", default: "pending", null: false
+    t.bigint "decided_by_id"
+    t.datetime "decided_at"
+    t.text "decision_note"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["decided_by_id"], name: "index_access_requests_on_decided_by_id"
+    t.index ["profile_id"], name: "index_access_requests_on_profile_id"
+    t.index ["requester_id"], name: "index_access_requests_on_requester_id"
+    t.index ["server_id"], name: "index_access_requests_on_server_id"
+    t.index ["status"], name: "index_access_requests_on_status"
+  end
 
   create_table "access_rules", force: :cascade do |t|
     t.bigint "profile_id"
@@ -279,6 +299,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_100000) do
     t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
   end
 
+  add_foreign_key "access_requests", "profiles", on_delete: :nullify
+  add_foreign_key "access_requests", "servers", on_delete: :cascade
+  add_foreign_key "access_requests", "users", column: "decided_by_id", on_delete: :nullify
+  add_foreign_key "access_requests", "users", column: "requester_id", on_delete: :cascade
   add_foreign_key "access_rules", "profiles", on_delete: :cascade
   add_foreign_key "access_rules", "server_groups", on_delete: :cascade
   add_foreign_key "access_rules", "servers", on_delete: :cascade

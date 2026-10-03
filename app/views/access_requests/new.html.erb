@@ -1,0 +1,46 @@
+<% content_for :title, "Demander un accès · SSHM" %>
+<% input_class = "mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" %>
+<% label_class = "block text-sm font-medium text-slate-700" %>
+
+<div class="mx-auto max-w-xl">
+  <%= link_to "← Demandes", access_requests_path, class: "text-sm text-slate-500 hover:text-slate-700" %>
+  <h1 class="mt-2 text-2xl font-bold tracking-tight">Demander un accès</h1>
+
+  <div class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <% if current_user.profile %>
+      <p class="mb-5 text-sm text-slate-600">
+        La clé de votre profil <%= link_to current_user.profile.name, profile_path(current_user.profile), class: "font-medium text-indigo-600 hover:text-indigo-500" %>
+        sera ajoutée pour la durée choisie si la demande est acceptée.
+      </p>
+      <%= form_with model: @request, url: access_requests_path, class: "space-y-5" do |f| %>
+        <%= render "shared/form_errors", record: @request %>
+        <div>
+          <%= f.label :server_id, "Serveur", class: label_class %>
+          <%= f.collection_select :server_id, Server.order(:name), :id, :name, { prompt: "Choisir…" }, required: true, class: input_class %>
+        </div>
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div>
+            <%= f.label :unix_user, "Compte", class: label_class %>
+            <%= f.text_field :unix_user, placeholder: "utilisateur SSH", autocomplete: "off", spellcheck: false, class: "#{input_class} font-mono" %>
+          </div>
+          <div>
+            <%= f.label :duration_minutes, "Durée", class: label_class %>
+            <%= f.select :duration_minutes, TemporaryAccess::DURATIONS.map { |value, (label, _)| [ label, value.to_i ] }, {}, class: input_class %>
+          </div>
+        </div>
+        <div>
+          <%= f.label :reason, "Motif", class: label_class %>
+          <%= f.text_area :reason, rows: 3, required: true, maxlength: 500, placeholder: "Ex. : investigation de l'incident #142 sur la base de données", class: input_class %>
+        </div>
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <%= link_to "Annuler", access_requests_path, class: "rounded-md px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" %>
+          <%= f.submit "Envoyer la demande", class: "cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+        </div>
+      <% end %>
+    <% else %>
+      <p class="no-profile text-sm text-slate-600">
+        Votre compte n'est relié à aucun profil SSH : un administrateur doit le relier à votre profil (Paramètres → Utilisateurs) avant que vous puissiez demander un accès.
+      </p>
+    <% end %>
+  </div>
+</div>

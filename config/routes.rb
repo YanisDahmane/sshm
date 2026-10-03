@@ -37,6 +37,13 @@ Rails.application.routes.draw do
     resources :access_rules, only: %i[index create destroy], path: "rules"
     resource :drift, only: :show
     resource :drift_fix, only: %i[create destroy], path: "drift/fix"
+    resources :access_requests, only: %i[index new create], path: "requests" do
+      member do
+        post :approve
+        post :deny
+        post :cancel
+      end
+    end
   end
   resources :revocations, only: :show do
     post :retry, on: :member

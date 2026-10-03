@@ -5,6 +5,7 @@ fr:
       server_group: Groupe de serveurs
       team: Équipe
       access_rule: Règle d'accès
+      access_request: Demande d'accès
       profile: Profil
       user: Utilisateur
       notification_channel: Canal de notification
@@ -18,6 +19,12 @@ fr:
       server_group:
         name: Nom
         color: Couleur
+      access_request:
+        server: Serveur
+        unix_user: Compte
+        duration_minutes: Durée
+        reason: Motif
+        decision_note: Motif du refus
       access_rule:
         subject_key: Profil ou équipe
         target_key: Serveur ou groupe
@@ -51,6 +58,10 @@ fr:
           attributes:
             base:
               duplicate_rule: "Cette règle existe déjà"
+        access_request:
+          attributes:
+            base:
+              no_profile: "Votre compte n'est relié à aucun profil SSH : demandez à un administrateur de le relier à votre profil"
         profile:
           attributes:
             public_key:

@@ -11,6 +11,9 @@ class Activity < ApplicationRecord
   KINDS = [
     Kind.new(:key_added, "Clé ajoutée", :keys, :info, "Un profil a été autorisé sur un compte d'un serveur."),
     Kind.new(:key_removed, "Clé supprimée", :keys, :info, "Une clé a été supprimée d'un compte depuis SSHM."),
+    Kind.new(:access_requested, "Demande d'accès", :keys, :warning, "Un utilisateur demande un accès temporaire à un serveur."),
+    Kind.new(:access_request_approved, "Demande d'accès acceptée", :keys, :info, "Une demande d'accès a été acceptée : l'accès temporaire est en place."),
+    Kind.new(:access_request_denied, "Demande d'accès refusée", :keys, :info, "Une demande d'accès a été refusée."),
     Kind.new(:key_expired, "Accès temporaire expiré", :keys, :info, "Un accès temporaire a expiré et sa clé a été retirée."),
     Kind.new(:profile_revoked_everywhere, "Profil révoqué partout", :security, :critical, "La clé d'un profil a été retirée de tous les serveurs."),
     Kind.new(:unknown_key_detected, "Clé sans profil détectée", :security, :warning, "Une clé qui ne correspond à aucun profil a été trouvée sur un serveur."),
@@ -90,6 +93,9 @@ class Activity < ApplicationRecord
     when :profile_revoked_everywhere
       failures = data["failed"].to_i.positive? ? ", #{data["failed"]} échec(s)" : ""
       "Clé de « #{profile_name} » retirée partout : #{data["removed"]} compte(s)#{failures}"
+    when :access_requested then "#{data["requester"]} demande #{data["duration_label"]} d'accès à #{target} : « #{data["reason"]} »"
+    when :access_request_approved then "Demande de #{data["requester"]} acceptée : accès à #{target} pendant #{data["duration_label"]}"
+    when :access_request_denied then "Demande de #{data["requester"]} pour #{target} refusée#{data["note"] ? " : « #{data["note"]} »" : ""}"
     when :key_expired then "Accès temporaire de « #{profile_name || key_name} » retiré de #{target}"
     when :unknown_key_detected then "Clé « #{key_name} » sans profil trouvée sur #{target}"
     when :key_disappeared then "Clé « #{key_name} » disparue de #{target}"
