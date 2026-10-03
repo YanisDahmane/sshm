@@ -15,7 +15,9 @@ module Users
       else
         user.update_tracked_fields!(request)
         set_flash_message!(:notice, :signed_in)
-        sign_in(resource_name, user)
+        # force: authenticate!(store: false) left the user in Warden for this
+        # request, so without it Devise would think they are signed in already.
+        sign_in(resource_name, user, force: true)
         respond_with user, location: after_sign_in_path_for(user)
       end
     end

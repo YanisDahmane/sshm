@@ -12,6 +12,8 @@ class TwoFactorSignInTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to root_path
     assert_equal 1, users(:viewer).reload.sign_in_count
+    get servers_path
+    assert_response :success, "the session must be open"
   end
 
   test "with 2FA the password alone does not open a session" do
