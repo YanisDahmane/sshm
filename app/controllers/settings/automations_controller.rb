@@ -1,5 +1,7 @@
 module Settings
   class AutomationsController < ApplicationController
+    require_permission :administer
+
     before_action :set_automation, only: %i[update run]
 
     def index

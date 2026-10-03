@@ -10,12 +10,14 @@
       <p class="mt-1 text-sm text-slate-500">Profil ajouté <%= relative_time_tag @profile.created_at %></p>
     </div>
     <div class="flex shrink-0 items-center gap-2">
-      <%= link_to edit_profile_path(@profile),
-            class: "inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" do %>
-        <%= icon :pencil_square %> Modifier
+      <% if can?(:operate) %>
+        <%= link_to edit_profile_path(@profile),
+              class: "inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" do %>
+          <%= icon :pencil_square %> Modifier
+        <% end %>
+        <%= render "delete_button", profile: @profile, label: "Supprimer",
+              class: "inline-flex cursor-pointer items-center gap-2 rounded-md border border-red-300 bg-white px-3 py-2 text-sm font-medium text-red-700 shadow-sm hover:bg-red-50" %>
       <% end %>
-      <%= render "delete_button", profile: @profile, label: "Supprimer",
-            class: "inline-flex cursor-pointer items-center gap-2 rounded-md border border-red-300 bg-white px-3 py-2 text-sm font-medium text-red-700 shadow-sm hover:bg-red-50" %>
     </div>
   </div>
 
@@ -48,5 +50,7 @@
   </section>
 
   <%= render "profiles/accesses", profile: @profile %>
-  <%= render "profiles/bulk_form", profile: @profile %>
+  <% if can?(:operate) %>
+    <%= render "profiles/bulk_form", profile: @profile %>
+  <% end %>
 </div>

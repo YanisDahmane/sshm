@@ -6,8 +6,10 @@
       <h1 class="text-2xl font-bold tracking-tight">Profils</h1>
       <p class="text-sm text-slate-500"><%= pluralize(@profiles.size, "profil", plural: "profils") %></p>
     </div>
-    <%= link_to "Ajouter un profil", new_profile_path,
-          class: "rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+    <% if can?(:operate) %>
+      <%= link_to "Ajouter un profil", new_profile_path,
+            class: "rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+    <% end %>
   </div>
 
   <% if @profiles.any? %>
@@ -29,12 +31,16 @@
               <td class="px-4 py-3 font-mono text-xs text-slate-500"><%= profile.fingerprint %></td>
               <td class="px-4 py-3">
                 <div class="flex items-center justify-end gap-1">
-                  <%= link_to edit_profile_path(profile),
-                        title: "Modifier", aria: { label: "Modifier #{profile.name}" },
-                        class: "rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700" do %>
-                    <%= icon :pencil_square %>
+                  <% if can?(:operate) %>
+                    <%= link_to edit_profile_path(profile),
+                          title: "Modifier", aria: { label: "Modifier #{profile.name}" },
+                          class: "rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700" do %>
+                      <%= icon :pencil_square %>
+                    <% end %>
                   <% end %>
-                  <%= render "profiles/delete_button", profile: profile %>
+                  <% if can?(:operate) %>
+                    <%= render "profiles/delete_button", profile: profile %>
+                  <% end %>
                 </div>
               </td>
             </tr>
@@ -45,7 +51,9 @@
   <% else %>
     <div class="mt-4 rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
       <p class="text-sm text-slate-500">Aucun profil pour le moment.</p>
-      <%= link_to "Ajouter votre premier profil", new_profile_path, class: "mt-2 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+      <% if can?(:operate) %>
+        <%= link_to "Ajouter votre premier profil", new_profile_path, class: "mt-2 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+      <% end %>
     </div>
   <% end %>
 </section>

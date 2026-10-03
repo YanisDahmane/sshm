@@ -30,7 +30,7 @@
     <% end %>
   </div>
 
-  <% if @result.success? %>
+  <% if @result.success? && can?(:operate) %>
     <% if @authorizable_profiles.any? %>
       <%= form_with url: server_authorizations_path(@server),
             data: { controller: "quiet-submit", turbo_frame: "_top" },
@@ -128,22 +128,26 @@
                                                                dialog_id: "key-#{key.fingerprint.delete_prefix("SHA256:").gsub(/[^A-Za-z0-9]/, "")[0, 16]}" %>
             </div>
             <% if orphan %>
-              <%= link_to new_profile_path(public_key: [ key.type, key.key, key.comment ].compact.join(" "), name: suggested_profile_name(key),
-                                           return_to: server_path(@server, anchor: "server-authorized-keys")),
-                    data: { turbo_frame: "_top" },
-                    class: "create-profile inline-flex shrink-0 items-center gap-1.5 rounded-md border border-indigo-200 bg-white px-2.5 py-1 text-xs font-medium text-indigo-700 shadow-sm hover:bg-indigo-50" do %>
-                <%= icon :user_plus, class: "h-4 w-4" %> Créer un profil
+              <% if can?(:operate) %>
+                <%= link_to new_profile_path(public_key: [ key.type, key.key, key.comment ].compact.join(" "), name: suggested_profile_name(key),
+                                             return_to: server_path(@server, anchor: "server-authorized-keys")),
+                      data: { turbo_frame: "_top" },
+                      class: "create-profile inline-flex shrink-0 items-center gap-1.5 rounded-md border border-indigo-200 bg-white px-2.5 py-1 text-xs font-medium text-indigo-700 shadow-sm hover:bg-indigo-50" do %>
+                  <%= icon :user_plus, class: "h-4 w-4" %> Créer un profil
+                <% end %>
               <% end %>
             <% end %>
             <% unless key.matches?(@app_key) %>
-              <%= button_to server_authorized_key_path(@server), method: :delete,
-                    params: { key: key.key, name: key.name, account: @account.unix_user },
-                    title: "Supprimer la clé", aria: { label: "Supprimer la clé #{key.name || "sans nom"}" },
-                    form: { class: "shrink-0", data: { controller: "quiet-submit", turbo_frame: "_top",
-                                                       turbo_confirm: "La clé « #{key.name || "sans nom"} » sera supprimée de « #{@server.name} » pour #{@account.unix_user}. Elle ne pourra plus se connecter avec ce compte.",
-                                                       confirm_label: "Supprimer la clé", confirm_variant: "danger" } },
-                    class: "cursor-pointer rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:cursor-wait disabled:opacity-50" do %>
-                <%= icon :trash %>
+              <% if can?(:operate) %>
+                <%= button_to server_authorized_key_path(@server), method: :delete,
+                      params: { key: key.key, name: key.name, account: @account.unix_user },
+                      title: "Supprimer la clé", aria: { label: "Supprimer la clé #{key.name || "sans nom"}" },
+                      form: { class: "shrink-0", data: { controller: "quiet-submit", turbo_frame: "_top",
+                                                         turbo_confirm: "La clé « #{key.name || "sans nom"} » sera supprimée de « #{@server.name} » pour #{@account.unix_user}. Elle ne pourra plus se connecter avec ce compte.",
+                                                         confirm_label: "Supprimer la clé", confirm_variant: "danger" } },
+                      class: "cursor-pointer rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:cursor-wait disabled:opacity-50" do %>
+                  <%= icon :trash %>
+                <% end %>
               <% end %>
             <% end %>
           </li>

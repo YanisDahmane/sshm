@@ -12,14 +12,16 @@
     </p>
   </div>
   <% if @servers.any? %>
-    <%= button_to server_scans_path,
-          class: "inline-flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" do %>
-      <%= icon :key, class: "h-4 w-4" %> Scanner les clés
+    <% if can?(:operate) %>
+      <%= button_to server_scans_path,
+            class: "inline-flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" do %>
+        <%= icon :key, class: "h-4 w-4" %> Scanner les clés
+      <% end %>
     <% end %>
   <% end %>
 </div>
 
-<% unless @checklist.complete? %>
+<% if can?(:administer) && !@checklist.complete? %>
   <%= render "dashboard/checklist", checklist: @checklist %>
 <% end %>
 

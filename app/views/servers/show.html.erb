@@ -9,11 +9,13 @@
       <p class="mt-1 font-mono text-sm text-slate-500"><%= @server.username %>@<%= @server.host %>:<%= @server.port %></p>
     </div>
     <div class="flex shrink-0 items-center gap-2">
-      <%= link_to edit_server_path(@server),
-            class: "inline-flex shrink-0 items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" do %>
-        <%= icon :pencil_square %> Modifier
+      <% if can?(:operate) %>
+        <%= link_to edit_server_path(@server),
+              class: "inline-flex shrink-0 items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" do %>
+          <%= icon :pencil_square %> Modifier
+        <% end %>
+        <%= render "servers/delete_button", server: @server %>
       <% end %>
-      <%= render "servers/delete_button", server: @server %>
     </div>
   </div>
 

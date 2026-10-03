@@ -1,6 +1,8 @@
 class ServerAuthorizedKeysController < ApplicationController
   include AuthorizedKeysRefresh
 
+  require_permission :operate, only: :destroy
+
   before_action :set_server_and_account
 
   def index

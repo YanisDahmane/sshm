@@ -6,8 +6,10 @@
       <h2 class="text-lg font-semibold">Accès</h2>
       <p class="mt-1 text-sm text-slate-500">Serveurs et comptes où la clé de ce profil est installée, d'après la dernière lecture des clés.</p>
     </div>
-    <%= button_to server_scans_path, class: "inline-flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" do %>
-      <%= icon :key, class: "h-4 w-4" %> Scanner les clés
+    <% if can?(:operate) %>
+      <%= button_to server_scans_path, class: "inline-flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" do %>
+        <%= icon :key, class: "h-4 w-4" %> Scanner les clés
+      <% end %>
     <% end %>
   </div>
 
@@ -29,13 +31,15 @@
             <% else %>
               <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">Permanent</span>
             <% end %>
-            <%= button_to profile_access_path(profile), method: :delete, params: { server_id: access.server.id, account: access.unix_user },
-                  title: "Retirer l'accès", aria: { label: "Retirer l'accès à #{access.server.name} pour #{access.unix_user}" },
-                  form: { data: { controller: "quiet-submit",
-                                  turbo_confirm: "La clé de « #{profile.name} » sera supprimée de « #{access.server.name} » pour #{access.unix_user}.",
-                                  confirm_label: "Retirer l'accès", confirm_variant: "danger" } },
-                  class: "cursor-pointer rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:cursor-wait disabled:opacity-50" do %>
-              <%= icon :trash %>
+            <% if can?(:operate) %>
+              <%= button_to profile_access_path(profile), method: :delete, params: { server_id: access.server.id, account: access.unix_user },
+                    title: "Retirer l'accès", aria: { label: "Retirer l'accès à #{access.server.name} pour #{access.unix_user}" },
+                    form: { data: { controller: "quiet-submit",
+                                    turbo_confirm: "La clé de « #{profile.name} » sera supprimée de « #{access.server.name} » pour #{access.unix_user}.",
+                                    confirm_label: "Retirer l'accès", confirm_variant: "danger" } },
+                    class: "cursor-pointer rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:cursor-wait disabled:opacity-50" do %>
+                <%= icon :trash %>
+              <% end %>
             <% end %>
           </div>
         </li>

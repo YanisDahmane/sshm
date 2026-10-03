@@ -1,5 +1,7 @@
 module Settings
   class NotificationChannelsController < ApplicationController
+    require_permission :administer
+
     before_action :set_channel, only: %i[edit update destroy test]
 
     # New channels receive the warnings and critical activities by default.

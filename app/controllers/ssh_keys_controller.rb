@@ -1,4 +1,6 @@
 class SshKeysController < ApplicationController
+  require_permission :administer
+
   def create
     regenerated = SshKey.exists?
     SshKey.generate!

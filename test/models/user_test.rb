@@ -28,4 +28,25 @@ class UserTest < ActiveSupport::TestCase
     assert users(:one).valid_password?("password123")
     assert_not users(:one).valid_password?("wrong")
   end
+
+  test "new users are viewers by default" do
+    assert User.new.viewer?
+  end
+
+  test "rejects an unknown role" do
+    user = User.new(email: "x@example.com", password: "password123", role: "root")
+    assert_not user.valid?
+    assert user.errors.key?(:role)
+  end
+
+  test "permissions per role" do
+    assert_equal [ true, true, true ], %i[view operate administer].map { |permission| users(:one).can?(permission) }
+    assert_equal [ true, true, false ], %i[view operate administer].map { |permission| users(:operator).can?(permission) }
+    assert_equal [ true, false, false ], %i[view operate administer].map { |permission| users(:viewer).can?(permission) }
+    assert_raises(KeyError) { users(:one).can?(:nope) }
+  end
+
+  test "role labels" do
+    assert_equal %w[Admin Opérateur Lecture], [ users(:one), users(:operator), users(:viewer) ].map(&:role_label)
+  end
 end

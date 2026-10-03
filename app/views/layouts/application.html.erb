@@ -41,10 +41,15 @@
         <% if user_signed_in? %>
           <div class="flex items-center gap-2 sm:gap-3">
             <%= render "shared/command_palette_button" %>
-            <span class="hidden text-sm text-slate-500 lg:inline"><%= current_user.email %></span>
-            <%= link_to settings_path, title: "Paramètres", aria: { label: "Paramètres", current: (controller_path.start_with?("settings") ? "page" : nil) },
-                  class: "rounded-md p-1.5 hover:bg-slate-100 #{controller_path.start_with?("settings") ? "text-indigo-600" : "text-slate-500 hover:text-slate-700"}" do %>
-              <%= icon :cog, class: "h-5 w-5" %>
+            <span class="hidden items-center gap-2 text-sm text-slate-500 lg:inline-flex">
+              <%= current_user.email %>
+              <span class="user-role rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600"><%= current_user.role_label %></span>
+            </span>
+            <% if can?(:administer) %>
+              <%= link_to settings_path, title: "Paramètres", aria: { label: "Paramètres", current: (controller_path.start_with?("settings") ? "page" : nil) },
+                    class: "rounded-md p-1.5 hover:bg-slate-100 #{controller_path.start_with?("settings") ? "text-indigo-600" : "text-slate-500 hover:text-slate-700"}" do %>
+                <%= icon :cog, class: "h-5 w-5" %>
+              <% end %>
             <% end %>
             <%= button_to "Déconnexion", destroy_user_session_path, method: :delete,
                   class: "rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 cursor-pointer" %>

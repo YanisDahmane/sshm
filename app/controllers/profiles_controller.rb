@@ -1,4 +1,6 @@
 class ProfilesController < ApplicationController
+  require_permission :operate, only: %i[new create edit update destroy]
+
   before_action :set_profile, only: %i[show edit update destroy]
 
   def index

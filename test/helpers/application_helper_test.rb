@@ -1,6 +1,8 @@
 require "test_helper"
 
 class ApplicationHelperTest < ActionView::TestCase
+  # Normally provided by the Authorization concern.
+  def can?(permission) = (@user || users(:one)).can?(permission)
   test "relative_time_in_words in French, past and future" do
     freeze_time do
       assert_equal "à l'instant", relative_time_in_words(30.seconds.ago)
@@ -64,5 +66,20 @@ class ApplicationHelperTest < ActionView::TestCase
     assert_equal "Deploy key", suggested_profile_name(AuthorizedKey.new(type: "ssh-ed25519", key: "AAAA", comment: "Deploy key"))
     assert_nil suggested_profile_name(AuthorizedKey.new(type: "ssh-ed25519", key: "AAAA"))
     assert_nil suggested_profile_name(AuthorizedKey.new(type: "ssh-ed25519", key: "AAAA", comment: "@host"))
+  end
+
+  test "command_palette_items hides the pages the role cannot use" do
+    @user = users(:viewer)
+    labels = command_palette_items.map { |item| item[:label] }
+
+    assert_includes labels, "Serveurs"
+    assert_includes labels, "Web"
+    assert_not_includes labels, "Ajouter un serveur"
+    assert_not_includes labels, "Paramètres"
+
+    @user = users(:operator)
+    labels = command_palette_items.map { |item| item[:label] }
+    assert_includes labels, "Ajouter un serveur"
+    assert_not_includes labels, "Automatisations"
   end
 end

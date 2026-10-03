@@ -3,7 +3,14 @@
 one:
   email: one@example.com
   encrypted_password: <%= Devise::Encryptor.digest(User, "password123") %>
+  role: admin
 
-two:
-  email: two@example.com
+operator:
+  email: operator@example.com
   encrypted_password: <%= Devise::Encryptor.digest(User, "password123") %>
+  role: operator
+
+viewer:
+  email: viewer@example.com
+  encrypted_password: <%= Devise::Encryptor.digest(User, "password123") %>
+  role: viewer

@@ -41,12 +41,15 @@ module ApplicationHelper
   def command_palette_items
     pages = [
       { label: "Dashboard", url: root_path }, { label: "Serveurs", url: servers_path }, { label: "Profils", url: profiles_path },
-      { label: "Activité", url: activities_path },
+      { label: "Activité", url: activities_path }
+    ]
+    pages += [ { label: "Ajouter un serveur", url: new_server_path }, { label: "Ajouter un profil", url: new_profile_path } ] if can?(:operate)
+    pages += [
       { label: "Paramètres", hint: "clé SSH de SSHM", url: settings_path },
       { label: "Notifications", hint: "paramètres", url: settings_notifications_path },
-      { label: "Automatisations", hint: "paramètres", url: settings_automations_path },
-      { label: "Ajouter un serveur", url: new_server_path }, { label: "Ajouter un profil", url: new_profile_path }
-    ].map { |page| page.merge(group: "Pages") }
+      { label: "Automatisations", hint: "paramètres", url: settings_automations_path }
+    ] if can?(:administer)
+    pages = pages.map { |page| page.merge(group: "Pages") }
 
     servers = Server.order(:name).map { |server| { group: "Serveurs", label: server.name, hint: "#{server.username}@#{server.host}", url: server_path(server) } }
     profiles = Profile.order(:name).map { |profile| { group: "Profils", label: profile.name, hint: profile.authorized_key&.comment, url: profile_path(profile) } }

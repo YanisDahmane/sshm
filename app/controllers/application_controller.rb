@@ -4,6 +4,7 @@ class ApplicationController < ActionController::Base
 
   before_action :authenticate_user!, unless: :devise_controller?
   before_action { Current.user = current_user }
+  include Authorization
 
   layout :layout_by_resource
 

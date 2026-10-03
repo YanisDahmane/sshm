@@ -1,6 +1,8 @@
 # Grants a profile access to several servers at once, or revokes one access,
 # from the profile page.
 class ProfileAccessesController < ApplicationController
+  require_permission :operate
+
   BulkResult = Data.define(:server, :unix_user, :status, :message)
 
   before_action :set_profile

@@ -1,6 +1,8 @@
 class ServerAuthorizationsController < ApplicationController
   include AuthorizedKeysRefresh
 
+  require_permission :operate
+
   def create
     server = Server.find(params[:server_id])
     account = authorized_keys_account(server)
