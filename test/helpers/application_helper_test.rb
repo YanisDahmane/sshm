@@ -57,6 +57,10 @@ class ApplicationHelperTest < ActionView::TestCase
                  ssh_key_install_command(ssh_keys(:main))
   end
 
+  test "pluralize_fr treats 0 and 1 as singular" do
+    assert_equal [ "0 ligne", "1 ligne", "2 lignes" ], [ 0, 1, 2 ].map { |count| pluralize_fr(count, "ligne", "lignes") }
+  end
+
   test "nav_link_to marks the active link" do
     render html: nav_link_to("Serveurs", "/servers", active: true) + nav_link_to("Profils", "/profiles", active: false)
 

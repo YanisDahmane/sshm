@@ -26,6 +26,8 @@
         <% end %>
       <% end %>
       <% if can?(:operate) %>
+        <%= link_to "Importer", new_server_import_path,
+              class: "rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" %>
         <%= link_to "Ajouter un serveur", new_server_path,
               class: "rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
       <% end %>

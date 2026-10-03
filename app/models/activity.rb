@@ -25,6 +25,7 @@ class Activity < ApplicationRecord
     Kind.new(:server_back_online, "Serveur de nouveau joignable", :servers, :info, "Un serveur injoignable répond à nouveau."),
     Kind.new(:server_created, "Serveur ajouté", :servers, :info, "Un serveur a été ajouté à SSHM."),
     Kind.new(:server_updated, "Serveur modifié", :servers, :info, "Les informations de connexion d'un serveur ont changé."),
+    Kind.new(:servers_imported, "Serveurs importés", :servers, :info, "Des serveurs ont été importés depuis un fichier CSV ou un ~/.ssh/config."),
     Kind.new(:server_deleted, "Serveur supprimé", :servers, :warning, "Un serveur a été retiré de SSHM (ses clés restent installées dessus)."),
     Kind.new(:server_group_created, "Groupe de serveurs créé", :configuration, :info, "Un groupe de serveurs a été créé."),
     Kind.new(:server_group_deleted, "Groupe de serveurs supprimé", :configuration, :info, "Un groupe de serveurs a été supprimé (ses serveurs restent)."),
@@ -106,6 +107,10 @@ class Activity < ApplicationRecord
     when :server_back_online then "« #{server_name} » répond à nouveau"
     when :server_created then "Serveur « #{server_name} » ajouté"
     when :server_updated then "Serveur « #{server_name} » modifié"
+    when :servers_imported
+      names = data["names"].to_a
+      more = data["count"].to_i > names.size ? "…" : ""
+      "#{data["count"]} serveur(s) importé(s) (#{data["format"]}) : #{names.join(", ")}#{more}"
     when :server_deleted then "Serveur « #{server_name} » supprimé de SSHM"
     when :server_group_created then "Groupe « #{data["group_name"]} » créé (#{data["servers"]} serveur(s))"
     when :server_group_deleted then "Groupe « #{data["group_name"]} » supprimé"

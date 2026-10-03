@@ -26,6 +26,12 @@ module ApplicationHelper
                    **options
   end
 
+  # "0 ligne", "1 ligne", "2 lignes": in French, 0 and 1 are singular
+  # (Rails' pluralize only treats 1 as singular).
+  def pluralize_fr(count, singular, plural)
+    "#{count} #{count.to_i.abs < 2 ? singular : plural}"
+  end
+
   # Shell command adding the app's public key to ~/.ssh/authorized_keys.
   def ssh_key_install_command(ssh_key)
     "mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo '#{ssh_key.public_key}' >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
@@ -46,7 +52,7 @@ module ApplicationHelper
       { label: "Demandes d'accès", url: access_requests_path }, { label: "Demander un accès", url: new_access_request_path },
       { label: "Activité", url: activities_path }
     ]
-    pages += [ { label: "Ajouter un serveur", url: new_server_path }, { label: "Ajouter un profil", url: new_profile_path } ] if can?(:operate)
+    pages += [ { label: "Importer des serveurs", hint: "CSV, ~/.ssh/config", url: new_server_import_path }, { label: "Ajouter un serveur", url: new_server_path }, { label: "Ajouter un profil", url: new_profile_path } ] if can?(:operate)
     pages += [
       { label: "Paramètres", hint: "clé SSH de SSHM", url: settings_path },
       { label: "Notifications", hint: "paramètres", url: settings_notifications_path },

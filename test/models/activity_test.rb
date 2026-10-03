@@ -53,6 +53,7 @@ class ActivityTest < ActiveSupport::TestCase
       [ :unknown_key_detected, { unix_user: "root" } ] => "Clé « sans nom » sans profil trouvée sur « Web » pour root",
       [ :key_disappeared, { unix_user: "root", key_name: "bob" } ] => "Clé « bob » disparue de « Web » pour root",
       [ :ssh_access_lost, {} ] => "« Web » refuse la clé de SSHM",
+      [ :servers_imported, { count: 12, format: "CSV", names: %w[A B] } ] => "12 serveur(s) importé(s) (CSV) : A, B…",
       [ :access_requested, { requester: "v@x.fr", duration_label: "1 heure", reason: "incident" } ] => "v@x.fr demande 1 heure d'accès à « Web » : « incident »",
       [ :access_request_approved, { requester: "v@x.fr", duration_label: "1 heure" } ] => "Demande de v@x.fr acceptée : accès à « Web » pendant 1 heure",
       [ :access_request_denied, { requester: "v@x.fr", note: "non" } ] => "Demande de v@x.fr pour « Web » refusée : « non »",

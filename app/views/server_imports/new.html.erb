@@ -1,0 +1,115 @@
+<% content_for :title, "Importer des serveurs · SSHM" %>
+<% input_class = "mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" %>
+<% label_class = "block text-sm font-medium text-slate-700" %>
+
+<div class="mx-auto max-w-4xl">
+  <%= link_to "← Serveurs", servers_path, class: "text-sm text-slate-500 hover:text-slate-700" %>
+  <h1 class="mt-2 text-2xl font-bold tracking-tight">Importer des serveurs</h1>
+
+  <% if @rows %>
+    <% counts = @rows.group_by(&:status).transform_values(&:size) %>
+    <section id="import-preview" class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-semibold">Aperçu</h2>
+          <p class="import-counts text-sm text-slate-500">
+            <%= pluralize_fr(counts[:valid].to_i, "serveur à importer", "serveurs à importer") %> ·
+            <%= pluralize_fr(counts[:duplicate].to_i, "doublon ignoré", "doublons ignorés") %> ·
+            <%= pluralize_fr(counts[:invalid].to_i, "ligne en erreur", "lignes en erreur") %>
+          </p>
+        </div>
+        <% if counts[:valid].to_i.positive? %>
+          <%= form_with url: server_import_path, class: "import-confirm" do |f| %>
+            <%# A hidden textarea: an input's value would not keep the line breaks reliably. %>
+            <%= text_area_tag :content, @text, id: nil, hidden: true %>
+            <%= hidden_field_tag :import_format, @format, id: nil %>
+            <%= hidden_field_tag :default_username, @default_username, id: nil %>
+            <%= f.submit "Importer #{pluralize(counts[:valid], "serveur", plural: "serveurs")}",
+                  class: "cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+          <% end %>
+        <% end %>
+      </div>
+
+      <div class="mt-4 overflow-x-auto rounded-md border border-slate-200">
+        <table class="min-w-full divide-y divide-slate-200 text-sm">
+          <thead class="bg-slate-50 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
+            <tr>
+              <th class="px-3 py-2">Ligne</th><th class="px-3 py-2">Nom</th><th class="px-3 py-2">Adresse</th>
+              <th class="px-3 py-2">Groupes</th><th class="px-3 py-2">État</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <% @rows.each do |row| %>
+              <tr class="import-row is-<%= row.status %> <%= { invalid: "bg-red-50/50", duplicate: "bg-slate-50 text-slate-500" }[row.status] %>">
+                <td class="px-3 py-2 text-slate-500"><%= row.line %></td>
+                <td class="px-3 py-2 font-medium"><%= row.name.presence || "—" %></td>
+                <td class="px-3 py-2 font-mono text-xs"><%= row.username %>@<%= row.host.presence || "?" %>:<%= row.port %></td>
+                <td class="px-3 py-2 text-xs"><%= row.group_names.join(", ") %></td>
+                <td class="px-3 py-2 text-xs">
+                  <% case row.status %>
+                  <% when :valid %>
+                    <span class="font-medium text-emerald-700">À importer</span>
+                  <% when :duplicate %>
+                    Doublon de « <%= row.duplicate_of %> »
+                  <% else %>
+                    <span class="text-red-700"><%= row.errors.join(", ") %></span>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <p class="mt-2 text-xs text-slate-500">Les groupes qui n'existent pas encore seront créés. Les doublons (même nom, ou même adresse et port) et les lignes en erreur sont ignorés.</p>
+    </section>
+  <% end %>
+
+  <section class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <%# Without Turbo: the preview is rendered in the response to the POST. %>
+    <%= form_with url: preview_server_import_path, multipart: true, data: { turbo: false }, class: "space-y-5" do |f| %>
+      <fieldset>
+        <legend class="<%= label_class %>">Format</legend>
+        <div class="mt-2 flex flex-wrap gap-4 text-sm">
+          <% ServerImport::FORMATS.each do |value, label| %>
+            <label class="flex cursor-pointer items-center gap-2">
+              <%= radio_button_tag :import_format, value, @format == value, class: "h-4 w-4 border-slate-300 text-indigo-600" %> <%= label %>
+            </label>
+          <% end %>
+        </div>
+      </fieldset>
+
+      <div class="grid grid-cols-1 gap-3 text-xs text-slate-600 sm:grid-cols-2">
+        <div class="rounded-md bg-slate-50 p-3">
+          <p class="font-medium text-slate-700">CSV</p>
+          <p class="mt-1">Colonnes : nom, hôte, port, utilisateur, groupes (séparés par <code>|</code>). Ligne d'en-tête facultative ; séparateur <code>,</code> ou <code>;</code>.</p>
+          <pre class="mt-2 overflow-x-auto font-mono">nom,hôte,port,utilisateur,groupes
+API,10.0.0.12,22,deploy,Production|API</pre>
+        </div>
+        <div class="rounded-md bg-slate-50 p-3">
+          <p class="font-medium text-slate-700">~/.ssh/config</p>
+          <p class="mt-1">Un serveur par bloc <code>Host</code> (sans <code>*</code>), avec <code>HostName</code>, <code>Port</code> et <code>User</code>.</p>
+          <pre class="mt-2 overflow-x-auto font-mono">Host api
+  HostName 10.0.0.12
+  User deploy</pre>
+        </div>
+      </div>
+
+      <div>
+        <%= label_tag :content, "Contenu", class: label_class %>
+        <%= text_area_tag :content, (@text unless params[:file].respond_to?(:read)), rows: 8, spellcheck: false, class: "#{input_class} font-mono text-xs" %>
+      </div>
+      <div>
+        <%= label_tag :file, "… ou fichier", class: label_class %>
+        <%= file_field_tag :file, accept: ".csv,.txt,text/csv,text/plain", class: "mt-1 block text-sm text-slate-600" %>
+      </div>
+      <div class="max-w-xs">
+        <%= label_tag :default_username, "Utilisateur par défaut", class: label_class %>
+        <%= text_field_tag :default_username, @default_username, autocomplete: "off", spellcheck: false, class: "#{input_class} font-mono" %>
+        <p class="mt-1 text-xs text-slate-500">Pour les lignes sans utilisateur.</p>
+      </div>
+      <div class="flex justify-end">
+        <%= f.submit "Voir l'aperçu", class: "cursor-pointer rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" %>
+      </div>
+    <% end %>
+  </section>
+</div>
