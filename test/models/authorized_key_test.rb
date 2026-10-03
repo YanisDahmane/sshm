@@ -84,4 +84,13 @@ class AuthorizedKeyTest < ActiveSupport::TestCase
     assert_not AuthorizedKey.parse(@ed25519).sole.matches?(app_key)
     assert_not AuthorizedKey.parse(@ed25519).sole.matches?(nil)
   end
+
+  test "matches any key of a list" do
+    pending = SshKey.generate_pending!
+    key = AuthorizedKey.parse(pending.public_key).sole
+
+    assert key.matches?([ ssh_keys(:main), pending ])
+    assert_not key.matches?([ ssh_keys(:main) ])
+    assert_not key.matches?([])
+  end
 end

@@ -34,6 +34,8 @@ class Activity < ApplicationRecord
     Kind.new(:profile_created, "Profil créé", :configuration, :info, "Un profil a été créé."),
     Kind.new(:profile_deleted, "Profil supprimé", :configuration, :info, "Un profil a été supprimé."),
     Kind.new(:ssh_key_generated, "Clé SSHM générée", :security, :critical, "La clé SSH de SSHM a été générée ou régénérée."),
+    Kind.new(:ssh_key_rotation_started, "Rotation de la clé SSHM lancée", :security, :warning, "Une nouvelle clé SSHM est en cours d'installation sur les serveurs."),
+    Kind.new(:ssh_key_rotated, "Clé SSHM remplacée", :security, :critical, "La rotation est terminée : la nouvelle clé SSHM est active, l'ancienne supprimée."),
     Kind.new(:automation_run, "Automatisation exécutée", :configuration, :info, "Une automatisation s'est exécutée.")
   ].index_by(&:key).freeze
 
@@ -102,6 +104,10 @@ class Activity < ApplicationRecord
     when :profile_created then "Profil « #{profile_name} » créé"
     when :profile_deleted then "Profil « #{profile_name} » supprimé"
     when :ssh_key_generated then data["regenerated"] ? "Clé SSHM régénérée" : "Clé SSHM générée"
+    when :ssh_key_rotation_started then "Rotation de la clé SSHM lancée sur #{data["servers"]} serveur(s)"
+    when :ssh_key_rotated
+      forced = data["forced"] ? " (finalisée malgré #{data["failed"]} échec(s))" : ""
+      "Clé SSHM remplacée sur #{data["servers"]} serveur(s)#{forced}"
     when :automation_run then "#{data["automation_label"]} : #{data["result"]}"
     end
   end

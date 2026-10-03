@@ -3,5 +3,6 @@ class SettingsController < ApplicationController
 
   def show
     @ssh_key = SshKey.current
+    @rotation = KeyRotation.in_progress
   end
 end

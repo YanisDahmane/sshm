@@ -77,6 +77,10 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
       "revoke a profile everywhere" => -> { post profile_revocation_path(profiles(:alice)) },
       "follow a revocation" => -> { get revocation_path(Revocation.start!(profiles(:alice), by: users(:one))) },
       "retry a revocation" => -> { post retry_revocation_path(Revocation.start!(profiles(:alice), by: users(:one)).tap(&:finish!)) },
+      "start a key rotation" => -> { post settings_key_rotations_path },
+      "follow a key rotation" => -> { get settings_key_rotation_path(KeyRotation.start!(by: users(:one))) },
+      "retry a key rotation" => -> { post retry_settings_key_rotation_path(KeyRotation.start!(by: users(:one))) },
+      "finalize a key rotation" => -> { post finalize_settings_key_rotation_path(KeyRotation.start!(by: users(:one))) },
       "require 2FA for admins" => -> { patch settings_security_path, params: { app_setting: { require_admin_two_factor: "0" } } }
     }
   }.freeze

@@ -1,0 +1,57 @@
+<% content_for :title, "Rotation de la clé SSHM · SSHM" %>
+<%= render "settings/nav" %>
+
+<div class="mx-auto mt-8 max-w-3xl">
+  <%= link_to "← Clé SSH de l'application", settings_path, class: "text-sm text-slate-500 hover:text-slate-700" %>
+  <h2 class="mt-2 text-xl font-semibold">Rotation de la clé SSHM</h2>
+  <p class="mt-1 text-sm text-slate-500">
+    Lancée par <%= @rotation.started_by&.email || "un utilisateur supprimé" %> <%= relative_time_tag @rotation.created_at %>.
+    Pendant la rotation, SSHM se connecte avec l'ancienne ou la nouvelle clé : aucun serveur ne perd l'accès.
+  </p>
+
+  <%# No src here: Turbo refuses a frame whose src is the page itself (auto-refresh sets it). %>
+  <%= turbo_frame_tag dom_id(@rotation), class: "block" do %>
+    <% if @rotation.running? %>
+      <div data-controller="auto-refresh" hidden></div>
+    <% end %>
+
+    <section id="rotation-summary" class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <% if @rotation.status == :running %>
+        <p class="rotation-status flex items-center gap-2 text-sm font-medium text-indigo-700">
+          <%= icon :arrow_path, class: "h-4 w-4 animate-spin" %> En cours : <%= @rotation.servers_done %>/<%= @rotation.servers_count %> serveur(s)
+        </p>
+      <% elsif @rotation.status == :activated %>
+        <p class="rotation-status flex items-center gap-2 text-sm font-medium text-emerald-700">
+          <%= icon :check, class: "h-4 w-4" %> Terminée : la nouvelle clé est active, l'ancienne a été supprimée.
+          <%= "(finalisée malgré #{@rotation.failed_count} échec(s))" if @rotation.forced %>
+        </p>
+      <% else %>
+        <p class="rotation-status flex items-center gap-2 text-sm font-medium text-red-700">
+          <%= icon :x_mark, class: "h-4 w-4" %> <%= pluralize(@rotation.failed_count, "serveur en échec", plural: "serveurs en échec") %> : ils gardent l'ancienne clé, qui reste utilisable.
+        </p>
+        <div class="mt-4 flex flex-wrap gap-3">
+          <%= button_to "Relancer les échecs", retry_settings_key_rotation_path(@rotation), data: { turbo_frame: "_top" },
+                class: "cursor-pointer rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+          <%= button_to "Finaliser malgré les échecs", finalize_settings_key_rotation_path(@rotation),
+                form: { data: { turbo_frame: "_top", turbo_confirm: "L'ancienne clé sera supprimée : SSHM perdra l'accès aux serveurs en échec tant que la nouvelle clé n'y sera pas installée.",
+                                confirm_label: "Finaliser", confirm_variant: "danger" } },
+                class: "cursor-pointer rounded-md border border-red-300 bg-white px-3 py-1.5 text-sm font-medium text-red-700 shadow-sm hover:bg-red-50" %>
+        </div>
+      <% end %>
+    </section>
+
+    <% if @rotation.steps.any? %>
+      <ul id="rotation-steps" class="mt-4 divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white text-sm shadow-sm">
+        <% @rotation.steps.each do |step| %>
+          <li class="rotation-step flex items-start gap-3 px-4 py-3 is-<%= step.status %>">
+            <span class="mt-0.5 <%= step.rotated? ? "text-emerald-600" : "text-red-600" %>"><%= icon(step.rotated? ? :check : :x_mark) %></span>
+            <div class="min-w-0 flex-1">
+              <p><span class="font-medium"><%= step.server_name %></span> — <%= step.rotated? ? "nouvelle clé installée et vérifiée, ancienne retirée" : "échec : #{step.phase_label}" %></p>
+              <% if step.error_message %><p class="mt-0.5 break-all font-mono text-xs text-red-700"><%= step.error_message %></p><% end %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  <% end %>
+</div>

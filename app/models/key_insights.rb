@@ -1,7 +1,7 @@
 # Figures computed from the AccountSnapshots (last known keys of each server
 # account): keys that match no profile ("orphans"), per server and in total.
 class KeyInsights
-  def initialize(snapshots: AccountSnapshot.includes(:server).to_a, app_key: SshKey.current)
+  def initialize(snapshots: AccountSnapshot.includes(:server).to_a, app_key: SshKey.app_keys)
     @snapshots = snapshots
     @app_key = app_key
     @profile_fingerprints = Profile.pluck(:fingerprint).to_set

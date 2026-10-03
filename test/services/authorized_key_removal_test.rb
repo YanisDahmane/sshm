@@ -158,4 +158,23 @@ class AuthorizedKeyRemovalTest < ActiveSupport::TestCase
     assert_not status.success?
     assert_equal "unknown user", error.strip
   end
+
+  test "the pending SSHM key is protected too" do
+    pending = SshKey.generate_pending!
+    fake = FakeSsh.new(handler: local_shell)
+
+    assert_equal "Suppression interdite", remove(pending.blob, fake: fake).error_title
+    assert_nil fake.started_with
+  end
+
+  test "the protected keys can be chosen (to remove the old key during a rotation)" do
+    authorized_keys_file.write("#{ssh_keys(:main).public_key}\n#{@bob}\n")
+    new_key = SshKey.generate_pending!
+
+    result = AuthorizedKeyRemoval.call(servers(:web), ssh_keys(:main).blob, protected_keys: [ new_key ],
+                                       transport: FakeSsh.new(handler: local_shell), known_hosts_file: @known_hosts)
+
+    assert result.removed?
+    assert_equal "#{@bob}\n", authorized_keys_file.read
+  end
 end

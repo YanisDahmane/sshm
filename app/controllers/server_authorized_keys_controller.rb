@@ -10,7 +10,7 @@ class ServerAuthorizedKeysController < ApplicationController
     record_ssh_status
     @accounts = @result.success? ? ServerAccountsReader.call(@server).accounts : [ @account ]
     @accounts |= [ @account ]
-    @app_key = SshKey.current
+    @app_key = SshKey.app_keys
     @profiles_by_fingerprint = Profile.where(fingerprint: @result.keys.map(&:fingerprint)).index_by(&:fingerprint)
     @authorizable_profiles = Profile.where.not(fingerprint: @profiles_by_fingerprint.keys).order(:name) if @result.success?
     @orphan_keys = @result.keys.reject { |key| key.matches?(@app_key) || @profiles_by_fingerprint.key?(key.fingerprint) }

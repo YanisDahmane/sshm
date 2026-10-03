@@ -6,8 +6,8 @@ require "net/ssh"
 #     ssh.exec!("cat /root/.ssh/authorized_keys").stdout
 #   end
 #
-# Authentication only uses the app's SSH key (SshKey.current, generated from
-# the settings page), whose public key must be in the server's authorized_keys.
+# Authentication only uses the app's SSH keys (SshKey.app_keys: the active key,
+# plus the pending one during a rotation), never ~/.ssh nor the ssh-agent.
 # Host keys are trusted on first use and pinned in KNOWN_HOSTS_FILE; a changed
 # key aborts the connection.
 class SshConnection
@@ -62,9 +62,10 @@ class SshConnection
   end
 
   # `transport` is the Net::SSH-compatible entry point, swappable in tests.
-  def initialize(server, key: SshKey.current, timeout: DEFAULT_TIMEOUT, known_hosts_file: KNOWN_HOSTS_FILE, transport: Net::SSH)
+  # `key`: one SshKey or a list, tried in order (the app keys by default).
+  def initialize(server, key: SshKey.app_keys, timeout: DEFAULT_TIMEOUT, known_hosts_file: KNOWN_HOSTS_FILE, transport: Net::SSH)
     @server = server
-    @key = key
+    @keys = Array(key).compact
     @timeout = timeout
     @known_hosts_file = Pathname(known_hosts_file)
     @transport = transport
@@ -72,7 +73,7 @@ class SshConnection
 
   # Yields the connection and closes the session afterwards. Returns the block's value.
   def open
-    raise MissingKeyError, "Aucune clé SSH configurée : générez-en une dans les paramètres." unless @key
+    raise MissingKeyError, "Aucune clé SSH configurée : générez-en une dans les paramètres." if @keys.empty?
 
     FileUtils.mkdir_p(@known_hosts_file.dirname)
 
@@ -125,7 +126,7 @@ class SshConnection
       logger: Rails.logger,
       verbose: :fatal,
       auth_methods: %w[publickey],
-      key_data: [ @key.private_key ],
+      key_data: @keys.map(&:private_key),
       keys: [],
       keys_only: true,                # only the app key, never ~/.ssh/id_*
       use_agent: false

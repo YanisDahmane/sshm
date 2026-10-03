@@ -61,12 +61,12 @@ class AuthorizedKey
     SshKeyGenerator.fingerprint(Base64.strict_decode64(key))
   end
 
-  # True when this is the given SshKey's public key (compared on the key
-  # itself, not the comment, which anyone can change).
-  def matches?(ssh_key)
-    return false unless ssh_key
-
-    other_type, other_key = ssh_key.public_key.split(" ")
-    type == other_type && key == other_key
+  # True when this is the public key of the given SshKey, or of one of them
+  # (compared on the key itself, not the comment, which anyone can change).
+  def matches?(ssh_keys)
+    Array(ssh_keys).compact.any? do |ssh_key|
+      other_type, other_key = ssh_key.public_key.split(" ")
+      type == other_type && key == other_key
+    end
   end
 end

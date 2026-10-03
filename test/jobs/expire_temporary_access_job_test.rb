@@ -34,6 +34,7 @@ class ExpireTemporaryAccessJobTest < ActiveJob::TestCase
     access = create_temporary_access(expires_at: 1.minute.ago).tap(&:end!)
 
     stub_method(AuthorizedKeyRemoval, :call, ->(*, **) { flunk "should not remove" }) { ExpireTemporaryAccessJob.perform_now(access) }
+    assert_not access.reload.active?
   end
 
   test "reschedules itself when run too early" do

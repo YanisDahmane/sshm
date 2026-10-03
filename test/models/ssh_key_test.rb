@@ -51,4 +51,25 @@ class SshKeyTest < ActiveSupport::TestCase
     assert_not SshKey.exists?(old.id)
     assert_not_equal old.public_key, key.public_key
   end
+
+  test "current is the active key, app_keys the active then the pending one" do
+    pending = SshKey.generate_pending!
+
+    assert pending.pending?
+    assert_equal ssh_keys(:main), SshKey.current
+    assert_equal [ ssh_keys(:main), pending ], SshKey.app_keys
+  end
+
+  test "generate! replaces every key, pending included" do
+    SshKey.generate_pending!
+
+    key = SshKey.generate!
+
+    assert_equal [ key ], SshKey.all.to_a
+    assert key.active?
+  end
+
+  test "blob is the base64 part of the public key" do
+    assert_equal ssh_keys(:main).public_key.split(" ")[1], ssh_keys(:main).blob
+  end
 end

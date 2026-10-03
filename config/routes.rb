@@ -41,6 +41,12 @@ Rails.application.routes.draw do
     end
     resources :invitations, only: %i[create destroy]
     resource :security, only: :update
+    resources :key_rotations, only: %i[create show] do
+      member do
+        post :retry
+        post :finalize
+      end
+    end
     resource :notifications, only: :show
     resources :notification_channels, except: %i[index show], path: "notifications/channels" do
       post :test, on: :member

@@ -1,21 +1,41 @@
 # The key pair the app uses to connect to every server. Its public key must be
-# added to the servers' authorized_keys. There is at most one key at a time.
+# added to the servers' authorized_keys. There is one active key, plus a
+# pending one while a KeyRotation replaces it: both are SSHM's keys then
+# (connections try both, neither counts as an unknown key nor can be removed).
 class SshKey < ApplicationRecord
   encrypts :private_key
+
+  enum :state, { active: "active", pending: "pending" }, default: :active, validate: true
 
   validates :public_key, :private_key, :fingerprint, presence: true
 
   def self.current
-    order(:created_at).last
+    active.order(:created_at).last
   end
 
-  # Replaces the current key with a freshly generated one.
-  def self.generate!(comment: "sshm")
-    key = SshKeyGenerator.generate(comment: comment)
+  # Active then pending key: the keys SSHM connects with and protects.
+  def self.app_keys
+    where(state: %w[active pending]).in_order_of(:state, %w[active pending]).to_a
+  end
 
+  # Replaces every key with a freshly generated active one (cuts the access to
+  # servers until its public key is installed; see KeyRotation for no downtime).
+  def self.generate!(comment: "sshm")
     transaction do
       delete_all
-      create!(public_key: key.public_key, private_key: key.private_key, fingerprint: key.fingerprint)
+      build_generated(comment: comment).tap(&:save!)
     end
   end
+
+  def self.generate_pending!(comment: "sshm")
+    build_generated(comment: comment, state: :pending).tap(&:save!)
+  end
+
+  def self.build_generated(comment:, state: :active)
+    key = SshKeyGenerator.generate(comment: comment)
+    new(public_key: key.public_key, private_key: key.private_key, fingerprint: key.fingerprint, state: state)
+  end
+  private_class_method :build_generated
+
+  def blob = public_key.split(" ")[1]
 end

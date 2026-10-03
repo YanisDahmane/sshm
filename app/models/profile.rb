@@ -35,6 +35,6 @@ class Profile < ApplicationRecord
   end
 
   def public_key_must_not_be_the_app_key
-    errors.add(:public_key, :app_key) if authorized_key&.matches?(SshKey.current)
+    errors.add(:public_key, :app_key) if authorized_key&.matches?(SshKey.app_keys)
   end
 end

@@ -206,4 +206,20 @@ class SshConnectionTest < ActiveSupport::TestCase
     listener&.close
     thread&.join(1)
   end
+
+  test "tries the active then the pending app key" do
+    pending = SshKey.generate_pending!
+    fake = FakeSsh.new
+    connect(servers(:web), fake) { }
+
+    assert_equal [ ssh_keys(:main).private_key, pending.private_key ], fake.started_with[:key_data]
+  end
+
+  test "accepts an explicit list of keys" do
+    other = SshKey.new(private_key: "other")
+    fake = FakeSsh.new
+    SshConnection.open(servers(:web), key: [ other, nil ], transport: fake, known_hosts_file: @known_hosts) { }
+
+    assert_equal [ "other" ], fake.started_with[:key_data]
+  end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_03_215335) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_03_215939) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -73,6 +73,34 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_215335) do
     t.index ["invited_by_id"], name: "index_invitations_on_invited_by_id"
     t.index ["token"], name: "index_invitations_on_token", unique: true
     t.index ["user_id"], name: "index_invitations_on_user_id"
+  end
+
+  create_table "key_rotation_steps", force: :cascade do |t|
+    t.bigint "key_rotation_id", null: false
+    t.bigint "server_id"
+    t.string "server_name", null: false
+    t.string "status", null: false
+    t.string "phase"
+    t.text "error_message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["key_rotation_id"], name: "index_key_rotation_steps_on_key_rotation_id"
+    t.index ["server_id"], name: "index_key_rotation_steps_on_server_id"
+  end
+
+  create_table "key_rotations", force: :cascade do |t|
+    t.bigint "old_key_id"
+    t.bigint "new_key_id"
+    t.bigint "started_by_id"
+    t.integer "servers_count", default: 0, null: false
+    t.boolean "forced", default: false, null: false
+    t.datetime "finished_at"
+    t.datetime "activated_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["new_key_id"], name: "index_key_rotations_on_new_key_id"
+    t.index ["old_key_id"], name: "index_key_rotations_on_old_key_id"
+    t.index ["started_by_id"], name: "index_key_rotations_on_started_by_id"
   end
 
   create_table "notification_channels", force: :cascade do |t|
@@ -147,6 +175,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_215335) do
     t.string "fingerprint", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "state", default: "active", null: false
   end
 
   create_table "temporary_accesses", force: :cascade do |t|
@@ -200,6 +229,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_215335) do
   add_foreign_key "activities", "users", on_delete: :nullify
   add_foreign_key "invitations", "users", column: "invited_by_id"
   add_foreign_key "invitations", "users", on_delete: :nullify
+  add_foreign_key "key_rotation_steps", "key_rotations", on_delete: :cascade
+  add_foreign_key "key_rotation_steps", "servers", on_delete: :nullify
+  add_foreign_key "key_rotations", "ssh_keys", column: "new_key_id", on_delete: :nullify
+  add_foreign_key "key_rotations", "ssh_keys", column: "old_key_id", on_delete: :nullify
+  add_foreign_key "key_rotations", "users", column: "started_by_id", on_delete: :nullify
   add_foreign_key "revocation_steps", "revocations", on_delete: :cascade
   add_foreign_key "revocation_steps", "servers", on_delete: :nullify
   add_foreign_key "revocations", "profiles", on_delete: :nullify

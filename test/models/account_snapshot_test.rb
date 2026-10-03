@@ -87,4 +87,12 @@ class AccountSnapshotTest < ActiveSupport::TestCase
 
     assert_equal 0, Activity.of_kind(:key_disappeared).count
   end
+
+  test "the pending SSHM key is not reported as a key without profile" do
+    pending = SshKey.generate_pending!
+
+    AccountSnapshot.record!(servers(:web), @account, keys(pending.public_key))
+
+    assert_equal 0, Activity.of_kind(:unknown_key_detected).count
+  end
 end
