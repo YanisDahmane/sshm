@@ -73,3 +73,7 @@ gem "json", "~> 2.10"
 gem "net-ssh", "~> 7.3"
 gem "ed25519", "~> 1.3"
 gem "bcrypt_pbkdf", "~> 1.1"
+
+# French translations (dates, validation errors, Devise)
+gem "rails-i18n", "~> 8.0"
+gem "devise-i18n", "~> 1.13"

@@ -1,0 +1,33 @@
+fr:
+  activerecord:
+    models:
+      server: Serveur
+      profile: Profil
+      user: Utilisateur
+    attributes:
+      server:
+        name: Nom
+        host: Hôte
+        port: Port
+        username: Utilisateur
+      profile:
+        name: Nom
+        public_key: Clé SSH publique
+        fingerprint: Cette clé
+      user:
+        email: Email
+        password: Mot de passe
+        password_confirmation: Confirmation du mot de passe
+    errors:
+      models:
+        profile:
+          attributes:
+            public_key:
+              invalid: 'doit être une seule clé publique, par exemple « ssh-ed25519 AAAA… alice@laptop »'
+              private_key: "ressemble à une clé privée : collez la clé publique (fichier .pub)"
+              app_key: "est la clé de SSHM et ne peut pas être utilisée par un profil"
+            fingerprint:
+              taken: "est déjà utilisée par un autre profil"
+  time:
+    formats:
+      short: "%d %b %H:%M"

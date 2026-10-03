@@ -78,7 +78,7 @@ class ProfileTest < ActiveSupport::TestCase
     profile = build_profile(public_key: @key.private_key)
     assert_not profile.valid?
     assert profile.errors.added?(:public_key, :private_key)
-    assert_match "private key", profile.errors.full_messages.to_sentence
+    assert_match "ressemble à une clé privée", profile.errors.full_messages.to_sentence
   end
 
   test "rejects a key already used by another profile, whatever its comment" do

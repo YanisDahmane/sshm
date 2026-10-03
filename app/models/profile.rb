@@ -10,7 +10,7 @@ class Profile < ApplicationRecord
   validates :public_key, presence: true
   validate :public_key_must_be_a_single_public_key
   validate :public_key_must_not_be_the_app_key
-  validates :fingerprint, uniqueness: { message: "is already used by another profile" }, if: :authorized_key
+  validates :fingerprint, uniqueness: true, if: :authorized_key
 
   # The parsed key, or nil when public_key is not exactly one valid public key.
   def authorized_key
@@ -28,13 +28,13 @@ class Profile < ApplicationRecord
     return if public_key.blank? || authorized_key
 
     if public_key.include?("PRIVATE KEY")
-      errors.add(:public_key, :private_key, message: "looks like a private key: paste the public key (.pub file) instead")
+      errors.add(:public_key, :private_key)
     else
-      errors.add(:public_key, :invalid, message: "must be a single SSH public key, e.g. \"ssh-ed25519 AAAA... alice@laptop\"")
+      errors.add(:public_key, :invalid)
     end
   end
 
   def public_key_must_not_be_the_app_key
-    errors.add(:public_key, :app_key, message: "is the SSHM key and cannot be used by a profile") if authorized_key&.matches?(SshKey.current)
+    errors.add(:public_key, :app_key) if authorized_key&.matches?(SshKey.current)
   end
 end
