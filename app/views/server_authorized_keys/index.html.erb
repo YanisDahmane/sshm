@@ -1,0 +1,58 @@
+<% content_for :title, "Clés autorisées · #{@server.name} · SSHM" %>
+
+<turbo-frame id="<%= dom_id(@server, :authorized_keys) %>" class="group block">
+  <div class="flex items-center justify-between gap-4">
+    <p class="text-sm text-slate-500">
+      <code class="rounded bg-slate-100 px-1 font-mono text-xs"><%= @server.username %>:<%= AuthorizedKeysReader::PATH %></code>
+      <% if @result.success? %>
+        · <%= pluralize(@result.keys.size, "clé", plural: "clés") %>
+      <% end %>
+    </p>
+    <%= link_to server_authorized_keys_path(@server),
+          title: "Recharger les clés", aria: { label: "Recharger les clés" },
+          class: "rounded-md border border-slate-300 bg-white p-2 text-slate-600 shadow-sm hover:bg-slate-50" do %>
+      <%= icon :arrow_path, class: "h-4 w-4 group-aria-busy:animate-spin" %>
+    <% end %>
+  </div>
+
+  <div class="mt-4 group-aria-busy:opacity-50">
+    <% if !@result.success? %>
+      <div class="authorized-keys-error flex gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <%= icon :x_mark, class: "mt-0.5 h-4 w-4 shrink-0" %>
+        <div>
+          <p class="font-medium"><%= @result.error_title %></p>
+          <p class="mt-1 break-all font-mono text-xs text-red-700"><%= @result.error_details %></p>
+        </div>
+      </div>
+    <% elsif @result.keys.empty? %>
+      <p class="rounded-md border border-dashed border-slate-300 px-4 py-6 text-center text-sm text-slate-500">Aucune clé autorisée sur ce serveur.</p>
+    <% else %>
+      <ul id="authorized-keys" class="divide-y divide-slate-100 rounded-md border border-slate-200">
+        <% @result.keys.each do |key| %>
+          <li class="authorized-key flex items-start gap-3 px-4 py-3">
+            <%= icon :key, class: "mt-0.5 h-4 w-4 shrink-0 text-slate-400" %>
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="key-name truncate text-sm font-medium <%= key.named? ? "text-slate-900" : "italic text-slate-500" %>">
+                  <%= key.named? ? key.name : "Sans nom" %>
+                </span>
+                <% if key.named? %>
+                  <span class="key-badge rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">Connue</span>
+                <% else %>
+                  <span class="key-badge rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/20">Inconnue</span>
+                <% end %>
+                <% if key.matches?(@app_key) %>
+                  <span class="key-badge key-master rounded-full bg-indigo-600 px-2 py-0.5 text-xs font-semibold text-white" title="Clé SSH de l'application SSHM">Master</span>
+                <% end %>
+              </div>
+              <p class="mt-1 break-all font-mono text-xs text-slate-500"><%= key.type %> · <%= key.fingerprint %></p>
+              <% if key.options %>
+                <p class="mt-1 break-all font-mono text-xs text-amber-700" title="Options">options : <%= key.options %></p>
+              <% end %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  </div>
+</turbo-frame>

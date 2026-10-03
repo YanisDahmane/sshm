@@ -139,6 +139,14 @@ class SshConnectionTest < ActiveSupport::TestCase
     assert_match "SHA256:abc", error.message
   end
 
+  test "each error has a French title" do
+    assert_equal "Connexion impossible", SshConnection::ConnectionError.new.title
+    assert_equal "Clé SSH refusée par le serveur", SshConnection::AuthenticationError.new.title
+    assert_equal "L'empreinte du serveur a changé", SshConnection::HostKeyMismatchError.new.title
+    assert_equal "Aucune clé SSH configurée", SshConnection::MissingKeyError.new.title
+    assert_equal "Erreur SSH", SshConnection::Error.new.title
+  end
+
   test "all errors share a common base class" do
     [ SshConnection::ConnectionError, SshConnection::AuthenticationError, SshConnection::HostKeyMismatchError, SshConnection::MissingKeyError, SshConnection::CommandError ].each do |klass|
       assert_operator klass, :<, SshConnection::Error

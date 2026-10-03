@@ -38,4 +38,15 @@ class ServerShowTest < ApplicationSystemTestCase
     within("##{dom_id(servers(:web), :ssh_check)}") { assert_text "Connexion impossible" }
     assert evaluate_script("window.noFullReload")
   end
+
+  test "authorized keys load lazily and can be reloaded" do
+    visit server_path(servers(:web))
+
+    within("#server-authorized-keys") do
+      assert_selector ".authorized-keys-error", text: "Connexion impossible"
+      click_on "Recharger les clés"
+      assert_selector ".authorized-keys-error", text: "Connexion impossible"
+    end
+    assert_selector "h1", text: "Web"
+  end
 end

@@ -4,6 +4,7 @@ class ServerSshChecksControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
   include ActionView::RecordIdentifier
   include TcpHelpers
+  include StubHelpers
 
   setup do
     # Point every fixture at a closed local port so no real host is contacted.
@@ -47,7 +48,7 @@ class ServerSshChecksControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:one)
     result = SshCheck::Result.new(success: true, message: "Connexion SSH réussie", details: "deploy@127.0.0.1 a répondu.")
 
-    with_ssh_check_result(result) do
+    stub_method(SshCheck, :call, result) do
       post server_ssh_check_path(servers(:web)), as: :turbo_stream
     end
 
@@ -63,16 +64,5 @@ class ServerSshChecksControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to server_path(servers(:web))
     assert_match "Connexion impossible", flash[:alert]
-  end
-
-  private
-
-  # Replaces SshCheck.call for the duration of the block (no real SSH server in tests).
-  def with_ssh_check_result(result)
-    original = SshCheck.method(:call)
-    SshCheck.define_singleton_method(:call) { |*| result }
-    yield
-  ensure
-    SshCheck.define_singleton_method(:call, original)
   end
 end

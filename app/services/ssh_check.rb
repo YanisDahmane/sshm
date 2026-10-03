@@ -15,17 +15,6 @@ class SshCheck
       Result.new(success: false, message: "Réponse inattendue du serveur", details: "Attendu « #{token} », reçu « #{output.truncate(200)} ».")
     end
   rescue SshConnection::Error => e
-    Result.new(success: false, message: failure_message(e), details: e.message)
+    Result.new(success: false, message: e.title, details: e.message)
   end
-
-  def self.failure_message(error)
-    case error
-    when SshConnection::MissingKeyError then "Aucune clé SSH configurée"
-    when SshConnection::AuthenticationError then "Clé SSH refusée par le serveur"
-    when SshConnection::HostKeyMismatchError then "L'empreinte du serveur a changé"
-    when SshConnection::CommandError then "La commande a échoué"
-    else "Connexion impossible"
-    end
-  end
-  private_class_method :failure_message
 end

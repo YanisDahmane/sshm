@@ -11,14 +11,31 @@ require "net/ssh"
 # Host keys are trusted on first use and pinned in KNOWN_HOSTS_FILE; a changed
 # key aborts the connection.
 class SshConnection
-  class Error < StandardError; end
-  class ConnectionError < Error; end
-  class AuthenticationError < Error; end
-  class HostKeyMismatchError < Error; end
-  class MissingKeyError < Error; end
+  # Each error has a short French `title` to show in the UI next to its message.
+  class Error < StandardError
+    def title = "Erreur SSH"
+  end
+
+  class ConnectionError < Error
+    def title = "Connexion impossible"
+  end
+
+  class AuthenticationError < Error
+    def title = "Clé SSH refusée par le serveur"
+  end
+
+  class HostKeyMismatchError < Error
+    def title = "L'empreinte du serveur a changé"
+  end
+
+  class MissingKeyError < Error
+    def title = "Aucune clé SSH configurée"
+  end
 
   class CommandError < Error
     attr_reader :result
+
+    def title = "La commande a échoué"
 
     def initialize(command, result)
       @result = result

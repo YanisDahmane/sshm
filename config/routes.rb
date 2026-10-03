@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   resources :servers, only: %i[show new create edit update] do
     resource :ping, only: :create, controller: "server_pings"
     resource :ssh_check, only: :create, controller: "server_ssh_checks"
+    resources :authorized_keys, only: :index, controller: "server_authorized_keys"
   end
   resource :server_pings, only: :create, path: "servers/pings"
 
