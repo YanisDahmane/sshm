@@ -7,7 +7,6 @@ class ServerShowTest < ApplicationSystemTestCase
   include ActionView::RecordIdentifier
 
   setup do
-    Server.update_all(host: "127.0.0.1", port: closed_port)
     sign_in users(:one)
   end
 
