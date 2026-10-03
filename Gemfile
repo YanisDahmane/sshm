@@ -65,3 +65,6 @@ group :test do
 end
 
 gem "devise", "~> 5.0"
+
+# json 3.x drops `quirks_mode`, which Rails 8.0 still passes when encoding session cookies
+gem "json", "~> 2.10"
