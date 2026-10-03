@@ -1,5 +1,5 @@
 class ServersController < ApplicationController
-  before_action :set_server, only: %i[show edit update]
+  before_action :set_server, only: %i[show edit update destroy]
 
   def index
     @servers = Server.order(:name)
@@ -36,6 +36,19 @@ class ServersController < ApplicationController
     else
       render :edit, status: :unprocessable_entity
     end
+  end
+
+  # Removes the server from SSHM only: keys installed on the machine stay.
+  def destroy
+    active_temporary_accesses = @server.temporary_accesses.active.count
+    @server.destroy!
+    still_used = Server.exists?(host: @server.host, port: @server.port)
+    KnownHosts.forget(@server.host, @server.port) unless still_used
+    Activity.record!(:server_deleted, server_name: @server.name, address: "#{@server.username}@#{@server.host}:#{@server.port}",
+                                      active_temporary_accesses: active_temporary_accesses)
+
+    redirect_to servers_path, notice: "Le serveur « #{@server.name} » a été supprimé de SSHM. Les clés installées dessus n'ont pas été retirées.",
+                              status: :see_other
   end
 
   private

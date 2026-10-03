@@ -1,6 +1,9 @@
 require "resolv"
 
 class Server < ApplicationRecord
+  has_many :account_snapshots, dependent: :delete_all
+  has_many :temporary_accesses, dependent: :delete_all
+  has_many :activities, dependent: :nullify
   HOSTNAME_REGEXP = /\A(?=.{1,253}\z)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\z/i
 
   normalizes :name, :host, :username, with: ->(value) { value.strip }

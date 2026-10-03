@@ -49,4 +49,20 @@ class ServerShowTest < ApplicationSystemTestCase
     end
     assert_selector "h1", text: "Web"
   end
+
+  test "deleting a server from its page" do
+    visit server_path(servers(:backup))
+
+    dismiss_app_confirm { first("button.delete-server").click }
+    assert_selector "h1", text: "Backup"
+
+    accept_app_confirm("Supprimer le serveur") { first("button.delete-server").click }
+
+    assert_selector "h1", text: "Serveurs"
+    assert_text "Le serveur « Backup » a été supprimé de SSHM."
+    assert_no_selector "#servers", text: "Backup"
+
+    visit activities_path
+    assert_selector "li.activity", text: "Serveur « Backup » supprimé de SSHM"
+  end
 end

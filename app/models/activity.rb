@@ -19,6 +19,7 @@ class Activity < ApplicationRecord
     Kind.new(:server_back_online, "Serveur de nouveau joignable", :servers, :info, "Un serveur injoignable répond à nouveau."),
     Kind.new(:server_created, "Serveur ajouté", :servers, :info, "Un serveur a été ajouté à SSHM."),
     Kind.new(:server_updated, "Serveur modifié", :servers, :info, "Les informations de connexion d'un serveur ont changé."),
+    Kind.new(:server_deleted, "Serveur supprimé", :servers, :warning, "Un serveur a été retiré de SSHM (ses clés restent installées dessus)."),
     Kind.new(:profile_created, "Profil créé", :configuration, :info, "Un profil a été créé."),
     Kind.new(:profile_deleted, "Profil supprimé", :configuration, :info, "Un profil a été supprimé."),
     Kind.new(:ssh_key_generated, "Clé SSHM générée", :security, :critical, "La clé SSH de SSHM a été générée ou régénérée."),
@@ -73,6 +74,7 @@ class Activity < ApplicationRecord
     when :server_back_online then "« #{server_name} » répond à nouveau"
     when :server_created then "Serveur « #{server_name} » ajouté"
     when :server_updated then "Serveur « #{server_name} » modifié"
+    when :server_deleted then "Serveur « #{server_name} » supprimé de SSHM"
     when :profile_created then "Profil « #{profile_name} » créé"
     when :profile_deleted then "Profil « #{profile_name} » supprimé"
     when :ssh_key_generated then data["regenerated"] ? "Clé SSHM régénérée" : "Clé SSHM générée"

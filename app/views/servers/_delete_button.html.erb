@@ -1,0 +1,9 @@
+<%# Deletes the server from SSHM, after a confirmation explaining what is (not) removed. %>
+<% temporary = server.temporary_accesses.active.count %>
+<% warning = "« #{server.name} » sera retiré de SSHM, avec son historique de clés lues. Les clés installées sur la machine, dont celle de SSHM, n'en seront pas retirées." %>
+<% warning += " #{temporary} accès temporaire(s) en cours ne seront plus nettoyé(s) automatiquement (sshd les refusera quand même à l'échéance)." if temporary.positive? %>
+<%= button_to server_path(server), method: :delete,
+      form: { class: local_assigns[:form_class], data: { turbo_confirm: warning, confirm_label: "Supprimer le serveur", confirm_variant: "danger" } },
+      class: local_assigns.fetch(:class, "delete-server inline-flex cursor-pointer items-center gap-2 rounded-md border border-red-300 bg-white px-3 py-2 text-sm font-medium text-red-700 shadow-sm hover:bg-red-50") do %>
+  <%= icon :trash %> <%= local_assigns.fetch(:label, "Supprimer") %>
+<% end %>

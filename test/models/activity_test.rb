@@ -78,4 +78,10 @@ class ActivityTest < ActiveSupport::TestCase
     assert_equal [ detected ], Activity.in_category(:security).to_a
     assert_equal [ old ], Activity.in_category("servers").to_a
   end
+
+  test "server_deleted summary uses the copied name" do
+    activity = Activity.record!(:server_deleted, server_name: "Web")
+    assert_equal "Serveur « Web » supprimé de SSHM", activity.summary
+    assert_equal :warning, activity.severity
+  end
 end

@@ -2,6 +2,7 @@ require "test_helper"
 
 class ServersControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
+  include StubHelpers
   include ActionView::RecordIdentifier
 
   def valid_params
@@ -203,5 +204,66 @@ class ServersControllerTest < ActionDispatch::IntegrationTest
 
     assert_select "#server-activity li.activity", 1
     assert_select "#server-activity a[href=?]", activities_path(server_id: servers(:web).id), text: "Tout voir"
+  end
+
+  test "destroy requires authentication" do
+    delete server_path(servers(:web))
+    assert_redirected_to new_user_session_path
+    assert Server.exists?(servers(:web).id)
+  end
+
+  test "destroy returns 404 for an unknown server" do
+    sign_in users(:one)
+    delete server_path(id: 0)
+    assert_response :not_found
+  end
+
+  test "destroy removes the server, logs it and forgets its host key" do
+    sign_in users(:one)
+    server = servers(:web)
+    TemporaryAccess.create!(server: server, profile: profiles(:ci), unix_user: "deploy", key_blob: profiles(:ci).authorized_key.key,
+                            fingerprint: profiles(:ci).fingerprint, expires_at: 9.minutes.from_now)
+    previous = Activity.record!(:key_added, server: server, profile: profiles(:alice), unix_user: "deploy")
+    forgotten = []
+
+    stub_method(KnownHosts, :forget, ->(host, port, **) { forgotten << [ host, port ] }) do
+      delete server_path(server)
+    end
+
+    assert_not Server.exists?(server.id)
+    assert_redirected_to servers_path
+    assert_response :see_other
+    assert_equal "Le serveur « Web » a été supprimé de SSHM. Les clés installées dessus n'ont pas été retirées.", flash[:notice]
+    assert_equal [ [ "192.168.1.10", 22 ] ], forgotten
+
+    deleted = Activity.of_kind(:server_deleted).sole
+    assert_equal [ users(:one), "Web", "deploy@192.168.1.10:22", 1 ],
+                 [ deleted.user, deleted.server_name, deleted.data["address"], deleted.data["active_temporary_accesses"] ]
+    assert_equal "« Alice » autorisé sur « Web » pour deploy", previous.reload.summary
+  end
+
+  test "destroy keeps the host key when another server uses the same address" do
+    sign_in users(:one)
+    Server.create!(name: "Web bis", host: "192.168.1.10", port: 22, username: "root")
+    forgotten = []
+
+    stub_method(KnownHosts, :forget, ->(*args, **) { forgotten << args }) do
+      delete server_path(servers(:web))
+    end
+
+    assert_empty forgotten
+  end
+
+  test "the server page and the edit page offer to delete the server, with a warning" do
+    TemporaryAccess.create!(server: servers(:web), profile: profiles(:ci), unix_user: "deploy", key_blob: profiles(:ci).authorized_key.key,
+                            fingerprint: profiles(:ci).fingerprint, expires_at: 9.minutes.from_now)
+    sign_in users(:one)
+
+    get server_path(servers(:web))
+    assert_select "form[action=?][data-confirm-variant=danger] input[name=_method][value=delete]", server_path(servers(:web))
+    assert_select "form[action=?][data-turbo-confirm*='pas retirées'][data-turbo-confirm*='1 accès temporaire']", server_path(servers(:web))
+
+    get edit_server_path(servers(:web))
+    assert_select "#danger-zone form[action=?] button", server_path(servers(:web)), text: /Supprimer le serveur/
   end
 end
