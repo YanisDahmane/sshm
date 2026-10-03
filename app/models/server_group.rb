@@ -1,0 +1,27 @@
+# A named set of servers (e.g. "Production", "Clients"), used to filter the
+# server list and to select several servers at once.
+class ServerGroup < ApplicationRecord
+  # Badge classes are written out in full so Tailwind generates them.
+  COLORS = {
+    "slate" => [ "Gris", "bg-slate-100 text-slate-700 ring-slate-500/20", "bg-slate-400" ],
+    "red" => [ "Rouge", "bg-red-50 text-red-700 ring-red-600/20", "bg-red-500" ],
+    "amber" => [ "Orange", "bg-amber-50 text-amber-800 ring-amber-600/20", "bg-amber-500" ],
+    "emerald" => [ "Vert", "bg-emerald-50 text-emerald-700 ring-emerald-600/20", "bg-emerald-500" ],
+    "sky" => [ "Bleu", "bg-sky-50 text-sky-700 ring-sky-600/20", "bg-sky-500" ],
+    "indigo" => [ "Indigo", "bg-indigo-50 text-indigo-700 ring-indigo-600/20", "bg-indigo-500" ],
+    "violet" => [ "Violet", "bg-violet-50 text-violet-700 ring-violet-600/20", "bg-violet-500" ],
+    "pink" => [ "Rose", "bg-pink-50 text-pink-700 ring-pink-600/20", "bg-pink-500" ]
+  }.freeze
+
+  has_many :memberships, class_name: "ServerGroupMembership", dependent: :delete_all
+  has_many :servers, -> { order(:name) }, through: :memberships
+
+  normalizes :name, with: ->(value) { value.squish }
+
+  validates :name, presence: true, uniqueness: { case_sensitive: false }, length: { maximum: 50 }
+  validates :color, inclusion: { in: COLORS.keys }
+
+  def color_label = COLORS.dig(color, 0)
+  def badge_classes = COLORS.dig(color, 1)
+  def dot_classes = COLORS.dig(color, 2)
+end

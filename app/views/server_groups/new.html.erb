@@ -1,0 +1,10 @@
+<% content_for :title, "Nouveau groupe · SSHM" %>
+
+<div class="mx-auto max-w-2xl">
+  <%= link_to "← Groupes", server_groups_path, class: "text-sm text-slate-500 hover:text-slate-700" %>
+  <h1 class="mt-2 text-2xl font-bold tracking-tight">Nouveau groupe de serveurs</h1>
+
+  <div class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <%= render "form", group: @group %>
+  </div>
+</div>

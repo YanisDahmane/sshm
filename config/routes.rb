@@ -11,6 +11,8 @@ Rails.application.routes.draw do
   get "invitations/:token", to: "invitations#show", as: :invitation_acceptance
   post "invitations/:token", to: "invitations#accept"
 
+  # Before `resources :servers`, or /servers/groups would be a server's page.
+  resources :server_groups, except: :show, path: "servers/groups"
   resources :servers do
     resource :ping, only: %i[show create], controller: "server_pings"
     resource :ssh_check, only: :show, controller: "server_ssh_checks"

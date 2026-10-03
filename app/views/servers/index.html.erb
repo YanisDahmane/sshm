@@ -6,7 +6,7 @@
   <div class="flex items-center justify-between gap-4">
     <div>
       <h1 class="text-2xl font-bold tracking-tight">Serveurs</h1>
-      <p class="text-sm text-slate-500"><%= pluralize(@servers.size, "serveur", plural: "serveurs") %></p>
+      <p class="text-sm text-slate-500"><%= pluralize(@servers.size, "serveur", plural: "serveurs") %><%= " dans « #{@group.name} »" if @group %></p>
     </div>
     <div class="flex flex-wrap items-center justify-end gap-2">
       <% if @servers.any? %>
@@ -32,6 +32,24 @@
     </div>
   </div>
 
+  <nav class="server-group-filter mt-4 flex flex-wrap items-center gap-2" aria-label="Groupes">
+    <% chip = "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium ring-1 ring-inset" %>
+    <% if @groups.any? %>
+      <%= link_to "Tous", servers_path, aria: { current: (@group ? nil : "page") },
+            class: "#{chip} #{@group ? "bg-white text-slate-700 ring-slate-300 hover:bg-slate-50" : "bg-indigo-600 text-white ring-indigo-600"}" %>
+      <% @groups.each do |group| %>
+        <% current = group == @group %>
+        <%= link_to servers_path(group: group.id), aria: { current: (current ? "page" : nil) },
+              class: "#{chip} #{current ? "bg-indigo-600 text-white ring-indigo-600" : "bg-white text-slate-700 ring-slate-300 hover:bg-slate-50"}" do %>
+          <span class="h-2 w-2 rounded-full <%= group.dot_classes %>"></span><%= group.name %>
+        <% end %>
+      <% end %>
+    <% end %>
+    <%= link_to server_groups_path, class: "text-sm font-medium text-indigo-600 hover:text-indigo-500 #{"ml-1" if @groups.any?}" do %>
+      <%= @groups.any? ? "Gérer les groupes" : "Organiser les serveurs en groupes" %>
+    <% end %>
+  </nav>
+
   <% if @servers.any? %>
     <div class="mt-4 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
       <table id="servers" class="min-w-full divide-y divide-slate-200 text-sm">
@@ -51,7 +69,12 @@
           <% @servers.each do |server| %>
             <tr id="<%= dom_id(server) %>" class="hover:bg-slate-50">
               <td class="px-4 py-3"><%= render "servers/status", server: server %></td>
-              <td class="px-4 py-3 font-medium"><%= link_to server.name, server_path(server), class: "hover:text-indigo-600 hover:underline" %></td>
+              <td class="px-4 py-3">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <%= link_to server.name, server_path(server), class: "font-medium hover:text-indigo-600 hover:underline" %>
+                  <%= render partial: "server_groups/badge", collection: server.server_groups, as: :group %>
+                </div>
+              </td>
               <td class="px-4 py-3 font-mono text-slate-700"><%= server.host %></td>
               <td class="px-4 py-3 font-mono text-slate-700"><%= server.port %></td>
               <td class="px-4 py-3 font-mono text-slate-700"><%= server.username %></td>
@@ -82,8 +105,10 @@
     </div>
   <% else %>
     <div class="mt-4 rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
-      <p class="text-sm text-slate-500">Aucun serveur pour le moment.</p>
-      <% if can?(:operate) %>
+      <p class="text-sm text-slate-500"><%= @group ? "Aucun serveur dans ce groupe." : "Aucun serveur pour le moment." %></p>
+      <% if @group && can?(:operate) %>
+        <%= link_to "Ajouter des serveurs au groupe", edit_server_group_path(@group), class: "mt-2 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+      <% elsif can?(:operate) %>
         <%= link_to "Ajouter votre premier serveur", new_server_path, class: "mt-2 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
       <% end %>
     </div>

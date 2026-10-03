@@ -1,0 +1,54 @@
+<% content_for :title, "Groupes de serveurs · SSHM" %>
+
+<section id="server-groups-section">
+  <%= link_to "← Serveurs", servers_path, class: "text-sm text-slate-500 hover:text-slate-700" %>
+  <div class="mt-2 flex items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight">Groupes de serveurs</h1>
+      <p class="text-sm text-slate-500"><%= pluralize(@groups.size, "groupe", plural: "groupes") %></p>
+    </div>
+    <% if can?(:operate) %>
+      <%= link_to "Nouveau groupe", new_server_group_path,
+            class: "rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+    <% end %>
+  </div>
+
+  <% if @groups.any? %>
+    <ul id="server-groups" class="mt-4 divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white shadow-sm">
+      <% @groups.each do |group| %>
+        <li id="<%= dom_id(group) %>" class="server-group flex items-center gap-4 px-4 py-3">
+          <span class="h-3 w-3 shrink-0 rounded-full <%= group.dot_classes %>"></span>
+          <div class="min-w-0 flex-1">
+            <%= link_to group.name, servers_path(group: group.id), class: "font-medium hover:text-indigo-600 hover:underline" %>
+            <p class="truncate text-xs text-slate-500">
+              <% if group.servers.any? %>
+                <%= pluralize(group.servers.size, "serveur", plural: "serveurs") %> : <%= group.servers.map(&:name).join(", ") %>
+              <% else %>
+                Aucun serveur
+              <% end %>
+            </p>
+          </div>
+          <% if can?(:operate) %>
+            <%= link_to edit_server_group_path(group), title: "Modifier", aria: { label: "Modifier le groupe #{group.name}" },
+                  class: "rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700" do %>
+              <%= icon :pencil_square %>
+            <% end %>
+            <%= button_to server_group_path(group), method: :delete, title: "Supprimer", aria: { label: "Supprimer le groupe #{group.name}" },
+                  form: { data: { turbo_confirm: "Le groupe « #{group.name} » sera supprimé. Ses serveurs ne seront pas touchés.",
+                                  confirm_label: "Supprimer le groupe", confirm_variant: "danger" } },
+                  class: "cursor-pointer rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600" do %>
+              <%= icon :trash %>
+            <% end %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <div class="mt-4 rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
+      <p class="text-sm text-slate-500">Aucun groupe. Les groupes servent à filtrer les serveurs et à en sélectionner plusieurs d'un coup (ex. « Production », « Clients »).</p>
+      <% if can?(:operate) %>
+        <%= link_to "Créer un groupe", new_server_group_path, class: "mt-2 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+      <% end %>
+    </div>
+  <% end %>
+</section>

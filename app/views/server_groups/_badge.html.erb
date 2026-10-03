@@ -1,0 +1,5 @@
+<%# A server group as a colored pill, linking to the server list filtered on it. %>
+<%= link_to servers_path(group: group.id), data: { turbo_frame: "_top" },
+      class: "server-group-badge inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset hover:opacity-80 #{group.badge_classes}" do %>
+  <%= group.name %>
+<% end %>

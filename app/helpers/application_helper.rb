@@ -41,6 +41,7 @@ module ApplicationHelper
   def command_palette_items
     pages = [
       { label: "Dashboard", url: root_path }, { label: "Serveurs", url: servers_path }, { label: "Profils", url: profiles_path },
+      { label: "Groupes de serveurs", url: server_groups_path },
       { label: "Activité", url: activities_path }
     ]
     pages += [ { label: "Ajouter un serveur", url: new_server_path }, { label: "Ajouter un profil", url: new_profile_path } ] if can?(:operate)
@@ -51,10 +52,13 @@ module ApplicationHelper
     ] if can?(:administer)
     pages = pages.map { |page| page.merge(group: "Pages") }
 
-    servers = Server.order(:name).map { |server| { group: "Serveurs", label: server.name, hint: "#{server.username}@#{server.host}", url: server_path(server) } }
+    groups = ServerGroup.order(:name).map { |group| { group: "Groupes", label: group.name, hint: "serveurs du groupe", url: servers_path(group: group.id) } }
+    servers = Server.order(:name).includes(:server_groups).map do |server|
+      { group: "Serveurs", label: server.name, hint: [ "#{server.username}@#{server.host}", *server.server_groups.map(&:name) ].join(" · "), url: server_path(server) }
+    end
     profiles = Profile.order(:name).map { |profile| { group: "Profils", label: profile.name, hint: profile.authorized_key&.comment, url: profile_path(profile) } }
 
-    pages + servers + profiles
+    pages + groups + servers + profiles
   end
 
   # Profile name proposed for an authorized key: its comment without the host

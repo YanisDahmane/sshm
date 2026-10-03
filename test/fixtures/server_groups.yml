@@ -1,0 +1,7 @@
+production:
+  name: Production
+  color: red
+
+staging:
+  name: Staging
+  color: sky

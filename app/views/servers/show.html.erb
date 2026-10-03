@@ -7,6 +7,11 @@
     <div>
       <h1 class="text-2xl font-bold tracking-tight"><%= @server.name %></h1>
       <p class="mt-1 font-mono text-sm text-slate-500"><%= @server.username %>@<%= @server.host %>:<%= @server.port %></p>
+      <% if @server.server_groups.any? %>
+        <div class="server-groups mt-2 flex flex-wrap gap-1.5">
+          <%= render partial: "server_groups/badge", collection: @server.server_groups, as: :group %>
+        </div>
+      <% end %>
     </div>
     <div class="flex shrink-0 items-center gap-2">
       <% if can?(:operate) %>

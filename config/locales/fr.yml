@@ -2,6 +2,7 @@ fr:
   activerecord:
     models:
       server: Serveur
+      server_group: Groupe de serveurs
       profile: Profil
       user: Utilisateur
       notification_channel: Canal de notification
@@ -12,6 +13,9 @@ fr:
         host: Hôte
         port: Port
         username: Utilisateur
+      server_group:
+        name: Nom
+        color: Couleur
       profile:
         name: Nom
         public_key: Clé SSH publique

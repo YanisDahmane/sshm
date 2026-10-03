@@ -1,0 +1,7 @@
+web_production:
+  server: web
+  server_group: production
+
+db_production:
+  server: db
+  server_group: production

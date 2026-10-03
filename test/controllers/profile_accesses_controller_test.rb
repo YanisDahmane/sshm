@@ -172,4 +172,18 @@ class ProfileAccessesControllerTest < ActionDispatch::IntegrationTest
       assert_select "select[name=duration] option[value='60']", "1 heure"
     end
   end
+
+  test "the bulk form can check a whole group (only the groups that have servers)" do
+    sign_in users(:one)
+    production = server_groups(:production)
+
+    get profile_path(@profile)
+
+    assert_select "#bulk-authorize .bulk-groups" do
+      assert_select "button[data-action='check-all#toggleGroup'][data-check-all-group-param=?]", production.id.to_s, text: "Production"
+      assert_select "button", text: "Staging", count: 0
+    end
+    assert_select "input#server_ids_#{servers(:web).id}[data-groups=?]", production.id.to_s
+    assert_select "input#server_ids_#{servers(:backup).id}[data-groups='']"
+  end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_03_215939) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_04_080000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -155,6 +155,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_215939) do
     t.index ["started_by_id"], name: "index_revocations_on_started_by_id"
   end
 
+  create_table "server_group_memberships", force: :cascade do |t|
+    t.bigint "server_id", null: false
+    t.bigint "server_group_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["server_group_id", "server_id"], name: "idx_on_server_group_id_server_id_9a8ddc3e88", unique: true
+    t.index ["server_group_id"], name: "index_server_group_memberships_on_server_group_id"
+    t.index ["server_id"], name: "index_server_group_memberships_on_server_id"
+  end
+
+  create_table "server_groups", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "color", default: "slate", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index "lower((name)::text)", name: "index_server_groups_on_lower_name", unique: true
+  end
+
   create_table "servers", force: :cascade do |t|
     t.string "name", null: false
     t.string "host", null: false
@@ -238,6 +256,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_215939) do
   add_foreign_key "revocation_steps", "servers", on_delete: :nullify
   add_foreign_key "revocations", "profiles", on_delete: :nullify
   add_foreign_key "revocations", "users", column: "started_by_id", on_delete: :nullify
+  add_foreign_key "server_group_memberships", "server_groups", on_delete: :cascade
+  add_foreign_key "server_group_memberships", "servers", on_delete: :cascade
   add_foreign_key "temporary_accesses", "profiles", on_delete: :nullify
   add_foreign_key "temporary_accesses", "servers", on_delete: :cascade
   add_foreign_key "users", "profiles", on_delete: :nullify

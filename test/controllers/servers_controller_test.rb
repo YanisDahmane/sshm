@@ -9,6 +9,38 @@ class ServersControllerTest < ActionDispatch::IntegrationTest
     { server: { name: "Staging", host: "staging.example.com", port: 2222, username: "deploy" } }
   end
 
+  test "the form lets choose the groups, only when there are some" do
+    sign_in users(:one)
+
+    get edit_server_path(servers(:web))
+    assert_select "input[type=checkbox][name='server[server_group_ids][]'][value=?][checked]", server_groups(:production).id.to_s
+    assert_select "input[type=checkbox][name='server[server_group_ids][]'][value=?]:not([checked])", server_groups(:staging).id.to_s
+
+    ServerGroup.delete_all
+    get new_server_path
+    assert_select "input[name='server[server_group_ids][]']", 0
+  end
+
+  test "create and update set the server groups, and an empty choice clears them" do
+    sign_in users(:one)
+
+    post servers_path, params: { server: valid_params[:server].merge(server_group_ids: [ "", server_groups(:staging).id ]) }
+    server = Server.find_by!(name: "Staging")
+    assert_equal [ server_groups(:staging) ], server.server_groups.to_a
+
+    patch server_path(server), params: { server: { server_group_ids: [ "" ] } }
+    assert_redirected_to server_path(server)
+    assert_empty server.reload.server_groups
+    assert_equal 0, Activity.of_kind(:server_updated).count, "changing groups is not a connection change"
+  end
+
+  test "the server page shows its groups" do
+    sign_in users(:one)
+    stub_method(ServerPing, :reachable?, true) { get server_path(servers(:web)) }
+
+    assert_select ".server-groups a.server-group-badge[href=?]", servers_path(group: server_groups(:production).id), text: "Production"
+  end
+
   test "new redirects to sign in when not authenticated" do
     get new_server_path
     assert_redirected_to new_user_session_path

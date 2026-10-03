@@ -22,6 +22,8 @@ class Activity < ApplicationRecord
     Kind.new(:server_created, "Serveur ajouté", :servers, :info, "Un serveur a été ajouté à SSHM."),
     Kind.new(:server_updated, "Serveur modifié", :servers, :info, "Les informations de connexion d'un serveur ont changé."),
     Kind.new(:server_deleted, "Serveur supprimé", :servers, :warning, "Un serveur a été retiré de SSHM (ses clés restent installées dessus)."),
+    Kind.new(:server_group_created, "Groupe de serveurs créé", :configuration, :info, "Un groupe de serveurs a été créé."),
+    Kind.new(:server_group_deleted, "Groupe de serveurs supprimé", :configuration, :info, "Un groupe de serveurs a été supprimé (ses serveurs restent)."),
     Kind.new(:user_invited, "Utilisateur invité", :configuration, :info, "Une invitation à rejoindre SSHM a été créée."),
     Kind.new(:invitation_accepted, "Invitation acceptée", :security, :warning, "Un nouvel utilisateur a rejoint SSHM."),
     Kind.new(:invitation_revoked, "Invitation révoquée", :configuration, :info, "Une invitation en attente a été annulée."),
@@ -93,6 +95,8 @@ class Activity < ApplicationRecord
     when :server_created then "Serveur « #{server_name} » ajouté"
     when :server_updated then "Serveur « #{server_name} » modifié"
     when :server_deleted then "Serveur « #{server_name} » supprimé de SSHM"
+    when :server_group_created then "Groupe « #{data["group_name"]} » créé (#{data["servers"]} serveur(s))"
+    when :server_group_deleted then "Groupe « #{data["group_name"]} » supprimé"
     when :user_invited then "#{data["email"]} invité (#{data["role_label"]})"
     when :invitation_accepted then "#{data["email"]} a rejoint SSHM (#{data["role_label"]})"
     when :invitation_revoked then "Invitation de #{data["email"]} révoquée"

@@ -4,7 +4,9 @@ class ServersController < ApplicationController
   before_action :set_server, only: %i[show edit update destroy]
 
   def index
-    @servers = Server.order(:name)
+    @groups = ServerGroup.order(:name)
+    @group = @groups.find { |group| group.id.to_s == params[:group].to_s } if params[:group].present?
+    @servers = (@group ? Server.in_group(@group) : Server.all).order(:name).includes(:server_groups)
     @insights = KeyInsights.new
   end
 
@@ -60,6 +62,6 @@ class ServersController < ApplicationController
   end
 
   def server_params
-    params.expect(server: [ :name, :host, :port, :username ])
+    params.expect(server: [ :name, :host, :port, :username, server_group_ids: [] ])
   end
 end

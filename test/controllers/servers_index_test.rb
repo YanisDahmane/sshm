@@ -21,6 +21,46 @@ class ServersIndexTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", new_server_path, text: "Ajouter un serveur"
   end
 
+  test "filters the servers by group and shows their group badges" do
+    sign_in users(:one)
+    production = server_groups(:production)
+
+    get servers_path
+    assert_select "nav.server-group-filter" do
+      assert_select "a[aria-current=page]", "Tous"
+      assert_select "a[href=?]", servers_path(group: production.id), text: "Production"
+      assert_select "a[href=?]", server_groups_path, text: "Gérer les groupes"
+    end
+    assert_select "##{ActionView::RecordIdentifier.dom_id(servers(:web))} a.server-group-badge[href=?]", servers_path(group: production.id), text: "Production"
+    assert_select "##{ActionView::RecordIdentifier.dom_id(servers(:backup))} a.server-group-badge", 0
+
+    get servers_path(group: production.id)
+    assert_select "#servers tbody tr", 2
+    assert_select "#servers tbody tr td", text: "Backup", count: 0
+    assert_select "nav.server-group-filter a[aria-current=page]", "Production"
+    assert_select "p", text: "2 serveurs dans « Production »"
+  end
+
+  test "an empty group offers to add servers to it, an unknown group shows everything" do
+    sign_in users(:one)
+
+    get servers_path(group: server_groups(:staging).id)
+    assert_select "p", text: "Aucun serveur dans ce groupe."
+    assert_select "a[href=?]", edit_server_group_path(server_groups(:staging)), text: "Ajouter des serveurs au groupe"
+
+    get servers_path(group: 0)
+    assert_select "#servers tbody tr", Server.count
+  end
+
+  test "without groups, invites to create some" do
+    ServerGroup.delete_all
+    sign_in users(:one)
+    get servers_path
+
+    assert_select "nav.server-group-filter a[href=?]", server_groups_path, text: "Organiser les serveurs en groupes"
+    assert_select "nav.server-group-filter a[aria-current]", 0
+  end
+
   test "shows an empty state when there are no servers" do
     Server.delete_all
     sign_in users(:one)

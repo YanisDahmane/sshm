@@ -25,6 +25,22 @@
     <%= f.text_field :username, required: true, placeholder: "root", autocomplete: "off", spellcheck: false, class: "#{input_class} font-mono" %>
   </div>
 
+  <% if ServerGroup.exists? %>
+    <fieldset>
+      <legend class="<%= label_class %>">Groupes</legend>
+      <div class="mt-2 flex flex-wrap gap-2">
+        <%= f.collection_check_boxes :server_group_ids, ServerGroup.order(:name), :id, :name do |b| %>
+          <label class="cursor-pointer">
+            <%= b.check_box class: "peer sr-only" %>
+            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset opacity-50 peer-checked:opacity-100 peer-checked:ring-2 peer-checked:[&>svg]:block peer-focus-visible:outline-2 peer-focus-visible:outline-indigo-600 <%= b.object.badge_classes %>">
+              <%= icon :check, class: "hidden h-3 w-3" %><%= b.text %>
+            </span>
+          </label>
+        <% end %>
+      </div>
+    </fieldset>
+  <% end %>
+
   <div class="flex items-center justify-end gap-3 pt-2">
     <%= link_to "Annuler", server.persisted? ? server_path(server) : servers_path, class: "rounded-md px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" %>
     <%= f.submit server.persisted? ? "Enregistrer" : "Ajouter le serveur", class: "cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
