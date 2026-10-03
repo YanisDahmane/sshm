@@ -39,10 +39,7 @@ class AuthorizedKeyRemoval
       if [ ! -f "$file" ]; then echo absent; exit 0; fi
       matches=$(awk -v blob=#{blob} '{ for (i = 1; i <= NF; i++) if ($i == blob) { n++; break } } END { print n + 0 }' "$file")
       if [ "$matches" -eq 0 ]; then echo absent; exit 0; fi
-      tmp=$(mktemp "$home/.ssh/authorized_keys.XXXXXX")
-      trap 'rm -f "$tmp"' EXIT
-      awk -v blob=#{blob} '{ for (i = 1; i <= NF; i++) if ($i == blob) next; print }' "$file" > "$tmp"
-      cat "$tmp" > "$file"
+      #{AuthorizedKeysScript.drop_lines(blob)}
       echo removed
     SH
   end

@@ -5,6 +5,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
   include ActionView::RecordIdentifier
   include StubHelpers
   include TcpHelpers
+  include TemporaryAccessHelpers
 
   def frame_id = dom_id(servers(:web), :authorized_keys)
 
@@ -341,5 +342,81 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal [ "deploy" ], accounts.map(&:unix_user)
     assert_select "a.account-tab[aria-current=page]", text: /deploy/
+  end
+
+  test "the authorize form offers a duration, permanent by default" do
+    sign_in users(:one)
+
+    stub_method(AuthorizedKeysReader, :call, keys_result) do
+      get server_authorized_keys_path(servers(:web))
+    end
+
+    assert_select "form.authorize-profile select[name=duration]" do
+      assert_select "option[selected]", 1
+      assert_select "option:first-child[value=''][selected]", "Permanent"
+      assert_select "option[value='10']", "10 minutes"
+      assert_select "option[value='10080']", "7 jours"
+    end
+  end
+
+  test "shows when a temporary access expires" do
+    sign_in users(:one)
+    access = create_temporary_access(expires_at: 9.minutes.from_now + 30.seconds)
+    type, blob = profiles(:ci).public_key.split(" ")
+
+    stub_method(AuthorizedKeysReader, :call, keys_result(%(expiry-time="20300101000000Z" #{type} #{blob} CI), profiles(:alice).public_key)) do
+      get server_authorized_keys_path(servers(:web))
+    end
+
+    assert_select "li.authorized-key:nth-child(1) .key-expiry[title=?]", "Expire le #{I18n.l(access.expires_at, format: :long)}", text: /Expire dans 10 minutes/
+    assert_select "li.authorized-key:nth-child(2) .key-expiry", 0
+  end
+
+  test "temporary access badges are per account" do
+    sign_in users(:one)
+    create_temporary_access(unix_user: "root")
+
+    stub_method(AuthorizedKeysReader, :call, keys_result(profiles(:ci).public_key)) do
+      get server_authorized_keys_path(servers(:web), account: "deploy")
+    end
+
+    assert_select ".key-expiry", 0
+  end
+
+  test "flags an expired access waiting for its removal" do
+    sign_in users(:one)
+    create_temporary_access(expires_at: 1.minute.ago)
+
+    stub_method(AuthorizedKeysReader, :call, keys_result(profiles(:ci).public_key)) do
+      get server_authorized_keys_path(servers(:web))
+    end
+
+    assert_select ".key-expiry", text: /Expiré, suppression en cours/
+  end
+
+  test "destroy ends the temporary access of the removed key" do
+    sign_in users(:one)
+    access = create_temporary_access
+    other = create_temporary_access(unix_user: "root")
+    removed = AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil)
+
+    stub_method(AuthorizedKeyRemoval, :call, removed) do
+      delete server_authorized_key_path(servers(:web)), params: { key: profiles(:ci).authorized_key.key, account: "deploy" }, as: :turbo_stream
+    end
+
+    assert_not access.reload.active?
+    assert other.reload.active?
+  end
+
+  test "destroy keeps the temporary access when the removal fails" do
+    sign_in users(:one)
+    access = create_temporary_access
+    failed = AuthorizedKeyRemoval::Result.new(status: :error, error_title: "Connexion impossible", error_details: "")
+
+    stub_method(AuthorizedKeyRemoval, :call, failed) do
+      delete server_authorized_key_path(servers(:web)), params: { key: profiles(:ci).authorized_key.key }, as: :turbo_stream
+    end
+
+    assert access.reload.active?
   end
 end

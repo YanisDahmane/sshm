@@ -5,6 +5,7 @@ class ServerAuthorizationsControllerTest < ActionDispatch::IntegrationTest
   include ActionView::RecordIdentifier
   include StubHelpers
   include TcpHelpers
+  include TemporaryAccessHelpers
 
   def result(status, title: nil, details: nil)
     ProfileAuthorization::Result.new(status: status, error_title: title, error_details: details)
@@ -105,6 +106,43 @@ class ServerAuthorizationsControllerTest < ActionDispatch::IntegrationTest
   test "rejects an invalid account name" do
     sign_in users(:one)
     post server_authorizations_path(servers(:web)), params: { profile_id: profiles(:alice).id, account: "../root" }
+    assert_response :bad_request
+  end
+
+  test "grants a temporary access for the requested duration" do
+    sign_in users(:one)
+    calls = []
+    granter = lambda do |_server, profile, account:, duration:, **|
+      calls << [ profile, account.unix_user, duration ]
+      result(:added)
+    end
+
+    freeze_time do
+      stub_method(AccessGrant, :call, granter) do
+        post server_authorizations_path(servers(:web)), params: { profile_id: profiles(:alice).id, account: "debian", duration: "10" }, as: :turbo_stream
+      end
+
+      assert_equal [ [ profiles(:alice), "debian", 10.minutes ] ], calls
+      assert_turbo_stream action: :update, target: "flash" do
+        assert_select "div", text: "Le profil « Alice » est autorisé sur « Web » pour debian pendant 10 minutes, jusqu'à #{I18n.l(10.minutes.from_now, format: :short)}."
+      end
+    end
+  end
+
+  test "a blank duration means a permanent access" do
+    sign_in users(:one)
+    durations = []
+
+    stub_method(AccessGrant, :call, ->(*, duration:, **) { durations << duration; result(:added) }) do
+      post server_authorizations_path(servers(:web)), params: { profile_id: profiles(:alice).id, duration: "" }, as: :turbo_stream
+    end
+
+    assert_equal [ nil ], durations
+  end
+
+  test "rejects a duration that is not offered" do
+    sign_in users(:one)
+    post server_authorizations_path(servers(:web)), params: { profile_id: profiles(:alice).id, duration: "5" }
     assert_response :bad_request
   end
 end

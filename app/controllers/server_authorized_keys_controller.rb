@@ -10,12 +10,15 @@ class ServerAuthorizedKeysController < ApplicationController
     @app_key = SshKey.current
     @profiles_by_fingerprint = Profile.where(fingerprint: @result.keys.map(&:fingerprint)).index_by(&:fingerprint)
     @authorizable_profiles = Profile.where.not(fingerprint: @profiles_by_fingerprint.keys).order(:name) if @result.success?
+    @temporary_accesses = TemporaryAccess.active.where(server: @server, unix_user: @account.unix_user).index_by(&:fingerprint)
   end
 
   # Removes the key whose base64 blob is params[:key] from the account's file.
   def destroy
     name = params[:name].presence || "sans nom"
-    result = AuthorizedKeyRemoval.call(@server, params.expect(:key), account: @account)
+    blob = params.expect(:key)
+    result = AuthorizedKeyRemoval.call(@server, blob, account: @account)
+    TemporaryAccess.active.where(server: @server, unix_user: @account.unix_user, key_blob: blob).find_each(&:end!) if result.success?
     target = "« #{@server.name} » pour #{@account.unix_user}"
 
     flash_type, message = if result.removed?

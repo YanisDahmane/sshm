@@ -55,4 +55,32 @@ class ServerAuthorizationsTest < ApplicationSystemTestCase
       end
     end
   end
+
+  test "authorizing a profile for a limited time shows when it expires" do
+    lines = [ ssh_keys(:main).public_key ]
+    reader = ->(*, **) { AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(lines.join("\n")), error_title: nil, error_details: nil) }
+    authorizer = lambda do |_server, profile, expires_at:, **|
+      lines << ProfileAuthorization.line_for(profile, expires_at)
+      ProfileAuthorization::Result.new(status: :added, error_title: nil, error_details: nil)
+    end
+
+    stub_method(AuthorizedKeysReader, :call, reader) do
+      stub_method(ProfileAuthorization, :call, authorizer) do
+        visit server_path(servers(:web))
+
+        within("#server-authorized-keys") do
+          select "CI", from: "Autoriser un profil pour deploy"
+          select "10 minutes", from: "Durée"
+          click_on "Autoriser"
+
+          within("li.authorized-key", text: "CI") do
+            assert_selector ".key-expiry", text: "Expire dans 10 minutes"
+            assert_selector "p[title=Options]", text: "expiry-time="
+          end
+        end
+        assert_selector "#flash", text: "Le profil « CI » est autorisé sur « Web » pour deploy pendant 10 minutes"
+        assert_equal 1, TemporaryAccess.active.count
+      end
+    end
+  end
 end

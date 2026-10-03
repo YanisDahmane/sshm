@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_10_03_160108) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_03_163057) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -44,6 +44,22 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_03_160108) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "temporary_accesses", force: :cascade do |t|
+    t.bigint "server_id", null: false
+    t.bigint "profile_id"
+    t.string "unix_user", null: false
+    t.text "key_blob", null: false
+    t.string "fingerprint", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "ended_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["expires_at"], name: "index_temporary_accesses_active_expiry", where: "(ended_at IS NULL)"
+    t.index ["profile_id"], name: "index_temporary_accesses_on_profile_id"
+    t.index ["server_id", "unix_user", "fingerprint"], name: "index_temporary_accesses_active_key", unique: true, where: "(ended_at IS NULL)"
+    t.index ["server_id"], name: "index_temporary_accesses_on_server_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -55,4 +71,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_03_160108) do
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
+
+  add_foreign_key "temporary_accesses", "profiles", on_delete: :nullify
+  add_foreign_key "temporary_accesses", "servers", on_delete: :cascade
 end

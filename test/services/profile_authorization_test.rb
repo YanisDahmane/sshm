@@ -178,6 +178,52 @@ class ProfileAuthorizationTest < ActiveSupport::TestCase
     assert_empty @home.children
   end
 
+  test "an expiring line carries an OpenSSH expiry-time option in UTC" do
+    expires_at = Time.zone.parse("2026-10-03 16:42:18 +02:00")
+
+    assert_equal %(expiry-time="20261003144218Z" #{@type} #{@blob} Alice), ProfileAuthorization.line_for(@profile, expires_at)
+    assert_equal "#{@type} #{@blob} Alice", ProfileAuthorization.line_for(@profile)
+  end
+
+  test "the expiring line is parsed back with its option" do
+    run_script(line: ProfileAuthorization.line_for(@profile, 10.minutes.from_now))
+
+    key = AuthorizedKey.parse(authorized_keys.read).sole
+    assert_match(/\Aexpiry-time="\d{14}Z"\z/, key.options)
+    assert_equal @profile.fingerprint, key.fingerprint
+  end
+
+  test "the script replaces an existing line when asked, keeping the other lines" do
+    other = SshKeyGenerator.generate(comment: "bob").public_key
+    authorized_keys.dirname.mkpath
+    authorized_keys.write(%(# team\nexpiry-time="20261003144218Z" #{@type} #{@blob} Alice\n#{other}\n))
+
+    output = run_local_script(ProfileAuthorization.append_script("#{@type} #{@blob} Alice", @blob, replace: true))
+
+    assert_equal "added", output
+    assert_equal "# team\n#{other}\n#{@type} #{@blob} Alice\n", authorized_keys.read
+    assert_equal [ "authorized_keys" ], authorized_keys.dirname.children.map { |path| path.basename.to_s }
+  end
+
+  test "without replace, an existing expiring line is left as it is" do
+    authorized_keys.dirname.mkpath
+    authorized_keys.write(%(expiry-time="20261003144218Z" #{@type} #{@blob} Alice\n))
+
+    assert_equal "present", run_script
+  end
+
+  test "passes expires_at and replace to the script" do
+    fake = FakeSsh.new(handler: local_shell)
+    authorized_keys.dirname.mkpath
+    authorized_keys.write(%(expiry-time="20261003144218Z" #{@type} #{@blob} Alice\n))
+
+    result = ProfileAuthorization.call(servers(:web), @profile, expires_at: Time.utc(2030, 1, 1), replace: true,
+                                       transport: fake, known_hosts_file: @known_hosts)
+
+    assert result.added?
+    assert_equal %(expiry-time="20300101000000Z" #{@type} #{@blob} Alice\n), authorized_keys.read
+  end
+
   private
 
   def authorize_as_root(fake)
