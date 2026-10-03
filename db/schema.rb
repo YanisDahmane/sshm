@@ -10,9 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_10_03_154554) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_03_160108) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "profiles", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "public_key", null: false
+    t.string "fingerprint", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["fingerprint"], name: "index_profiles_on_fingerprint", unique: true
+    t.index ["name"], name: "index_profiles_on_name", unique: true
+  end
 
   create_table "servers", force: :cascade do |t|
     t.string "name", null: false

@@ -1,0 +1,11 @@
+<% alice = SshKeyGenerator.generate(comment: "alice@laptop") %>
+<% ci = SshKeyGenerator.generate(comment: "") %>
+alice:
+  name: Alice
+  public_key: <%= alice.public_key %>
+  fingerprint: <%= alice.fingerprint %>
+
+ci:
+  name: CI
+  public_key: <%= ci.public_key.strip %>
+  fingerprint: <%= ci.fingerprint %>
