@@ -3,7 +3,8 @@
 <nav class="settings-nav mt-6 flex gap-1 border-b border-slate-200" aria-label="Paramètres">
   <% [ [ "Général", settings_path, controller_path == "settings" ],
        [ "Notifications", settings_notifications_path, controller_path.start_with?("settings/notification") ],
-       [ "Automatisations", settings_automations_path, controller_path == "settings/automations" ] ].each do |label, path, active| %>
+       [ "Automatisations", settings_automations_path, controller_path == "settings/automations" ],
+       [ "Utilisateurs", settings_users_path, controller_path.in?(%w[settings/users settings/invitations]) ] ].each do |label, path, active| %>
     <%= link_to label, path, aria: { current: (active ? "page" : nil) },
           class: "-mb-px border-b-2 px-4 py-2 text-sm font-medium #{active ? "border-indigo-600 text-indigo-700" : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"}" %>
   <% end %>

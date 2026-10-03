@@ -15,18 +15,20 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", "Dashboard"
   end
 
-  test "registers a new user and lands on the dashboard" do
-    assert_difference "User.count", 1 do
-      post user_registration_path, params: { user: { email: "new@example.com", password: "password123", password_confirmation: "password123" } }
+  test "there is no public sign up any more" do
+    get "/users/sign_up"
+    assert_response :not_found
+
+    assert_no_difference "User.count" do
+      post "/users", params: { user: { email: "new@example.com", password: "password123", password_confirmation: "password123" } }
     end
-    assert_redirected_to root_path
+    assert_response :not_found
   end
 
-  test "sign in and sign up pages render" do
+  test "the sign in page renders and points to invitations" do
     get new_user_session_path
     assert_response :success
-    get new_user_registration_path
-    assert_response :success
+    assert_select "p", text: /Demandez une invitation à un administrateur/
   end
 
   test "shows the setup checklist until every step is done" do

@@ -64,7 +64,10 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
       "delete channel" => -> { delete settings_notification_channel_path(create_channel) },
       "automations" => -> { get settings_automations_path },
       "update automation" => -> { patch settings_automation_path(Automation.all_kinds.first), params: { automation: { enabled: "1", interval_minutes: "60" } } },
-      "run automation" => -> { post run_settings_automation_path(Automation.all_kinds.first) }
+      "run automation" => -> { post run_settings_automation_path(Automation.all_kinds.first) },
+      "users" => -> { get settings_users_path },
+      "invite a user" => -> { post settings_invitations_path, params: { invitation: { email: "new@example.com", role: "viewer" } } },
+      "revoke an invitation" => -> { delete settings_invitation_path(Invitation.create!(email: "x@example.com", invited_by: users(:one))) }
     }
   }.freeze
 

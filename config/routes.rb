@@ -1,5 +1,8 @@
 Rails.application.routes.draw do
   devise_for :users
+  resource :setup, only: %i[new create]
+  get "invitations/:token", to: "invitations#show", as: :invitation_acceptance
+  post "invitations/:token", to: "invitations#accept"
 
   resources :servers do
     resource :ping, only: %i[show create], controller: "server_pings"
@@ -18,6 +21,8 @@ Rails.application.routes.draw do
 
   resource :settings, only: :show
   namespace :settings do
+    resources :users, only: :index
+    resources :invitations, only: %i[create destroy]
     resource :notifications, only: :show
     resources :notification_channels, except: %i[index show], path: "notifications/channels" do
       post :test, on: :member

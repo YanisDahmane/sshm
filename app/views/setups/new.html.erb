@@ -1,0 +1,13 @@
+<% content_for :title, "Premier lancement · SSHM" %>
+
+<h2 class="text-xl font-semibold">Créer le compte administrateur</h2>
+<p class="mt-1 mb-6 text-sm text-slate-500">Premier lancement de SSHM : ce compte aura tous les droits. Les autres utilisateurs seront invités ensuite.</p>
+
+<%= form_with model: @user, url: setup_path, scope: :user, class: "space-y-5" do |f| %>
+  <%= render "shared/form_errors", record: @user %>
+  <%= render "shared/auth_field", f: f, attribute: :email, label: "Email", type: :email_field, autocomplete: "email", autofocus: true %>
+  <%= render "shared/auth_field", f: f, attribute: :password, label: "Mot de passe", type: :password_field, autocomplete: "new-password",
+             hint: "#{Devise.password_length.min} caractères minimum" %>
+  <%= render "shared/auth_field", f: f, attribute: :password_confirmation, label: "Confirmation du mot de passe", type: :password_field, autocomplete: "new-password" %>
+  <%= f.submit "Créer le compte", class: "w-full cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+<% end %>

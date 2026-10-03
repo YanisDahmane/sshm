@@ -1,8 +1,7 @@
 class User < ApplicationRecord
-  # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
-  devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable
+  # No public sign up: the first admin is created through SetupsController,
+  # everyone else through an Invitation.
+  devise :database_authenticatable, :recoverable, :rememberable, :validatable
 
   ROLE_LABELS = { "admin" => "Admin", "operator" => "Opérateur", "viewer" => "Lecture" }.freeze
 

@@ -20,6 +20,9 @@ class Activity < ApplicationRecord
     Kind.new(:server_created, "Serveur ajouté", :servers, :info, "Un serveur a été ajouté à SSHM."),
     Kind.new(:server_updated, "Serveur modifié", :servers, :info, "Les informations de connexion d'un serveur ont changé."),
     Kind.new(:server_deleted, "Serveur supprimé", :servers, :warning, "Un serveur a été retiré de SSHM (ses clés restent installées dessus)."),
+    Kind.new(:user_invited, "Utilisateur invité", :configuration, :info, "Une invitation à rejoindre SSHM a été créée."),
+    Kind.new(:invitation_accepted, "Invitation acceptée", :security, :warning, "Un nouvel utilisateur a rejoint SSHM."),
+    Kind.new(:invitation_revoked, "Invitation révoquée", :configuration, :info, "Une invitation en attente a été annulée."),
     Kind.new(:profile_created, "Profil créé", :configuration, :info, "Un profil a été créé."),
     Kind.new(:profile_deleted, "Profil supprimé", :configuration, :info, "Un profil a été supprimé."),
     Kind.new(:ssh_key_generated, "Clé SSHM générée", :security, :critical, "La clé SSH de SSHM a été générée ou régénérée."),
@@ -75,6 +78,9 @@ class Activity < ApplicationRecord
     when :server_created then "Serveur « #{server_name} » ajouté"
     when :server_updated then "Serveur « #{server_name} » modifié"
     when :server_deleted then "Serveur « #{server_name} » supprimé de SSHM"
+    when :user_invited then "#{data["email"]} invité (#{data["role_label"]})"
+    when :invitation_accepted then "#{data["email"]} a rejoint SSHM (#{data["role_label"]})"
+    when :invitation_revoked then "Invitation de #{data["email"]} révoquée"
     when :profile_created then "Profil « #{profile_name} » créé"
     when :profile_deleted then "Profil « #{profile_name} » supprimé"
     when :ssh_key_generated then data["regenerated"] ? "Clé SSHM régénérée" : "Clé SSHM générée"

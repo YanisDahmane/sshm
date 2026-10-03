@@ -1,0 +1,15 @@
+<% content_for :title, "Invitation · SSHM" %>
+
+<h2 class="text-xl font-semibold">Rejoindre SSHM</h2>
+<p class="mt-1 mb-6 text-sm text-slate-500">
+  <%= @invitation.invited_by.email %> vous invite avec le rôle <strong><%= @invitation.role_label %></strong>. Choisissez votre mot de passe.
+</p>
+
+<%= form_with model: @user, url: invitation_acceptance_path(params[:token]), method: :post, scope: :user, class: "space-y-5" do |f| %>
+  <%= render "shared/form_errors", record: @user %>
+  <%= render "shared/auth_field", f: f, attribute: :email, label: "Email", type: :email_field, readonly: true %>
+  <%= render "shared/auth_field", f: f, attribute: :password, label: "Mot de passe", type: :password_field, autocomplete: "new-password", autofocus: true,
+             hint: "#{Devise.password_length.min} caractères minimum" %>
+  <%= render "shared/auth_field", f: f, attribute: :password_confirmation, label: "Confirmation du mot de passe", type: :password_field, autocomplete: "new-password" %>
+  <%= f.submit "Créer mon compte", class: "w-full cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+<% end %>

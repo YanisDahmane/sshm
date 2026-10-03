@@ -1,0 +1,54 @@
+<% content_for :title, "Utilisateurs · Paramètres · SSHM" %>
+<%= render "settings/nav" %>
+
+<section id="invite" class="mt-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+  <h2 class="text-base font-semibold">Inviter un utilisateur</h2>
+  <p class="mt-1 text-sm text-slate-500">Un lien à usage unique, valable <%= Invitation::VALIDITY.inspect.sub("days", "jours") %>, est créé : copiez-le et envoyez-le à la personne.</p>
+  <%= form_with model: @invitation, url: settings_invitations_path, class: "mt-4 flex flex-wrap items-end gap-3" do |f| %>
+    <div class="min-w-60 flex-1">
+      <%= f.label :email, "Email", class: "block text-sm font-medium text-slate-700" %>
+      <%= f.email_field :email, required: true, placeholder: "alice@example.com",
+            class: "mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" %>
+    </div>
+    <div>
+      <%= f.label :role, "Rôle", class: "block text-sm font-medium text-slate-700" %>
+      <%= f.select :role, User::ROLE_LABELS.invert, {},
+            class: "mt-1 block rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" %>
+    </div>
+    <%= f.submit "Créer l'invitation", class: "cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+  <% end %>
+
+  <% if @invitations.any? %>
+    <h3 class="mt-6 text-sm font-semibold text-slate-700">Invitations en attente</h3>
+    <ul id="pending-invitations" class="mt-2 divide-y divide-slate-100 rounded-md border border-slate-200">
+      <% @invitations.each do |invitation| %>
+        <li id="<%= dom_id(invitation) %>" class="pending-invitation flex flex-wrap items-center gap-3 px-4 py-3 text-sm" data-controller="clipboard">
+          <div class="min-w-0 flex-1">
+            <p class="font-medium"><%= invitation.email %> <span class="ml-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600"><%= invitation.role_label %></span></p>
+            <p class="text-xs text-slate-500">Par <%= invitation.invited_by.email %> · <%= relative_time_tag invitation.expires_at, prefix: "expire " %></p>
+            <input type="text" readonly value="<%= invitation_acceptance_url(invitation.token) %>" data-clipboard-target="source" aria-label="Lien d'invitation"
+                   class="invitation-link mt-2 block w-full rounded-md border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-xs text-slate-600">
+          </div>
+          <%= render "settings/copy_button" %>
+          <%= button_to settings_invitation_path(invitation), method: :delete, title: "Révoquer", aria: { label: "Révoquer l'invitation de #{invitation.email}" },
+                form: { data: { turbo_confirm: "Le lien d'invitation de #{invitation.email} ne fonctionnera plus.", confirm_label: "Révoquer", confirm_variant: "danger" } },
+                class: "cursor-pointer rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600" do %>
+            <%= icon :trash %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+</section>
+
+<section id="users" class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+  <h2 class="text-base font-semibold">Utilisateurs</h2>
+  <ul class="mt-4 divide-y divide-slate-100 rounded-md border border-slate-200">
+    <% @users.each do |user| %>
+      <li id="<%= dom_id(user) %>" class="user-row flex flex-wrap items-center gap-3 px-4 py-3 text-sm">
+        <p class="min-w-0 flex-1 font-medium"><%= user.email %><%= " (vous)" if user == current_user %></p>
+        <span class="user-role-badge rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600"><%= user.role_label %></span>
+      </li>
+    <% end %>
+  </ul>
+</section>

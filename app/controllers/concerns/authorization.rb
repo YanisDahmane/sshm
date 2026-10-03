@@ -8,7 +8,7 @@ module Authorization
   class NotAuthorized < StandardError; end
 
   included do
-    before_action -> { authorize!(:view) }, unless: :devise_controller?
+    before_action :authorize_view!, unless: :devise_controller?
     rescue_from NotAuthorized, with: :render_forbidden
     helper_method :can?
   end
@@ -22,6 +22,8 @@ module Authorization
   private
 
   def can?(permission) = current_user&.can?(permission) || false
+
+  def authorize_view! = authorize!(:view)
 
   def authorize!(permission)
     raise NotAuthorized unless can?(permission)

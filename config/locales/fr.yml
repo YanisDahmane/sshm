@@ -22,6 +22,9 @@ fr:
         activity_kinds: Les activités
       automation:
         interval_minutes: La fréquence
+      invitation:
+        email: L'email
+        role: Le rôle
       user:
         email: Email
         password: Mot de passe
@@ -36,6 +39,11 @@ fr:
               app_key: "est la clé de SSHM et ne peut pas être utilisée par un profil"
             fingerprint:
               taken: "est déjà utilisée par un autre profil"
+        invitation:
+          attributes:
+            email:
+              taken_by_user: "correspond déjà à un utilisateur"
+              already_invited: "a déjà une invitation en attente"
   time:
     formats:
       short: "%d %b %H:%M"

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_03_205443) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_03_205858) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -50,6 +50,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_205443) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["kind"], name: "index_automations_on_kind", unique: true
+  end
+
+  create_table "invitations", force: :cascade do |t|
+    t.string "email", null: false
+    t.string "role", default: "viewer", null: false
+    t.string "token", null: false
+    t.bigint "invited_by_id", null: false
+    t.bigint "user_id"
+    t.datetime "expires_at", null: false
+    t.datetime "accepted_at"
+    t.datetime "revoked_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_invitations_on_email"
+    t.index ["invited_by_id"], name: "index_invitations_on_invited_by_id"
+    t.index ["token"], name: "index_invitations_on_token", unique: true
+    t.index ["user_id"], name: "index_invitations_on_user_id"
   end
 
   create_table "notification_channels", force: :cascade do |t|
@@ -131,6 +148,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_205443) do
   add_foreign_key "activities", "profiles", on_delete: :nullify
   add_foreign_key "activities", "servers", on_delete: :nullify
   add_foreign_key "activities", "users", on_delete: :nullify
+  add_foreign_key "invitations", "users", column: "invited_by_id"
+  add_foreign_key "invitations", "users", on_delete: :nullify
   add_foreign_key "temporary_accesses", "profiles", on_delete: :nullify
   add_foreign_key "temporary_accesses", "servers", on_delete: :cascade
 end
