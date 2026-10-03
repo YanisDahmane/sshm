@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_03_213751) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_03_215335) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -99,6 +99,34 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_213751) do
     t.index ["name"], name: "index_profiles_on_name", unique: true
   end
 
+  create_table "revocation_steps", force: :cascade do |t|
+    t.bigint "revocation_id", null: false
+    t.bigint "server_id"
+    t.string "server_name", null: false
+    t.string "unix_user"
+    t.string "status", null: false
+    t.text "error_message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["revocation_id"], name: "index_revocation_steps_on_revocation_id"
+    t.index ["server_id"], name: "index_revocation_steps_on_server_id"
+  end
+
+  create_table "revocations", force: :cascade do |t|
+    t.bigint "profile_id"
+    t.string "profile_name", null: false
+    t.string "fingerprint", null: false
+    t.text "key_blob", null: false
+    t.bigint "started_by_id"
+    t.boolean "delete_profile", default: false, null: false
+    t.integer "servers_count", default: 0, null: false
+    t.datetime "finished_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["profile_id"], name: "index_revocations_on_profile_id"
+    t.index ["started_by_id"], name: "index_revocations_on_started_by_id"
+  end
+
   create_table "servers", force: :cascade do |t|
     t.string "name", null: false
     t.string "host", null: false
@@ -172,6 +200,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_213751) do
   add_foreign_key "activities", "users", on_delete: :nullify
   add_foreign_key "invitations", "users", column: "invited_by_id"
   add_foreign_key "invitations", "users", on_delete: :nullify
+  add_foreign_key "revocation_steps", "revocations", on_delete: :cascade
+  add_foreign_key "revocation_steps", "servers", on_delete: :nullify
+  add_foreign_key "revocations", "profiles", on_delete: :nullify
+  add_foreign_key "revocations", "users", column: "started_by_id", on_delete: :nullify
   add_foreign_key "temporary_accesses", "profiles", on_delete: :nullify
   add_foreign_key "temporary_accesses", "servers", on_delete: :cascade
   add_foreign_key "users", "profiles", on_delete: :nullify

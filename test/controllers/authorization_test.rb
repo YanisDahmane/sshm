@@ -74,6 +74,9 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
       "deactivate a user" => -> { post deactivate_settings_user_path(users(:viewer)) },
       "reactivate a user" => -> { post reactivate_settings_user_path(users(:viewer)) },
       "reset a user's 2FA" => -> { post reset_two_factor_settings_user_path(users(:viewer)) },
+      "revoke a profile everywhere" => -> { post profile_revocation_path(profiles(:alice)) },
+      "follow a revocation" => -> { get revocation_path(Revocation.start!(profiles(:alice), by: users(:one))) },
+      "retry a revocation" => -> { post retry_revocation_path(Revocation.start!(profiles(:alice), by: users(:one)).tap(&:finish!)) },
       "require 2FA for admins" => -> { patch settings_security_path, params: { app_setting: { require_admin_two_factor: "0" } } }
     }
   }.freeze

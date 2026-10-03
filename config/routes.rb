@@ -24,6 +24,10 @@ Rails.application.routes.draw do
   resources :profiles do
     resources :accesses, only: :create, controller: "profile_accesses"
     resource :access, only: :destroy, controller: "profile_accesses"
+    resource :revocation, only: :create
+  end
+  resources :revocations, only: :show do
+    post :retry, on: :member
   end
 
   resource :settings, only: :show

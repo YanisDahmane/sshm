@@ -12,6 +12,7 @@ class Activity < ApplicationRecord
     Kind.new(:key_added, "Clé ajoutée", :keys, :info, "Un profil a été autorisé sur un compte d'un serveur."),
     Kind.new(:key_removed, "Clé supprimée", :keys, :info, "Une clé a été supprimée d'un compte depuis SSHM."),
     Kind.new(:key_expired, "Accès temporaire expiré", :keys, :info, "Un accès temporaire a expiré et sa clé a été retirée."),
+    Kind.new(:profile_revoked_everywhere, "Profil révoqué partout", :security, :critical, "La clé d'un profil a été retirée de tous les serveurs."),
     Kind.new(:unknown_key_detected, "Clé sans profil détectée", :security, :warning, "Une clé qui ne correspond à aucun profil a été trouvée sur un serveur."),
     Kind.new(:key_disappeared, "Clé retirée hors de SSHM", :security, :warning, "Une clé a disparu d'un serveur sans passer par SSHM."),
     Kind.new(:ssh_access_lost, "Accès SSH perdu", :security, :critical, "Le serveur refuse désormais la clé de SSHM."),
@@ -76,6 +77,9 @@ class Activity < ApplicationRecord
       duration = data["duration_label"] ? " pendant #{data["duration_label"]}" : ""
       "« #{profile_name} » autorisé sur #{target}#{duration}"
     when :key_removed then "Clé « #{key_name} » supprimée de #{target}"
+    when :profile_revoked_everywhere
+      failures = data["failed"].to_i.positive? ? ", #{data["failed"]} échec(s)" : ""
+      "Clé de « #{profile_name} » retirée partout : #{data["removed"]} compte(s)#{failures}"
     when :key_expired then "Accès temporaire de « #{profile_name || key_name} » retiré de #{target}"
     when :unknown_key_detected then "Clé « #{key_name} » sans profil trouvée sur #{target}"
     when :key_disappeared then "Clé « #{key_name} » disparue de #{target}"

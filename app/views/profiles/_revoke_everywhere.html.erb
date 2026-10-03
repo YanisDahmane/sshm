@@ -1,0 +1,25 @@
+<%# "Révoquer partout" button and its modal (admins only). %>
+<div data-controller="modal">
+  <button type="button" data-action="modal#open"
+          class="revoke-everywhere inline-flex cursor-pointer items-center gap-2 rounded-md border border-red-300 bg-white px-3 py-2 text-sm font-medium text-red-700 shadow-sm hover:bg-red-50">
+    Révoquer partout
+  </button>
+  <dialog data-modal-target="dialog" data-action="click->modal#backdropClose" aria-labelledby="revoke-everywhere-title"
+          class="m-auto w-full max-w-md rounded-xl border border-slate-200 bg-white p-0 text-left shadow-xl backdrop:bg-slate-900/40 backdrop:backdrop-blur-sm">
+    <%= form_with url: profile_revocation_path(profile), class: "p-6" do |f| %>
+      <h2 id="revoke-everywhere-title" class="text-base font-semibold">Révoquer « <%= profile.name %> » partout ?</h2>
+      <p class="mt-2 text-sm text-slate-600">
+        Sa clé sera retirée de tous les comptes découverts sur les <%= pluralize(Server.count, "serveur", plural: "serveurs") %>.
+        Vous pourrez suivre l'avancement et relancer les échecs.
+      </p>
+      <label class="mt-4 flex cursor-pointer items-start gap-2 text-sm text-slate-700">
+        <%= check_box_tag :delete_profile, "1", false, class: "mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600" %>
+        <span>Supprimer le profil ensuite <span class="text-slate-500">(seulement si tout a réussi)</span></span>
+      </label>
+      <div class="mt-6 flex justify-end gap-3">
+        <button type="button" data-action="modal#close" class="cursor-pointer rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Annuler</button>
+        <%= f.submit "Révoquer partout", class: "cursor-pointer rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500" %>
+      </div>
+    <% end %>
+  </dialog>
+</div>

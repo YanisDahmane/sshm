@@ -1,0 +1,63 @@
+<% content_for :title, "Révocation de #{@revocation.profile_name} · SSHM" %>
+
+<div class="mx-auto max-w-3xl">
+  <%= link_to "← #{@revocation.profile ? "Profil" : "Profils"}", @revocation.profile ? profile_path(@revocation.profile) : profiles_path,
+        class: "text-sm text-slate-500 hover:text-slate-700" %>
+  <h1 class="mt-2 text-2xl font-bold tracking-tight">Révocation de « <%= @revocation.profile_name %> »</h1>
+  <p class="mt-1 text-sm text-slate-500">
+    Lancée par <%= @revocation.started_by&.email || "un utilisateur supprimé" %> <%= relative_time_tag @revocation.created_at %>
+    · <span class="font-mono text-xs"><%= @revocation.fingerprint %></span>
+  </p>
+
+  <%# No src here: Turbo refuses a frame whose src is the page itself (auto-refresh sets it). %>
+  <%= turbo_frame_tag dom_id(@revocation), class: "block" do %>
+    <% if @revocation.running? %>
+      <div data-controller="auto-refresh" hidden></div>
+    <% end %>
+
+    <section id="revocation-summary" class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <% if @revocation.status == :running %>
+        <p class="revocation-status flex items-center gap-2 text-sm font-medium text-indigo-700">
+          <%= icon :arrow_path, class: "h-4 w-4 animate-spin" %> En cours : <%= @revocation.servers_done %>/<%= @revocation.servers_count %> serveur(s) traité(s)
+        </p>
+      <% elsif @revocation.status == :succeeded %>
+        <p class="revocation-status flex items-center gap-2 text-sm font-medium text-emerald-700">
+          <%= icon :check, class: "h-4 w-4" %> Terminée : la clé a été retirée de <%= pluralize(@revocation.removed_count, "compte", plural: "comptes") %>.
+          <%= "Le profil a été supprimé." if @revocation.delete_profile && @revocation.profile.nil? %>
+        </p>
+      <% else %>
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <p class="revocation-status flex items-center gap-2 text-sm font-medium text-red-700">
+            <%= icon :x_mark, class: "h-4 w-4" %> Terminée avec <%= pluralize(@revocation.failed_count, "échec", plural: "échecs") %>
+            (<%= @revocation.removed_count %> compte(s) nettoyé(s)).
+          </p>
+          <%= button_to "Relancer les échecs", retry_revocation_path(@revocation), data: { turbo_frame: "_top" },
+                class: "cursor-pointer rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+        </div>
+        <% if @revocation.delete_profile && @revocation.profile %>
+          <p class="mt-2 text-xs text-slate-500">Le profil n'a pas été supprimé, puisque la clé est peut-être encore présente là où ça a échoué.</p>
+        <% end %>
+      <% end %>
+    </section>
+
+    <% if @revocation.steps.any? %>
+      <ul id="revocation-steps" class="mt-4 divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white text-sm shadow-sm">
+        <% @revocation.steps.each do |step| %>
+          <li class="revocation-step flex items-start gap-3 px-4 py-3 is-<%= step.status %>">
+            <span class="mt-0.5 <%= { "removed" => "text-emerald-600", "absent" => "text-slate-400", "failed" => "text-red-600" }.fetch(step.status) %>">
+              <%= icon(step.failed? ? :x_mark : :check) %>
+            </span>
+            <div class="min-w-0 flex-1">
+              <p>
+                <span class="font-medium"><%= step.server_name %></span>
+                <% if step.unix_user %> · <span class="font-mono"><%= step.unix_user %></span><% end %>
+                — <%= { "removed" => "clé retirée", "absent" => "clé absente", "failed" => (step.server_level? ? "comptes impossibles à lister" : "échec") }.fetch(step.status) %>
+              </p>
+              <% if step.error_message %><p class="mt-0.5 break-all font-mono text-xs text-red-700"><%= step.error_message %></p><% end %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  <% end %>
+</div>
