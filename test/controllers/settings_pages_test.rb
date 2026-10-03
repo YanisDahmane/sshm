@@ -28,19 +28,6 @@ class SettingsPagesTest < ActionDispatch::IntegrationTest
     assert_select "#ssh-key-fingerprint", ssh_keys(:main).fingerprint
   end
 
-  test "the notifications page lists every activity kind by category" do
-    sign_in users(:one)
-
-    get settings_notifications_path
-
-    assert_select "section.notification-category", Activity::CATEGORIES.size
-    Activity::KINDS.each_value do |kind|
-      assert_select "#notification-#{kind.key}", text: /#{Regexp.escape(kind.label)}/ do
-        assert_select "input[type=checkbox][disabled]"
-      end
-    end
-  end
-
   test "the automations page lists the automations with their state" do
     Automation.all_kinds.first.update!(enabled: true, last_run_at: 1.hour.ago, last_result: "3/3 serveur(s) scanné(s)")
     sign_in users(:one)

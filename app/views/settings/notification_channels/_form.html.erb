@@ -1,0 +1,61 @@
+<% input_class = "mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" %>
+<% label_class = "block text-sm font-medium text-slate-700" %>
+
+<%= form_with model: channel, url: (channel.persisted? ? settings_notification_channel_path(channel) : settings_notification_channels_path), class: "space-y-6" do |f| %>
+  <%= render "shared/form_errors", record: channel %>
+
+  <div>
+    <%= f.label :name, "Nom", class: label_class %>
+    <%= f.text_field :name, required: true, autofocus: true, placeholder: "#ops-alertes", class: input_class %>
+  </div>
+
+  <div>
+    <%= f.label :webhook_url, "URL du webhook Slack", class: label_class %>
+    <%= f.password_field :webhook_url, value: nil, required: channel.new_record?, autocomplete: "off",
+          placeholder: (channel.persisted? ? "#{channel.masked_webhook_url} (laisser vide pour la conserver)" : "https://hooks.slack.com/services/…"),
+          class: "#{input_class} font-mono text-xs" %>
+    <p class="mt-1 text-xs text-slate-500">
+      Dans Slack : <em>Apps → Incoming Webhooks → Add to Slack</em>, choisissez le canal, puis copiez l'URL. Elle est stockée chiffrée.
+    </p>
+  </div>
+
+  <fieldset>
+    <legend class="text-sm font-medium text-slate-700">Activités à notifier</legend>
+    <%= hidden_field_tag "notification_channel[activity_kinds][]", "" %>
+    <div class="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <% Activity::KINDS.values.group_by(&:category).each do |category, kinds| %>
+        <div class="activity-kind-group rounded-md border border-slate-200 p-3" data-controller="check-all">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-semibold text-slate-800"><%= Activity::CATEGORIES.fetch(category) %></p>
+            <button type="button" data-action="check-all#toggle" class="cursor-pointer text-xs font-medium text-indigo-600 hover:text-indigo-500">Tout / rien</button>
+          </div>
+          <div class="mt-2 space-y-1.5">
+            <% kinds.each do |kind| %>
+              <label class="flex cursor-pointer items-start gap-2 text-sm text-slate-700" title="<%= kind.description %>">
+                <%= check_box_tag "notification_channel[activity_kinds][]", kind.key, channel.subscribed_to?(kind.key),
+                      id: "activity_kind_#{kind.key}", data: { check_all_target: "checkbox" }, class: "mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600" %>
+                <span class="flex items-center gap-1.5"><%= render "activities/severity", severity: kind.severity %><%= kind.label %></span>
+              </label>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </fieldset>
+
+  <div class="space-y-3">
+    <label class="flex cursor-pointer items-start gap-2 text-sm text-slate-700">
+      <%= f.check_box :mention_channel, class: "mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600" %>
+      <span>Mentionner <code class="font-mono text-xs">@channel</code> <span class="text-slate-500">— tous les membres du canal Slack reçoivent une alerte.</span></span>
+    </label>
+    <label class="flex cursor-pointer items-start gap-2 text-sm text-slate-700">
+      <%= f.check_box :enabled, class: "mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600" %>
+      <span>Actif <span class="text-slate-500">— décochez pour mettre le canal en pause.</span></span>
+    </label>
+  </div>
+
+  <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+    <%= link_to "Annuler", settings_notifications_path, class: "rounded-md px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" %>
+    <%= f.submit channel.persisted? ? "Enregistrer" : "Ajouter le canal", class: "cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+  </div>
+<% end %>

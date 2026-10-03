@@ -4,6 +4,8 @@ fr:
       server: Serveur
       profile: Profil
       user: Utilisateur
+      notification_channel: Canal de notification
+      automation: Automatisation
     attributes:
       server:
         name: Nom
@@ -14,6 +16,12 @@ fr:
         name: Nom
         public_key: Clé SSH publique
         fingerprint: Cette clé
+      notification_channel:
+        name: Nom
+        webhook_url: L'URL du webhook
+        activity_kinds: Les activités
+      automation:
+        interval_minutes: La fréquence
       user:
         email: Email
         password: Mot de passe

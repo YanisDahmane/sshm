@@ -25,7 +25,7 @@ class AccessGrantTest < ActiveSupport::TestCase
 
     assert_equal [ { account: @account, expires_at: nil, replace: false } ], @calls
     assert_equal 0, TemporaryAccess.count
-    assert_no_enqueued_jobs
+    assert_no_enqueued_jobs only: ExpireTemporaryAccessJob
   end
 
   test "a temporary grant writes an expiring line, records the access and schedules its expiry" do
@@ -44,7 +44,7 @@ class AccessGrantTest < ActiveSupport::TestCase
     with_authorization(:already_present) { AccessGrant.call(@server, profiles(:alice), account: @account, duration: 10.minutes) }
 
     assert_equal 0, TemporaryAccess.count
-    assert_no_enqueued_jobs
+    assert_no_enqueued_jobs only: ExpireTemporaryAccessJob
   end
 
   test "a permanent grant replaces the line of an active temporary access and ends it" do
@@ -85,7 +85,7 @@ class AccessGrantTest < ActiveSupport::TestCase
     assert_not result.success?
     assert access.reload.active?
     assert_equal 1, TemporaryAccess.count
-    assert_no_enqueued_jobs
+    assert_no_enqueued_jobs only: ExpireTemporaryAccessJob
   end
 
   test "logs the added key, with its duration" do

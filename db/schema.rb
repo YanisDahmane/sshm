@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_10_03_200652) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_03_201517) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -50,6 +50,20 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_03_200652) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["kind"], name: "index_automations_on_kind", unique: true
+  end
+
+  create_table "notification_channels", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "kind", default: "slack", null: false
+    t.text "webhook_url", null: false
+    t.jsonb "activity_kinds", default: [], null: false
+    t.boolean "mention_channel", default: false, null: false
+    t.boolean "enabled", default: true, null: false
+    t.datetime "last_delivered_at"
+    t.text "last_error"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_notification_channels_on_name", unique: true
   end
 
   create_table "profiles", force: :cascade do |t|

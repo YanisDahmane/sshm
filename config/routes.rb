@@ -19,6 +19,9 @@ Rails.application.routes.draw do
   resource :settings, only: :show
   namespace :settings do
     resource :notifications, only: :show
+    resources :notification_channels, except: %i[index show], path: "notifications/channels" do
+      post :test, on: :member
+    end
     resources :automations, only: %i[index update] do
       post :run, on: :member
     end

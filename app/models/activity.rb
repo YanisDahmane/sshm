@@ -31,6 +31,8 @@ class Activity < ApplicationRecord
 
   validates :kind, inclusion: { in: KINDS.keys.map(&:to_s) }
 
+  after_create_commit -> { NotifyActivityJob.perform_later(self) }
+
   scope :recent, -> { order(created_at: :desc, id: :desc) }
   scope :of_kind, ->(kind) { where(kind: kind.to_s) }
   scope :in_category, ->(category) { where(kind: KINDS.values.select { |kind| kind.category == category.to_sym }.map { |kind| kind.key.to_s }) }

@@ -1,29 +1,73 @@
 <% content_for :title, "Notifications · Paramètres · SSHM" %>
 <%= render "settings/nav" %>
 
-<div class="mt-8 rounded-xl border border-dashed border-indigo-300 bg-indigo-50/50 px-6 py-5 text-sm text-indigo-900">
-  <p class="font-semibold">Bientôt disponible</p>
-  <p class="mt-1">Vous pourrez choisir quelles activités vous notifient, et par quel canal. Voici les types d'activité qui seront proposés.</p>
-</div>
-
-<div class="mt-6 space-y-6">
-  <% @kinds_by_category.each do |category, kinds| %>
-    <section class="notification-category rounded-xl border border-slate-200 bg-white shadow-sm">
-      <h2 class="border-b border-slate-100 px-6 py-4 text-base font-semibold"><%= Activity::CATEGORIES.fetch(category) %></h2>
-      <ul class="divide-y divide-slate-100">
-        <% kinds.each do |kind| %>
-          <li id="notification-<%= kind.key %>" class="flex items-center justify-between gap-4 px-6 py-3">
-            <div class="min-w-0">
-              <p class="flex items-center gap-2 text-sm font-medium">
-                <%= render "activities/severity", severity: kind.severity %>
-                <%= kind.label %>
-              </p>
-              <p class="mt-0.5 text-xs text-slate-500"><%= kind.description %></p>
-            </div>
-            <input type="checkbox" disabled aria-label="Notifier : <%= kind.label %> (bientôt)" class="h-4 w-4 cursor-not-allowed rounded border-slate-300 opacity-50">
-          </li>
-        <% end %>
-      </ul>
-    </section>
+<div class="mt-6 flex flex-wrap items-center justify-between gap-4">
+  <p class="max-w-2xl text-sm text-slate-500">
+    Recevez les activités de SSHM dans Slack. Chaque canal choisit les activités qu'il reçoit et peut mentionner <code class="font-mono text-xs">@channel</code>.
+  </p>
+  <%= link_to new_settings_notification_channel_path,
+        class: "inline-flex shrink-0 items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" do %>
+    Ajouter un canal Slack
   <% end %>
 </div>
+
+<% if @channels.any? %>
+  <div class="mt-6 space-y-4">
+    <% @channels.each do |channel| %>
+      <section id="<%= dom_id(channel) %>" class="notification-channel rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+          <div class="min-w-0">
+            <h2 class="flex flex-wrap items-center gap-2 text-base font-semibold">
+              <%= channel.name %>
+              <span class="rounded-full bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700 ring-1 ring-inset ring-violet-600/20">Slack</span>
+              <% if channel.enabled? %>
+                <span class="channel-state rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">Actif</span>
+              <% else %>
+                <span class="channel-state rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">En pause</span>
+              <% end %>
+              <% if channel.mention_channel %>
+                <span class="channel-mention rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20">@channel</span>
+              <% end %>
+            </h2>
+            <p class="mt-1 break-all font-mono text-xs text-slate-500"><%= channel.masked_webhook_url %></p>
+          </div>
+          <div class="flex shrink-0 items-center gap-2">
+            <%= button_to "Envoyer un test", test_settings_notification_channel_path(channel),
+                  class: "cursor-pointer whitespace-nowrap rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" %>
+            <%= link_to edit_settings_notification_channel_path(channel), title: "Modifier", aria: { label: "Modifier #{channel.name}" },
+                  class: "rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700" do %>
+              <%= icon :pencil_square %>
+            <% end %>
+            <%= button_to settings_notification_channel_path(channel), method: :delete, title: "Supprimer", aria: { label: "Supprimer #{channel.name}" },
+                  form: { data: { turbo_confirm: "Le canal « #{channel.name} » ne recevra plus aucune notification.", confirm_label: "Supprimer", confirm_variant: "danger" } },
+                  class: "cursor-pointer rounded-md p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-600" do %>
+              <%= icon :trash %>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400"><%= pluralize(channel.activity_kinds.size, "activité notifiée", plural: "activités notifiées") %></p>
+          <div class="mt-2 flex flex-wrap gap-1.5">
+            <% Activity::KINDS.values.select { |kind| channel.subscribed_to?(kind.key) }.each do |kind| %>
+              <span class="channel-kind inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-2 py-0.5 text-xs text-slate-700 ring-1 ring-inset ring-slate-200">
+                <%= render "activities/severity", severity: kind.severity %><%= kind.label %>
+              </span>
+            <% end %>
+          </div>
+        </div>
+
+        <% if channel.last_error %>
+          <p class="channel-error mt-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">Dernier envoi en échec : <%= channel.last_error %></p>
+        <% elsif channel.last_delivered_at %>
+          <p class="mt-4 text-xs text-slate-500">Dernier envoi <%= relative_time_tag channel.last_delivered_at %>.</p>
+        <% end %>
+      </section>
+    <% end %>
+  </div>
+<% else %>
+  <div class="mt-6 rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
+    <p class="text-sm text-slate-500">Aucun canal de notification pour le moment.</p>
+    <%= link_to "Ajouter votre premier canal Slack", new_settings_notification_channel_path, class: "mt-2 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+  </div>
+<% end %>

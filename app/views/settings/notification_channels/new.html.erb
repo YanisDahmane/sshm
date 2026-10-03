@@ -1,0 +1,10 @@
+<% content_for :title, "Canal Slack · Paramètres · SSHM" %>
+<%= render "settings/nav" %>
+
+<div class="mx-auto mt-8 max-w-3xl">
+  <%= link_to "← Notifications", settings_notifications_path, class: "text-sm text-slate-500 hover:text-slate-700" %>
+  <h2 class="mt-2 text-xl font-semibold">Ajouter un canal Slack</h2>
+  <div class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <%= render "form", channel: @channel %>
+  </div>
+</div>

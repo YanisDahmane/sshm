@@ -1,8 +1,8 @@
 module Settings
-  # Placeholder: will let users choose which activity kinds notify them.
+  # Notification channels (Slack webhooks) and the activity kinds they receive.
   class NotificationsController < ApplicationController
     def show
-      @kinds_by_category = Activity::KINDS.values.group_by(&:category)
+      @channels = NotificationChannel.order(:name)
     end
   end
 end
