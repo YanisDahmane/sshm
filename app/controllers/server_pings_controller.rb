@@ -1,6 +1,13 @@
 class ServerPingsController < ApplicationController
   include ActionView::RecordIdentifier
 
+  # Pings one server and renders its reachability frame (server page, loaded
+  # on display and on refresh).
+  def show
+    @server = Server.find(params[:server_id])
+    ServerPing.check!(@server)
+  end
+
   def create
     if params[:server_id]
       server = Server.find(params[:server_id])

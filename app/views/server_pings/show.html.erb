@@ -1,0 +1,6 @@
+<%= turbo_frame_tag dom_id(@server, :reachability), class: "group block" do %>
+  <%= render "servers/health_item", label: "Port #{@server.port}", refresh_path: server_ping_path(@server), refresh_title: "Revérifier le port" do %>
+    <%= render "servers/status", server: @server %>
+    <span class="text-xs text-slate-500">vérifié <%= relative_time_tag @server.last_checked_at %></span>
+  <% end %>
+<% end %>

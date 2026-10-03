@@ -124,4 +124,26 @@ class ServerPingsControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to server_url(servers(:web))
   end
+
+  test "show pings the server and renders its reachability frame" do
+    sign_in users(:one)
+
+    with_open_port do |port|
+      servers(:db).update_columns(port: port)
+      get server_ping_path(servers(:db))
+    end
+
+    assert_response :success
+    assert_select "turbo-frame##{dom_id(servers(:db), :reachability)}" do
+      assert_select ".server-status", text: "En ligne"
+      assert_select "time[data-controller=relative-time]"
+      assert_select "a.health-refresh[href=?][data-turbo-prefetch=false]", server_ping_path(servers(:db))
+    end
+    assert servers(:db).reload.reachable
+  end
+
+  test "show requires authentication" do
+    get server_ping_path(servers(:web))
+    assert_redirected_to new_user_session_path
+  end
 end

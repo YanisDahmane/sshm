@@ -12,7 +12,7 @@
     </p>
     <div class="mt-3" data-controller="clipboard">
       <div class="flex items-start gap-2">
-        <textarea readonly rows="2" data-clipboard-target="source" aria-label="Commande d'installation de la clé SSHM"
+        <textarea readonly rows="3" data-clipboard-target="source" aria-label="Commande d'installation de la clé SSHM"
                   class="block w-full resize-none rounded-md border border-slate-300 bg-slate-900 px-3 py-2 font-mono text-xs text-slate-100"><%= ssh_key_install_command(ssh_key) %></textarea>
         <%= render "settings/copy_button" %>
       </div>

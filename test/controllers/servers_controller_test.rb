@@ -150,7 +150,7 @@ class ServersControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_user_session_path
   end
 
-  test "show displays the server name, its status and the SSH check" do
+  test "show displays the server and checks its port and SSH access on display" do
     sign_in users(:one)
     server = servers(:web)
 
@@ -160,13 +160,18 @@ class ServersControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", "Web"
     assert_select "p", text: "deploy@192.168.1.10:22"
     assert_select "a[href=?]", edit_server_path(server)
-    assert_select "[data-controller=server-ping]" do
-      assert_select "template[data-server-ping-target=checking]"
-      assert_select "#server-status ##{dom_id(server, :status)}", text: "En ligne"
-      assert_select "#server-status form[action=?][data-server-ping-badge-param=?]", server_ping_path(server), dom_id(server, :status)
+    assert_select "#server-health" do
+      assert_select "turbo-frame##{dom_id(server, :reachability)}[loading=lazy][src=?]", server_ping_path(server) do
+        assert_select ".server-status", text: "En ligne" # last known state while checking
+        assert_select ".health-checking", text: /Vérification/
+      end
+      assert_select "turbo-frame##{dom_id(server, :ssh_check)}[loading=lazy][src=?]", server_ssh_check_path(server) do
+        assert_select ".ssh-status", text: "—"
+        assert_select ".health-checking"
+      end
     end
-    assert_select "#server-ssh form[action=?][data-controller=quiet-submit] button", server_ssh_check_path(server), text: /Tester la connexion SSH/
-    assert_select "#server-ssh ##{dom_id(server, :ssh_check)}:empty"
+    assert_select "#server-status", 0
+    assert_select "#server-ssh", 0
   end
 
   test "show returns 404 for an unknown server" do

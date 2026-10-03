@@ -1,0 +1,19 @@
+<%# Compact reachability + SSH status of a server, both checked when the page is displayed. %>
+<section id="server-health" class="mt-6 divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white shadow-sm">
+  <div class="px-5 py-3">
+    <%= turbo_frame_tag dom_id(server, :reachability), src: server_ping_path(server), loading: :lazy, class: "group block" do %>
+      <%= render "servers/health_item", label: "Port #{server.port}" do %>
+        <%= render "servers/status", server: server %>
+        <%= render "servers/health_checking" %>
+      <% end %>
+    <% end %>
+  </div>
+  <div class="px-5 py-3">
+    <%= turbo_frame_tag dom_id(server, :ssh_check), src: server_ssh_check_path(server), loading: :lazy, class: "group block" do %>
+      <%= render "servers/health_item", label: "SSH" do %>
+        <%= render "servers/ssh_status", server: server %>
+        <%= render "servers/health_checking" %>
+      <% end %>
+    <% end %>
+  </div>
+</section>

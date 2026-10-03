@@ -2,8 +2,8 @@ Rails.application.routes.draw do
   devise_for :users
 
   resources :servers do
-    resource :ping, only: :create, controller: "server_pings"
-    resource :ssh_check, only: :create, controller: "server_ssh_checks"
+    resource :ping, only: %i[show create], controller: "server_pings"
+    resource :ssh_check, only: :show, controller: "server_ssh_checks"
     resources :authorized_keys, only: :index, controller: "server_authorized_keys"
     resource :authorized_key, only: :destroy, controller: "server_authorized_keys"
     resources :authorizations, only: :create, controller: "server_authorizations"

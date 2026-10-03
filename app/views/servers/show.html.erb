@@ -1,8 +1,6 @@
 <% content_for :title, "#{@server.name} · SSHM" %>
 
-<div class="mx-auto max-w-3xl" data-controller="server-ping">
-  <%= render "servers/checking_badge_template" %>
-
+<div class="mx-auto max-w-3xl">
   <%= link_to "← Serveurs", servers_path, class: "text-sm text-slate-500 hover:text-slate-700" %>
 
   <div class="mt-2 flex items-start justify-between gap-4">
@@ -19,43 +17,7 @@
     </div>
   </div>
 
-  <section id="server-status" class="mt-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-    <div class="flex items-center justify-between gap-4">
-      <div>
-        <h2 class="text-lg font-semibold">Statut</h2>
-        <p class="mt-1 text-sm text-slate-500">Le serveur accepte-t-il les connexions sur le port <%= @server.port %> ?</p>
-      </div>
-      <div class="flex items-center gap-3">
-        <%= render "servers/status", server: @server %>
-        <%= button_to server_ping_path(@server),
-              title: "Actualiser le statut", aria: { label: "Actualiser le statut" },
-              form: { data: { controller: "quiet-submit",
-                              action: "turbo:submit-start->server-ping#start turbo:submit-end->server-ping#finish",
-                              server_ping_badge_param: dom_id(@server, :status) } },
-              class: "group cursor-pointer rounded-md border border-slate-300 bg-white p-2 text-slate-600 shadow-sm hover:bg-slate-50 disabled:cursor-wait disabled:opacity-60" do %>
-          <%= icon :arrow_path, class: "h-4 w-4 group-disabled:animate-spin" %>
-        <% end %>
-      </div>
-    </div>
-  </section>
-
-  <section id="server-ssh" class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-    <div class="flex items-center justify-between gap-4">
-      <div>
-        <h2 class="text-lg font-semibold">Connexion SSH</h2>
-        <p class="mt-1 text-sm text-slate-500">Se connecte avec la clé de l'application et lance un <code class="rounded bg-slate-100 px-1 font-mono text-xs">echo</code> sur le serveur.</p>
-      </div>
-      <%= button_to server_ssh_check_path(@server),
-            form: { data: { controller: "quiet-submit" } },
-            class: "group inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-wait disabled:opacity-60" do %>
-        <%= icon :arrow_path, class: "hidden h-4 w-4 animate-spin group-disabled:block" %>
-        <span class="group-disabled:hidden">Tester la connexion SSH</span>
-        <span class="hidden group-disabled:inline">Test en cours…</span>
-      <% end %>
-    </div>
-
-    <div id="<%= dom_id(@server, :ssh_check) %>" class="mt-4 empty:hidden"></div>
-  </section>
+  <%= render "servers/health_bar", server: @server %>
 
   <section id="server-authorized-keys" class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
     <h2 class="text-lg font-semibold">Clés autorisées</h2>
