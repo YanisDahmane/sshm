@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_03_205858) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_03_212709) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -140,7 +140,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_205858) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "role", default: "viewer", null: false
+    t.datetime "deactivated_at"
+    t.bigint "profile_id"
+    t.integer "sign_in_count", default: 0, null: false
+    t.datetime "current_sign_in_at"
+    t.datetime "last_sign_in_at"
+    t.string "current_sign_in_ip"
+    t.string "last_sign_in_ip"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["profile_id"], name: "index_users_on_profile_id", unique: true, where: "(profile_id IS NOT NULL)"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
@@ -152,4 +160,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_205858) do
   add_foreign_key "invitations", "users", on_delete: :nullify
   add_foreign_key "temporary_accesses", "profiles", on_delete: :nullify
   add_foreign_key "temporary_accesses", "servers", on_delete: :cascade
+  add_foreign_key "users", "profiles", on_delete: :nullify
 end

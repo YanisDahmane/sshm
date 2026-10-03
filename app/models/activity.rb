@@ -23,6 +23,9 @@ class Activity < ApplicationRecord
     Kind.new(:user_invited, "Utilisateur invité", :configuration, :info, "Une invitation à rejoindre SSHM a été créée."),
     Kind.new(:invitation_accepted, "Invitation acceptée", :security, :warning, "Un nouvel utilisateur a rejoint SSHM."),
     Kind.new(:invitation_revoked, "Invitation révoquée", :configuration, :info, "Une invitation en attente a été annulée."),
+    Kind.new(:user_role_changed, "Rôle modifié", :security, :warning, "Le rôle d'un utilisateur a changé."),
+    Kind.new(:user_deactivated, "Utilisateur désactivé", :security, :warning, "Un compte a été désactivé : il ne peut plus se connecter."),
+    Kind.new(:user_reactivated, "Utilisateur réactivé", :security, :warning, "Un compte désactivé peut de nouveau se connecter."),
     Kind.new(:profile_created, "Profil créé", :configuration, :info, "Un profil a été créé."),
     Kind.new(:profile_deleted, "Profil supprimé", :configuration, :info, "Un profil a été supprimé."),
     Kind.new(:ssh_key_generated, "Clé SSHM générée", :security, :critical, "La clé SSH de SSHM a été générée ou régénérée."),
@@ -81,6 +84,9 @@ class Activity < ApplicationRecord
     when :user_invited then "#{data["email"]} invité (#{data["role_label"]})"
     when :invitation_accepted then "#{data["email"]} a rejoint SSHM (#{data["role_label"]})"
     when :invitation_revoked then "Invitation de #{data["email"]} révoquée"
+    when :user_role_changed then "Rôle de #{data["email"]} : #{data["from"]} → #{data["to"]}"
+    when :user_deactivated then "#{data["email"]} désactivé"
+    when :user_reactivated then "#{data["email"]} réactivé"
     when :profile_created then "Profil « #{profile_name} » créé"
     when :profile_deleted then "Profil « #{profile_name} » supprimé"
     when :ssh_key_generated then data["regenerated"] ? "Clé SSHM régénérée" : "Clé SSHM générée"

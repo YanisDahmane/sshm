@@ -49,4 +49,58 @@ class UserTest < ActiveSupport::TestCase
   test "role labels" do
     assert_equal %w[Admin Opérateur Lecture], [ users(:one), users(:operator), users(:viewer) ].map(&:role_label)
   end
+
+  test "a deactivated account cannot authenticate" do
+    user = users(:operator)
+    assert user.active_for_authentication?
+
+    user.deactivate!
+
+    assert user.deactivated?
+    assert_not user.active_for_authentication?
+    assert_equal :deactivated, user.inactive_message
+    assert_not_includes User.active, user
+
+    user.reactivate!
+    assert user.active_for_authentication?
+  end
+
+  test "the last active admin cannot be demoted or deactivated" do
+    admin = users(:one)
+
+    assert_not admin.update(role: :operator)
+    assert_includes admin.errors.full_messages, "Il doit toujours rester au moins un administrateur actif."
+
+    admin.reload
+    assert_raises(ActiveRecord::RecordInvalid) { admin.deactivate! }
+  end
+
+  test "an admin can be demoted when another active admin remains" do
+    users(:operator).update!(role: :admin)
+
+    assert users(:one).update(role: :viewer)
+  end
+
+  test "a deactivated admin does not count as remaining admin" do
+    other = users(:operator)
+    other.update!(role: :admin)
+    other.deactivate!
+
+    assert_not users(:one).update(role: :viewer)
+  end
+
+  test "a profile belongs to one user at most" do
+    users(:operator).update!(profile: profiles(:alice))
+
+    user = users(:viewer)
+    assert_not user.update(profile: profiles(:alice))
+    assert user.errors.of_kind?(:profile_id, :taken)
+  end
+
+  test "deleting a profile unlinks its user" do
+    users(:operator).update!(profile: profiles(:alice))
+    profiles(:alice).destroy!
+
+    assert_nil users(:operator).reload.profile_id
+  end
 end

@@ -67,7 +67,10 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
       "run automation" => -> { post run_settings_automation_path(Automation.all_kinds.first) },
       "users" => -> { get settings_users_path },
       "invite a user" => -> { post settings_invitations_path, params: { invitation: { email: "new@example.com", role: "viewer" } } },
-      "revoke an invitation" => -> { delete settings_invitation_path(Invitation.create!(email: "x@example.com", invited_by: users(:one))) }
+      "revoke an invitation" => -> { delete settings_invitation_path(Invitation.create!(email: "x@example.com", invited_by: users(:one))) },
+      "change a user's role" => -> { patch settings_user_path(users(:viewer)), params: { user: { role: "operator", profile_id: "" } } },
+      "deactivate a user" => -> { post deactivate_settings_user_path(users(:viewer)) },
+      "reactivate a user" => -> { post reactivate_settings_user_path(users(:viewer)) }
     }
   }.freeze
 

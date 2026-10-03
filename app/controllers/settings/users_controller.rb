@@ -2,10 +2,49 @@ module Settings
   class UsersController < ApplicationController
     require_permission :administer
 
+    before_action :set_user, only: %i[update deactivate reactivate]
+
     def index
-      @users = User.order(:email)
+      @users = User.includes(:profile).order(:email)
       @invitations = Invitation.pending.includes(:invited_by).order(created_at: :desc)
       @invitation = Invitation.new
+      @profiles = Profile.order(:name)
+    end
+
+    # Role and linked profile.
+    def update
+      previous_role = @user.role_label
+
+      if @user.update(params.expect(user: %i[role profile_id]))
+        if @user.saved_change_to_role?
+          Activity.record!(:user_role_changed, email: @user.email, from: previous_role, to: @user.role_label)
+        end
+        redirect_to settings_users_path, notice: "#{@user.email} a été mis à jour."
+      else
+        redirect_to settings_users_path, alert: "Impossible de modifier #{@user.email} : #{@user.errors.full_messages.to_sentence}"
+      end
+    end
+
+    def deactivate
+      return redirect_to(settings_users_path, alert: "Vous ne pouvez pas désactiver votre propre compte.") if @user == current_user
+
+      @user.deactivate!
+      Activity.record!(:user_deactivated, email: @user.email)
+      redirect_to settings_users_path, notice: "#{@user.email} est désactivé : il ne peut plus se connecter."
+    rescue ActiveRecord::RecordInvalid
+      redirect_to settings_users_path, alert: @user.errors.full_messages.to_sentence
+    end
+
+    def reactivate
+      @user.reactivate!
+      Activity.record!(:user_reactivated, email: @user.email)
+      redirect_to settings_users_path, notice: "#{@user.email} peut de nouveau se connecter."
+    end
+
+    private
+
+    def set_user
+      @user = User.find(params[:id])
     end
   end
 end

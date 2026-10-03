@@ -43,11 +43,37 @@
 
 <section id="users" class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
   <h2 class="text-base font-semibold">Utilisateurs</h2>
+  <p class="mt-1 text-sm text-slate-500">Rôle, profil SSH de la personne (pour ses demandes d'accès) et accès à SSHM.</p>
+  <% select_class = "rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" %>
   <ul class="mt-4 divide-y divide-slate-100 rounded-md border border-slate-200">
     <% @users.each do |user| %>
-      <li id="<%= dom_id(user) %>" class="user-row flex flex-wrap items-center gap-3 px-4 py-3 text-sm">
-        <p class="min-w-0 flex-1 font-medium"><%= user.email %><%= " (vous)" if user == current_user %></p>
-        <span class="user-role-badge rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600"><%= user.role_label %></span>
+      <li id="<%= dom_id(user) %>" class="user-row flex flex-wrap items-center gap-3 px-4 py-3 text-sm <%= "is-deactivated bg-slate-50" if user.deactivated? %>">
+        <div class="min-w-48 flex-1">
+          <p class="font-medium <%= "text-slate-400 line-through" if user.deactivated? %>"><%= user.email %><%= " (vous)" if user == current_user %></p>
+          <p class="text-xs text-slate-500">
+            <% if user.deactivated? %>
+              <span class="user-state font-medium text-red-700">Désactivé</span> <%= relative_time_tag user.deactivated_at %>
+            <% elsif user.last_sign_in_at %>
+              Dernière connexion <%= relative_time_tag user.last_sign_in_at %>
+            <% else %>
+              Jamais connecté
+            <% end %>
+          </p>
+        </div>
+        <%= form_with model: user, url: settings_user_path(user), class: "flex flex-wrap items-center gap-2" do |f| %>
+          <%= f.select :role, User::ROLE_LABELS.invert, {}, aria: { label: "Rôle de #{user.email}" }, class: select_class %>
+          <%= f.select :profile_id, @profiles.map { |profile| [ profile.name, profile.id ] }, { include_blank: "Aucun profil" },
+                aria: { label: "Profil de #{user.email}" }, class: select_class %>
+          <%= f.submit "Enregistrer", class: "cursor-pointer rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" %>
+        <% end %>
+        <% if user.deactivated? %>
+          <%= button_to "Réactiver", reactivate_settings_user_path(user),
+                class: "cursor-pointer rounded-md border border-emerald-300 bg-white px-3 py-1.5 text-sm font-medium text-emerald-700 shadow-sm hover:bg-emerald-50" %>
+        <% elsif user != current_user %>
+          <%= button_to "Désactiver", deactivate_settings_user_path(user),
+                form: { data: { turbo_confirm: "#{user.email} ne pourra plus se connecter et sera déconnecté immédiatement.", confirm_label: "Désactiver", confirm_variant: "danger" } },
+                class: "cursor-pointer rounded-md border border-red-300 bg-white px-3 py-1.5 text-sm font-medium text-red-700 shadow-sm hover:bg-red-50" %>
+        <% end %>
       </li>
     <% end %>
   </ul>

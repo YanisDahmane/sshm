@@ -21,7 +21,12 @@ Rails.application.routes.draw do
 
   resource :settings, only: :show
   namespace :settings do
-    resources :users, only: :index
+    resources :users, only: %i[index update] do
+      member do
+        post :deactivate
+        post :reactivate
+      end
+    end
     resources :invitations, only: %i[create destroy]
     resource :notifications, only: :show
     resources :notification_channels, except: %i[index show], path: "notifications/channels" do

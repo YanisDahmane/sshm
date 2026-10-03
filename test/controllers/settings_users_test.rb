@@ -12,6 +12,14 @@ class SettingsUsersTest < ActionDispatch::IntegrationTest
 
     assert_select "#users li.user-row", 3
     assert_select "#users li", text: /one@example.com \(vous\)/
+    assert_select "##{ActionView::RecordIdentifier.dom_id(users(:one))} button", text: "Désactiver", count: 0
+    assert_select "##{ActionView::RecordIdentifier.dom_id(users(:operator))}" do
+      assert_select "select[name='user[role]'] option[selected][value=operator]"
+      assert_select "select[name='user[profile_id]'] option:first-child[value='']", "Aucun profil"
+      assert_select "select[name='user[profile_id]'] option[selected]", 0
+      assert_select "form[action=?][data-turbo-confirm]", deactivate_settings_user_path(users(:operator))
+      assert_select "p", text: "Jamais connecté"
+    end
     assert_select "li.pending-invitation", 1 do
       assert_select "p", text: /dave@example.com\s+Opérateur/
       assert_select "input.invitation-link[value=?]", invitation_acceptance_url(invitation.token)
@@ -58,5 +66,76 @@ class SettingsUsersTest < ActionDispatch::IntegrationTest
     delete settings_invitation_path(invitation)
 
     assert_response :not_found
+  end
+
+  test "changing a role is logged" do
+    sign_in users(:one)
+
+    patch settings_user_path(users(:viewer)), params: { user: { role: "operator", profile_id: "" } }
+
+    assert users(:viewer).reload.operator?
+    assert_redirected_to settings_users_path
+    assert_equal "Rôle de viewer@example.com : Lecture → Opérateur", Activity.of_kind(:user_role_changed).sole.summary
+  end
+
+  test "linking a profile does not log a role change" do
+    sign_in users(:one)
+
+    patch settings_user_path(users(:viewer)), params: { user: { role: "viewer", profile_id: profiles(:alice).id } }
+
+    assert_equal profiles(:alice), users(:viewer).reload.profile
+    assert_equal 0, Activity.of_kind(:user_role_changed).count
+  end
+
+  test "the last admin cannot demote themselves" do
+    sign_in users(:one)
+
+    patch settings_user_path(users(:one)), params: { user: { role: "viewer", profile_id: "" } }
+
+    assert users(:one).reload.admin?
+    assert_match "au moins un administrateur actif", flash[:alert]
+  end
+
+  test "deactivating and reactivating an account" do
+    sign_in users(:one)
+
+    post deactivate_settings_user_path(users(:operator))
+    assert users(:operator).reload.deactivated?
+    assert_equal "operator@example.com désactivé", Activity.of_kind(:user_deactivated).sole.summary
+
+    post reactivate_settings_user_path(users(:operator))
+    assert_not users(:operator).reload.deactivated?
+    assert_equal "operator@example.com réactivé", Activity.of_kind(:user_reactivated).sole.summary
+  end
+
+  test "an admin cannot deactivate their own account" do
+    users(:operator).update!(role: :admin)
+    sign_in users(:one)
+
+    post deactivate_settings_user_path(users(:one))
+
+    assert_not users(:one).reload.deactivated?
+    assert_equal "Vous ne pouvez pas désactiver votre propre compte.", flash[:alert]
+  end
+
+  test "a deactivated user is signed out on their next request and cannot sign in again" do
+    sign_in users(:operator)
+    get root_path
+    assert_response :success
+
+    users(:operator).deactivate!
+    get root_path
+    assert_redirected_to new_user_session_path
+
+    post user_session_path, params: { user: { email: "operator@example.com", password: "password123" } }
+    follow_redirect! while response.redirect?
+    assert_select "#flash", text: /Ce compte a été désactivé/
+  end
+
+  test "signing in records the last sign in" do
+    post user_session_path, params: { user: { email: "viewer@example.com", password: "password123" } }
+
+    assert_equal 1, users(:viewer).reload.sign_in_count
+    assert_not_nil users(:viewer).last_sign_in_at
   end
 end

@@ -26,6 +26,9 @@ fr:
         email: L'email
         role: Le rôle
       user:
+        role: Le rôle
+        profile: Le profil
+        profile_id: Le profil
         email: Email
         password: Mot de passe
         password_confirmation: Confirmation du mot de passe
@@ -39,11 +42,20 @@ fr:
               app_key: "est la clé de SSHM et ne peut pas être utilisée par un profil"
             fingerprint:
               taken: "est déjà utilisée par un autre profil"
+        user:
+          attributes:
+            base:
+              last_admin: "Il doit toujours rester au moins un administrateur actif."
+            profile_id:
+              taken: "est déjà relié à un autre utilisateur"
         invitation:
           attributes:
             email:
               taken_by_user: "correspond déjà à un utilisateur"
               already_invited: "a déjà une invitation en attente"
+  devise:
+    failure:
+      deactivated: "Ce compte a été désactivé. Contactez un administrateur."
   time:
     formats:
       short: "%d %b %H:%M"
