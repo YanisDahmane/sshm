@@ -1,0 +1,44 @@
+require "application_system_test_case"
+
+class AuthorizedKeyRemovalSystemTest < ApplicationSystemTestCase
+  include Devise::Test::IntegrationHelpers
+  include StubHelpers
+
+  setup do
+    sign_in users(:one)
+    stub_method_until_teardown(ServerAccountsReader, :call, ->(server, **) { ServerAccountsReader::Result.new(accounts: [ AuthorizedKeysAccount.login(server) ], error_title: nil, error_details: nil) })
+  end
+
+  # Simulates the server's authorized_keys file in memory.
+  test "deleting a key asks for confirmation and updates the list in place" do
+    bob = SshKeyGenerator.generate(comment: "bob@desktop").public_key
+    lines = [ ssh_keys(:main).public_key, bob ]
+    reader = lambda do |_server, account:, **|
+      keys = account.root? ? [] : AuthorizedKey.parse(lines.join("\n"))
+      AuthorizedKeysReader::Result.new(keys: keys, error_title: nil, error_details: nil)
+    end
+    remover = lambda do |_server, blob, **|
+      lines.reject! { |line| line.split(" ")[1] == blob }
+      AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil)
+    end
+
+    stub_method(AuthorizedKeysReader, :call, reader) do
+      stub_method(AuthorizedKeyRemoval, :call, remover) do
+        visit server_path(servers(:web))
+
+        within("#server-authorized-keys") do
+          assert_selector "li.authorized-key", count: 2
+          assert_selector "li.authorized-key:first-child button[title='Supprimer la clé']", count: 0
+
+          dismiss_confirm { find("li.authorized-key", text: "bob@desktop").click_on("Supprimer la clé") }
+          assert_selector "li.authorized-key", count: 2
+
+          accept_confirm { find("li.authorized-key", text: "bob@desktop").click_on("Supprimer la clé") }
+          assert_selector "li.authorized-key", count: 1
+          assert_selector ".key-master", text: "Master"
+        end
+        assert_selector "#flash", text: "La clé « bob@desktop » a été supprimée de « Web » pour deploy."
+      end
+    end
+  end
+end
