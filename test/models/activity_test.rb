@@ -53,6 +53,8 @@ class ActivityTest < ActiveSupport::TestCase
       [ :unknown_key_detected, { unix_user: "root" } ] => "Clé « sans nom » sans profil trouvée sur « Web » pour root",
       [ :key_disappeared, { unix_user: "root", key_name: "bob" } ] => "Clé « bob » disparue de « Web » pour root",
       [ :ssh_access_lost, {} ] => "« Web » refuse la clé de SSHM",
+      [ :team_created, { team_name: "Devs", profiles: 3 } ] => "Équipe « Devs » créée (3 profil(s))",
+      [ :team_deleted, { team_name: "Devs" } ] => "Équipe « Devs » supprimée",
       [ :server_group_created, { group_name: "Prod", servers: 2 } ] => "Groupe « Prod » créé (2 serveur(s))",
       [ :server_group_deleted, { group_name: "Prod" } ] => "Groupe « Prod » supprimé",
       [ :host_key_changed, { new_fingerprint: "SHA256:new" } ] => "Nouvelle empreinte acceptée pour « Web » : SHA256:new",

@@ -14,7 +14,7 @@ class ProfilesIndexTest < ActionDispatch::IntegrationTest
 
     assert_select "#profiles-section a[href=?]", new_profile_path, text: "Ajouter un profil"
     assert_select "#profiles tbody tr", 2
-    assert_select "#profiles tbody tr:first-child td:first-child", "Alice"
+    assert_select "#profiles tbody tr:first-child td:first-child a:first-child", "Alice"
     Profile.find_each do |profile|
       assert_select "##{ActionView::RecordIdentifier.dom_id(profile)}" do
         assert_select "td a[href=?]", profile_path(profile), text: profile.name

@@ -4,7 +4,7 @@ class ProfilesController < ApplicationController
   before_action :set_profile, only: %i[show edit update destroy]
 
   def index
-    @profiles = Profile.order(:name)
+    @profiles = Profile.order(:name).includes(:teams)
   end
 
   def show

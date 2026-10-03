@@ -4,7 +4,10 @@
   <div class="flex items-center justify-between gap-4">
     <div>
       <h1 class="text-2xl font-bold tracking-tight">Profils</h1>
-      <p class="text-sm text-slate-500"><%= pluralize(@profiles.size, "profil", plural: "profils") %></p>
+      <p class="text-sm text-slate-500">
+        <%= pluralize(@profiles.size, "profil", plural: "profils") %> ·
+        <%= link_to "Équipes", teams_path, class: "font-medium text-indigo-600 hover:text-indigo-500" %>
+      </p>
     </div>
     <% if can?(:operate) %>
       <%= link_to "Ajouter un profil", new_profile_path,
@@ -26,7 +29,12 @@
         <tbody class="divide-y divide-slate-100">
           <% @profiles.each do |profile| %>
             <tr id="<%= dom_id(profile) %>" class="hover:bg-slate-50">
-              <td class="px-4 py-3 font-medium"><%= link_to profile.name, profile_path(profile), class: "hover:text-indigo-600 hover:underline" %></td>
+              <td class="px-4 py-3">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <%= link_to profile.name, profile_path(profile), class: "font-medium hover:text-indigo-600 hover:underline" %>
+                  <%= render partial: "teams/badge", collection: profile.teams, as: :team %>
+                </div>
+              </td>
               <td class="px-4 py-3 font-mono text-slate-700"><%= profile.authorized_key&.type %></td>
               <td class="px-4 py-3 font-mono text-xs text-slate-500"><%= profile.fingerprint %></td>
               <td class="px-4 py-3">

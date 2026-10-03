@@ -35,6 +35,8 @@ class Activity < ApplicationRecord
     Kind.new(:two_factor_disabled, "2FA désactivée", :security, :critical, "La double authentification d'un utilisateur a été désactivée ou réinitialisée."),
     Kind.new(:two_factor_backup_code_used, "Code de secours utilisé", :security, :warning, "Un utilisateur s'est connecté avec un code de secours."),
     Kind.new(:profile_created, "Profil créé", :configuration, :info, "Un profil a été créé."),
+    Kind.new(:team_created, "Équipe créée", :configuration, :info, "Une équipe de profils a été créée."),
+    Kind.new(:team_deleted, "Équipe supprimée", :configuration, :info, "Une équipe a été supprimée (ses profils et leurs accès restent)."),
     Kind.new(:profile_deleted, "Profil supprimé", :configuration, :info, "Un profil a été supprimé."),
     Kind.new(:ssh_key_generated, "Clé SSHM générée", :security, :critical, "La clé SSH de SSHM a été générée ou régénérée."),
     Kind.new(:ssh_key_rotation_started, "Rotation de la clé SSHM lancée", :security, :warning, "Une nouvelle clé SSHM est en cours d'installation sur les serveurs."),
@@ -108,6 +110,8 @@ class Activity < ApplicationRecord
     when :two_factor_disabled then data["reset_by"] ? "2FA de #{data["email"]} réinitialisée par #{data["reset_by"]}" : "2FA désactivée pour #{data["email"]}"
     when :two_factor_backup_code_used then "#{data["email"]} s'est connecté avec un code de secours (#{data["left"]} restant(s))"
     when :profile_created then "Profil « #{profile_name} » créé"
+    when :team_created then "Équipe « #{data["team_name"]} » créée (#{data["profiles"]} profil(s))"
+    when :team_deleted then "Équipe « #{data["team_name"]} » supprimée"
     when :profile_deleted then "Profil « #{profile_name} » supprimé"
     when :ssh_key_generated then data["regenerated"] ? "Clé SSHM régénérée" : "Clé SSHM générée"
     when :ssh_key_rotation_started then "Rotation de la clé SSHM lancée sur #{data["servers"]} serveur(s)"

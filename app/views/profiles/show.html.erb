@@ -8,6 +8,11 @@
     <div>
       <h1 class="text-2xl font-bold tracking-tight"><%= @profile.name %></h1>
       <p class="mt-1 text-sm text-slate-500">Profil ajouté <%= relative_time_tag @profile.created_at %></p>
+      <% if @profile.teams.any? %>
+        <div class="profile-teams mt-2 flex flex-wrap gap-1.5">
+          <%= render partial: "teams/badge", collection: @profile.teams, as: :team %>
+        </div>
+      <% end %>
     </div>
     <div class="flex shrink-0 items-center gap-2">
       <% if can?(:operate) %>

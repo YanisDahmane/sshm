@@ -41,7 +41,7 @@ module ApplicationHelper
   def command_palette_items
     pages = [
       { label: "Dashboard", url: root_path }, { label: "Serveurs", url: servers_path }, { label: "Profils", url: profiles_path },
-      { label: "Groupes de serveurs", url: server_groups_path },
+      { label: "Groupes de serveurs", url: server_groups_path }, { label: "Équipes", url: teams_path },
       { label: "Activité", url: activities_path }
     ]
     pages += [ { label: "Ajouter un serveur", url: new_server_path }, { label: "Ajouter un profil", url: new_profile_path } ] if can?(:operate)
@@ -58,7 +58,9 @@ module ApplicationHelper
     end
     profiles = Profile.order(:name).map { |profile| { group: "Profils", label: profile.name, hint: profile.authorized_key&.comment, url: profile_path(profile) } }
 
-    pages + groups + servers + profiles
+    teams = Team.order(:name).map { |team| { group: "Équipes", label: team.name, hint: "équipe", url: team_path(team) } }
+
+    pages + groups + servers + teams + profiles
   end
 
   # Profile name proposed for an authorized key: its comment without the host

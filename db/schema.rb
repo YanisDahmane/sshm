@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_04_080000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_04_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -196,6 +196,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_080000) do
     t.string "state", default: "active", null: false
   end
 
+  create_table "team_memberships", force: :cascade do |t|
+    t.bigint "team_id", null: false
+    t.bigint "profile_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["profile_id"], name: "index_team_memberships_on_profile_id"
+    t.index ["team_id", "profile_id"], name: "index_team_memberships_on_team_id_and_profile_id", unique: true
+    t.index ["team_id"], name: "index_team_memberships_on_team_id"
+  end
+
+  create_table "teams", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index "lower((name)::text)", name: "index_teams_on_lower_name", unique: true
+  end
+
   create_table "temporary_accesses", force: :cascade do |t|
     t.bigint "server_id", null: false
     t.bigint "profile_id"
@@ -258,6 +276,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_080000) do
   add_foreign_key "revocations", "users", column: "started_by_id", on_delete: :nullify
   add_foreign_key "server_group_memberships", "server_groups", on_delete: :cascade
   add_foreign_key "server_group_memberships", "servers", on_delete: :cascade
+  add_foreign_key "team_memberships", "profiles", on_delete: :cascade
+  add_foreign_key "team_memberships", "teams", on_delete: :cascade
   add_foreign_key "temporary_accesses", "profiles", on_delete: :nullify
   add_foreign_key "temporary_accesses", "servers", on_delete: :cascade
   add_foreign_key "users", "profiles", on_delete: :nullify

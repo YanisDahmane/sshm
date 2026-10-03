@@ -3,6 +3,7 @@ fr:
     models:
       server: Serveur
       server_group: Groupe de serveurs
+      team: Équipe
       profile: Profil
       user: Utilisateur
       notification_channel: Canal de notification
@@ -16,6 +17,9 @@ fr:
       server_group:
         name: Nom
         color: Couleur
+      team:
+        name: Nom
+        description: Description
       profile:
         name: Nom
         public_key: Clé SSH publique

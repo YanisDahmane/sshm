@@ -29,6 +29,10 @@ Rails.application.routes.draw do
     resource :access, only: :destroy, controller: "profile_accesses"
     resource :revocation, only: :create
   end
+  resources :teams do
+    resources :accesses, only: :create, controller: "team_accesses"
+    resource :access, only: :destroy, controller: "team_accesses"
+  end
   resources :revocations, only: :show do
     post :retry, on: :member
   end
