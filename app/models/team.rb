@@ -3,6 +3,7 @@
 # only: the servers still get one authorized_keys line per profile.
 class Team < ApplicationRecord
   has_many :memberships, class_name: "TeamMembership", dependent: :delete_all
+  has_many :access_rules, dependent: :delete_all
   has_many :profiles, -> { order(:name) }, through: :memberships
 
   normalizes :name, with: ->(value) { value.squish }

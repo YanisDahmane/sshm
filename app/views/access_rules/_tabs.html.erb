@@ -1,0 +1,17 @@
+<%# Header of the "Accès" section: desired state (rules) and drift. %>
+<div>
+  <h1 class="text-2xl font-bold tracking-tight">Accès</h1>
+  <p class="mt-1 text-sm text-slate-500">Décrivez qui doit avoir accès à quoi, puis comparez avec les clés réellement présentes sur les serveurs.</p>
+</div>
+<nav class="access-tabs mt-4 flex gap-2 border-b border-slate-200" aria-label="Accès">
+  <% tab = "-mb-px border-b-2 px-3 py-2 text-sm font-medium" %>
+  <%= link_to "Règles", access_rules_path, aria: { current: (current == :rules ? "page" : nil) },
+        class: "#{tab} #{current == :rules ? "border-indigo-600 text-indigo-700" : "border-transparent text-slate-600 hover:text-slate-900"}" %>
+  <%= link_to drift_path, aria: { current: (current == :drift ? "page" : nil) },
+        class: "#{tab} inline-flex items-center gap-2 #{current == :drift ? "border-indigo-600 text-indigo-700" : "border-transparent text-slate-600 hover:text-slate-900"}" do %>
+    Écarts
+    <% if report.drifts.any? %>
+      <span class="drift-count rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800"><%= report.drifts.size %></span>
+    <% end %>
+  <% end %>
+</nav>

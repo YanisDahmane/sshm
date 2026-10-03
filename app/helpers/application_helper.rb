@@ -42,6 +42,7 @@ module ApplicationHelper
     pages = [
       { label: "Dashboard", url: root_path }, { label: "Serveurs", url: servers_path }, { label: "Profils", url: profiles_path },
       { label: "Groupes de serveurs", url: server_groups_path }, { label: "Équipes", url: teams_path },
+      { label: "Règles d'accès", url: access_rules_path }, { label: "Écarts", hint: "règles d'accès", url: drift_path },
       { label: "Activité", url: activities_path }
     ]
     pages += [ { label: "Ajouter un serveur", url: new_server_path }, { label: "Ajouter un profil", url: new_profile_path } ] if can?(:operate)

@@ -10,9 +10,27 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_04_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_04_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "access_rules", force: :cascade do |t|
+    t.bigint "profile_id"
+    t.bigint "team_id"
+    t.bigint "server_id"
+    t.bigint "server_group_id"
+    t.string "unix_user"
+    t.bigint "created_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_access_rules_on_created_by_id"
+    t.index ["profile_id"], name: "index_access_rules_on_profile_id"
+    t.index ["server_group_id"], name: "index_access_rules_on_server_group_id"
+    t.index ["server_id"], name: "index_access_rules_on_server_id"
+    t.index ["team_id"], name: "index_access_rules_on_team_id"
+    t.check_constraint "num_nonnulls(profile_id, team_id) = 1", name: "access_rules_one_subject"
+    t.check_constraint "num_nonnulls(server_id, server_group_id) = 1", name: "access_rules_one_target"
+  end
 
   create_table "account_snapshots", force: :cascade do |t|
     t.bigint "server_id", null: false
@@ -55,6 +73,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_090000) do
     t.string "last_result"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "auto_fix", default: false, null: false
+    t.jsonb "state", default: {}, null: false
     t.index ["kind"], name: "index_automations_on_kind", unique: true
   end
 
@@ -259,6 +279,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_090000) do
     t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
   end
 
+  add_foreign_key "access_rules", "profiles", on_delete: :cascade
+  add_foreign_key "access_rules", "server_groups", on_delete: :cascade
+  add_foreign_key "access_rules", "servers", on_delete: :cascade
+  add_foreign_key "access_rules", "teams", on_delete: :cascade
+  add_foreign_key "access_rules", "users", column: "created_by_id", on_delete: :nullify
   add_foreign_key "account_snapshots", "servers", on_delete: :cascade
   add_foreign_key "activities", "profiles", on_delete: :nullify
   add_foreign_key "activities", "servers", on_delete: :nullify

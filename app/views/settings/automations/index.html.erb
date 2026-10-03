@@ -42,6 +42,12 @@
           <%= f.check_box :enabled, class: "h-4 w-4 rounded border-slate-300 text-indigo-600" %>
           Activer
         </label>
+        <% if automation.kind == "drift_check" %>
+          <label class="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+            <%= f.check_box :auto_fix, class: "h-4 w-4 rounded border-slate-300 text-indigo-600" %>
+            Ajouter automatiquement les clés manquantes <span class="text-xs text-slate-500">(jamais de suppression)</span>
+          </label>
+        <% end %>
         <%= f.select :interval_minutes, Automation::INTERVALS.invert, {}, aria: { label: "Fréquence" },
               class: "rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" %>
         <%= f.submit "Enregistrer", class: "cursor-pointer rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>

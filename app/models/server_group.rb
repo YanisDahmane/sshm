@@ -14,6 +14,7 @@ class ServerGroup < ApplicationRecord
   }.freeze
 
   has_many :memberships, class_name: "ServerGroupMembership", dependent: :delete_all
+  has_many :access_rules, dependent: :delete_all
   has_many :servers, -> { order(:name) }, through: :memberships
 
   normalizes :name, with: ->(value) { value.squish }

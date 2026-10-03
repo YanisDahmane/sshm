@@ -33,6 +33,11 @@ Rails.application.routes.draw do
     resources :accesses, only: :create, controller: "team_accesses"
     resource :access, only: :destroy, controller: "team_accesses"
   end
+  scope "access" do
+    resources :access_rules, only: %i[index create destroy], path: "rules"
+    resource :drift, only: :show
+    resource :drift_fix, only: %i[create destroy], path: "drift/fix"
+  end
   resources :revocations, only: :show do
     post :retry, on: :member
   end

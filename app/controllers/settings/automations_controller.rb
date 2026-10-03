@@ -29,7 +29,7 @@ module Settings
     end
 
     def automation_params
-      params.expect(automation: [ :enabled, :interval_minutes ])
+      params.expect(automation: [ :enabled, :interval_minutes, :auto_fix ])
     end
   end
 end

@@ -4,6 +4,7 @@ fr:
       server: Serveur
       server_group: Groupe de serveurs
       team: Équipe
+      access_rule: Règle d'accès
       profile: Profil
       user: Utilisateur
       notification_channel: Canal de notification
@@ -17,6 +18,10 @@ fr:
       server_group:
         name: Nom
         color: Couleur
+      access_rule:
+        subject_key: Profil ou équipe
+        target_key: Serveur ou groupe
+        unix_user: Compte
       team:
         name: Nom
         description: Description
@@ -42,6 +47,10 @@ fr:
         password_confirmation: Confirmation du mot de passe
     errors:
       models:
+        access_rule:
+          attributes:
+            base:
+              duplicate_rule: "Cette règle existe déjà"
         profile:
           attributes:
             public_key:

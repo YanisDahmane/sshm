@@ -1,0 +1,78 @@
+<% content_for :title, "Règles d'accès · SSHM" %>
+<% select_class = "mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" %>
+
+<%= render "access_rules/tabs", current: :rules, report: @report %>
+
+<% if can?(:operate) %>
+  <section id="new-access-rule" class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <h2 class="text-base font-semibold">Nouvelle règle</h2>
+    <% profiles = Profile.order(:name) %>
+    <% teams = Team.order(:name) %>
+    <% servers = Server.order(:name) %>
+    <% groups = ServerGroup.order(:name) %>
+    <% if (profiles.any? || teams.any?) && (servers.any? || groups.any?) %>
+      <%= form_with model: @rule, url: access_rules_path, class: "mt-4" do |f| %>
+        <%= render "shared/form_errors", record: @rule %>
+        <div class="grid grid-cols-1 items-end gap-4 sm:grid-cols-[1fr_1fr_12rem_auto]">
+          <div>
+            <%= f.label :subject_key, "Profil ou équipe", class: "block text-sm font-medium text-slate-700" %>
+            <%= f.select :subject_key, { "Équipes" => teams.map { |team| [ team.name, "team:#{team.id}" ] }, "Profils" => profiles.map { |profile| [ profile.name, "profile:#{profile.id}" ] } }.reject { |_, options| options.empty? },
+                  { prompt: "Choisir…" }, class: select_class %>
+          </div>
+          <div>
+            <%= f.label :target_key, "Serveur ou groupe", class: "block text-sm font-medium text-slate-700" %>
+            <%= f.select :target_key, { "Groupes" => groups.map { |group| [ group.name, "server_group:#{group.id}" ] }, "Serveurs" => servers.map { |server| [ server.name, "server:#{server.id}" ] } }.reject { |_, options| options.empty? },
+                  { prompt: "Choisir…" }, class: select_class %>
+          </div>
+          <div>
+            <%= f.label :unix_user, "Compte", class: "block text-sm font-medium text-slate-700" %>
+            <%= f.text_field :unix_user, placeholder: "utilisateur SSH", autocomplete: "off", spellcheck: false, class: "#{select_class} font-mono" %>
+          </div>
+          <%= f.submit "Ajouter la règle", class: "cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+        </div>
+        <p class="mt-2 text-xs text-slate-500">Compte vide : l'utilisateur SSH de chaque serveur. Les règles décrivent des accès permanents ; rien n'est modifié sur les serveurs tant que vous ne corrigez pas les écarts.</p>
+      <% end %>
+    <% else %>
+      <p class="mt-2 text-sm text-slate-500">Créez d'abord un profil (ou une équipe) et un serveur (ou un groupe).</p>
+    <% end %>
+  </section>
+<% end %>
+
+<section id="access-rules-section" class="mt-6">
+  <% if @rules.any? %>
+    <ul id="access-rules" class="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white shadow-sm">
+      <% @rules.each do |rule| %>
+        <li id="<%= dom_id(rule) %>" class="access-rule flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3 text-sm">
+          <% if rule.team %>
+            <%= link_to rule.team.name, team_path(rule.team), class: "font-medium hover:text-indigo-600 hover:underline" %>
+            <span class="rounded-full bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700">équipe · <%= pluralize(rule.team.profiles.size, "profil", plural: "profils") %></span>
+          <% else %>
+            <%= link_to rule.profile.name, profile_path(rule.profile), class: "font-medium hover:text-indigo-600 hover:underline" %>
+          <% end %>
+          <span class="text-slate-400">→</span>
+          <% if rule.server_group %>
+            <%= render "server_groups/badge", group: rule.server_group %>
+            <span class="text-xs text-slate-500"><%= pluralize(rule.server_group.servers.size, "serveur", plural: "serveurs") %></span>
+          <% else %>
+            <%= link_to rule.server.name, server_path(rule.server), class: "font-medium hover:text-indigo-600 hover:underline" %>
+          <% end %>
+          <span class="font-mono text-xs text-slate-600"><%= rule.unix_user || tag.span("utilisateur SSH", class: "font-sans italic text-slate-500") %></span>
+          <span class="ml-auto text-xs text-slate-400" title="<%= l(rule.created_at, format: :long) %>"><%= rule.created_by&.email %></span>
+          <% if can?(:operate) %>
+            <%= button_to access_rule_path(rule), method: :delete, title: "Supprimer la règle", aria: { label: "Supprimer la règle #{rule.summary}" },
+                  form: { data: { turbo_confirm: "La règle « #{rule.summary} » sera supprimée. Les clés déjà installées restent en place.",
+                                  confirm_label: "Supprimer la règle", confirm_variant: "danger" } },
+                  class: "cursor-pointer rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600" do %>
+              <%= icon :trash %>
+            <% end %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <div class="rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
+      <p class="text-sm text-slate-500">Aucune règle. Exemple : « l'équipe Développeurs doit avoir accès au groupe Production avec le compte deploy ».</p>
+      <p class="mt-1 text-sm text-slate-500">Les écarts entre les règles et les clés réellement présentes apparaîtront dans l'onglet Écarts.</p>
+    </div>
+  <% end %>
+</section>
