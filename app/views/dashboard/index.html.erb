@@ -92,3 +92,17 @@
     <% end %>
   </section>
 </div>
+
+<section id="recent-activity" class="mt-6 rounded-xl border border-slate-200 bg-white px-6 pt-5 pb-2 shadow-sm">
+  <div class="flex items-center justify-between">
+    <h2 class="text-lg font-semibold">Activité récente</h2>
+    <%= link_to "Tout voir", activities_path, class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+  </div>
+  <% if @activities.any? %>
+    <ul class="mt-2 divide-y divide-slate-100">
+      <%= render partial: "activities/activity", collection: @activities %>
+    </ul>
+  <% else %>
+    <p class="py-6 text-sm text-slate-500">Rien pour le moment : les ajouts et suppressions de clés, détections et automatisations apparaîtront ici.</p>
+  <% end %>
+</section>

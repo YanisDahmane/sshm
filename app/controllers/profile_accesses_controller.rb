@@ -18,12 +18,9 @@ class ProfileAccessesController < ApplicationController
   def destroy
     server = Server.find(params.expect(:server_id))
     account = AuthorizedKeysAccount.for(server, params.expect(:account))
-    blob = @profile.authorized_key.key
-    result = AuthorizedKeyRemoval.call(server, blob, account: account)
+    result = KeyRevocation.call(server, @profile.authorized_key.key, account: account, key_name: @profile.authorized_key.comment || @profile.name, profile: @profile)
 
     if result.success?
-      TemporaryAccess.active.where(server: server, unix_user: account.unix_user, key_blob: blob).find_each(&:end!)
-      AccountSnapshot.find_by(server: server, unix_user: account.unix_user)&.forget!(blob)
       respond_with_accesses(:notice, "L'accès de « #{@profile.name} » à « #{server.name} » pour #{account.unix_user} a été retiré.")
     else
       respond_with_accesses(:alert, "Impossible de retirer l'accès : #{result.error_title} — #{result.error_details}")

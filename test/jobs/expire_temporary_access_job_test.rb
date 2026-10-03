@@ -70,4 +70,13 @@ class ExpireTemporaryAccessJobTest < ActiveJob::TestCase
 
     assert_equal [ profiles(:alice).fingerprint ], AccountSnapshot.sole.fingerprints
   end
+
+  test "logs the expiry as a system activity" do
+    access = create_temporary_access(expires_at: 1.minute.ago)
+
+    stub_method(AuthorizedKeyRemoval, :call, removal(:removed)) { ExpireTemporaryAccessJob.perform_now(access) }
+
+    activity = Activity.of_kind(:key_expired).sole
+    assert_equal [ servers(:web), profiles(:ci), "deploy", "Système" ], [ activity.server, activity.profile, activity.unix_user, activity.author_name ]
+  end
 end

@@ -31,7 +31,7 @@ class ServerPing
   end
 
   def self.record(server, reachable)
-    server.update_columns(reachable: reachable, last_checked_at: Time.current)
+    server.record_reachability!(reachable)
     reachable
   end
   private_class_method :record

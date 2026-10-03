@@ -17,8 +17,16 @@ class AccessGrant
       active&.end!
       schedule_expiry(server, profile, account, expires_at) if expires_at && result.added?
     end
+    log(server, profile, account, duration, expires_at) if result.added?
     result
   end
+
+  def self.log(server, profile, account, duration, expires_at)
+    Activity.record!(:key_added, server: server, profile: profile, unix_user: account.unix_user,
+                                 key_name: profile.authorized_key.comment || profile.name, fingerprint: profile.fingerprint,
+                                 duration_label: duration && TemporaryAccess.label_for(duration), expires_at: expires_at&.iso8601)
+  end
+  private_class_method :log
 
   def self.schedule_expiry(server, profile, account, expires_at)
     access = TemporaryAccess.create!(server: server, profile: profile, unix_user: account.unix_user,

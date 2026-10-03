@@ -97,4 +97,33 @@ class ServerTest < ActiveSupport::TestCase
     assert_nil server.ssh_ok
     assert_nil server.ssh_checked_at
   end
+
+  test "losing SSH access is logged once" do
+    server = servers(:web)
+    server.record_ssh_status!(false)
+    assert_equal 0, Activity.count, "unknown → refused is not a loss"
+
+    server.record_ssh_status!(true)
+    server.record_ssh_status!(false)
+    server.record_ssh_status!(false)
+
+    assert_equal [ "ssh_access_lost" ], Activity.pluck(:kind)
+  end
+
+  test "going down and coming back is logged" do
+    server = servers(:web) # reachable in the fixtures
+
+    server.record_reachability!(false)
+    server.record_reachability!(false)
+    server.record_reachability!(true)
+    server.record_reachability!(true)
+
+    assert_equal %w[server_unreachable server_back_online], Activity.order(:id).pluck(:kind)
+    assert server.reload.reachable
+  end
+
+  test "a first check that finds the server down is logged" do
+    servers(:backup).record_reachability!(false)
+    assert_equal [ "server_unreachable" ], Activity.pluck(:kind)
+  end
 end

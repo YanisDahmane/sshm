@@ -34,4 +34,14 @@ class SshKeysControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to settings_path
     assert_equal "Nouvelle clé SSH générée. Remplacez l'ancienne clé publique sur vos serveurs.", flash[:notice]
   end
+
+  test "logs the generation with its author" do
+    sign_in users(:one)
+
+    post ssh_key_path
+
+    activity = Activity.of_kind(:ssh_key_generated).sole
+    assert_equal users(:one), activity.user
+    assert_equal "Clé SSHM régénérée", activity.summary
+  end
 end

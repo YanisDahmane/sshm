@@ -87,4 +87,20 @@ class AccessGrantTest < ActiveSupport::TestCase
     assert_equal 1, TemporaryAccess.count
     assert_no_enqueued_jobs
   end
+
+  test "logs the added key, with its duration" do
+    with_authorization(:added) { AccessGrant.call(@server, profiles(:alice), account: @account, duration: 10.minutes) }
+
+    activity = Activity.of_kind(:key_added).sole
+    assert_equal [ @server, profiles(:alice), "deploy" ], [ activity.server, activity.profile, activity.unix_user ]
+    assert_equal "« Alice » autorisé sur « Web » pour deploy pendant 10 minutes", activity.summary
+    assert_equal profiles(:alice).fingerprint, activity.data["fingerprint"]
+  end
+
+  test "does not log a key that was already there or a failure" do
+    with_authorization(:already_present) { AccessGrant.call(@server, profiles(:alice), account: @account) }
+    with_authorization(:error) { AccessGrant.call(@server, profiles(:alice), account: @account) }
+
+    assert_equal 0, Activity.count
+  end
 end

@@ -14,8 +14,10 @@ class ExpireTemporaryAccessesJobTest < ActiveJob::TestCase
     assert_enqueued_with(job: ExpireTemporaryAccessJob, args: [ expired ])
   end
 
-  test "runs every minute in production" do
-    recurring = YAML.load_file(Rails.root.join("config/recurring.yml"))["production"]["expire_temporary_accesses"]
-    assert_equal({ "class" => "ExpireTemporaryAccessesJob", "schedule" => "every minute" }, recurring)
+  test "runs every minute in development and production" do
+    recurring = YAML.load_file(Rails.root.join("config/recurring.yml"), aliases: true)
+    %w[development production].each do |environment|
+      assert_equal({ "class" => "ExpireTemporaryAccessesJob", "schedule" => "every minute" }, recurring.dig(environment, "expire_temporary_accesses"))
+    end
   end
 end

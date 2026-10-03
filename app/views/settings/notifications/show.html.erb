@@ -1,0 +1,29 @@
+<% content_for :title, "Notifications · Paramètres · SSHM" %>
+<%= render "settings/nav" %>
+
+<div class="mt-8 rounded-xl border border-dashed border-indigo-300 bg-indigo-50/50 px-6 py-5 text-sm text-indigo-900">
+  <p class="font-semibold">Bientôt disponible</p>
+  <p class="mt-1">Vous pourrez choisir quelles activités vous notifient, et par quel canal. Voici les types d'activité qui seront proposés.</p>
+</div>
+
+<div class="mt-6 space-y-6">
+  <% @kinds_by_category.each do |category, kinds| %>
+    <section class="notification-category rounded-xl border border-slate-200 bg-white shadow-sm">
+      <h2 class="border-b border-slate-100 px-6 py-4 text-base font-semibold"><%= Activity::CATEGORIES.fetch(category) %></h2>
+      <ul class="divide-y divide-slate-100">
+        <% kinds.each do |kind| %>
+          <li id="notification-<%= kind.key %>" class="flex items-center justify-between gap-4 px-6 py-3">
+            <div class="min-w-0">
+              <p class="flex items-center gap-2 text-sm font-medium">
+                <%= render "activities/severity", severity: kind.severity %>
+                <%= kind.label %>
+              </p>
+              <p class="mt-0.5 text-xs text-slate-500"><%= kind.description %></p>
+            </div>
+            <input type="checkbox" disabled aria-label="Notifier : <%= kind.label %> (bientôt)" class="h-4 w-4 cursor-not-allowed rounded border-slate-300 opacity-50">
+          </li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+</div>

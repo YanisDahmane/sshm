@@ -41,7 +41,10 @@ module ApplicationHelper
   def command_palette_items
     pages = [
       { label: "Dashboard", url: root_path }, { label: "Serveurs", url: servers_path }, { label: "Profils", url: profiles_path },
+      { label: "Activité", url: activities_path },
       { label: "Paramètres", hint: "clé SSH de SSHM", url: settings_path },
+      { label: "Notifications", hint: "paramètres", url: settings_notifications_path },
+      { label: "Automatisations", hint: "paramètres", url: settings_automations_path },
       { label: "Ajouter un serveur", url: new_server_path }, { label: "Ajouter un profil", url: new_profile_path }
     ].map { |page| page.merge(group: "Pages") }
 

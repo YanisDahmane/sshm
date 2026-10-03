@@ -55,4 +55,36 @@ class AccountSnapshotTest < ActiveSupport::TestCase
     AccountSnapshot.record!(servers(:web), @account, [])
     assert_difference("AccountSnapshot.count", -1) { servers(:web).delete }
   end
+
+  test "the first read logs every key without profile" do
+    bob = SshKeyGenerator.generate(comment: "bob@desktop").public_key
+
+    AccountSnapshot.record!(servers(:web), @account, keys(@unnamed, bob, profiles(:alice).public_key, ssh_keys(:main).public_key))
+
+    detected = Activity.of_kind(:unknown_key_detected).order(:id)
+    assert_equal [ nil, "bob@desktop" ], detected.map { |activity| activity.data["key_name"] }
+    assert detected.all? { |activity| activity.server == servers(:web) && activity.unix_user == "root" }
+    assert_equal 0, Activity.of_kind(:key_disappeared).count
+  end
+
+  test "later reads log only new keys without profile and vanished keys" do
+    bob = SshKeyGenerator.generate(comment: "bob@desktop").public_key
+    eve = SshKeyGenerator.generate(comment: "eve@laptop").public_key
+    AccountSnapshot.record!(servers(:web), @account, keys(bob, profiles(:alice).public_key))
+    Activity.delete_all
+
+    AccountSnapshot.record!(servers(:web), @account, keys(bob, eve))
+
+    assert_equal [ "eve@laptop" ], Activity.of_kind(:unknown_key_detected).map(&:key_name)
+    assert_equal [ "alice@laptop" ], Activity.of_kind(:key_disappeared).map(&:key_name)
+  end
+
+  test "a key removed through SSHM is not reported as vanished" do
+    snapshot = AccountSnapshot.record!(servers(:web), @account, keys(profiles(:alice).public_key))
+    snapshot.forget!(profiles(:alice).authorized_key.key)
+
+    AccountSnapshot.record!(servers(:web), @account, [])
+
+    assert_equal 0, Activity.of_kind(:key_disappeared).count
+  end
 end

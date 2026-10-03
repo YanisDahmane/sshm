@@ -1,0 +1,39 @@
+<% content_for :title, "Activité · SSHM" %>
+
+<div class="flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="text-2xl font-bold tracking-tight">Activité</h1>
+    <p class="mt-1 text-sm text-slate-500">
+      Historique de ce qui s'est passé<%= " sur « #{@server.name} »" if @server %>.
+      <% if @server %><%= link_to "Tout voir", activities_path(category: @category), class: "font-medium text-indigo-600 hover:text-indigo-500" %><% end %>
+    </p>
+  </div>
+</div>
+
+<nav class="activity-filters mt-6 flex flex-wrap gap-2" aria-label="Catégories">
+  <% [ [ "Tout", nil ], *Activity::CATEGORIES.map { |key, label| [ label, key.to_s ] } ].each do |label, category| %>
+    <%= link_to label, activities_path(category: category, server_id: @server&.id), aria: { current: (@category == category ? "page" : nil) },
+          class: "rounded-full px-3 py-1 text-sm font-medium ring-1 ring-inset #{@category == category ? "bg-indigo-600 text-white ring-indigo-600" : "bg-white text-slate-700 ring-slate-300 hover:bg-slate-50"}" %>
+  <% end %>
+</nav>
+
+<section class="mt-6 rounded-xl border border-slate-200 bg-white px-6 shadow-sm">
+  <% if @activities.any? %>
+    <ul id="activities" class="divide-y divide-slate-100">
+      <%= render partial: "activities/activity", collection: @activities %>
+    </ul>
+  <% else %>
+    <p class="py-10 text-center text-sm text-slate-500">Aucune activité pour le moment.</p>
+  <% end %>
+</section>
+
+<div class="mt-4 flex justify-between text-sm">
+  <% if @page > 1 %>
+    <%= link_to "← Plus récentes", activities_path(category: @category, server_id: @server&.id, page: @page - 1), class: "font-medium text-indigo-600 hover:text-indigo-500" %>
+  <% else %>
+    <span></span>
+  <% end %>
+  <% if @more %>
+    <%= link_to "Plus anciennes →", activities_path(category: @category, server_id: @server&.id, page: @page + 1), class: "font-medium text-indigo-600 hover:text-indigo-500" %>
+  <% end %>
+</div>

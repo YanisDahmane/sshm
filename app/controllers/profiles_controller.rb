@@ -21,6 +21,7 @@ class ProfilesController < ApplicationController
     @return_to = safe_return_to
 
     if @profile.save
+      Activity.record!(:profile_created, profile: @profile, fingerprint: @profile.fingerprint)
       redirect_to @return_to || profile_path(@profile), notice: "Le profil « #{@profile.name} » a été ajouté."
     else
       render :new, status: :unprocessable_entity
@@ -40,6 +41,7 @@ class ProfilesController < ApplicationController
 
   def destroy
     @profile.destroy!
+    Activity.record!(:profile_deleted, profile_name: @profile.name, fingerprint: @profile.fingerprint)
     redirect_to profiles_path, notice: "Le profil « #{@profile.name} » a été supprimé.", status: :see_other
   end
 

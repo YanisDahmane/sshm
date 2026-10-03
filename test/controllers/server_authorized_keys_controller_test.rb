@@ -490,4 +490,16 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     assert_select ".ssh-setup-hint a[href=?][data-turbo-frame=_top]", settings_path
     assert_nil servers(:web).reload.ssh_ok
   end
+
+  test "destroy logs the removed key" do
+    sign_in users(:one)
+    removed = AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil)
+
+    stub_method(AuthorizedKeyRemoval, :call, removed) do
+      delete server_authorized_key_path(servers(:web)), params: { key: "AAAA", name: "bob", account: "root" }, as: :turbo_stream
+    end
+
+    activity = Activity.of_kind(:key_removed).sole
+    assert_equal [ "root", "bob", users(:one) ], [ activity.unix_user, activity.key_name, activity.user ]
+  end
 end

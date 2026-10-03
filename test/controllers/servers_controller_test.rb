@@ -173,4 +173,35 @@ class ServersControllerTest < ActionDispatch::IntegrationTest
     get server_path(id: 0)
     assert_response :not_found
   end
+
+  test "logs the created server" do
+    sign_in users(:one)
+
+    post servers_path, params: valid_params
+
+    activity = Activity.of_kind(:server_created).sole
+    assert_equal [ Server.find_by!(name: "Staging"), users(:one) ], [ activity.server, activity.user ]
+    assert_equal "deploy@staging.example.com:2222", activity.data["address"]
+  end
+
+  test "logs an update only when something changed" do
+    sign_in users(:one)
+
+    patch server_path(servers(:web)), params: { server: { name: "Web" } }
+    assert_equal 0, Activity.count
+
+    patch server_path(servers(:web)), params: { server: { host: "10.0.0.9", port: 2200 } }
+    assert_equal %w[host port], Activity.of_kind(:server_updated).sole.data["changed"]
+  end
+
+  test "the server page shows its history" do
+    Activity.record!(:key_added, server: servers(:web), profile: profiles(:alice), unix_user: "deploy")
+    Activity.record!(:key_added, server: servers(:db), profile: profiles(:alice), unix_user: "admin")
+    sign_in users(:one)
+
+    get server_path(servers(:web))
+
+    assert_select "#server-activity li.activity", 1
+    assert_select "#server-activity a[href=?]", activities_path(server_id: servers(:web).id), text: "Tout voir"
+  end
 end

@@ -14,8 +14,23 @@ class Server < ApplicationRecord
   before_update :reset_reachability, if: -> { will_save_change_to_host? || will_save_change_to_port? }
 
   # Remembers whether the app could log in over SSH (see SshCheck); `nil` = unknown.
+  # Logs ssh_access_lost when a server that accepted the SSHM key refuses it.
   def record_ssh_status!(ok)
+    lost = ssh_ok == true && ok == false
     update_columns(ssh_ok: ok, ssh_checked_at: Time.current)
+    Activity.record!(:ssh_access_lost, server: self) if lost
+  end
+
+  # Remembers a ping result (see ServerPing) and logs when the server goes
+  # down (server_unreachable) or comes back (server_back_online).
+  def record_reachability!(reachable)
+    previous = self.reachable
+    update_columns(reachable: reachable, last_checked_at: Time.current)
+    if !reachable && previous != false
+      Activity.record!(:server_unreachable, server: self)
+    elsif reachable && previous == false
+      Activity.record!(:server_back_online, server: self)
+    end
   end
 
   private

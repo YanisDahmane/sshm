@@ -215,4 +215,13 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", profiles_path, text: "← Profils"
     assert_select "input[name=return_to]", 0
   end
+
+  test "logs the created and deleted profiles" do
+    sign_in users(:one)
+
+    post profiles_path, params: valid_params
+    delete profile_path(Profile.find_by!(name: "Bob"))
+
+    assert_equal [ "Profil « Bob » créé", "Profil « Bob » supprimé" ], Activity.order(:id).map(&:summary)
+  end
 end

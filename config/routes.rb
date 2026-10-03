@@ -17,6 +17,13 @@ Rails.application.routes.draw do
   end
 
   resource :settings, only: :show
+  namespace :settings do
+    resource :notifications, only: :show
+    resources :automations, only: %i[index update] do
+      post :run, on: :member
+    end
+  end
+  resources :activities, only: :index
   scope "settings" do
     resource :ssh_key, only: :create
   end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_10_03_194214) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_03_200652) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -23,6 +23,33 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_03_194214) do
     t.datetime "updated_at", null: false
     t.index ["server_id", "unix_user"], name: "index_account_snapshots_on_server_id_and_unix_user", unique: true
     t.index ["server_id"], name: "index_account_snapshots_on_server_id"
+  end
+
+  create_table "activities", force: :cascade do |t|
+    t.string "kind", null: false
+    t.bigint "user_id"
+    t.bigint "server_id"
+    t.bigint "profile_id"
+    t.string "unix_user"
+    t.jsonb "data", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_activities_on_created_at"
+    t.index ["kind"], name: "index_activities_on_kind"
+    t.index ["profile_id"], name: "index_activities_on_profile_id"
+    t.index ["server_id"], name: "index_activities_on_server_id"
+    t.index ["user_id"], name: "index_activities_on_user_id"
+  end
+
+  create_table "automations", force: :cascade do |t|
+    t.string "kind", null: false
+    t.boolean "enabled", default: false, null: false
+    t.integer "interval_minutes", null: false
+    t.datetime "last_run_at"
+    t.string "last_result"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["kind"], name: "index_automations_on_kind", unique: true
   end
 
   create_table "profiles", force: :cascade do |t|
@@ -86,6 +113,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_03_194214) do
   end
 
   add_foreign_key "account_snapshots", "servers", on_delete: :cascade
+  add_foreign_key "activities", "profiles", on_delete: :nullify
+  add_foreign_key "activities", "servers", on_delete: :nullify
+  add_foreign_key "activities", "users", on_delete: :nullify
   add_foreign_key "temporary_accesses", "profiles", on_delete: :nullify
   add_foreign_key "temporary_accesses", "servers", on_delete: :cascade
 end

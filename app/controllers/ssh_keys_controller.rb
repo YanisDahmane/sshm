@@ -2,6 +2,7 @@ class SshKeysController < ApplicationController
   def create
     regenerated = SshKey.exists?
     SshKey.generate!
+    Activity.record!(:ssh_key_generated, regenerated: regenerated)
 
     notice = if regenerated
       "Nouvelle clé SSH générée. Remplacez l'ancienne clé publique sur vos serveurs."

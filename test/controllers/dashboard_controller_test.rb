@@ -178,4 +178,15 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
 
     assert_select "#attention-#{ActionView::RecordIdentifier.dom_id(servers(:web))} .attention-orphans", text: /bob@desktop/
   end
+
+  test "shows the recent activity" do
+    9.times { |index| travel_to(index.minutes.ago) { Activity.record!(:server_created, server: servers(:web)) } }
+    sign_in users(:one)
+
+    get root_path
+
+    assert_select "#recent-activity li.activity", 8
+    assert_select "#recent-activity a[href=?]", activities_path, text: "Tout voir"
+    assert_select "nav .main-nav a[href=?]", activities_path, text: "Activité"
+  end
 end

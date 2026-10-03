@@ -71,4 +71,14 @@ class ServerPingTest < ActiveSupport::TestCase
   test "check_all! returns an empty hash when there are no servers" do
     assert_equal({}, ServerPing.check_all!(Server.none))
   end
+
+  test "check! logs a server going down" do
+    server = servers(:web)
+    server.update!(host: "127.0.0.1", port: closed_port)
+    server.update_columns(reachable: true)
+
+    ServerPing.check!(server, timeout: 1)
+
+    assert_equal [ "server_unreachable" ], Activity.pluck(:kind)
+  end
 end
