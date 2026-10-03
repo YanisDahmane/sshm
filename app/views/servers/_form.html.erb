@@ -1,0 +1,46 @@
+<% input_class = "mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" %>
+<% label_class = "block text-sm font-medium text-slate-700" %>
+
+<%= form_with model: server, class: "space-y-5" do |f| %>
+  <% if server.errors.any? %>
+    <div id="error_explanation" class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+      <ul class="list-disc space-y-1 pl-5">
+        <% server.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :name, "Nom", class: label_class %>
+    <%= f.text_field :name, autofocus: true, required: true, placeholder: "Production web", class: input_class %>
+  </div>
+
+  <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+    <div class="sm:col-span-2">
+      <%= f.label :host, "Hôte (IP ou nom de domaine)", class: label_class %>
+      <%= f.text_field :host, required: true, placeholder: "192.168.1.10", autocomplete: "off", spellcheck: false, class: "#{input_class} font-mono" %>
+    </div>
+    <div>
+      <%= f.label :port, "Port", class: label_class %>
+      <%= f.number_field :port, required: true, min: 1, max: 65_535, class: "#{input_class} font-mono" %>
+    </div>
+  </div>
+
+  <div>
+    <%= f.label :username, "Utilisateur", class: label_class %>
+    <%= f.text_field :username, required: true, placeholder: "root", autocomplete: "off", spellcheck: false, class: "#{input_class} font-mono" %>
+  </div>
+
+  <div>
+    <%= f.label :password, "Mot de passe", class: label_class %>
+    <%= f.password_field :password, autocomplete: "new-password", class: input_class %>
+    <p class="mt-1 text-xs text-slate-500">Facultatif. Stocké chiffré.</p>
+  </div>
+
+  <div class="flex items-center justify-end gap-3 pt-2">
+    <%= link_to "Annuler", root_path, class: "rounded-md px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" %>
+    <%= f.submit "Ajouter le serveur", class: "cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+  </div>
+<% end %>

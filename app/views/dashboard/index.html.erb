@@ -1,3 +1,46 @@
 <% content_for :title, "Dashboard · SSHM" %>
 
 <h1 class="text-2xl font-bold tracking-tight">Dashboard</h1>
+
+<section class="mt-8">
+  <div class="flex items-center justify-between gap-4">
+    <div>
+      <h2 class="text-lg font-semibold">Serveurs</h2>
+      <p class="text-sm text-slate-500"><%= pluralize(@servers.size, "serveur", plural: "serveurs") %></p>
+    </div>
+    <%= link_to "Ajouter un serveur", new_server_path,
+          class: "rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+  </div>
+
+  <% if @servers.any? %>
+    <div class="mt-4 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+      <table id="servers" class="min-w-full divide-y divide-slate-200 text-sm">
+        <thead class="bg-slate-50 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
+          <tr>
+            <th scope="col" class="px-4 py-3">Nom</th>
+            <th scope="col" class="px-4 py-3">Hôte</th>
+            <th scope="col" class="px-4 py-3">Port</th>
+            <th scope="col" class="px-4 py-3">Utilisateur</th>
+            <th scope="col" class="px-4 py-3">Mot de passe</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <% @servers.each do |server| %>
+            <tr id="<%= dom_id(server) %>" class="hover:bg-slate-50">
+              <td class="px-4 py-3 font-medium"><%= server.name %></td>
+              <td class="px-4 py-3 font-mono text-slate-700"><%= server.host %></td>
+              <td class="px-4 py-3 font-mono text-slate-700"><%= server.port %></td>
+              <td class="px-4 py-3 font-mono text-slate-700"><%= server.username %></td>
+              <td class="px-4 py-3 text-slate-500"><%= server.password.present? ? "Défini" : "—" %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="mt-4 rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
+      <p class="text-sm text-slate-500">Aucun serveur pour le moment.</p>
+      <%= link_to "Ajouter votre premier serveur", new_server_path, class: "mt-2 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+    </div>
+  <% end %>
+</section>
