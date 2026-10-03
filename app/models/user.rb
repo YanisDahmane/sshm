@@ -1,7 +1,10 @@
 class User < ApplicationRecord
   # No public sign up: the first admin is created through SetupsController,
   # everyone else through an Invitation.
-  devise :database_authenticatable, :recoverable, :rememberable, :validatable, :trackable
+  # Sessions expire after 30 minutes of inactivity (unless remembered); 10
+  # failed attempts (passwords or 2FA codes) lock the account for 15 minutes.
+  devise :database_authenticatable, :recoverable, :rememberable, :validatable, :trackable,
+         :timeoutable, :lockable
 
   include TwoFactorAuthenticatable
 
@@ -39,6 +42,18 @@ class User < ApplicationRecord
   def deactivate! = update!(deactivated_at: Time.current)
 
   def reactivate! = update!(deactivated_at: nil)
+
+  # Devise lockable: logged so a brute force attempt can be noticed / notified.
+  def lock_access!(opts = {})
+    super(opts.merge(send_instructions: false))
+    Activity.record!(:user_locked, user: nil, email: email, attempts: failed_attempts)
+  end
+
+  # Counts a failed 2FA code like a failed password; locks after too many.
+  def register_failed_two_factor_attempt!
+    increment_failed_attempts
+    lock_access! if attempts_exceeded? && !access_locked?
+  end
 
   # Devise: a deactivated account cannot sign in, and is signed out on its next request.
   def active_for_authentication? = super && !deactivated?

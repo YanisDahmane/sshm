@@ -1,6 +1,7 @@
 require "test_helper"
 
 class UserTest < ActiveSupport::TestCase
+  include ActionMailer::TestHelper
   test "is valid with an email and a password" do
     user = User.new(email: "valid@example.com", password: "password123")
     assert user.valid?
@@ -102,5 +103,25 @@ class UserTest < ActiveSupport::TestCase
     profiles(:alice).destroy!
 
     assert_nil users(:operator).reload.profile_id
+  end
+
+  test "locking logs an activity and sends no email" do
+    assert_no_emails do
+      users(:viewer).lock_access!
+    end
+
+    assert users(:viewer).access_locked?
+    assert_not users(:viewer).active_for_authentication?
+    assert_equal :locked, users(:viewer).inactive_message
+    assert_equal 1, Activity.of_kind(:user_locked).count
+  end
+
+  test "failed 2FA attempts lock the account after the maximum" do
+    user = users(:viewer)
+    (Devise.maximum_attempts - 1).times { user.register_failed_two_factor_attempt! }
+    assert_not user.access_locked?
+
+    user.register_failed_two_factor_attempt!
+    assert user.access_locked?
   end
 end

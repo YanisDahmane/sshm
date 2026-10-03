@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_03_212941) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_03_213751) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -157,9 +157,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_212941) do
     t.datetime "otp_enabled_at"
     t.jsonb "otp_backup_codes", default: [], null: false
     t.integer "otp_last_used_at"
+    t.integer "failed_attempts", default: 0, null: false
+    t.string "unlock_token"
+    t.datetime "locked_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["profile_id"], name: "index_users_on_profile_id", unique: true, where: "(profile_id IS NOT NULL)"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+    t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
   end
 
   add_foreign_key "account_snapshots", "servers", on_delete: :cascade

@@ -16,8 +16,14 @@ class TwoFactorChallengesController < ApplicationController
 
   def create
     method = @user.verify_two_factor(params[:code])
-    return render(:new, status: :unprocessable_entity) unless method
+    unless method
+      @user.register_failed_two_factor_attempt!
+      return abandon("Trop d'essais ratés : votre compte est verrouillé pendant 15 minutes.") if @user.access_locked?
 
+      return render(:new, status: :unprocessable_entity)
+    end
+
+    @user.update_column(:failed_attempts, 0)
     remember = session.dig(:two_factor, "remember")
     session.delete(:two_factor)
     sign_in(:user, @user)
@@ -36,7 +42,7 @@ class TwoFactorChallengesController < ApplicationController
     @user = User.find_by(id: pending["user_id"])
     expired = pending["started_at"].to_i < TIMEOUT.ago.to_i
 
-    abandon("Session de connexion expirée : reconnectez-vous.") if @user.nil? || expired || !@user.active_for_authentication? || !@user.two_factor_enabled?
+    abandon("Session de connexion expirée : reconnectez-vous.") if @user.nil? || expired || !@user.active_for_authentication? || !@user.two_factor_enabled? || @user.access_locked?
   end
 
   def abandon(message)
