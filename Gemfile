@@ -78,3 +78,5 @@ gem "devise-i18n", "~> 1.13"
 # Two-factor authentication (TOTP) with QR codes
 gem "rotp", "~> 6.3"
 gem "rqrcode", "~> 3.1"
+# CSV import of servers (no longer a default gem since Ruby 3.4)
+gem "csv"
