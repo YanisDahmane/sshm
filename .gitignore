@@ -38,3 +38,9 @@
 
 # Local Claude Code notes
 /CLAUDE.md
+
+# Rubymine
+.idea/*
+
+# Local roadmap
+/PLAN.md
