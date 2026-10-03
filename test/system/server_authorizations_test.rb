@@ -6,15 +6,20 @@ class ServerAuthorizationsTest < ApplicationSystemTestCase
 
   setup do
     sign_in users(:one)
+    accounts = ->(server, **) { ServerAccountsReader::Result.new(accounts: [ AuthorizedKeysAccount.login(server), AuthorizedKeysAccount.for(server, "root") ], error_title: nil, error_details: nil) }
+    stub_method_until_teardown(ServerAccountsReader, :call, accounts)
   end
 
-  # Simulates the server's authorized_keys file in memory: the reader lists
+  # Simulates each account's authorized_keys file in memory: the reader lists
   # it and the authorization appends to it.
-  test "authorizing a profile updates the key list in place" do
-    lines = [ ssh_keys(:main).public_key ]
-    reader = ->(*, **) { AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(lines.join("\n")), error_title: nil, error_details: nil) }
-    authorizer = lambda do |_server, profile, **|
-      lines << "#{profile.authorized_key.type} #{profile.authorized_key.key} #{profile.name}"
+  test "authorizing a profile on the selected account" do
+    files = Hash.new { |hash, user| hash[user] = [] }
+    files["deploy"] << ssh_keys(:main).public_key
+    reader = lambda do |_server, account:, **|
+      AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(files[account.unix_user].join("\n")), error_title: nil, error_details: nil)
+    end
+    authorizer = lambda do |_server, profile, account:, **|
+      files[account.unix_user] << "#{profile.authorized_key.type} #{profile.authorized_key.key} #{profile.name}"
       ProfileAuthorization::Result.new(status: :added, error_title: nil, error_details: nil)
     end
 
@@ -23,15 +28,30 @@ class ServerAuthorizationsTest < ApplicationSystemTestCase
         visit server_path(servers(:web))
 
         within("#server-authorized-keys") do
+          assert_selector "a.account-tab[aria-current=page]", text: "deploy"
           assert_selector "li.authorized-key", count: 1
-          select "CI", from: "Autoriser un profil"
+          select "CI", from: "Autoriser un profil pour deploy"
           click_on "Autoriser"
-
-          assert_selector "li.authorized-key", count: 2
           assert_selector ".key-profile", text: "Profil : CI"
-          assert_no_selector "option", text: "CI"
         end
-        assert_selector "#flash", text: "Le profil « CI » est maintenant autorisé sur « Web »."
+        assert_selector "#flash", text: "Le profil « CI » est maintenant autorisé sur « Web » pour deploy."
+
+        within("#server-authorized-keys") do
+          click_on "root"
+          assert_selector "a.account-tab[aria-current=page]", text: "root"
+          assert_text "Aucune clé autorisée sur ce serveur."
+
+          select "Alice", from: "Autoriser un profil pour root"
+          click_on "Autoriser"
+          assert_selector "a.account-tab[aria-current=page]", text: "root"
+          assert_selector ".key-profile", text: "Profil : Alice"
+
+          click_on "deploy"
+          assert_selector "a.account-tab[aria-current=page]", text: "deploy"
+          assert_selector ".key-profile", text: "Profil : CI"
+          assert_no_selector ".key-profile", text: "Alice"
+        end
+        assert_selector "#flash", text: "Le profil « Alice » est maintenant autorisé sur « Web » pour root."
       end
     end
   end

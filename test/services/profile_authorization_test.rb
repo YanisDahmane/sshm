@@ -1,34 +1,24 @@
 require "test_helper"
-require "open3"
 
 class ProfileAuthorizationTest < ActiveSupport::TestCase
+  include LocalShellHelpers
+
   setup do
     @known_hosts = Rails.root.join("tmp", "test", "ssh-#{SecureRandom.hex(4)}", "known_hosts")
-    @home = Pathname(Dir.mktmpdir)
+    setup_temp_home
     @profile = profiles(:alice)
     @type, @blob = @profile.public_key.split(" ")
   end
 
   teardown do
     FileUtils.rm_rf(@known_hosts.dirname)
-    FileUtils.rm_rf(@home)
+    teardown_temp_home
   end
 
-  def authorized_keys = @home.join(".ssh", "authorized_keys")
+  def authorized_keys = authorized_keys_file
 
-  # Runs the append script for real with `sh`, in a temporary HOME.
   def run_script(line: "#{@type} #{@blob} Alice", blob: @blob)
-    output, status = Open3.capture2({ "HOME" => @home.to_s }, "sh", "-c", ProfileAuthorization.append_script(line, blob))
-    assert status.success?, "script failed: #{output}"
-    output.strip
-  end
-
-  # FakeSsh handler that executes the received `sh -c '…'` command locally.
-  def local_shell
-    lambda do |command|
-      stdout, stderr, status = Open3.capture3({ "HOME" => @home.to_s }, "sh", "-c", command)
-      FakeSsh::Response.new(stdout, stderr, status.exitstatus)
-    end
+    run_local_script(ProfileAuthorization.append_script(line, blob))
   end
 
   def authorize(fake, profile: @profile)
@@ -121,5 +111,77 @@ class ProfileAuthorizationTest < ActiveSupport::TestCase
 
     assert_not result.success?
     assert_equal "Connexion impossible", result.error_title
+  end
+
+  test "authorizes in root's file through sudo" do
+    fake = FakeSsh.new(handler: ->(_command) { FakeSsh::Response.new("added\n", "", 0) })
+
+    result = authorize_as_root(fake)
+
+    assert result.added?
+    *prefix, script = Shellwords.split(fake.commands.sole)
+    assert_equal %w[sudo -n sh -c], prefix
+    assert_includes script.lines, "home=~root\n"
+  end
+
+  test "explains when sudo is not available for root" do
+    fake = FakeSsh.new(handler: ->(_command) { FakeSsh::Response.new("", "sudo: a password is required\n", 1) })
+
+    result = authorize_as_root(fake)
+
+    assert_equal "Accès root impossible", result.error_title
+  end
+
+  test "the script honours the home parameter" do
+    custom = @home.join("other")
+    custom.mkpath
+
+    run_local_script(ProfileAuthorization.append_script("#{@type} #{@blob} Alice", @blob, home: Shellwords.escape(custom.to_s)))
+
+    assert custom.join(".ssh", "authorized_keys").exist?
+    assert_not authorized_keys.exist?
+  end
+
+  test "gives the files back to another user when writing as root" do
+    fake = FakeSsh.new(handler: ->(_command) { FakeSsh::Response.new("added\n", "", 0) })
+
+    ProfileAuthorization.call(servers(:web), @profile, account: AuthorizedKeysAccount.for(servers(:web), "bob"),
+                              transport: fake, known_hosts_file: @known_hosts)
+
+    *prefix, script = Shellwords.split(fake.commands.sole)
+    assert_equal %w[sudo -n sh -c], prefix
+    assert_includes script.lines, "home=~bob\n"
+    assert_includes script, %(chown "bob:$(id -gn bob)" "$home/.ssh" "$file")
+  end
+
+  test "does not chown for the login user or root" do
+    [ AuthorizedKeysAccount.login(servers(:web)), AuthorizedKeysAccount.for(servers(:web), "root") ].each do |account|
+      assert_not_includes ProfileAuthorization.append_script("l", "b", home: account.home, owner: account.owner), "chown"
+    end
+  end
+
+  test "the script chowns to the owner, which must exist" do
+    owner = Etc.getpwuid.name
+
+    run_local_script(ProfileAuthorization.append_script("#{@type} #{@blob} Alice", @blob, owner: owner))
+
+    assert_equal owner, Etc.getpwuid(authorized_keys.stat.uid).name
+  end
+
+  test "the script stops on an unknown user without creating anything" do
+    script = ProfileAuthorization.append_script("#{@type} #{@blob} Alice", @blob, home: "~nosuchuser#{SecureRandom.hex(2)}")
+
+    _output, error, status = Open3.capture3({ "HOME" => @home.to_s }, "sh", "-c", script, chdir: @home.to_s)
+
+    assert_not status.success?
+    assert_equal "unknown user", error.strip
+    assert_empty @home.children
+  end
+
+  private
+
+  def authorize_as_root(fake)
+    ProfileAuthorization.call(servers(:web), @profile, account: AuthorizedKeysAccount.for(servers(:web), "root"),
+                              transport: fake, known_hosts_file: @known_hosts)
   end
 end

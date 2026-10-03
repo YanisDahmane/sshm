@@ -40,10 +40,10 @@ class ServerAuthorizationsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_turbo_stream action: :replace, target: dom_id(servers(:web), :authorized_keys) do
-      assert_select "turbo-frame[loading=eager][src=?]", server_authorized_keys_path(servers(:web))
+      assert_select "turbo-frame[loading=eager][src=?]", server_authorized_keys_path(servers(:web), account: "deploy")
     end
     assert_turbo_stream action: :update, target: "flash" do
-      assert_select "div", text: "Le profil « Alice » est maintenant autorisé sur « Web »."
+      assert_select "div", text: "Le profil « Alice » est maintenant autorisé sur « Web » pour deploy."
     end
   end
 
@@ -55,7 +55,7 @@ class ServerAuthorizationsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_turbo_stream action: :update, target: "flash" do
-      assert_select "div", text: "Le profil « Alice » était déjà autorisé sur « Web »."
+      assert_select "div", text: "Le profil « Alice » était déjà autorisé sur « Web » pour deploy."
     end
   end
 
@@ -66,7 +66,7 @@ class ServerAuthorizationsControllerTest < ActionDispatch::IntegrationTest
     post server_authorizations_path(servers(:web)), params: { profile_id: profiles(:alice).id }, as: :turbo_stream
 
     assert_turbo_stream action: :update, target: "flash" do
-      assert_select "div.bg-red-50", text: /Impossible d'autoriser « Alice » : Connexion impossible/
+      assert_select "div.bg-red-50", text: /Impossible d'autoriser « Alice » sur « Web » pour deploy : Connexion impossible/
     end
   end
 
@@ -78,6 +78,33 @@ class ServerAuthorizationsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_redirected_to server_path(servers(:web))
-    assert_equal "Le profil « Alice » est maintenant autorisé sur « Web ».", flash[:notice]
+    assert_equal "Le profil « Alice » est maintenant autorisé sur « Web » pour deploy.", flash[:notice]
+  end
+
+  test "authorizes for root when requested" do
+    sign_in users(:one)
+    accounts = []
+    authorizer = lambda do |_server, _profile, account:, **|
+      accounts << account
+      result(:added)
+    end
+
+    stub_method(ProfileAuthorization, :call, authorizer) do
+      post server_authorizations_path(servers(:web)), params: { profile_id: profiles(:alice).id, account: "root" }, as: :turbo_stream
+    end
+
+    assert_equal [ "root" ], accounts.map(&:name)
+    assert_turbo_stream action: :replace, target: dom_id(servers(:web), :authorized_keys) do
+      assert_select "turbo-frame[src=?]", server_authorized_keys_path(servers(:web), account: "root")
+    end
+    assert_turbo_stream action: :update, target: "flash" do
+      assert_select "div", text: "Le profil « Alice » est maintenant autorisé sur « Web » pour root."
+    end
+  end
+
+  test "rejects an invalid account name" do
+    sign_in users(:one)
+    post server_authorizations_path(servers(:web)), params: { profile_id: profiles(:alice).id, account: "../root" }
+    assert_response :bad_request
   end
 end

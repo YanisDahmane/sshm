@@ -56,7 +56,7 @@
 
   <section id="server-authorized-keys" class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
     <h2 class="text-lg font-semibold">Clés autorisées</h2>
-    <p class="mt-1 text-sm text-slate-500">Clés publiques qui peuvent se connecter à ce serveur avec l'utilisateur <span class="font-mono"><%= @server.username %></span>.</p>
+    <p class="mt-1 text-sm text-slate-500">Clés publiques qui peuvent se connecter à ce serveur. Choisissez le compte à gérer.</p>
     <div class="mt-4">
       <%= render "server_authorized_keys/frame", server: @server %>
     </div>

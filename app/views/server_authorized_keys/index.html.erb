@@ -1,14 +1,29 @@
 <% content_for :title, "Clés autorisées · #{@server.name} · SSHM" %>
 
 <turbo-frame id="<%= dom_id(@server, :authorized_keys) %>" class="group block">
+  <nav class="account-tabs mb-4 flex flex-wrap gap-2" aria-label="Comptes">
+    <% @accounts.each do |account| %>
+      <%= link_to server_authorized_keys_path(@server, account: account.unix_user),
+            aria: { current: (account == @account ? "page" : nil) },
+            class: "account-tab inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium ring-1 ring-inset #{account == @account ? "bg-indigo-600 text-white ring-indigo-600" : "bg-white text-slate-700 ring-slate-300 hover:bg-slate-50"}" do %>
+        <span class="font-mono"><%= account.unix_user %></span>
+        <% if account.login? %>
+          <span class="text-xs opacity-75">connexion</span>
+        <% elsif account.sudo? %>
+          <span class="text-xs opacity-75">via sudo</span>
+        <% end %>
+      <% end %>
+    <% end %>
+  </nav>
+
   <div class="flex items-center justify-between gap-4">
     <p class="text-sm text-slate-500">
-      <code class="rounded bg-slate-100 px-1 font-mono text-xs"><%= @server.username %>:<%= AuthorizedKeysReader::PATH %></code>
+      <code class="rounded bg-slate-100 px-1 font-mono text-xs"><%= @account.path %></code>
       <% if @result.success? %>
         · <%= pluralize(@result.keys.size, "clé", plural: "clés") %>
       <% end %>
     </p>
-    <%= link_to server_authorized_keys_path(@server),
+    <%= link_to server_authorized_keys_path(@server, account: @account.unix_user),
           title: "Recharger les clés", aria: { label: "Recharger les clés" },
           class: "rounded-md border border-slate-300 bg-white p-2 text-slate-600 shadow-sm hover:bg-slate-50" do %>
       <%= icon :arrow_path, class: "h-4 w-4 group-aria-busy:animate-spin" %>
@@ -17,12 +32,13 @@
 
   <% if @result.success? %>
     <% if @authorizable_profiles.any? %>
-      <%= form_with url: server_authorizations_path(@server), id: "authorize-profile",
+      <%= form_with url: server_authorizations_path(@server),
             data: { controller: "quiet-submit", turbo_frame: "_top" },
-            class: "mt-4 flex flex-wrap items-end gap-2 rounded-md bg-slate-50 p-3" do |f| %>
+            class: "authorize-profile mt-4 flex flex-wrap items-end gap-2 rounded-md bg-slate-50 p-3" do |f| %>
+        <%= f.hidden_field :account, value: @account.unix_user %>
         <div class="min-w-48 flex-1">
-          <%= f.label :profile_id, "Autoriser un profil", class: "block text-xs font-medium text-slate-600" %>
-          <%= f.select :profile_id, @authorizable_profiles.map { |profile| [ profile.name, profile.id ] }, {},
+          <%= f.label :profile_id, "Autoriser un profil pour #{@account.unix_user}", for: "profile_id", class: "block text-xs font-medium text-slate-600" %>
+          <%= f.select :profile_id, @authorizable_profiles.map { |profile| [ profile.name, profile.id ] }, {}, id: "profile_id",
                 class: "mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" %>
         </div>
         <%= f.button type: "submit",
@@ -36,7 +52,7 @@
         <%= link_to "Créez un profil", new_profile_path, data: { turbo_frame: "_top" }, class: "font-medium text-indigo-600 hover:text-indigo-500" %> pour pouvoir l'autoriser sur ce serveur.
       </p>
     <% else %>
-      <p id="all-profiles-authorized" class="mt-4 text-xs text-slate-500">Tous les profils sont autorisés sur ce serveur.</p>
+      <p class="all-profiles-authorized mt-4 text-xs text-slate-500">Tous les profils sont autorisés pour <%= @account.unix_user %>.</p>
     <% end %>
   <% end %>
 
@@ -52,7 +68,7 @@
     <% elsif @result.keys.empty? %>
       <p class="rounded-md border border-dashed border-slate-300 px-4 py-6 text-center text-sm text-slate-500">Aucune clé autorisée sur ce serveur.</p>
     <% else %>
-      <ul id="authorized-keys" class="divide-y divide-slate-100 rounded-md border border-slate-200">
+      <ul class="authorized-keys divide-y divide-slate-100 rounded-md border border-slate-200">
         <% @result.keys.each do |key| %>
           <li class="authorized-key flex items-start gap-3 px-4 py-3">
             <%= icon :key, class: "mt-0.5 h-4 w-4 shrink-0 text-slate-400" %>
@@ -81,6 +97,16 @@
                 <p class="mt-1 break-all font-mono text-xs text-amber-700" title="Options">options : <%= key.options %></p>
               <% end %>
             </div>
+            <% unless key.matches?(@app_key) %>
+              <%= button_to server_authorized_key_path(@server), method: :delete,
+                    params: { key: key.key, name: key.name, account: @account.unix_user },
+                    title: "Supprimer la clé", aria: { label: "Supprimer la clé #{key.name || "sans nom"}" },
+                    form: { class: "shrink-0", data: { controller: "quiet-submit", turbo_frame: "_top",
+                                                       turbo_confirm: "Supprimer la clé « #{key.name || "sans nom"} » de « #{@server.name} » pour #{@account.unix_user} ? Elle ne pourra plus se connecter avec ce compte." } },
+                    class: "cursor-pointer rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:cursor-wait disabled:opacity-50" do %>
+                <%= icon :trash %>
+              <% end %>
+            <% end %>
           </li>
         <% end %>
       </ul>

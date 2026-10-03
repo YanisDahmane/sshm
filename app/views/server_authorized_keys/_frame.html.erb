@@ -1,5 +1,8 @@
-<%# Lazy-loaded list of the server's authorized keys; reloads itself through the refresh link. %>
-<turbo-frame id="<%= dom_id(server, :authorized_keys) %>" src="<%= server_authorized_keys_path(server) %>" loading="<%= local_assigns.fetch(:loading, :lazy) %>" class="group block">
+<%# Lazy-loaded key list of a server, on `account` (the login user when omitted); reloads itself through its links. %>
+<% account = local_assigns[:account] %>
+<% server = account&.server || local_assigns.fetch(:server) %>
+<turbo-frame id="<%= dom_id(server, :authorized_keys) %>" src="<%= server_authorized_keys_path(server, account: account&.unix_user) %>"
+             loading="<%= local_assigns.fetch(:loading, :lazy) %>" class="group block">
   <div class="flex items-center gap-2 py-6 text-sm text-slate-500">
     <%= icon :arrow_path, class: "h-4 w-4 animate-spin" %>
     Lecture des clés autorisées…
