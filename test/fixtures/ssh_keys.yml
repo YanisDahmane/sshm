@@ -1,0 +1,5 @@
+<% key = SshKeyGenerator.generate(comment: "sshm-fixture") %>
+main:
+  public_key: <%= key.public_key %>
+  private_key: <%= key.private_key.to_json %>
+  fingerprint: <%= key.fingerprint %>
