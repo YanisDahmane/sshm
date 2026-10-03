@@ -107,4 +107,61 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
 
     assert_select "#server-authorized-keys turbo-frame##{frame_id}[loading=lazy][src=?]", server_authorized_keys_path(servers(:web))
   end
+
+  test "offers to authorize the profiles that are not on the server yet" do
+    sign_in users(:one)
+
+    stub_method(AuthorizedKeysReader, :call, keys_result(profiles(:ci).public_key)) do
+      get server_authorized_keys_path(servers(:web))
+    end
+
+    assert_select "form#authorize-profile[action=?][data-controller=quiet-submit]", server_authorizations_path(servers(:web)) do
+      assert_select "select[name=profile_id] option", 1
+      assert_select "option[value=?]", profiles(:alice).id.to_s, text: "Alice"
+      assert_select "button[type=submit]", text: /Autoriser/
+    end
+  end
+
+  test "tags keys that belong to a profile, whatever their comment" do
+    sign_in users(:one)
+    type, blob = profiles(:alice).public_key.split(" ")
+
+    stub_method(AuthorizedKeysReader, :call, keys_result("#{type} #{blob} renamed")) do
+      get server_authorized_keys_path(servers(:web))
+    end
+
+    assert_select "li.authorized-key a.key-profile[href=?][data-turbo-frame=_top]", profile_path(profiles(:alice)), text: /Profil : Alice/
+  end
+
+  test "says when every profile is already authorized" do
+    sign_in users(:one)
+
+    stub_method(AuthorizedKeysReader, :call, keys_result(profiles(:alice).public_key, profiles(:ci).public_key)) do
+      get server_authorized_keys_path(servers(:web))
+    end
+
+    assert_select "form#authorize-profile", 0
+    assert_select "#all-profiles-authorized"
+  end
+
+  test "invites to create a profile when there is none" do
+    Profile.delete_all
+    sign_in users(:one)
+
+    stub_method(AuthorizedKeysReader, :call, keys_result) do
+      get server_authorized_keys_path(servers(:web))
+    end
+
+    assert_select "form#authorize-profile", 0
+    assert_select "a[href=?][data-turbo-frame=_top]", new_profile_path
+  end
+
+  test "does not offer to authorize when the keys cannot be read" do
+    Server.update_all(host: "127.0.0.1", port: closed_port)
+    sign_in users(:one)
+
+    get server_authorized_keys_path(servers(:web))
+
+    assert_select "form#authorize-profile", 0
+  end
 end
