@@ -21,8 +21,15 @@ default: &default
 
 
 development:
-  <<: *default
-  database: sshm_development
+  primary:
+    <<: *default
+    database: sshm_development
+  # Solid Queue in development too, so scheduled jobs (expiries, automations)
+  # survive restarts and recurring tasks run (process "jobs" in Procfile.dev).
+  queue:
+    <<: *default
+    database: sshm_development_queue
+    migrations_paths: db/queue_migrate
 
   # The specified database role being used to connect to PostgreSQL.
   # To create additional roles in PostgreSQL see `$ createuser --help`.
