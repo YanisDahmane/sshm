@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   resources :servers do
     resource :ping, only: %i[show create], controller: "server_pings"
     resource :ssh_check, only: :show, controller: "server_ssh_checks"
+    resource :host_key, only: :create, controller: "server_host_keys"
     resources :authorized_keys, only: :index, controller: "server_authorized_keys"
     resource :authorized_key, only: :destroy, controller: "server_authorized_keys"
     resources :authorizations, only: :create, controller: "server_authorizations"

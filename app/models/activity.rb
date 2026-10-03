@@ -16,6 +16,7 @@ class Activity < ApplicationRecord
     Kind.new(:unknown_key_detected, "Clé sans profil détectée", :security, :warning, "Une clé qui ne correspond à aucun profil a été trouvée sur un serveur."),
     Kind.new(:key_disappeared, "Clé retirée hors de SSHM", :security, :warning, "Une clé a disparu d'un serveur sans passer par SSHM."),
     Kind.new(:ssh_access_lost, "Accès SSH perdu", :security, :critical, "Le serveur refuse désormais la clé de SSHM."),
+    Kind.new(:host_key_changed, "Empreinte serveur remplacée", :security, :critical, "Un administrateur a accepté la nouvelle empreinte d'un serveur (réinstallation…)."),
     Kind.new(:server_unreachable, "Serveur injoignable", :servers, :warning, "Un serveur ne répond plus sur son port SSH."),
     Kind.new(:server_back_online, "Serveur de nouveau joignable", :servers, :info, "Un serveur injoignable répond à nouveau."),
     Kind.new(:server_created, "Serveur ajouté", :servers, :info, "Un serveur a été ajouté à SSHM."),
@@ -86,6 +87,7 @@ class Activity < ApplicationRecord
     when :unknown_key_detected then "Clé « #{key_name} » sans profil trouvée sur #{target}"
     when :key_disappeared then "Clé « #{key_name} » disparue de #{target}"
     when :ssh_access_lost then "« #{server_name} » refuse la clé de SSHM"
+    when :host_key_changed then "Nouvelle empreinte acceptée pour « #{server_name} » : #{data["new_fingerprint"]}"
     when :server_unreachable then "« #{server_name} » ne répond plus"
     when :server_back_online then "« #{server_name} » répond à nouveau"
     when :server_created then "Serveur « #{server_name} » ajouté"

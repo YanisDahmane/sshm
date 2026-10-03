@@ -137,6 +137,20 @@ class SshConnectionTest < ActiveSupport::TestCase
 
     error = assert_raises(SshConnection::HostKeyMismatchError) { connect(servers(:web), fake) { } }
     assert_match "SHA256:abc", error.message
+    assert_equal "SHA256:abc", error.new_fingerprint
+    assert_equal :host_key_changed, error.reason
+  end
+
+  test "a host key mismatch tells which fingerprints were pinned" do
+    pinned = SshKeyGenerator.generate
+    server = servers(:web)
+    FileUtils.mkdir_p(@known_hosts.dirname)
+    @known_hosts.write("#{server.port == 22 ? server.host : "[#{server.host}]:#{server.port}"} #{pinned.public_key.split.first(2).join(" ")}\n")
+    mismatch = Net::SSH::HostKeyMismatch.new("fingerprint does not match")
+    mismatch.data = { fingerprint: "SHA256:new" }
+
+    error = assert_raises(SshConnection::HostKeyMismatchError) { connect(server, FakeSsh.new(error: mismatch)) { } }
+    assert_equal [ pinned.fingerprint ], error.known_fingerprints
   end
 
   test "each error has a French title" do

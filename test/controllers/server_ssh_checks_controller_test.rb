@@ -64,6 +64,37 @@ class ServerSshChecksControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "shows both fingerprints and lets an admin trust the new one" do
+    changed = SshCheck::Result.new(success: false, message: "L'empreinte du serveur a changé", details: "x", reason: :host_key_changed,
+                                   host_key: { new: "SHA256:new", known: [ "SHA256:old" ] })
+    sign_in users(:one)
+
+    stub_method(SshCheck, :call, changed) { get server_ssh_check_path(servers(:web)) }
+
+    assert_select "turbo-frame##{frame_id} .host-key-changed" do
+      assert_select ".host-key-known", "SHA256:old"
+      assert_select ".host-key-new", "SHA256:new"
+      assert_select "form[action=?][data-turbo-frame=_top][data-confirm-variant=danger]", server_host_key_path(servers(:web)) do
+        assert_select "input[name=fingerprint][value=?]", "SHA256:new"
+      end
+    end
+    assert_select ".ssh-setup-hint", 0
+  end
+
+  test "only admins get the button to trust a new host key" do
+    changed = SshCheck::Result.new(success: false, message: "L'empreinte du serveur a changé", details: "x", reason: :host_key_changed,
+                                   host_key: { new: "SHA256:new", known: [] })
+    sign_in users(:operator)
+
+    stub_method(SshCheck, :call, changed) { get server_ssh_check_path(servers(:web)) }
+
+    assert_select ".host-key-changed" do
+      assert_select ".host-key-known", "—"
+      assert_select "form", 0
+      assert_select "p", text: /Demandez à un administrateur/
+    end
+  end
+
   test "points to the settings and records nothing when there is no SSHM key" do
     SshKey.delete_all
     sign_in users(:one)

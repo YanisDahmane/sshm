@@ -28,8 +28,19 @@ class SshConnection
     def reason = :key_refused
   end
 
+  # Carries the fingerprint the server presents and the pinned ones, so an
+  # admin can decide to trust the new one (ServerHostKeysController).
   class HostKeyMismatchError < Error
+    attr_reader :new_fingerprint, :known_fingerprints
+
+    def initialize(message = nil, new_fingerprint: nil, known_fingerprints: [])
+      @new_fingerprint = new_fingerprint
+      @known_fingerprints = known_fingerprints
+      super(message)
+    end
+
     def title = "L'empreinte du serveur a changé"
+    def reason = :host_key_changed
   end
 
   class MissingKeyError < Error
@@ -63,7 +74,7 @@ class SshConnection
 
   # `transport` is the Net::SSH-compatible entry point, swappable in tests.
   # `key`: one SshKey or a list, tried in order (the app keys by default).
-  def initialize(server, key: SshKey.app_keys, timeout: DEFAULT_TIMEOUT, known_hosts_file: KNOWN_HOSTS_FILE, transport: Net::SSH)
+  def initialize(server, key: SshKey.app_keys, timeout: DEFAULT_TIMEOUT, known_hosts_file: KnownHosts.file, transport: Net::SSH)
     @server = server
     @keys = Array(key).compact
     @timeout = timeout
@@ -86,7 +97,9 @@ class SshConnection
   rescue Net::SSH::AuthenticationFailed => e
     raise AuthenticationError, "Authentification refusée pour #{server.username}@#{server.host} (#{e.message})"
   rescue Net::SSH::HostKeyMismatch => e
-    raise HostKeyMismatchError, "La clé d'hôte de #{server.host} a changé (#{e.fingerprint}). Connexion refusée."
+    raise HostKeyMismatchError.new("La clé d'hôte de #{server.host} a changé (#{e.fingerprint}). Connexion refusée.",
+                                   new_fingerprint: e.fingerprint,
+                                   known_fingerprints: KnownHosts.fingerprints(server.host, server.port, file: @known_hosts_file))
   rescue Net::SSH::ConnectionTimeout, Net::SSH::Disconnect, Net::SSH::Exception, SocketError, SystemCallError, IOError, Timeout::Error => e
     raise ConnectionError, "Impossible de se connecter à #{server.host}:#{server.port} (#{e.class}: #{e.message})"
   end

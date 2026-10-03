@@ -80,6 +80,9 @@ class SshCheckTest < ActiveSupport::TestCase
     result = check(FakeSsh.new(error: mismatch))
 
     assert_equal "L'empreinte du serveur a changé", result.message
+    assert_equal :host_key_changed, result.reason
+    assert_equal "SHA256:abc", result.host_key[:new]
+    assert_equal [], result.host_key[:known]
   end
 
   test "explains when the server cannot be reached" do

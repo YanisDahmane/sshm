@@ -1,0 +1,21 @@
+<%# The server presents another host key than the pinned one: show both, let an admin trust the new one. %>
+<div class="host-key-changed mt-3 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+  <p>
+    Si le serveur vient d'être <strong>réinstallé</strong> ou a changé de clé d'hôte, c'est normal. Sinon, quelqu'un se fait peut-être passer pour lui :
+    vérifiez l'empreinte sur le serveur (<code class="font-mono text-xs">ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub</code>) avant d'accepter.
+  </p>
+  <dl class="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 font-mono text-xs">
+    <dt class="font-sans text-amber-700">Connue</dt>
+    <dd class="host-key-known break-all"><%= host_key[:known].presence&.join(", ") || "—" %></dd>
+    <dt class="font-sans text-amber-700">Présentée</dt>
+    <dd class="host-key-new break-all"><%= host_key[:new] %></dd>
+  </dl>
+  <% if can?(:administer) %>
+    <%= button_to "Faire confiance à la nouvelle empreinte", server_host_key_path(server), params: { fingerprint: host_key[:new] },
+          form: { class: "mt-3", data: { turbo_frame: "_top", turbo_confirm: "La nouvelle empreinte #{host_key[:new]} remplacera l'ancienne pour « #{server.name} ».",
+                                         confirm_label: "Faire confiance", confirm_variant: "danger" } },
+          class: "cursor-pointer rounded-md border border-amber-300 bg-white px-3 py-1.5 text-sm font-medium text-amber-800 shadow-sm hover:bg-amber-100" %>
+  <% else %>
+    <p class="mt-3 text-amber-700">Demandez à un administrateur de vérifier et d'accepter la nouvelle empreinte.</p>
+  <% end %>
+</div>

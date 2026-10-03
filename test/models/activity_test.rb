@@ -53,6 +53,7 @@ class ActivityTest < ActiveSupport::TestCase
       [ :unknown_key_detected, { unix_user: "root" } ] => "Clé « sans nom » sans profil trouvée sur « Web » pour root",
       [ :key_disappeared, { unix_user: "root", key_name: "bob" } ] => "Clé « bob » disparue de « Web » pour root",
       [ :ssh_access_lost, {} ] => "« Web » refuse la clé de SSHM",
+      [ :host_key_changed, { new_fingerprint: "SHA256:new" } ] => "Nouvelle empreinte acceptée pour « Web » : SHA256:new",
       [ :server_unreachable, {} ] => "« Web » ne répond plus",
       [ :server_back_online, {} ] => "« Web » répond à nouveau",
       [ :server_created, {} ] => "Serveur « Web » ajouté",
