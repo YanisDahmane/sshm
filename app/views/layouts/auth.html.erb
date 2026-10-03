@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html class="h-full bg-slate-50">
+  <head>
+    <title><%= content_for(:title) || "SSHM" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="flex min-h-full flex-col items-center justify-center px-4 py-12 text-slate-900">
+    <div class="w-full max-w-sm">
+      <h1 class="mb-8 text-center text-3xl font-bold tracking-tight">SSHM</h1>
+      <%= render "shared/flash" %>
+      <div class="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+        <%= yield %>
+      </div>
+    </div>
+  </body>
+</html>
