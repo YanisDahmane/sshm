@@ -68,3 +68,8 @@ gem "devise", "~> 5.0"
 
 # json 3.x drops `quirks_mode`, which Rails 8.0 still passes when encoding session cookies
 gem "json", "~> 2.10"
+
+# SSH connections to managed servers
+gem "net-ssh", "~> 7.3"
+gem "ed25519", "~> 1.3"
+gem "bcrypt_pbkdf", "~> 1.1"
