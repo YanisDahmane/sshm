@@ -8,6 +8,8 @@ Rails.application.routes.draw do
   end
   resource :server_pings, only: :create, path: "servers/pings"
 
+  resources :profiles, except: :index
+
   resource :settings, only: :show
   scope "settings" do
     resource :ssh_key, only: :create

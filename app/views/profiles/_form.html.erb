@@ -1,0 +1,26 @@
+<% input_class = "mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" %>
+<% label_class = "block text-sm font-medium text-slate-700" %>
+
+<%= form_with model: profile, class: "space-y-5" do |f| %>
+  <%= render "shared/form_errors", record: profile %>
+
+  <div>
+    <%= f.label :name, "Nom", class: label_class %>
+    <%= f.text_field :name, autofocus: true, required: true, placeholder: "Alice", class: input_class %>
+  </div>
+
+  <div>
+    <%= f.label :public_key, "Clé SSH publique", class: label_class %>
+    <%= f.text_area :public_key, required: true, rows: 4, spellcheck: false, autocomplete: "off",
+          placeholder: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA… alice@laptop",
+          class: "#{input_class} font-mono text-xs" %>
+    <p class="mt-1 text-xs text-slate-500">
+      Contenu du fichier <code class="font-mono">.pub</code>, par exemple <code class="font-mono">cat ~/.ssh/id_ed25519.pub</code>. Jamais la clé privée.
+    </p>
+  </div>
+
+  <div class="flex items-center justify-end gap-3 pt-2">
+    <%= link_to "Annuler", profile.persisted? ? profile_path(profile) : root_path, class: "rounded-md px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" %>
+    <%= f.submit profile.persisted? ? "Enregistrer" : "Ajouter le profil", class: "cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+  </div>
+<% end %>

@@ -1,0 +1,10 @@
+<% content_for :title, "Modifier #{@profile.name_was} · SSHM" %>
+
+<div class="mx-auto max-w-xl">
+  <%= link_to "← Retour au profil", profile_path(@profile), class: "text-sm text-slate-500 hover:text-slate-700" %>
+  <h1 class="mt-2 text-2xl font-bold tracking-tight">Modifier « <%= @profile.name_was %> »</h1>
+
+  <div class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <%= render "form", profile: @profile %>
+  </div>
+</div>

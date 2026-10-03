@@ -80,3 +80,53 @@
     </div>
   <% end %>
 </section>
+
+<section id="profiles-section" class="mt-12">
+  <div class="flex items-center justify-between gap-4">
+    <div>
+      <h2 class="text-lg font-semibold">Profils</h2>
+      <p class="text-sm text-slate-500"><%= pluralize(@profiles.size, "profil", plural: "profils") %></p>
+    </div>
+    <%= link_to "Ajouter un profil", new_profile_path,
+          class: "rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+  </div>
+
+  <% if @profiles.any? %>
+    <div class="mt-4 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+      <table id="profiles" class="min-w-full divide-y divide-slate-200 text-sm">
+        <thead class="bg-slate-50 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
+          <tr>
+            <th scope="col" class="px-4 py-3">Nom</th>
+            <th scope="col" class="px-4 py-3">Type</th>
+            <th scope="col" class="px-4 py-3">Empreinte</th>
+            <th scope="col" class="px-4 py-3"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <% @profiles.each do |profile| %>
+            <tr id="<%= dom_id(profile) %>" class="hover:bg-slate-50">
+              <td class="px-4 py-3 font-medium"><%= link_to profile.name, profile_path(profile), class: "hover:text-indigo-600 hover:underline" %></td>
+              <td class="px-4 py-3 font-mono text-slate-700"><%= profile.authorized_key&.type %></td>
+              <td class="px-4 py-3 font-mono text-xs text-slate-500"><%= profile.fingerprint %></td>
+              <td class="px-4 py-3">
+                <div class="flex items-center justify-end gap-1">
+                  <%= link_to edit_profile_path(profile),
+                        title: "Modifier", aria: { label: "Modifier #{profile.name}" },
+                        class: "rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700" do %>
+                    <%= icon :pencil_square %>
+                  <% end %>
+                  <%= render "profiles/delete_button", profile: profile %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="mt-4 rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
+      <p class="text-sm text-slate-500">Aucun profil pour le moment.</p>
+      <%= link_to "Ajouter votre premier profil", new_profile_path, class: "mt-2 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+    </div>
+  <% end %>
+</section>

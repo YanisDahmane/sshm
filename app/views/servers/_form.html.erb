@@ -2,15 +2,7 @@
 <% label_class = "block text-sm font-medium text-slate-700" %>
 
 <%= form_with model: server, class: "space-y-5" do |f| %>
-  <% if server.errors.any? %>
-    <div id="error_explanation" class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-      <ul class="list-disc space-y-1 pl-5">
-        <% server.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
-    </div>
-  <% end %>
+  <%= render "shared/form_errors", record: server %>
 
   <div>
     <%= f.label :name, "Nom", class: label_class %>
