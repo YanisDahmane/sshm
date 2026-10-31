@@ -11,7 +11,7 @@
               class="backup-codes mt-4 block w-full resize-none rounded-md border border-line bg-subtle px-3 py-2 font-mono text-sm leading-7 text-ink"><%= @backup_codes.each_slice(2).map { |pair| pair.join("    ") }.join("\n") %></textarea>
     <div class="mt-4 flex items-center justify-between gap-3">
       <%= render "settings/copy_button" %>
-      <%= link_to "J'ai enregistré mes codes", account_path, class: "rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-accent-hover" %>
+      <%= link_to "J'ai enregistré mes codes", account_path, class: "btn btn-primary" %>
     </div>
   </div>
 </div>

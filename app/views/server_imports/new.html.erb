@@ -1,6 +1,6 @@
 <% content_for :title, "Importer des serveurs · Elio" %>
-<% input_class = "mt-1 block w-full rounded-md border border-line bg-surface px-3 py-2 text-sm shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent" %>
-<% label_class = "block text-sm font-medium text-ink-2" %>
+<% input_class = "input mt-1" %>
+<% label_class = "label" %>
 
 <div class="mx-auto max-w-4xl">
   <%= link_to "← Serveurs", servers_path, class: "text-sm text-ink-3 hover:text-ink-2" %>
@@ -25,7 +25,7 @@
             <%= hidden_field_tag :import_format, @format, id: nil %>
             <%= hidden_field_tag :default_username, @default_username, id: nil %>
             <%= f.submit "Importer #{pluralize(counts[:valid], "serveur", plural: "serveurs")}",
-                  class: "cursor-pointer rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-accent-hover" %>
+                  class: "btn btn-primary" %>
           <% end %>
         <% end %>
       </div>
@@ -108,7 +108,7 @@ API,10.0.0.12,22,deploy,Production|API</pre>
         <p class="mt-1 text-xs text-ink-3">Pour les lignes sans utilisateur.</p>
       </div>
       <div class="flex justify-end">
-        <%= f.submit "Voir l'aperçu", class: "cursor-pointer rounded-md border border-line bg-surface px-4 py-2 text-sm font-medium text-ink-2 shadow-sm hover:bg-subtle" %>
+        <%= f.submit "Voir l'aperçu", class: "btn btn-secondary" %>
       </div>
     <% end %>
   </section>

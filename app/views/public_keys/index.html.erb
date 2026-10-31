@@ -10,14 +10,14 @@
     </div>
     <% if can?(:operate) %>
       <%= link_to "Ajouter une clé", new_public_key_path,
-            class: "rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-accent-hover" %>
+            class: "btn btn-primary" %>
     <% end %>
   </div>
 
   <nav class="key-kind-filter mt-4 flex flex-wrap gap-2" aria-label="Type de clé">
     <% [ [ "Toutes", nil ], [ "Personnes", "person" ], [ "Serveurs", "server" ] ].each do |label, value| %>
       <%= link_to label, public_keys_path(kind: value), aria: { current: (@kind == value ? "page" : nil) },
-            class: "rounded-full px-3 py-1 text-sm font-medium ring-1 ring-inset #{@kind == value ? "bg-accent text-white ring-accent" : "bg-surface text-ink-2 ring-line hover:bg-subtle"}" %>
+            class: "rounded-full px-3 py-1 text-sm font-medium ring-1 ring-inset #{@kind == value ? "bg-accent-fill text-white ring-accent-fill" : "bg-surface text-ink-2 ring-line hover:bg-subtle"}" %>
     <% end %>
   </nav>
 

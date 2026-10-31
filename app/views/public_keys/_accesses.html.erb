@@ -7,7 +7,7 @@
       <p class="mt-1 text-sm text-ink-3">Serveurs où cette clé est installée, d'après la dernière lecture des clés.</p>
     </div>
     <% if can?(:operate) %>
-      <%= button_to server_scans_path, class: "inline-flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-md border border-line bg-surface px-3 py-1.5 text-sm font-medium text-ink-2 shadow-sm hover:bg-subtle" do %>
+      <%= button_to server_scans_path, class: "btn btn-secondary shrink-0 whitespace-nowrap" do %>
         <%= icon :key, class: "h-4 w-4" %> Scanner les clés
       <% end %>
     <% end %>

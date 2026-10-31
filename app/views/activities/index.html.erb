@@ -13,7 +13,7 @@
 <nav class="activity-filters mt-6 flex flex-wrap gap-2" aria-label="Catégories">
   <% [ [ "Tout", nil ], *Activity::CATEGORIES.map { |key, label| [ label, key.to_s ] } ].each do |label, category| %>
     <%= link_to label, activities_path(category: category, server_id: @server&.id), aria: { current: (@category == category ? "page" : nil) },
-          class: "rounded-full px-3 py-1 text-sm font-medium ring-1 ring-inset #{@category == category ? "bg-accent text-white ring-accent" : "bg-surface text-ink-2 ring-line hover:bg-subtle"}" %>
+          class: "rounded-full px-3 py-1 text-sm font-medium ring-1 ring-inset #{@category == category ? "bg-accent-fill text-white ring-accent-fill" : "bg-surface text-ink-2 ring-line hover:bg-subtle"}" %>
   <% end %>
 </nav>
 

@@ -13,7 +13,7 @@
       <% current = step == checklist.current %>
       <li id="onboarding-<%= step.key %>" class="onboarding-step flex gap-3 <%= step.done? ? "is-done" : "" %>">
         <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold
-                     <%= step.done? ? "bg-good text-white" : (current ? "bg-accent text-white" : "bg-surface text-ink-3 ring-1 ring-line") %>">
+                     <%= step.done? ? "bg-good text-white" : (current ? "bg-accent-fill text-white" : "bg-surface text-ink-3 ring-1 ring-line") %>">
           <%= step.done? ? icon(:check, class: "h-3.5 w-3.5") : index + 1 %>
         </span>
         <div class="min-w-0 flex-1">
@@ -23,15 +23,15 @@
             <div class="mt-2">
               <% case step.key %>
               <% when :ssh_key %>
-                <%= button_to "Générer la clé", ssh_key_path, class: "cursor-pointer rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-white hover:bg-accent-hover" %>
+                <%= button_to "Générer la clé", ssh_key_path, class: "btn btn-primary" %>
               <% when :server %>
-                <%= link_to "Ajouter un serveur", new_server_path, class: "inline-flex rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-white hover:bg-accent-hover" %>
+                <%= link_to "Ajouter un serveur", new_server_path, class: "btn btn-primary" %>
               <% when :install_key %>
                 <%= render "ssh_keys/setup_hint", server: Server.order(:name).first, reason: :key_refused %>
                 <%= link_to "Ouvrir #{Server.order(:name).first.name} pour tester", server_path(Server.order(:name).first),
-                      class: "mt-3 inline-flex rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-white hover:bg-accent-hover" %>
+                      class: "btn btn-primary mt-3" %>
               <% when :public_key %>
-                <%= link_to "Ajouter une clé", new_public_key_path, class: "inline-flex rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-white hover:bg-accent-hover" %>
+                <%= link_to "Ajouter une clé", new_public_key_path, class: "btn btn-primary" %>
               <% when :inventory %>
                 <% if can?(:operate) && (server = Server.where(ssh_ok: true).order(:name).first) %>
                   <%= button_to "Inventorier #{server.name}", server_inventory_path(server), class: "btn btn-primary" %>

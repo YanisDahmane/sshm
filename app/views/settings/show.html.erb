@@ -54,7 +54,7 @@
           </div>
           <%= button_to "Faire tourner la clé", settings_key_rotations_path,
                 data: { turbo_confirm: "Une nouvelle clé Elio va remplacer l'actuelle sur les #{Server.count} serveur(s), sans coupure. Les serveurs injoignables pourront être relancés ensuite.", confirm_label: "Lancer la rotation" },
-                class: "shrink-0 cursor-pointer rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-accent-hover" %>
+                class: "btn btn-primary shrink-0" %>
         </div>
       <% end %>
       <div class="mt-6 flex flex-wrap items-center justify-between gap-4">
@@ -69,7 +69,7 @@
     <div class="mt-6 rounded-lg border border-dashed border-line px-6 py-10 text-center">
       <p class="text-sm text-ink-3">Aucune clé SSH n'a encore été générée.</p>
       <%= button_to "Générer une clé SSH", ssh_key_path,
-            class: "mt-4 cursor-pointer rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-accent-hover" %>
+            class: "btn btn-primary mt-4" %>
     </div>
   <% end %>
 </section>

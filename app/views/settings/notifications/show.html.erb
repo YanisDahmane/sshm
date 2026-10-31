@@ -6,7 +6,7 @@
     Recevez les activités d'Elio sur Slack, Discord, un webhook signé ou par email. Chaque canal choisit les activités qu'il reçoit, et peut recevoir un résumé chaque matin.
   </p>
   <%= link_to new_settings_notification_channel_path,
-        class: "inline-flex shrink-0 items-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-accent-hover" do %>
+        class: "btn btn-primary shrink-0" do %>
     Ajouter un canal
   <% end %>
 </div>
@@ -45,7 +45,7 @@
           </div>
           <div class="flex shrink-0 items-center gap-2">
             <%= button_to "Envoyer un test", test_settings_notification_channel_path(channel),
-                  class: "cursor-pointer whitespace-nowrap rounded-md border border-line bg-surface px-3 py-1.5 text-sm font-medium text-ink-2 shadow-sm hover:bg-subtle" %>
+                  class: "btn btn-secondary whitespace-nowrap" %>
             <%= link_to edit_settings_notification_channel_path(channel), title: "Modifier", aria: { label: "Modifier #{channel.name}" },
                   class: "rounded-md p-1.5 text-ink-3 hover:bg-subtle hover:text-ink-2" do %>
               <%= icon :pencil_square %>

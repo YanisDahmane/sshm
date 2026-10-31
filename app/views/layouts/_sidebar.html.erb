@@ -5,7 +5,7 @@
        class="sidebar fixed inset-y-0 left-0 z-40 flex w-60 -translate-x-full flex-col border-r border-line bg-surface px-3 py-4 transition-transform lg:translate-x-0">
   <div class="flex items-center justify-between">
     <%= link_to root_path, class: "flex items-center gap-2 px-1 text-base font-semibold tracking-tight text-ink" do %>
-      <span class="grid h-7 w-7 place-items-center rounded-lg bg-accent text-white"><%= icon :server_stack, class: "h-4 w-4" %></span>
+      <span class="grid h-7 w-7 place-items-center rounded-lg bg-accent-fill text-white"><%= icon :server_stack, class: "h-4 w-4" %></span>
       Elio
     <% end %>
     <button type="button" data-action="sidebar#close" aria-label="Fermer le menu" class="btn btn-ghost btn-icon lg:hidden"><%= icon :x_mark %></button>

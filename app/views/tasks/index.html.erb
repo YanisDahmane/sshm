@@ -19,7 +19,7 @@
   <nav class="task-filters mt-6 flex flex-wrap gap-2" aria-label="Statut">
     <% [ [ "Toutes", nil ], [ "À venir", "queued" ], [ "En cours", "running" ], [ "Terminées", "succeeded" ], [ "En échec", "failed" ] ].each do |label, filter| %>
       <%= link_to tasks_path(status: filter), aria: { current: (@filter == filter ? "page" : nil) }, data: { filter: filter || "all" },
-            class: "rounded-full px-3 py-1 text-sm font-medium ring-1 ring-inset #{@filter == filter ? "bg-accent text-white ring-accent" : "bg-surface text-ink-2 ring-line hover:bg-subtle"}" do %>
+            class: "rounded-full px-3 py-1 text-sm font-medium ring-1 ring-inset #{@filter == filter ? "bg-accent-fill text-white ring-accent-fill" : "bg-surface text-ink-2 ring-line hover:bg-subtle"}" do %>
         <%= label %><% if filter %> <span class="tabular-nums opacity-70"><%= task_filter_count(filter) %></span><% end %>
       <% end %>
     <% end %>

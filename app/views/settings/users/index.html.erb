@@ -6,16 +6,16 @@
   <p class="mt-1 text-sm text-ink-3">Un lien à usage unique, valable <%= Invitation::VALIDITY.inspect.sub("days", "jours") %>, est créé : copiez-le et envoyez-le à la personne.</p>
   <%= form_with model: @invitation, url: settings_invitations_path, class: "mt-4 flex flex-wrap items-end gap-3" do |f| %>
     <div class="min-w-60 flex-1">
-      <%= f.label :email, "Email", class: "block text-sm font-medium text-ink-2" %>
+      <%= f.label :email, "Email", class: "label" %>
       <%= f.email_field :email, required: true, placeholder: "alice@example.com",
-            class: "mt-1 block w-full rounded-md border border-line px-3 py-2 text-sm shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent" %>
+            class: "input mt-1" %>
     </div>
     <div>
-      <%= f.label :role, "Rôle", class: "block text-sm font-medium text-ink-2" %>
+      <%= f.label :role, "Rôle", class: "label" %>
       <%= f.select :role, User::ROLE_LABELS.invert, {},
-            class: "mt-1 block rounded-md border border-line bg-surface px-3 py-2 text-sm shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent" %>
+            class: "input w-auto mt-1" %>
     </div>
-    <%= f.submit "Créer l'invitation", class: "cursor-pointer rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-accent-hover" %>
+    <%= f.submit "Créer l'invitation", class: "btn btn-primary" %>
   <% end %>
 
   <% if @invitations.any? %>
@@ -48,14 +48,14 @@
       <%= f.check_box :require_admin_two_factor, class: "h-4 w-4 rounded border-line text-accent" %>
       Double authentification obligatoire pour les administrateurs
     </label>
-    <%= f.submit "Enregistrer", class: "cursor-pointer rounded-md border border-line bg-surface px-3 py-1.5 text-sm font-medium text-ink-2 shadow-sm hover:bg-subtle" %>
+    <%= f.submit "Enregistrer", class: "btn btn-secondary" %>
   <% end %>
 </section>
 
 <section id="users" class="mt-6 rounded-xl border border-line bg-surface p-6 shadow-sm">
   <h2 class="text-base font-semibold">Utilisateurs</h2>
   <p class="mt-1 text-sm text-ink-3">Rôle et accès à Elio.</p>
-  <% select_class = "rounded-md border border-line bg-surface px-2 py-1.5 text-sm shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent" %>
+  <% select_class = "input w-auto px-2 py-1.5" %>
   <ul class="mt-4 divide-y divide-line rounded-md border border-line">
     <% @users.each do |user| %>
       <li id="<%= dom_id(user) %>" class="user-row flex flex-wrap items-center gap-3 px-4 py-3 text-sm <%= "is-deactivated bg-subtle" if user.deactivated? %>">
@@ -74,12 +74,12 @@
         </div>
         <%= form_with model: user, url: settings_user_path(user), class: "flex flex-wrap items-center gap-2" do |f| %>
           <%= f.select :role, User::ROLE_LABELS.invert, {}, aria: { label: "Rôle de #{user.email}" }, class: select_class %>
-          <%= f.submit "Enregistrer", class: "cursor-pointer rounded-md border border-line bg-surface px-3 py-1.5 text-sm font-medium text-ink-2 shadow-sm hover:bg-subtle" %>
+          <%= f.submit "Enregistrer", class: "btn btn-secondary" %>
         <% end %>
         <% if user.two_factor_enabled? && user != current_user %>
           <%= button_to "Réinitialiser la 2FA", reset_two_factor_settings_user_path(user),
                 form: { data: { turbo_confirm: "La double authentification de #{user.email} sera désactivée : à faire seulement s'il a perdu son application et ses codes de secours.", confirm_label: "Réinitialiser", confirm_variant: "danger" } },
-                class: "cursor-pointer rounded-md border border-line bg-surface px-3 py-1.5 text-sm font-medium text-ink-2 shadow-sm hover:bg-subtle" %>
+                class: "btn btn-secondary" %>
         <% end %>
         <% if user.deactivated? %>
           <%= button_to "Réactiver", reactivate_settings_user_path(user),

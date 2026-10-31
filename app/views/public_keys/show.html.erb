@@ -18,7 +18,7 @@
     <div class="flex shrink-0 items-center gap-2">
       <% if can?(:operate) %>
         <%= link_to edit_public_key_path(@public_key),
-              class: "inline-flex items-center gap-2 rounded-md border border-line bg-surface px-3 py-2 text-sm font-medium text-ink-2 shadow-sm hover:bg-subtle" do %>
+              class: "btn btn-secondary" do %>
           <%= icon :pencil_square %> Modifier
         <% end %>
         <%= render "delete_button", public_key: @public_key, label: "Supprimer",

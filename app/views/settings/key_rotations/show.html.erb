@@ -31,7 +31,7 @@
         </p>
         <div class="mt-4 flex flex-wrap gap-3">
           <%= button_to "Relancer les échecs", retry_settings_key_rotation_path(@rotation), data: { turbo_frame: "_top" },
-                class: "cursor-pointer rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-accent-hover" %>
+                class: "btn btn-primary" %>
           <%= button_to "Finaliser malgré les échecs", finalize_settings_key_rotation_path(@rotation),
                 form: { data: { turbo_frame: "_top", turbo_confirm: "L'ancienne clé sera supprimée : Elio perdra l'accès aux serveurs en échec tant que la nouvelle clé n'y sera pas installée.",
                                 confirm_label: "Finaliser", confirm_variant: "danger" } },

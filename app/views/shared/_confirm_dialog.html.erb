@@ -5,11 +5,10 @@
     <h2 id="confirm-dialog-title" class="text-base font-semibold text-ink">Êtes-vous sûr ?</h2>
     <p data-confirm-message class="mt-2 text-sm text-ink-2"></p>
     <div class="mt-6 flex justify-end gap-3">
-      <button value="cancel" class="cursor-pointer rounded-md border border-line bg-surface px-4 py-2 text-sm font-medium text-ink-2 hover:bg-subtle">Annuler</button>
+      <button value="cancel" class="btn btn-secondary">Annuler</button>
       <button value="confirm" data-confirm-accept data-variant="primary"
-              class="cursor-pointer rounded-md px-4 py-2 text-sm font-semibold text-white shadow-sm
-                     data-[variant=primary]:bg-accent data-[variant=primary]:hover:bg-accent-hover
-                     data-[variant=danger]:bg-crit data-[variant=danger]:hover:bg-crit">Confirmer</button>
+              class="btn text-white data-[variant=primary]:bg-accent-fill data-[variant=primary]:hover:bg-accent-fill-hover
+                     data-[variant=danger]:bg-crit data-[variant=danger]:hover:bg-crit-ink">Confirmer</button>
     </div>
   </form>
 </dialog>

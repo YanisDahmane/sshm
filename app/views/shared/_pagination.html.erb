@@ -14,7 +14,7 @@
         <% if number == :gap %>
           <span class="px-1.5 text-ink-3" aria-hidden="true">…</span>
         <% elsif number == pager.page %>
-          <span class="page-current grid h-8 min-w-8 place-items-center rounded-md bg-accent px-2 font-medium text-white tabular-nums" aria-current="page"><%= number %></span>
+          <span class="page-current grid h-8 min-w-8 place-items-center rounded-md bg-accent-fill px-2 font-medium text-white tabular-nums" aria-current="page"><%= number %></span>
         <% else %>
           <%= link_to number, page_url.(number), class: "grid h-8 min-w-8 place-items-center rounded-md px-2 text-ink-2 tabular-nums hover:bg-subtle hover:text-ink",
                 aria: { label: "Page #{number}" } %>

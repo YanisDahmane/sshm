@@ -29,7 +29,7 @@
         <%= render "ssh_keys/setup_hint", server: @server, reason: @result.reason %>
       <% end %>
       <%= link_to "Réessayer", server_authorized_keys_path(@server),
-            class: "retry-authorized-keys mt-3 inline-flex items-center gap-1.5 rounded-md border border-line bg-surface px-3 py-1.5 text-sm font-medium text-ink-2 shadow-sm hover:bg-subtle" %>
+            class: "btn btn-secondary retry-authorized-keys mt-3" %>
     <% elsif @result.keys.empty? %>
       <p class="rounded-md border border-dashed border-line px-4 py-6 text-center text-sm text-ink-3">Aucune clé autorisée sur ce serveur.</p>
     <% else %>
@@ -72,7 +72,7 @@
                         class: "key-expiry inline-flex items-center rounded-full bg-warn-soft px-2 py-0.5 text-xs font-medium text-warn-ink ring-1 ring-inset ring-warn/20" %>
                 <% end %>
                 <% if key.matches?(@app_key) %>
-                  <span class="key-badge key-master rounded-full bg-accent px-2 py-0.5 text-xs font-semibold text-white" title="Clé SSH de l'application Elio">Master</span>
+                  <span class="key-badge key-master rounded-full bg-accent-fill px-2 py-0.5 text-xs font-semibold text-white" title="Clé SSH de l'application Elio">Master</span>
                 <% end %>
               </div>
             </div>

@@ -41,7 +41,7 @@
 
   <%= render "servers/health_bar", server: @server %>
 
-  <nav class="server-tabs mt-5 flex gap-5 overflow-x-auto border-b border-line text-sm" aria-label="Sections du serveur">
+  <nav class="server-tabs scrollbar-none mt-5 flex gap-5 overflow-x-auto border-b border-line text-sm" aria-label="Sections du serveur">
     <% [ [ "overview", "Vue d'ensemble", nil ], [ "packages", "Paquets", packages["total"] ], [ "services", "Services", (Array(services["units"]).count { |unit| unit["active"] == "active" } if services["units"]) ],
          [ "ports", "Ports", (Inventory::PortAnalysis.new(@server).public_ports.size if ports&.collected?) ], [ "keys", "Clés SSH", snapshot&.keys&.size ], [ "history", "Historique", nil ] ].each do |tab, label, count| %>
       <% current = tab == @tab %>

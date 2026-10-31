@@ -46,7 +46,7 @@
         <% if @groups.any? %>
           <details class="automation-groups relative">
             <summary class="input cursor-pointer py-1 text-xs"><%= automation.server_group_ids.any? ? "Groupes : #{automation.scope_label}" : "Sur tout le parc" %></summary>
-            <div class="absolute z-10 mt-1 w-56 space-y-1 rounded-lg border border-line bg-surface p-2 shadow-lg">
+            <div class="absolute right-0 z-10 mt-1 w-56 space-y-1 rounded-lg border border-line bg-surface p-2 shadow-lg sm:right-auto">
               <%= hidden_field_tag "automation[server_group_ids][]", "", id: nil %>
               <p class="px-1 text-[11px] text-ink-3">Aucun groupe coché : tout le parc.</p>
               <% @groups.each do |group| %>

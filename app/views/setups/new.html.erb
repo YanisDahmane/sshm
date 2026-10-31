@@ -9,5 +9,5 @@
   <%= render "shared/auth_field", f: f, attribute: :password, label: "Mot de passe", type: :password_field, autocomplete: "new-password",
              hint: "#{Devise.password_length.min} caractères minimum" %>
   <%= render "shared/auth_field", f: f, attribute: :password_confirmation, label: "Confirmation du mot de passe", type: :password_field, autocomplete: "new-password" %>
-  <%= f.submit "Créer le compte", class: "w-full cursor-pointer rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-accent-hover" %>
+  <%= f.submit "Créer le compte", class: "btn btn-primary w-full" %>
 <% end %>
