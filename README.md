@@ -42,11 +42,12 @@ Santé, système, paquets, services, ports et firewall de chaque serveur, et les
 | **Paquets** | Paquets Debian, snaps et images Docker de chaque serveur, mises à jour disponibles (sécurité en évidence). Recherche sur tout le parc : « quels serveurs ont openssl, et en quelle version ? » |
 | **Services** | Services systemd et conteneurs Docker, regroupés par projet Docker Compose (avec le chemin des fichiers compose). |
 | **Ports et firewall** | Ports en écoute avec le processus, le service ou le conteneur derrière, exposition (public, privé, local), état du firewall (ufw, nftables, iptables), **règles ufw suggérées à copier**, ports inattendus par groupe. |
-| **Trousseau** | Les clés SSH de l'équipe et des machines (CI, sauvegardes…), à ajouter ou retirer sur chaque serveur, pour toujours ou pour une durée limitée. Les clés inconnues trouvées sur les serveurs sont signalées. |
+| **Trousseau** | Les clés SSH de l'équipe et des machines (CI, sauvegardes…), à ajouter ou retirer sur chaque serveur — depuis le trousseau ou en collant une nouvelle clé directement sur la fiche du serveur —, pour toujours ou pour une durée limitée. Les clés inconnues trouvées sur les serveurs sont signalées. |
 | **Automatisations** | Suivi de la santé, inventaires (système, paquets, services, ports), vérification des serveurs et scan des clés, à la fréquence de votre choix, sur tout le parc ou par groupe. |
+| **Tâches** | Chaque inventaire, scan ou automatisation lancé en arrière-plan est suivi en direct : à venir, en cours, terminé, en échec, avec le résultat et l'erreur de chaque serveur. Les administrateurs ont aussi la vue technique de la file (Mission Control, `/jobs`). |
 | **Activité et notifications** | Journal de tout ce qui se passe (ajouts de clés, serveurs qui tombent, ports qui s'ouvrent, services en échec…), envoyé sur **Slack, Discord, un webhook signé ou par email**, avec un résumé chaque matin. |
 | **Accès à Elio** | Rôles (admin, opérateur, lecture), invitations, double authentification (TOTP + codes de secours), verrouillage après échecs, expiration de session. |
-| **Interface** | Mode clair et sombre, recherche rapide (⌘K), en français. |
+| **Interface** | Mode clair et sombre, utilisable sur téléphone, recherche rapide (⌘K : pages, serveurs et leurs onglets, clés, paquets, ports), en français. |
 
 | | |
 |---|---|
@@ -119,7 +120,7 @@ Gardez `config/master.key` (ou `RAILS_MASTER_KEY`) en lieu sûr : sans lui, les 
 
 1. **Paramètres → Général → Générer une clé SSH** : Elio crée sa paire de clés Ed25519 ; la clé privée ne quitte jamais la base.
 2. **Parc → Ajouter un serveur** (ou **Importer** depuis un CSV ou votre `~/.ssh/config`).
-3. Installez la clé publique d'Elio sur le serveur (la commande est proposée à l'écran), puis **Lancer l'inventaire**.
+3. Installez la clé publique d'Elio sur le serveur (la commande est proposée à l'écran), puis **Actualiser l'inventaire** ; la page **Tâches** montre son avancement.
 4. **Trousseau → Ajouter une clé** pour chaque membre de l'équipe, puis ajoutez-les sur les serveurs.
 5. **Paramètres → Notifications** pour recevoir les alertes, **Automatisations** pour planifier les inventaires (seul le suivi de la santé est activé par défaut).
 
