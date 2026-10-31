@@ -114,4 +114,20 @@ class UiTest < ApplicationSystemTestCase
       end
     end
   end
+
+  test "the theme switch turns the dark mode on and remembers it" do
+    visit root_path
+    page.execute_script("localStorage.removeItem('elio-theme')")
+    visit root_path
+    dark = -> { page.evaluate_script("document.documentElement.classList.contains('dark')") }
+    initially_dark = dark.call
+
+    find("button.theme-toggle").click
+    assert_equal !initially_dark, dark.call
+    assert_selector "button.theme-toggle", text: initially_dark ? "Thème sombre" : "Thème clair"
+
+    visit public_keys_path
+    assert_equal !initially_dark, dark.call
+    assert_equal (initially_dark ? "light" : "dark"), page.evaluate_script("localStorage.getItem('elio-theme')")
+  end
 end

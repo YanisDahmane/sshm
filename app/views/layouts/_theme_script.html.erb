@@ -1,0 +1,9 @@
+<%# Sets the theme before the first paint, to avoid a flash of the wrong one (see theme_controller.js). %>
+<script>
+  (function () {
+    var theme = localStorage.getItem("elio-theme")
+    if (theme === "dark" || (theme !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+      document.documentElement.classList.add("dark")
+    }
+  })()
+</script>

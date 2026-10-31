@@ -19,7 +19,7 @@ class SettingsPagesTest < ActionDispatch::IntegrationTest
       get path
       assert_select "nav.settings-nav a", 4
       assert_select "nav.settings-nav a[aria-current=page]", label
-      assert_select "nav a[title=Paramètres][aria-current=page]"
+      assert_select "nav.main-nav a[aria-current=page]", path == settings_automations_path ? "Automatisations" : "Paramètres"
     end
   end
 

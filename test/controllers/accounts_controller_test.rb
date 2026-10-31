@@ -12,7 +12,7 @@ class AccountsControllerTest < ActionDispatch::IntegrationTest
   test "shows the account with its 2FA state, reachable from the navbar" do
     sign_in users(:viewer)
     get root_path
-    assert_select "nav a.account-link[href=?]", account_path
+    assert_select ".sidebar a.account-link[href=?]", account_path
 
     get account_path
     assert_select "h1", "Mon compte"

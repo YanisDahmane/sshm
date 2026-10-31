@@ -12,7 +12,7 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:one)
     get root_path
     assert_response :success
-    assert_select "h1", "Dashboard"
+    assert_select "h1", "Vue d'ensemble"
   end
 
   test "there is no public sign up any more" do
@@ -119,22 +119,31 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:one)
 
     get root_path
-    assert_select "nav .main-nav a[aria-current=page]", text: "Dashboard"
-    assert_select "nav .main-nav a[href=?]", servers_path, text: "Serveurs"
-    assert_select "nav .main-nav a[href=?]", public_keys_path, text: "Trousseau"
+    assert_select "nav.main-nav a[aria-current=page]", text: "Vue d'ensemble"
+    assert_select "nav.main-nav a[href=?]", servers_path, text: /Parc\s*3/
+    assert_select "nav.main-nav a[href=?]", public_keys_path, text: /Trousseau\s*2/
+    assert_select "nav.main-nav a[href=?]", settings_automations_path, text: "Automatisations"
+    assert_select "nav.sidebar-groups a[href=?]", servers_path(group: server_groups(:production).id), text: /Production/
 
     get server_path(servers(:web))
-    assert_select "nav .main-nav a[aria-current=page]", text: "Serveurs"
+    assert_select "nav.main-nav a[aria-current=page]", text: /Parc/
+
+    get servers_path(group: server_groups(:production).id)
+    assert_select "nav.sidebar-groups a[aria-current=page]", text: /Production/
 
     get public_keys_path
-    assert_select "nav .main-nav a[aria-current=page]", text: "Trousseau"
+    assert_select "nav.main-nav a[aria-current=page]", text: /Trousseau/
+
+    sign_in users(:viewer)
+    get root_path
+    assert_select "nav.main-nav a[href=?]", settings_automations_path, 0
   end
 
   test "includes the quick search, its button and the confirm dialog when signed in" do
     sign_in users(:one)
     get root_path
 
-    assert_select "body[data-controller=command-palette]"
+    assert_select "body[data-controller~=command-palette]"
     assert_select "dialog#command-palette script[type='application/json']", text: /"label":"Web"/
     assert_select "button.command-palette-button[data-action='command-palette#open']"
     assert_select "dialog#confirm-dialog button[data-confirm-accept]"
@@ -189,6 +198,6 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
 
     assert_select "#recent-activity li.activity", 8
     assert_select "#recent-activity a[href=?]", activities_path, text: "Tout voir"
-    assert_select "nav .main-nav a[href=?]", activities_path, text: "Activité"
+    assert_select "nav.main-nav a[href=?]", activities_path, text: "Activité"
   end
 end

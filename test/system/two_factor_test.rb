@@ -6,7 +6,7 @@ class TwoFactorTest < ApplicationSystemTestCase
   test "enabling 2FA, then signing in with a code" do
     sign_in users(:operator)
     visit root_path
-    find("nav a.account-link").click
+    find(".sidebar a.account-link").click
     click_on "Activer la double authentification"
 
     assert_selector ".two-factor-qr img"
@@ -19,7 +19,7 @@ class TwoFactorTest < ApplicationSystemTestCase
     click_on "J'ai enregistré mes codes"
     assert_selector ".two-factor-state", text: "Activée"
 
-    find("nav button", text: "Déconnexion").click
+    find(".sidebar button[title='Déconnexion']").click
     fill_in "Email", with: "operator@example.com"
     fill_in "Mot de passe", with: "password123"
     click_on "Se connecter"
@@ -29,6 +29,6 @@ class TwoFactorTest < ApplicationSystemTestCase
     click_on "Vérifier"
 
     assert_text "Connexion réussie."
-    assert_selector "nav .user-role", text: "Opérateur"
+    assert_selector ".sidebar .user-role", text: "Opérateur"
   end
 end

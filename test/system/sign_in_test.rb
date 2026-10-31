@@ -7,9 +7,9 @@ class SignInTest < ApplicationSystemTestCase
     fill_in "Mot de passe", with: "password123"
     click_on "Se connecter"
 
-    assert_selector "h1", text: "Dashboard"
+    assert_selector "h1", text: "Vue d'ensemble"
     click_on "Serveurs", match: :first
     assert_selector "h1", text: "Serveurs"
-    assert_selector "nav .user-role", text: "Lecture"
+    assert_selector ".sidebar .user-role", text: "Lecture"
   end
 end

@@ -37,16 +37,10 @@ module ApplicationHelper
     "mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo '#{ssh_key.public_key}' >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
   end
 
-  # Main navigation link, highlighted (and aria-current) when active.
-  def nav_link_to(label, path, active:)
-    link_to label, path, aria: { current: (active ? "page" : nil) },
-                         class: "rounded-md px-3 py-1.5 text-sm font-medium #{active ? "bg-indigo-50 text-indigo-700" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"}"
-  end
-
   # Entries of the ⌘K quick search: pages, then servers and public_keys.
   def command_palette_items
     pages = [
-      { label: "Dashboard", url: root_path }, { label: "Serveurs", url: servers_path }, { label: "Trousseau", hint: "clés SSH", url: public_keys_path },
+      { label: "Vue d'ensemble", url: root_path }, { label: "Parc", hint: "serveurs", url: servers_path }, { label: "Trousseau", hint: "clés SSH", url: public_keys_path },
       { label: "Groupes de serveurs", url: server_groups_path },
       { label: "Activité", url: activities_path }
     ]

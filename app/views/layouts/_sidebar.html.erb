@@ -1,0 +1,68 @@
+<%# Sidebar of the signed-in pages (direction A): always visible from `lg`, a drawer below (sidebar_controller.js). %>
+<% settings_active = controller_path.start_with?("settings") && controller_name != "automations" %>
+<div data-sidebar-target="backdrop" data-action="click->sidebar#close" class="fixed inset-0 z-30 hidden bg-black/40 lg:hidden"></div>
+<aside data-sidebar-target="panel"
+       class="sidebar fixed inset-y-0 left-0 z-40 flex w-60 -translate-x-full flex-col border-r border-line bg-surface px-3 py-4 transition-transform lg:translate-x-0">
+  <div class="flex items-center justify-between">
+    <%= link_to root_path, class: "flex items-center gap-2 px-1 text-base font-semibold tracking-tight text-ink" do %>
+      <span class="grid h-7 w-7 place-items-center rounded-lg bg-accent text-white"><%= icon :server_stack, class: "h-4 w-4" %></span>
+      Elio
+    <% end %>
+    <button type="button" data-action="sidebar#close" aria-label="Fermer le menu" class="btn btn-ghost btn-icon lg:hidden"><%= icon :x_mark %></button>
+  </div>
+
+  <%= render "shared/command_palette_button" %>
+
+  <nav class="main-nav mt-4 space-y-0.5" aria-label="Navigation principale">
+    <%= sidebar_link "Vue d'ensemble", root_path, icon: :squares_2x2, active: controller_name == "dashboard" %>
+    <%= sidebar_link "Parc", servers_path, icon: :server_stack, count: Server.count,
+                     active: controller_name.start_with?("server") && controller_name != "server_groups" %>
+    <%= sidebar_link "Trousseau", public_keys_path, icon: :key, count: PublicKey.count, active: controller_name == "public_keys" %>
+    <%= sidebar_link "Activité", activities_path, icon: :pulse, active: controller_name == "activities" %>
+    <% if can?(:administer) %>
+      <%= sidebar_link "Automatisations", settings_automations_path, icon: :bolt, active: controller_path == "settings/automations" %>
+      <%= sidebar_link "Paramètres", settings_path, icon: :cog, active: settings_active, title: "Paramètres" %>
+    <% end %>
+  </nav>
+
+  <% groups = sidebar_server_groups %>
+  <% if groups.any? %>
+    <div class="mt-6 flex items-center justify-between px-2.5">
+      <p class="text-[11px] font-semibold tracking-wider text-ink-3 uppercase">Groupes</p>
+      <%= link_to "Gérer", server_groups_path, class: "text-[11px] text-ink-3 hover:text-ink" %>
+    </div>
+    <nav class="sidebar-groups mt-1 space-y-0.5" aria-label="Groupes de serveurs">
+      <% groups.each do |group| %>
+        <% active = controller_name == "servers" && params[:group].to_s == group.id.to_s %>
+        <%= link_to servers_path(group: group.id), aria: { current: (active ? "page" : nil) },
+              class: "flex items-center gap-2 rounded-lg px-2.5 py-1 text-sm #{active ? "bg-subtle text-ink" : "text-ink-2 hover:bg-subtle hover:text-ink"}" do %>
+          <span class="h-2 w-2 rounded-full <%= group.dot_classes %>"></span>
+          <span class="truncate"><%= group.name %></span>
+          <span class="ml-auto text-xs text-ink-3"><%= group.servers_count %></span>
+        <% end %>
+      <% end %>
+    </nav>
+  <% end %>
+
+  <div class="mt-auto space-y-1 border-t border-line pt-3">
+    <%= link_to account_path, title: "Mon compte", aria: { current: (controller_name == "accounts" ? "page" : nil) },
+          class: "account-link flex items-center gap-2 rounded-lg px-2.5 py-1.5 hover:bg-subtle" do %>
+      <span class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-subtle text-xs font-semibold text-ink-2"><%= current_user.email.first(2).upcase %></span>
+      <span class="min-w-0 leading-tight">
+        <span class="block truncate text-xs font-medium text-ink"><%= current_user.email %></span>
+        <span class="user-role text-[11px] text-ink-3"><%= current_user.role_label %></span>
+      </span>
+    <% end %>
+    <div class="flex items-center gap-1">
+      <button type="button" data-controller="theme" data-action="theme#toggle" aria-pressed="false"
+              class="theme-toggle btn btn-ghost flex-1 justify-start px-2.5 text-xs">
+        <%= icon :moon, class: "h-4 w-4 dark:hidden" %><%= icon :sun, class: "hidden h-4 w-4 dark:block" %>
+        <span data-theme-target="label">Thème sombre</span>
+      </button>
+      <%= button_to destroy_user_session_path, method: :delete, title: "Déconnexion", aria: { label: "Déconnexion" },
+            class: "btn btn-ghost btn-icon" do %>
+        <%= icon :logout %><span class="sr-only">Déconnexion</span>
+      <% end %>
+    </div>
+  </div>
+</aside>

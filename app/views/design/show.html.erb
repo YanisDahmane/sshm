@@ -1,0 +1,71 @@
+<% content_for :title, "Composants · Elio" %>
+<% section_class = "card mt-6 p-5" %>
+
+<h1 class="text-xl font-semibold">Composants</h1>
+<p class="text-xs text-ink-3">Catalogue de l'interface (direction A, voir <code>docs/design/</code>). Page disponible hors production uniquement.</p>
+
+<section class="<%= section_class %>" id="design-buttons">
+  <h2 class="font-semibold">Boutons</h2>
+  <div class="mt-3 flex flex-wrap items-center gap-2">
+    <button class="btn btn-primary"><%= icon :plus %> Ajouter un serveur</button>
+    <button class="btn btn-secondary"><%= icon :arrow_path %> Actualiser</button>
+    <button class="btn btn-danger"><%= icon :trash %> Supprimer</button>
+    <button class="btn btn-ghost">Annuler</button>
+    <button class="btn btn-ghost btn-icon" aria-label="Modifier"><%= icon :pencil_square %></button>
+    <button class="btn btn-primary" disabled>Désactivé</button>
+  </div>
+</section>
+
+<section class="<%= section_class %>" id="design-badges">
+  <h2 class="font-semibold">États</h2>
+  <div class="mt-3 flex flex-wrap items-center gap-2">
+    <%= status_badge :good, "En ligne" %>
+    <%= status_badge :warn, "À surveiller" %>
+    <%= status_badge :crit, "Critique" %>
+    <%= status_badge :off, "Injoignable" %>
+    <%= status_badge :neutral, "Inconnu" %>
+    <%= status_badge :accent, "Production" %>
+  </div>
+</section>
+
+<section class="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4" id="design-stats">
+  <%= stat_tile "En ligne", "7/12", "joignables et sains", tone: :good, icon: :check %>
+  <%= stat_tile "À surveiller", 2, "redémarrage, fin de support", tone: :warn, icon: :exclamation_triangle %>
+  <%= stat_tile "Critiques", 3, "dont 1 injoignable", tone: :crit, icon: :x_mark %>
+  <%= stat_tile "Mises à jour sécurité", 57, "sur 7 serveurs", icon: :shield_check %>
+</section>
+
+<section class="<%= section_class %>" id="design-gauges">
+  <h2 class="font-semibold">Jauges et courbes</h2>
+  <div class="mt-3 grid gap-3 sm:grid-cols-2">
+    <div class="space-y-2">
+      <%= meter 42, label: "CPU", width: "flex-1" %>
+      <%= meter 84, label: "RAM", width: "flex-1" %>
+      <%= meter 94, label: "Disque", width: "flex-1" %>
+    </div>
+    <div class="flex items-center gap-6">
+      <%= sparkline [ 30, 32, 28, 35, 40, 38, 36, 41, 39, 44 ], title: "Charge 24 h" %>
+      <%= sparkline [ 78, 80, 83, 85, 88, 90, 94 ], max: 100, width: 120, height: 28, color: "var(--color-crit)", title: "Disque 24 h" %>
+    </div>
+  </div>
+</section>
+
+<section class="mt-6 card overflow-hidden" id="design-table">
+  <div class="card-header"><h2 class="font-semibold">Tableau dense</h2><span class="text-xs text-ink-3">3 lignes</span></div>
+  <table class="table-dense">
+    <thead><tr><th>État</th><th>Serveur</th><th>Système</th><th>Mémoire</th><th>Disque</th></tr></thead>
+    <tbody>
+      <tr><td><%= status_badge :good, "En ligne" %></td><td><p class="font-medium">web-prod-1</p><p class="font-mono text-[11px] text-ink-3">deploy@51.38.12.4</p></td><td>Ubuntu 24.04 LTS</td><td><%= meter 61 %></td><td><%= meter 48 %></td></tr>
+      <tr><td><%= status_badge :crit, "Critique" %></td><td><p class="font-medium">db-prod</p><p class="font-mono text-[11px] text-ink-3">admin@10.0.1.20</p></td><td>Debian 12</td><td><%= meter 88 %></td><td><%= meter 94 %></td></tr>
+      <tr><td><%= status_badge :off, "Injoignable" %></td><td><p class="font-medium">ci-runner</p><p class="font-mono text-[11px] text-ink-3">ci@10.0.3.9</p></td><td>Ubuntu 22.04 LTS</td><td><%= meter nil %></td><td><%= meter nil %></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="<%= section_class %>" id="design-form">
+  <h2 class="font-semibold">Formulaire</h2>
+  <div class="mt-3 grid gap-4 sm:grid-cols-2">
+    <div><label class="label" for="design-name">Nom</label><input id="design-name" class="input mt-1" placeholder="web-prod-1"></div>
+    <div><label class="label" for="design-host">Hôte</label><input id="design-host" class="input mt-1 font-mono" value="10.0.1.20"></div>
+  </div>
+</section>

@@ -12,7 +12,7 @@ class PublicKeysTest < ApplicationSystemTestCase
     key = SshKeyGenerator.generate(comment: "bob@desktop")
     visit root_path
 
-    within("nav") { click_on "Trousseau", match: :first }
+    within("nav.main-nav") { click_on "Trousseau" }
     click_on "Ajouter une clé"
     fill_in "Nom", with: "Bob"
     fill_in "Clé SSH publique", with: key.public_key

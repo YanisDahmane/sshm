@@ -15,7 +15,7 @@ class InvitationsTest < ApplicationSystemTestCase
     link = find("input.invitation-link").value
     assert_match %r{/invitations/\S+\z}, link
 
-    find("nav button", text: "Déconnexion").click
+    find(".sidebar button[title='Déconnexion']").click
     assert_selector "h2", text: "Connexion"
 
     visit URI(link).path
@@ -25,7 +25,7 @@ class InvitationsTest < ApplicationSystemTestCase
     click_on "Créer mon compte"
 
     assert_text "Bienvenue sur Elio !"
-    assert_selector "nav .user-role", text: "Opérateur"
+    assert_selector ".sidebar .user-role", text: "Opérateur"
     assert_no_selector "nav a[title=Paramètres]"
   end
 end

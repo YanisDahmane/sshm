@@ -1,0 +1,69 @@
+/*
+ * Transitional dark mode for the pages not yet redone with the design tokens
+ * (they use Tailwind's slate / white / indigo / red… classes). Their palette
+ * is remapped on `.dark`: light steps become dark tints, dark steps light ink.
+ * Remove this file once every page uses the tokens (plan, lot 3.2).
+ */
+.dark {
+  --color-slate-50: #1f1f1d;
+  --color-slate-100: #262624;
+  --color-slate-200: #2e2e2b;
+  --color-slate-300: #3d3d39;
+  --color-slate-400: #6f6e69;
+  --color-slate-500: #93918a;
+  --color-slate-600: #aeada5;
+  --color-slate-700: #c3c2b7;
+  --color-slate-800: #dcdbd4;
+  --color-slate-900: #f0efec;
+
+  --color-indigo-50: #24223d;
+  --color-indigo-100: #2c2a4a;
+  --color-indigo-200: #3a3766;
+  --color-indigo-300: #4b4790;
+  --color-indigo-500: #8b85f0;
+  --color-indigo-600: #7c74ee;
+  --color-indigo-700: #a5a0f5;
+  --color-indigo-800: #b8b4f7;
+  --color-indigo-900: #cfccfa;
+
+  --color-red-50: #3a1717;
+  --color-red-100: #451b1b;
+  --color-red-200: #5c2323;
+  --color-red-300: #7a2d2d;
+  --color-red-700: #f08a8a;
+  --color-red-800: #f5a5a5;
+
+  --color-emerald-50: #13301f;
+  --color-emerald-200: #1f5236;
+  --color-emerald-300: #2a6b47;
+  --color-emerald-700: #5fd39a;
+  --color-emerald-800: #86e0b4;
+
+  --color-amber-50: #3a2c0c;
+  --color-amber-100: #463510;
+  --color-amber-200: #5c4514;
+  --color-amber-300: #7a5c1a;
+  --color-amber-700: #f5c056;
+  --color-amber-800: #f7cd77;
+  --color-amber-900: #f9da98;
+
+  --color-sky-50: #102a3a;
+  --color-sky-700: #7cc6f0;
+  --color-violet-50: #2a1f45;
+  --color-violet-700: #b9a6f5;
+  --color-pink-50: #3a1729;
+  --color-pink-700: #f29bc4;
+}
+
+/* `white` stays white for text on coloured buttons: only white surfaces turn dark. */
+.dark .bg-white {
+  background-color: var(--color-surface);
+}
+
+/* Code blocks are dark on light pages: keep them dark (slate-900 is remapped to light ink). */
+.dark .bg-slate-900 {
+  background-color: #0b0b0a;
+}
+.dark .text-slate-100 {
+  color: #e5e4de;
+}

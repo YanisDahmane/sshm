@@ -48,7 +48,7 @@ class TwoFactorSignInTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to root_path
     follow_redirect!
-    assert_select "nav .user-role", "Opérateur"
+    assert_select ".sidebar .user-role", "Opérateur"
     assert_equal 1, users(:operator).reload.sign_in_count
   end
 

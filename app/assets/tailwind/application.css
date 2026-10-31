@@ -1,4 +1,111 @@
 @import "tailwindcss";
+@import "./legacy_dark.css";
+
+/* Dark mode: `.dark` on <html>, set before the first paint (layouts) and by theme_controller.js. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Design tokens (direction A, see docs/design/). Use them through Tailwind
+ * utilities: bg-canvas, bg-surface, bg-subtle, border-line, text-ink,
+ * text-ink-2, text-ink-3, bg-accent, text-good-ink, bg-crit-soft…
+ * The dark values are redefined on `.dark` below.
+ */
+@theme {
+  --color-canvas: #f6f6f4;
+  --color-surface: #ffffff;
+  --color-subtle: #f1f1ee;
+  --color-line: #e4e3dd;
+  --color-ink: #121211;
+  --color-ink-2: #52514e;
+  --color-ink-3: #77756f;
+  --color-accent: #4f46e5;
+  --color-accent-hover: #4338ca;
+  --color-accent-soft: #eef0ff;
+  --color-good: #0ca30c;
+  --color-good-soft: #e7f6e7;
+  --color-good-ink: #006300;
+  --color-warn: #fab219;
+  --color-warn-soft: #fff4dc;
+  --color-warn-ink: #8a5a00;
+  --color-crit: #d03b3b;
+  --color-crit-soft: #fde8e8;
+  --color-crit-ink: #a12424;
+  --color-track: #e9e8e3;
+  --color-spark: #898781;
+}
+
+.dark {
+  color-scheme: dark;
+  --color-canvas: #111110;
+  --color-surface: #1a1a19;
+  --color-subtle: #232321;
+  --color-line: #2e2e2b;
+  --color-ink: #f0efec;
+  --color-ink-2: #c3c2b7;
+  --color-ink-3: #93918a;
+  --color-accent: #7c74ee;
+  --color-accent-hover: #8b85f0;
+  --color-accent-soft: #24223d;
+  --color-good-soft: #13301a;
+  --color-good-ink: #4fd34f;
+  --color-warn-soft: #3a2c0c;
+  --color-warn-ink: #f5c056;
+  --color-crit-soft: #3a1717;
+  --color-crit-ink: #f08a8a;
+  --color-track: #2c2c2a;
+  --color-spark: #8f8e86;
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors disabled:cursor-wait disabled:opacity-60;
+  }
+  .btn-primary {
+    @apply bg-accent text-white hover:bg-accent-hover;
+  }
+  .btn-secondary {
+    @apply border border-line bg-surface text-ink hover:bg-subtle;
+  }
+  .btn-danger {
+    @apply border border-crit/40 bg-surface text-crit-ink hover:bg-crit-soft;
+  }
+  .btn-ghost {
+    @apply text-ink-2 hover:bg-subtle hover:text-ink;
+  }
+  .btn-icon {
+    @apply rounded-md p-1.5;
+  }
+  .card {
+    @apply rounded-xl border border-line bg-surface;
+  }
+  .card-header {
+    @apply flex items-center justify-between gap-3 border-b border-line px-4 py-2.5;
+  }
+  .input {
+    @apply block w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-ink-3 focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none;
+  }
+  .label {
+    @apply block text-sm font-medium text-ink-2;
+  }
+  .badge {
+    @apply inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap;
+  }
+  .table-dense {
+    @apply w-full text-left text-sm;
+  }
+  .table-dense thead {
+    @apply bg-subtle text-[11px] tracking-wide text-ink-3 uppercase;
+  }
+  .table-dense th {
+    @apply px-3 py-2 font-medium;
+  }
+  .table-dense td {
+    @apply border-t border-line px-3 py-2;
+  }
+  .kbd {
+    @apply rounded border border-line px-1 font-sans text-[10px] text-ink-3;
+  }
+}
 
 /* Ping requests show their own loading state (see server_ping_controller.js). */
 html.hide-turbo-progress .turbo-progress-bar {

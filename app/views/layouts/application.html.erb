@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="h-full bg-slate-50">
+<html lang="fr" class="h-full">
   <head>
     <title><%= content_for(:title) || "Elio" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -7,6 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <%= render "layouts/theme_script" %>
 
     <%= yield :head %>
 
@@ -18,56 +19,23 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="h-full text-slate-900" <%= tag.attributes(user_signed_in? ? { data: { controller: "command-palette" } } : {}) %>>
+  <body class="h-full bg-canvas font-sans text-sm text-ink antialiased"
+        <%= tag.attributes(user_signed_in? ? { data: { controller: "command-palette sidebar", action: "keydown->sidebar#closeOnEscape turbo:visit@document->sidebar#close" } } : {}) %>>
     <%= render "shared/flash_container" %>
     <%= render "shared/confirm_dialog" %>
-    <%= render "shared/command_palette" if user_signed_in? %>
-    <nav class="border-b border-slate-200 bg-white" aria-label="Navigation principale">
-      <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center gap-6">
-          <%= link_to root_path, class: "flex items-center gap-2 text-lg font-semibold tracking-tight" do %>
-            <%= icon :key, class: "h-5 w-5 text-indigo-600" %> Elio
-          <% end %>
-          <% if user_signed_in? %>
-            <div class="main-nav hidden items-center gap-1 sm:flex">
-              <%= nav_link_to "Dashboard", root_path, active: controller_name == "dashboard" %>
-              <%= nav_link_to "Serveurs", servers_path, active: controller_name.start_with?("server") %>
-              <%= nav_link_to "Trousseau", public_keys_path, active: controller_name == "public_keys" %>
-              <%= nav_link_to "Activité", activities_path, active: controller_name == "activities" %>
-            </div>
-          <% end %>
-        </div>
+    <% if user_signed_in? %>
+      <%= render "shared/command_palette" %>
+      <%= render "layouts/sidebar" %>
+      <header class="sticky top-0 z-20 flex items-center gap-3 border-b border-line bg-surface px-4 py-2.5 lg:hidden">
+        <button type="button" data-action="sidebar#open" aria-label="Ouvrir le menu" class="btn btn-ghost btn-icon"><%= icon :bars_3, class: "h-5 w-5" %></button>
+        <%= link_to "Elio", root_path, class: "font-semibold tracking-tight" %>
+      </header>
+    <% end %>
 
-        <% if user_signed_in? %>
-          <div class="flex items-center gap-2 sm:gap-3">
-            <%= render "shared/command_palette_button" %>
-            <%= link_to account_path, title: "Mon compte", class: "account-link hidden items-center gap-2 rounded-md px-2 py-1 text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700 lg:inline-flex" do %>
-              <%= current_user.email %>
-              <span class="user-role rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600"><%= current_user.role_label %></span>
-            <% end %>
-            <% if can?(:administer) %>
-              <%= link_to settings_path, title: "Paramètres", aria: { label: "Paramètres", current: (controller_path.start_with?("settings") ? "page" : nil) },
-                    class: "rounded-md p-1.5 hover:bg-slate-100 #{controller_path.start_with?("settings") ? "text-indigo-600" : "text-slate-500 hover:text-slate-700"}" do %>
-                <%= icon :cog, class: "h-5 w-5" %>
-              <% end %>
-            <% end %>
-            <%= button_to "Déconnexion", destroy_user_session_path, method: :delete,
-                  class: "rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 cursor-pointer" %>
-          </div>
-        <% end %>
+    <main class="<%= "lg:pl-60" if user_signed_in? %>">
+      <div class="mx-auto max-w-7xl px-4 py-6 sm:px-8">
+        <%= yield %>
       </div>
-      <% if user_signed_in? %>
-        <div class="main-nav flex gap-1 border-t border-slate-100 px-4 py-2 sm:hidden">
-          <%= nav_link_to "Dashboard", root_path, active: controller_name == "dashboard" %>
-          <%= nav_link_to "Serveurs", servers_path, active: controller_name.start_with?("server") %>
-          <%= nav_link_to "Trousseau", public_keys_path, active: controller_name == "public_keys" %>
-          <%= nav_link_to "Activité", activities_path, active: controller_name == "activities" %>
-        </div>
-      <% end %>
-    </nav>
-
-    <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <%= yield %>
     </main>
   </body>
 </html>

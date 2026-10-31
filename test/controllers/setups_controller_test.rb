@@ -29,7 +29,7 @@ class SetupsControllerTest < ActionDispatch::IntegrationTest
     assert user.admin?
     follow_redirect!
     assert_response :success
-    assert_select "nav .user-role", "Admin"
+    assert_select ".sidebar .user-role", "Admin"
   end
 
   test "re-renders the form with errors" do

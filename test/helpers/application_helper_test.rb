@@ -43,7 +43,7 @@ class ApplicationHelperTest < ActionView::TestCase
     items = command_palette_items
 
     assert_equal %w[Pages Groupes Serveurs Trousseau], items.map { |item| item[:group] }.uniq
-    assert_includes items, { group: "Pages", label: "Serveurs", url: servers_path }
+    assert_includes items, { group: "Pages", label: "Parc", hint: "serveurs", url: servers_path }
     assert_includes items, { group: "Groupes", label: "Production", hint: "serveurs du groupe", url: servers_path(group: server_groups(:production).id) }
     assert_includes items, { group: "Serveurs", label: "Web", hint: "deploy@192.168.1.10 · Production", url: server_path(servers(:web)) }
     assert_includes items, { group: "Serveurs", label: "Backup", hint: "root@10.0.0.5", url: server_path(servers(:backup)) }
@@ -60,12 +60,6 @@ class ApplicationHelperTest < ActionView::TestCase
     assert_equal [ "0 ligne", "1 ligne", "2 lignes" ], [ 0, 1, 2 ].map { |count| pluralize_fr(count, "ligne", "lignes") }
   end
 
-  test "nav_link_to marks the active link" do
-    render html: nav_link_to("Serveurs", "/servers", active: true) + nav_link_to("Trousseau", "/public_keys", active: false)
-
-    assert_select "a[href='/servers'][aria-current=page].bg-indigo-50", "Serveurs"
-    assert_select "a[href='/public_keys']:not([aria-current])", "Trousseau"
-  end
 
   test "suggested_public_key_name drops the host part of the comment" do
     assert_equal "alice", suggested_public_key_name(AuthorizedKey.new(type: "ssh-ed25519", key: "AAAA", comment: "alice@laptop"))
@@ -78,7 +72,7 @@ class ApplicationHelperTest < ActionView::TestCase
     @user = users(:viewer)
     labels = command_palette_items.map { |item| item[:label] }
 
-    assert_includes labels, "Serveurs"
+    assert_includes labels, "Parc"
     assert_includes labels, "Web"
     assert_not_includes labels, "Ajouter un serveur"
     assert_not_includes labels, "Paramètres"

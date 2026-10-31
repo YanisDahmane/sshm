@@ -14,7 +14,7 @@ class RoleBasedUiTest < ActionDispatch::IntegrationTest
     { one: [ "Admin", 1 ], operator: [ "Opérateur", 0 ], viewer: [ "Lecture", 0 ] }.each do |role, (label, settings_links)|
       sign_in users(role)
       get root_path
-      assert_select "nav .user-role", label
+      assert_select ".sidebar .user-role", label
       assert_select "nav a[title=Paramètres]", settings_links
     end
   end

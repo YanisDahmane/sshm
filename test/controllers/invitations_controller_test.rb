@@ -30,7 +30,7 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ user, "dave@example.com a rejoint Elio (Opérateur)" ], [ activity.user, activity.summary ]
 
     follow_redirect!
-    assert_select "nav .user-role", "Opérateur"
+    assert_select ".sidebar .user-role", "Opérateur"
   end
 
   test "an invalid password re-renders the form" do
