@@ -73,7 +73,7 @@ class Inventory::Collectors::OsTest < ActiveSupport::TestCase
   def run_collector(response)
     known_hosts = Rails.root.join("tmp", "test", "os-#{SecureRandom.hex(4)}", "known_hosts")
     fake = FakeSsh.new(handler: ->(command) { response if command.start_with?("sh -c") })
-    SshConnection.open(servers(:web), transport: fake, known_hosts_file: known_hosts) { |ssh| Inventory::Collectors::Os.new(ssh).collect }
+    Ssh::Connection.open(servers(:web), transport: fake, known_hosts_file: known_hosts) { |ssh| Inventory::Collectors::Os.new(ssh).collect }
   ensure
     FileUtils.rm_rf(known_hosts.dirname)
   end

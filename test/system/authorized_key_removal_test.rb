@@ -10,7 +10,7 @@ class AuthorizedKeyRemovalSystemTest < ApplicationSystemTestCase
 
   # Simulates the server's authorized_keys file in memory.
   test "deleting a key asks for confirmation and updates the list in place" do
-    bob = SshKeyGenerator.generate(comment: "bob@desktop").public_key
+    bob = Ssh::KeyGenerator.generate(comment: "bob@desktop").public_key
     lines = [ ssh_keys(:main).public_key, bob ]
     reader = lambda do |_server, account:, **|
       keys = AuthorizedKey.parse(lines.join("\n"))

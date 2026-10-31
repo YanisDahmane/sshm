@@ -15,7 +15,7 @@ class Server < ApplicationRecord
 
   HEALTH_STATES = %w[ok warn crit unknown].freeze
 
-  # How root commands run on the server (see SshConnection#privilege), as
+  # How root commands run on the server (see Ssh::Connection#privilege), as
   # found by the last inventory: root, sudo or none.
   PRIVILEGES = %w[root sudo none].freeze
   validates :privilege, inclusion: { in: PRIVILEGES }, allow_nil: true
@@ -33,7 +33,7 @@ class Server < ApplicationRecord
 
   before_update :reset_reachability, if: -> { will_save_change_to_host? || will_save_change_to_port? }
 
-  # Remembers whether the app could log in over SSH (see SshCheck); `nil` = unknown.
+  # Remembers whether the app could log in over SSH (see Ssh::Check); `nil` = unknown.
   # Logs ssh_access_lost when a server that accepted the Elio key refuses it.
   def record_ssh_status!(ok)
     lost = ssh_ok == true && ok == false

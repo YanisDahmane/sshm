@@ -18,10 +18,10 @@ class PublicKeyAuthorization
     key = public_key.authorized_key
     script = append_script(line_for(public_key, expires_at), key.key, home: account.home, replace: replace)
 
-    output = SshConnection.open(server, **connection_options) { |ssh| ssh.exec!(account.command(script)).stdout }
+    output = Ssh::Connection.open(server, **connection_options) { |ssh| ssh.exec!(account.command(script)).stdout }
 
     Result.new(status: output.include?("present") ? :already_present : :added, error_title: nil, error_details: nil)
-  rescue SshConnection::Error => e
+  rescue Ssh::Connection::Error => e
     title, details = account.error_for(e)
     Result.new(status: :error, error_title: title, error_details: details)
   end

@@ -10,8 +10,8 @@ module ActiveSupport
     parallelize(workers: :number_of_processors)
 
     # Never read or write the project's pinned host keys.
-    KnownHosts.file = Rails.root.join("tmp", "test", "known_hosts")
-    parallelize_setup { |worker| KnownHosts.file = Rails.root.join("tmp", "test", "known_hosts-#{worker}") }
+    Ssh::KnownHosts.file = Rails.root.join("tmp", "test", "known_hosts")
+    parallelize_setup { |worker| Ssh::KnownHosts.file = Rails.root.join("tmp", "test", "known_hosts-#{worker}") }
 
     # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
     fixtures :all

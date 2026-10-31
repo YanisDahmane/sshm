@@ -26,9 +26,9 @@ class ServerSshChecksControllerTest < ActionDispatch::IntegrationTest
 
   test "renders a successful check in the server's SSH frame" do
     sign_in users(:one)
-    result = SshCheck::Result.new(success: true, message: "Connexion SSH réussie", details: "deploy@127.0.0.1 a répondu.")
+    result = Ssh::Check::Result.new(success: true, message: "Connexion SSH réussie", details: "deploy@127.0.0.1 a répondu.")
 
-    stub_method(SshCheck, :call, result) { get server_ssh_check_path(servers(:web)) }
+    stub_method(Ssh::Check, :call, result) { get server_ssh_check_path(servers(:web)) }
 
     assert_response :success
     assert_select "turbo-frame##{frame_id}" do
@@ -54,9 +54,9 @@ class ServerSshChecksControllerTest < ActionDispatch::IntegrationTest
 
   test "guides the user when the Elio key is refused" do
     sign_in users(:one)
-    refused = SshCheck::Result.new(success: false, message: "Clé SSH refusée par le serveur", details: "x", reason: :key_refused)
+    refused = Ssh::Check::Result.new(success: false, message: "Clé SSH refusée par le serveur", details: "x", reason: :key_refused)
 
-    stub_method(SshCheck, :call, refused) { get server_ssh_check_path(servers(:web)) }
+    stub_method(Ssh::Check, :call, refused) { get server_ssh_check_path(servers(:web)) }
 
     assert_select "turbo-frame##{frame_id} .ssh-setup-hint" do
       assert_select "code", text: "deploy@127.0.0.1"
@@ -65,11 +65,11 @@ class ServerSshChecksControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "shows both fingerprints and lets an admin trust the new one" do
-    changed = SshCheck::Result.new(success: false, message: "L'empreinte du serveur a changé", details: "x", reason: :host_key_changed,
+    changed = Ssh::Check::Result.new(success: false, message: "L'empreinte du serveur a changé", details: "x", reason: :host_key_changed,
                                    host_key: { new: "SHA256:new", known: [ "SHA256:old" ] })
     sign_in users(:one)
 
-    stub_method(SshCheck, :call, changed) { get server_ssh_check_path(servers(:web)) }
+    stub_method(Ssh::Check, :call, changed) { get server_ssh_check_path(servers(:web)) }
 
     assert_select "turbo-frame##{frame_id} .host-key-changed" do
       assert_select ".host-key-known", "SHA256:old"
@@ -82,11 +82,11 @@ class ServerSshChecksControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "only admins get the button to trust a new host key" do
-    changed = SshCheck::Result.new(success: false, message: "L'empreinte du serveur a changé", details: "x", reason: :host_key_changed,
+    changed = Ssh::Check::Result.new(success: false, message: "L'empreinte du serveur a changé", details: "x", reason: :host_key_changed,
                                    host_key: { new: "SHA256:new", known: [] })
     sign_in users(:operator)
 
-    stub_method(SshCheck, :call, changed) { get server_ssh_check_path(servers(:web)) }
+    stub_method(Ssh::Check, :call, changed) { get server_ssh_check_path(servers(:web)) }
 
     assert_select ".host-key-changed" do
       assert_select ".host-key-known", "—"

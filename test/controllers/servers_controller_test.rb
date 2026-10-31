@@ -263,7 +263,7 @@ class ServersControllerTest < ActionDispatch::IntegrationTest
     previous = Activity.record!(:key_added, server: server, public_key: public_keys(:alice), unix_user: "deploy")
     forgotten = []
 
-    stub_method(KnownHosts, :forget, ->(host, port, **) { forgotten << [ host, port ] }) do
+    stub_method(Ssh::KnownHosts, :forget, ->(host, port, **) { forgotten << [ host, port ] }) do
       delete server_path(server)
     end
 
@@ -284,7 +284,7 @@ class ServersControllerTest < ActionDispatch::IntegrationTest
     Server.create!(name: "Web bis", host: "192.168.1.10", port: 22, username: "root")
     forgotten = []
 
-    stub_method(KnownHosts, :forget, ->(*args, **) { forgotten << args }) do
+    stub_method(Ssh::KnownHosts, :forget, ->(*args, **) { forgotten << args }) do
       delete server_path(servers(:web))
     end
 

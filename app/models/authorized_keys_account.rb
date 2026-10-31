@@ -23,7 +23,7 @@ class AuthorizedKeysAccount
   # Command running `script` with sh.
   def command(script) = "sh -c #{Shellwords.escape(script)}"
 
-  # [title, details] to display for an SshConnection error.
+  # [title, details] to display for an Ssh::Connection error.
   def error_for(error) = [ error.title, error.message ]
 
   def ==(other) = other.is_a?(self.class) && other.server == server && other.unix_user == unix_user

@@ -13,7 +13,7 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
     # Nothing may reach a real server or Slack.
     ok_keys = AuthorizedKeysReader::Result.new(keys: [], error_title: nil, error_details: nil)
     stub_method_until_teardown(AuthorizedKeysReader, :call, ok_keys)
-    stub_method_until_teardown(SshCheck, :call, SshCheck::Result.new(success: true, message: "ok", details: "ok"))
+    stub_method_until_teardown(Ssh::Check, :call, Ssh::Check::Result.new(success: true, message: "ok", details: "ok"))
     stub_method_until_teardown(ServerPing, :reachable?, true)
     stub_method_until_teardown(AccessGrant, :call, PublicKeyAuthorization::Result.new(status: :added, error_title: nil, error_details: nil))
     stub_method_until_teardown(KeyRevocation, :call, AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil))
@@ -63,7 +63,7 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
       "authorize a public_key" => -> { post server_authorizations_path(servers(:web)), params: { public_key_id: public_keys(:alice).id } },
       "remove a key" => -> { delete server_authorized_key_path(servers(:web)), params: { key: "AAAA" } },
       "new public_key" => -> { get new_public_key_path },
-      "create public_key" => -> { post public_keys_path, params: { public_key: { name: "New", content: SshKeyGenerator.generate.public_key } } },
+      "create public_key" => -> { post public_keys_path, params: { public_key: { name: "New", content: Ssh::KeyGenerator.generate.public_key } } },
       "edit public_key" => -> { get edit_public_key_path(public_keys(:alice)) },
       "update public_key" => -> { patch public_key_path(public_keys(:alice)), params: { public_key: { name: "Renamed" } } },
       "delete public_key" => -> { delete public_key_path(public_keys(:alice)) },

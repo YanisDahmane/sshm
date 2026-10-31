@@ -2,7 +2,7 @@ require "test_helper"
 
 class AuthorizedKeyTest < ActiveSupport::TestCase
   setup do
-    @ed25519 = SshKeyGenerator.generate(comment: "alice@laptop").public_key
+    @ed25519 = Ssh::KeyGenerator.generate(comment: "alice@laptop").public_key
     @type, @key = @ed25519.split(" ")
   end
 
@@ -71,7 +71,7 @@ class AuthorizedKeyTest < ActiveSupport::TestCase
   end
 
   test "fingerprint matches the generator's fingerprint" do
-    generated = SshKeyGenerator.generate
+    generated = Ssh::KeyGenerator.generate
 
     assert_equal generated.fingerprint, AuthorizedKey.parse(generated.public_key).sole.fingerprint
   end

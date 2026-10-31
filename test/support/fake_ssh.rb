@@ -1,4 +1,4 @@
-# In-memory stand-in for Net::SSH, used through SshConnection's `transport:`.
+# In-memory stand-in for Net::SSH, used through Ssh::Connection's `transport:`.
 class FakeSsh
   # `hang: true` keeps the command running forever (to test timeouts).
   Response = Struct.new(:stdout, :stderr, :exit_status, :hang)

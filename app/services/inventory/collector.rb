@@ -1,5 +1,5 @@
 # Base class of the inventory collectors. A collector gathers one category
-# (os, health, packages…) through an open SshConnection, with read-only
+# (os, health, packages…) through an open Ssh::Connection, with read-only
 # commands, and turns their output into plain data (pure parsing, testable on
 # recorded outputs):
 #
@@ -64,7 +64,7 @@ class Inventory::Collector
 
   # Runs a read-only command, through `sudo -n` when `privileged` and root is
   # available. Raises Error when the output is unreasonably large.
-  def run(command, privileged: false, timeout: SshConnection::DEFAULT_COMMAND_TIMEOUT)
+  def run(command, privileged: false, timeout: Ssh::Connection::DEFAULT_COMMAND_TIMEOUT)
     command = ssh.privileged(command) if privileged
     ssh.exec(command, timeout: timeout).tap do |result|
       raise Error, "Sortie trop volumineuse pour « #{command.truncate(60)} »" if result.stdout.bytesize > MAX_OUTPUT

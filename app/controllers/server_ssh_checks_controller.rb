@@ -3,7 +3,7 @@ class ServerSshChecksController < ApplicationController
   # loaded on display and on refresh).
   def show
     @server = Server.find(params[:server_id])
-    @result = SshCheck.call(@server)
+    @result = Ssh::Check.call(@server)
     @server.record_ssh_status!(@result.success?) unless @result.reason == :missing_key
   end
 end

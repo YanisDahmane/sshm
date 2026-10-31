@@ -10,7 +10,7 @@ class Inventory::Collectors::PackagesTest < ActiveSupport::TestCase
     main = FakeSsh::Response.new(output(name), "", 0)
     fake = FakeSsh.new(responses: { "sudo -n true" => FakeSsh::Response.new("", "", sudo ? 0 : 1) },
                        handler: ->(command) { command.start_with?("sh -c") ? main : (docker if command.include?("docker image ls")) })
-    outcome = SshConnection.open(servers(:web), transport: fake, known_hosts_file: known_hosts) { |ssh| Collector.new(ssh).collect }
+    outcome = Ssh::Connection.open(servers(:web), transport: fake, known_hosts_file: known_hosts) { |ssh| Collector.new(ssh).collect }
     [ outcome, fake.commands ]
   ensure
     FileUtils.rm_rf(known_hosts.dirname)

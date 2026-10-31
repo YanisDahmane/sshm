@@ -1,6 +1,6 @@
 require "test_helper"
 
-class SshCheckTest < ActiveSupport::TestCase
+class Ssh::CheckTest < ActiveSupport::TestCase
   setup do
     @known_hosts = Rails.root.join("tmp", "test", "ssh-#{SecureRandom.hex(4)}", "known_hosts")
   end
@@ -10,7 +10,7 @@ class SshCheckTest < ActiveSupport::TestCase
   end
 
   def check(fake, server: servers(:web))
-    SshCheck.call(server, transport: fake, known_hosts_file: @known_hosts)
+    Ssh::Check.call(server, transport: fake, known_hosts_file: @known_hosts)
   end
 
   def echo_handler

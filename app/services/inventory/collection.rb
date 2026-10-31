@@ -20,7 +20,7 @@ class Inventory::Collection
     outcomes = {}
     privilege = nil
 
-    SshConnection.open(@server, **@connection_options) do |ssh|
+    Ssh::Connection.open(@server, **@connection_options) do |ssh|
       privilege = ssh.privilege
       @categories.each { |category| outcomes[category] = collect(category, ssh) }
     end
@@ -28,7 +28,7 @@ class Inventory::Collection
     record(outcomes, privilege)
     @server.refresh_health!
     outcomes
-  rescue SshConnection::Error => e
+  rescue Ssh::Connection::Error => e
     @server.record_ssh_status!(false) if e.reason == :key_refused
     failed = @categories.index_with { error_outcome("#{e.title} — #{e.message}") }
     failed.each { |category, outcome| save_snapshot(category, outcome, privileged: false) }
@@ -40,9 +40,9 @@ class Inventory::Collection
 
   def collect(category, ssh)
     Inventory::Collector.for(category).new(ssh).collect
-  rescue SshConnection::CommandTimeoutError, Inventory::Collector::Error => e
+  rescue Ssh::Connection::CommandTimeoutError, Inventory::Collector::Error => e
     error_outcome(e.message)
-  rescue SshConnection::Error => e
+  rescue Ssh::Connection::Error => e
     error_outcome("#{e.title} — #{e.message}")
   rescue StandardError => e
     Rails.error.report(e, context: { server_id: @server.id, category: category })

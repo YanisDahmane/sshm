@@ -7,8 +7,8 @@ class AuthorizedKeyRemovalTest < ActiveSupport::TestCase
     @known_hosts = Rails.root.join("tmp", "test", "ssh-#{SecureRandom.hex(4)}", "known_hosts")
     setup_temp_home
     authorized_keys_file.dirname.mkpath
-    @alice = SshKeyGenerator.generate(comment: "alice").public_key
-    @bob = SshKeyGenerator.generate(comment: "bob").public_key
+    @alice = Ssh::KeyGenerator.generate(comment: "alice").public_key
+    @bob = Ssh::KeyGenerator.generate(comment: "bob").public_key
     @alice_blob = @alice.split(" ")[1]
   end
 

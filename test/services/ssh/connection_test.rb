@@ -1,6 +1,6 @@
 require "test_helper"
 
-class SshConnectionTest < ActiveSupport::TestCase
+class Ssh::ConnectionTest < ActiveSupport::TestCase
   include TcpHelpers
 
   setup do
@@ -12,7 +12,7 @@ class SshConnectionTest < ActiveSupport::TestCase
   end
 
   def connect(server, fake, &block)
-    SshConnection.open(server, transport: fake, known_hosts_file: @known_hosts, timeout: 5, &block)
+    Ssh::Connection.open(server, transport: fake, known_hosts_file: @known_hosts, timeout: 5, &block)
   end
 
   test "connects with the server address, port and username" do
@@ -40,7 +40,7 @@ class SshConnectionTest < ActiveSupport::TestCase
   test "uses the given key instead of the current one" do
     other = SshKey.new(private_key: "other-private-key")
     fake = FakeSsh.new
-    SshConnection.open(servers(:web), key: other, transport: fake, known_hosts_file: @known_hosts) { }
+    Ssh::Connection.open(servers(:web), key: other, transport: fake, known_hosts_file: @known_hosts) { }
 
     assert_equal [ "other-private-key" ], fake.started_with[:key_data]
   end
@@ -49,7 +49,7 @@ class SshConnectionTest < ActiveSupport::TestCase
     SshKey.delete_all
     fake = FakeSsh.new
 
-    error = assert_raises(SshConnection::MissingKeyError) { connect(servers(:web), fake) { } }
+    error = assert_raises(Ssh::Connection::MissingKeyError) { connect(servers(:web), fake) { } }
     assert_match "paramètres", error.message
     assert_nil fake.started_with
   end
@@ -75,7 +75,7 @@ class SshConnectionTest < ActiveSupport::TestCase
 
     result = connect(servers(:web), fake) { |ssh| ssh.exec("uname") }
 
-    assert_equal SshConnection::Result.new(stdout: "Linux\n", stderr: "warning\n", exit_status: 0), result
+    assert_equal Ssh::Connection::Result.new(stdout: "Linux\n", stderr: "warning\n", exit_status: 0), result
     assert result.success?
   end
 
@@ -106,7 +106,7 @@ class SshConnectionTest < ActiveSupport::TestCase
   test "exec! raises CommandError with the result on failure" do
     fake = FakeSsh.new(responses: { "cat /missing" => FakeSsh::Response.new("", "No such file or directory\n", 1) })
 
-    error = assert_raises(SshConnection::CommandError) do
+    error = assert_raises(Ssh::Connection::CommandError) do
       connect(servers(:web), fake) { |ssh| ssh.exec!("cat /missing") }
     end
     assert_equal "`cat /missing` exited with status 1: No such file or directory", error.message
@@ -114,19 +114,19 @@ class SshConnectionTest < ActiveSupport::TestCase
   end
 
   test "exec outside of an open session raises" do
-    ssh = SshConnection.new(servers(:web), transport: FakeSsh.new)
-    assert_raises(SshConnection::Error) { ssh.exec("uname") }
+    ssh = Ssh::Connection.new(servers(:web), transport: FakeSsh.new)
+    assert_raises(Ssh::Connection::Error) { ssh.exec("uname") }
   end
 
   test "the session is not usable after the block" do
     ssh = connect(servers(:web), FakeSsh.new) { |connection| connection }
-    assert_raises(SshConnection::Error) { ssh.exec("uname") }
+    assert_raises(Ssh::Connection::Error) { ssh.exec("uname") }
   end
 
   test "wraps authentication failures" do
     fake = FakeSsh.new(error: Net::SSH::AuthenticationFailed.new("Authentication failed for user deploy@192.168.1.10"))
 
-    error = assert_raises(SshConnection::AuthenticationError) { connect(servers(:web), fake) { } }
+    error = assert_raises(Ssh::Connection::AuthenticationError) { connect(servers(:web), fake) { } }
     assert_match "deploy@192.168.1.10", error.message
   end
 
@@ -135,36 +135,36 @@ class SshConnectionTest < ActiveSupport::TestCase
     mismatch.data = { fingerprint: "SHA256:abc" }
     fake = FakeSsh.new(error: mismatch)
 
-    error = assert_raises(SshConnection::HostKeyMismatchError) { connect(servers(:web), fake) { } }
+    error = assert_raises(Ssh::Connection::HostKeyMismatchError) { connect(servers(:web), fake) { } }
     assert_match "SHA256:abc", error.message
     assert_equal "SHA256:abc", error.new_fingerprint
     assert_equal :host_key_changed, error.reason
   end
 
   test "a host key mismatch tells which fingerprints were pinned" do
-    pinned = SshKeyGenerator.generate
+    pinned = Ssh::KeyGenerator.generate
     server = servers(:web)
     FileUtils.mkdir_p(@known_hosts.dirname)
     @known_hosts.write("#{server.port == 22 ? server.host : "[#{server.host}]:#{server.port}"} #{pinned.public_key.split.first(2).join(" ")}\n")
     mismatch = Net::SSH::HostKeyMismatch.new("fingerprint does not match")
     mismatch.data = { fingerprint: "SHA256:new" }
 
-    error = assert_raises(SshConnection::HostKeyMismatchError) { connect(server, FakeSsh.new(error: mismatch)) { } }
+    error = assert_raises(Ssh::Connection::HostKeyMismatchError) { connect(server, FakeSsh.new(error: mismatch)) { } }
     assert_equal [ pinned.fingerprint ], error.known_fingerprints
   end
 
   test "each error has a French title" do
-    assert_equal "Connexion impossible", SshConnection::ConnectionError.new.title
-    assert_equal "Clé SSH refusée par le serveur", SshConnection::AuthenticationError.new.title
-    assert_equal "L'empreinte du serveur a changé", SshConnection::HostKeyMismatchError.new.title
-    assert_equal "Aucune clé SSH configurée", SshConnection::MissingKeyError.new.title
-    assert_equal "Erreur SSH", SshConnection::Error.new.title
-    assert_equal "Délai dépassé", SshConnection::CommandTimeoutError.new.title
+    assert_equal "Connexion impossible", Ssh::Connection::ConnectionError.new.title
+    assert_equal "Clé SSH refusée par le serveur", Ssh::Connection::AuthenticationError.new.title
+    assert_equal "L'empreinte du serveur a changé", Ssh::Connection::HostKeyMismatchError.new.title
+    assert_equal "Aucune clé SSH configurée", Ssh::Connection::MissingKeyError.new.title
+    assert_equal "Erreur SSH", Ssh::Connection::Error.new.title
+    assert_equal "Délai dépassé", Ssh::Connection::CommandTimeoutError.new.title
   end
 
   test "all errors share a common base class" do
-    [ SshConnection::ConnectionError, SshConnection::AuthenticationError, SshConnection::HostKeyMismatchError, SshConnection::MissingKeyError, SshConnection::CommandError, SshConnection::CommandTimeoutError ].each do |klass|
-      assert_operator klass, :<, SshConnection::Error
+    [ Ssh::Connection::ConnectionError, Ssh::Connection::AuthenticationError, Ssh::Connection::HostKeyMismatchError, Ssh::Connection::MissingKeyError, Ssh::Connection::CommandError, Ssh::Connection::CommandTimeoutError ].each do |klass|
+      assert_operator klass, :<, Ssh::Connection::Error
     end
   end
 
@@ -174,8 +174,8 @@ class SshConnectionTest < ActiveSupport::TestCase
     server = servers(:web)
     server.assign_attributes(host: "127.0.0.1", port: closed_port)
 
-    error = assert_raises(SshConnection::ConnectionError) do
-      SshConnection.open(server, known_hosts_file: @known_hosts, timeout: 2) { }
+    error = assert_raises(Ssh::Connection::ConnectionError) do
+      Ssh::Connection.open(server, known_hosts_file: @known_hosts, timeout: 2) { }
     end
     assert_match "127.0.0.1:#{server.port}", error.message
   end
@@ -185,8 +185,8 @@ class SshConnectionTest < ActiveSupport::TestCase
       server = servers(:web)
       server.assign_attributes(host: "127.0.0.1", port: port)
 
-      assert_raises(SshConnection::ConnectionError) do
-        SshConnection.open(server, known_hosts_file: @known_hosts, timeout: 2) { }
+      assert_raises(Ssh::Connection::ConnectionError) do
+        Ssh::Connection.open(server, known_hosts_file: @known_hosts, timeout: 2) { }
       end
     end
   end
@@ -197,8 +197,8 @@ class SshConnectionTest < ActiveSupport::TestCase
       server.assign_attributes(host: "127.0.0.1", port: port)
 
       started = Time.current
-      assert_raises(SshConnection::ConnectionError) do
-        SshConnection.open(server, known_hosts_file: @known_hosts, timeout: 1) { }
+      assert_raises(Ssh::Connection::ConnectionError) do
+        Ssh::Connection.open(server, known_hosts_file: @known_hosts, timeout: 1) { }
       end
       assert_operator Time.current - started, :<, 5
     end
@@ -233,7 +233,7 @@ class SshConnectionTest < ActiveSupport::TestCase
   test "accepts an explicit list of keys" do
     other = SshKey.new(private_key: "other")
     fake = FakeSsh.new
-    SshConnection.open(servers(:web), key: [ other, nil ], transport: fake, known_hosts_file: @known_hosts) { }
+    Ssh::Connection.open(servers(:web), key: [ other, nil ], transport: fake, known_hosts_file: @known_hosts) { }
 
     assert_equal [ "other" ], fake.started_with[:key_data]
   end
@@ -244,8 +244,8 @@ class SshConnectionTest < ActiveSupport::TestCase
 
     started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     connect(servers(:web), fake) do |ssh|
-      errors << assert_raises(SshConnection::CommandTimeoutError) { ssh.exec("sleep 30", timeout: 0.2) }
-      errors << assert_raises(SshConnection::CommandTimeoutError) { ssh.exec("uname") }
+      errors << assert_raises(Ssh::Connection::CommandTimeoutError) { ssh.exec("sleep 30", timeout: 0.2) }
+      errors << assert_raises(Ssh::Connection::CommandTimeoutError) { ssh.exec("uname") }
     end
 
     assert_in_delta 0.2, Process.clock_gettime(Process::CLOCK_MONOTONIC) - started, 0.5
@@ -258,8 +258,8 @@ class SshConnectionTest < ActiveSupport::TestCase
   test "commands get the default time limit of the connection" do
     fake = FakeSsh.new(responses: { "sleep 30" => FakeSsh::Response.new("", "", 0, true) })
 
-    assert_raises(SshConnection::CommandTimeoutError) do
-      SshConnection.open(servers(:web), transport: fake, known_hosts_file: @known_hosts, command_timeout: 0.1) { |ssh| ssh.exec!("sleep 30") }
+    assert_raises(Ssh::Connection::CommandTimeoutError) do
+      Ssh::Connection.open(servers(:web), transport: fake, known_hosts_file: @known_hosts, command_timeout: 0.1) { |ssh| ssh.exec!("sleep 30") }
     end
   end
 

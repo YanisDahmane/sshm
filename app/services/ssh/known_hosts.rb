@@ -1,10 +1,10 @@
-# The host keys pinned by SshConnection (trust on first use), in `file`
-# (SshConnection::KNOWN_HOSTS_FILE by default, replaced in tests).
-module KnownHosts
+# The host keys pinned by Ssh::Connection (trust on first use), in `file`
+# (Ssh::Connection::KNOWN_HOSTS_FILE by default, replaced in tests).
+module Ssh::KnownHosts
   class << self
     attr_writer :file
 
-    def file = Pathname(@file || SshConnection::KNOWN_HOSTS_FILE)
+    def file = Pathname(@file || Ssh::Connection::KNOWN_HOSTS_FILE)
 
     # Removes the entries of host:port. Returns the number of removed lines.
     def forget(host, port, file: self.file)
@@ -24,7 +24,7 @@ module KnownHosts
 
       file.readlines.select { |line| entry_for?(line, host, port) }.filter_map do |line|
         blob = line.split[2]
-        SshKeyGenerator.fingerprint(Base64.strict_decode64(blob)) if blob
+        Ssh::KeyGenerator.fingerprint(Base64.strict_decode64(blob)) if blob
       rescue ArgumentError
         nil
       end

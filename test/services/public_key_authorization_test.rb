@@ -35,7 +35,7 @@ class PublicKeyAuthorizationTest < ActiveSupport::TestCase
 
   test "script appends after existing keys and leaves them untouched" do
     authorized_keys.dirname.mkpath
-    other = SshKeyGenerator.generate(comment: "bob").public_key
+    other = Ssh::KeyGenerator.generate(comment: "bob").public_key
     authorized_keys.write("# team\n#{other}\n")
 
     assert_equal "added", run_script
@@ -44,7 +44,7 @@ class PublicKeyAuthorizationTest < ActiveSupport::TestCase
 
   test "script adds a missing trailing newline before appending" do
     authorized_keys.dirname.mkpath
-    other = SshKeyGenerator.generate(comment: "bob").public_key
+    other = Ssh::KeyGenerator.generate(comment: "bob").public_key
     authorized_keys.write(other)
 
     run_script
@@ -139,7 +139,7 @@ class PublicKeyAuthorizationTest < ActiveSupport::TestCase
   end
 
   test "the script replaces an existing line when asked, keeping the other lines" do
-    other = SshKeyGenerator.generate(comment: "bob").public_key
+    other = Ssh::KeyGenerator.generate(comment: "bob").public_key
     authorized_keys.dirname.mkpath
     authorized_keys.write(%(# team\nexpiry-time="20261003144218Z" #{@type} #{@blob} Alice\n#{other}\n))
 

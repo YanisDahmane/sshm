@@ -2,7 +2,7 @@ require "test_helper"
 
 class PublicKeyTest < ActiveSupport::TestCase
   setup do
-    @key = SshKeyGenerator.generate(comment: "bob@desktop")
+    @key = Ssh::KeyGenerator.generate(comment: "bob@desktop")
   end
 
   def build_public_key(**attributes)
@@ -62,7 +62,7 @@ class PublicKeyTest < ActiveSupport::TestCase
   end
 
   test "rejects several keys" do
-    other = SshKeyGenerator.generate.public_key
+    other = Ssh::KeyGenerator.generate.public_key
     public_key = build_public_key(content: "#{@key.public_key}\n#{other}")
     assert_not public_key.valid?
     assert public_key.errors.added?(:content, :invalid)

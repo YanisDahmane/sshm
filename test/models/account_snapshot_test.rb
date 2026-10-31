@@ -3,7 +3,7 @@ require "test_helper"
 class AccountSnapshotTest < ActiveSupport::TestCase
   setup do
     @account = AuthorizedKeysAccount.login(servers(:web))
-    @unnamed = SshKeyGenerator.generate.public_key.split(" ").first(2).join(" ")
+    @unnamed = Ssh::KeyGenerator.generate.public_key.split(" ").first(2).join(" ")
   end
 
   def keys(*lines) = AuthorizedKey.parse(lines.join("\n"))
@@ -28,7 +28,7 @@ class AccountSnapshotTest < ActiveSupport::TestCase
 
   test "keys without public_key, named or not, except the Elio key" do
     ci_unnamed = public_keys(:ci).content.split(" ").first(2).join(" ")
-    named = SshKeyGenerator.generate(comment: "bob@desktop").public_key
+    named = Ssh::KeyGenerator.generate(comment: "bob@desktop").public_key
     snapshot = AccountSnapshot.record!(servers(:web), @account, keys(@unnamed, named, ci_unnamed, ssh_keys(:main).public_key.split(" ").first(2).join(" "), public_keys(:alice).content))
 
     orphans = snapshot.unknown_keys(known_fingerprints: PublicKey.pluck(:fingerprint).to_set, app_key: ssh_keys(:main))
@@ -57,7 +57,7 @@ class AccountSnapshotTest < ActiveSupport::TestCase
   end
 
   test "the first read logs every key without public_key" do
-    bob = SshKeyGenerator.generate(comment: "bob@desktop").public_key
+    bob = Ssh::KeyGenerator.generate(comment: "bob@desktop").public_key
 
     AccountSnapshot.record!(servers(:web), @account, keys(@unnamed, bob, public_keys(:alice).content, ssh_keys(:main).public_key))
 
@@ -68,8 +68,8 @@ class AccountSnapshotTest < ActiveSupport::TestCase
   end
 
   test "later reads log only new keys without public_key and vanished keys" do
-    bob = SshKeyGenerator.generate(comment: "bob@desktop").public_key
-    eve = SshKeyGenerator.generate(comment: "eve@laptop").public_key
+    bob = Ssh::KeyGenerator.generate(comment: "bob@desktop").public_key
+    eve = Ssh::KeyGenerator.generate(comment: "eve@laptop").public_key
     AccountSnapshot.record!(servers(:web), @account, keys(bob, public_keys(:alice).content))
     Activity.delete_all
 

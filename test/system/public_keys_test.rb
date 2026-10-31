@@ -9,7 +9,7 @@ class PublicKeysTest < ApplicationSystemTestCase
   end
 
   test "creating, editing and deleting a public_key" do
-    key = SshKeyGenerator.generate(comment: "bob@desktop")
+    key = Ssh::KeyGenerator.generate(comment: "bob@desktop")
     visit root_path
 
     within("nav.main-nav") { click_on "Trousseau" }

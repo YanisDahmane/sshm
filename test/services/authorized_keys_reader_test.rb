@@ -19,7 +19,7 @@ class AuthorizedKeysReaderTest < ActiveSupport::TestCase
 
   test "reads and parses the SSH user's authorized_keys" do
     authorized_keys_file.dirname.mkpath
-    authorized_keys_file.write("#{ssh_keys(:main).public_key}\n#{SshKeyGenerator.generate(comment: "").public_key.strip}\n")
+    authorized_keys_file.write("#{ssh_keys(:main).public_key}\n#{Ssh::KeyGenerator.generate(comment: "").public_key.strip}\n")
 
     result = read(FakeSsh.new(handler: local_shell))
 

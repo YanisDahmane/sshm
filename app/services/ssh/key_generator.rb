@@ -6,7 +6,7 @@ require "net/ssh"
 #   - public key:  "ssh-ed25519 AAAA... comment" (one line, for authorized_keys)
 #   - private key: unencrypted "-----BEGIN OPENSSH PRIVATE KEY-----" block
 #   - fingerprint: "SHA256:..." as printed by `ssh-keygen -l`
-class SshKeyGenerator
+class Ssh::KeyGenerator
   KEY_TYPE = "ssh-ed25519".freeze
   AUTH_MAGIC = "openssh-key-v1\0".b.freeze
 

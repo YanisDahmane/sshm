@@ -9,12 +9,12 @@ class AuthorizedKeysReader
 
   def self.call(server, account: nil, **connection_options)
     account ||= AuthorizedKeysAccount.login(server)
-    output = SshConnection.open(server, **connection_options) do |ssh|
+    output = Ssh::Connection.open(server, **connection_options) do |ssh|
       ssh.exec!(account.command(read_script(account.home))).stdout
     end
 
     Result.new(keys: AuthorizedKey.parse(output), error_title: nil, error_details: nil)
-  rescue SshConnection::Error => e
+  rescue Ssh::Connection::Error => e
     title, details = account.error_for(e)
     Result.new(keys: [], error_title: title, error_details: details, reason: e.reason)
   end

@@ -41,7 +41,7 @@ class PaginationTest < ActionDispatch::IntegrationTest
 
   test "keyring, with the kind filter kept" do
     with_per_page(PublicKeysController, 1) do
-      PublicKey.create!(name: "Bob", kind: "person", content: SshKeyGenerator.generate(comment: "bob").public_key)
+      PublicKey.create!(name: "Bob", kind: "person", content: Ssh::KeyGenerator.generate(comment: "bob").public_key)
       get public_keys_path(kind: "person")
       assert_equal({ "kind" => "person", "page" => "2" }, next_page_query)
     end

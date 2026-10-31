@@ -58,7 +58,7 @@ class Inventory::Collectors::PortsTest < ActiveSupport::TestCase
       known_hosts = Rails.root.join("tmp", "test", "ports-#{SecureRandom.hex(4)}", "known_hosts")
       fake = FakeSsh.new(responses: { "sudo -n true" => FakeSsh::Response.new("", "", sudo ? 0 : 1) },
                          handler: ->(command) { FakeSsh::Response.new(output, "", 0) if command.include?("sh -c") })
-      outcome = SshConnection.open(servers(:web), transport: fake, known_hosts_file: known_hosts) { |ssh| Collector.new(ssh).collect }
+      outcome = Ssh::Connection.open(servers(:web), transport: fake, known_hosts_file: known_hosts) { |ssh| Collector.new(ssh).collect }
       assert_equal status, outcome.status
       assert_equal sudo, fake.commands.last.start_with?("sudo -n sh -c")
       FileUtils.rm_rf(known_hosts.dirname)

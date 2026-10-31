@@ -1,5 +1,5 @@
-<% alice = SshKeyGenerator.generate(comment: "alice@laptop") %>
-<% ci = SshKeyGenerator.generate(comment: "") %>
+<% alice = Ssh::KeyGenerator.generate(comment: "alice@laptop") %>
+<% ci = Ssh::KeyGenerator.generate(comment: "") %>
 alice:
   name: Alice
   kind: person

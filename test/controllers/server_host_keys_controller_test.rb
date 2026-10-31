@@ -6,17 +6,17 @@ class ServerHostKeysControllerTest < ActionDispatch::IntegrationTest
 
   setup do
     @server = servers(:web)
-    @old = SshKeyGenerator.generate
-    @new = SshKeyGenerator.generate
-    FileUtils.mkdir_p(KnownHosts.file.dirname)
-    KnownHosts.file.write("#{entry(@old)}\n10.9.9.9 #{@other = SshKeyGenerator.generate.public_key.split.first(2).join(" ")}\n")
+    @old = Ssh::KeyGenerator.generate
+    @new = Ssh::KeyGenerator.generate
+    FileUtils.mkdir_p(Ssh::KnownHosts.file.dirname)
+    Ssh::KnownHosts.file.write("#{entry(@old)}\n10.9.9.9 #{@other = Ssh::KeyGenerator.generate.public_key.split.first(2).join(" ")}\n")
   end
 
-  teardown { KnownHosts.file.delete if KnownHosts.file.exist? }
+  teardown { Ssh::KnownHosts.file.delete if Ssh::KnownHosts.file.exist? }
 
   # Mimics net-ssh pinning whatever key the server presents (accept_new).
   def presenting(key)
-    ->(server, **) { KnownHosts.file.write(KnownHosts.file.read + "#{entry(key)}\n"); SshCheck::Result.new(success: true, message: "ok", details: "ok") }
+    ->(server, **) { Ssh::KnownHosts.file.write(Ssh::KnownHosts.file.read + "#{entry(key)}\n"); Ssh::Check::Result.new(success: true, message: "ok", details: "ok") }
   end
 
   def entry(key)
@@ -32,14 +32,14 @@ class ServerHostKeysControllerTest < ActionDispatch::IntegrationTest
   test "replaces the pinned key when the server presents the expected one" do
     sign_in users(:one)
 
-    stub_method(SshCheck, :call, presenting(@new)) do
+    stub_method(Ssh::Check, :call, presenting(@new)) do
       post server_host_key_path(@server), params: { fingerprint: @new.fingerprint }
     end
 
     assert_redirected_to server_path(@server)
     assert_match "Nouvelle empreinte acceptée", flash[:notice]
-    assert_equal [ @new.fingerprint ], KnownHosts.fingerprints(@server.host, @server.port)
-    assert_includes KnownHosts.file.read, "10.9.9.9 #{@other}", "other hosts are kept"
+    assert_equal [ @new.fingerprint ], Ssh::KnownHosts.fingerprints(@server.host, @server.port)
+    assert_includes Ssh::KnownHosts.file.read, "10.9.9.9 #{@other}", "other hosts are kept"
 
     activity = Activity.last
     assert_equal "host_key_changed", activity.kind
@@ -51,17 +51,17 @@ class ServerHostKeysControllerTest < ActionDispatch::IntegrationTest
 
   test "pins nothing when the server presents yet another key" do
     sign_in users(:one)
-    third = SshKeyGenerator.generate
+    third = Ssh::KeyGenerator.generate
 
     assert_no_difference "Activity.count" do
-      stub_method(SshCheck, :call, presenting(third)) do
+      stub_method(Ssh::Check, :call, presenting(third)) do
         post server_host_key_path(@server), params: { fingerprint: @new.fingerprint }
       end
     end
 
     assert_redirected_to server_path(@server)
     assert_match "ne présente plus l'empreinte affichée", flash[:alert]
-    assert_equal [], KnownHosts.fingerprints(@server.host, @server.port)
+    assert_equal [], Ssh::KnownHosts.fingerprints(@server.host, @server.port)
   end
 
   test "is forbidden to non admins and changes nothing" do
@@ -70,7 +70,7 @@ class ServerHostKeysControllerTest < ActionDispatch::IntegrationTest
     post server_host_key_path(@server), params: { fingerprint: @new.fingerprint }
 
     assert_response :forbidden
-    assert_equal [ @old.fingerprint ], KnownHosts.fingerprints(@server.host, @server.port)
+    assert_equal [ @old.fingerprint ], Ssh::KnownHosts.fingerprints(@server.host, @server.port)
   end
 
   test "requires the fingerprint" do

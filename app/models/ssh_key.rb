@@ -32,7 +32,7 @@ class SshKey < ApplicationRecord
   end
 
   def self.build_generated(comment:, state: :active)
-    key = SshKeyGenerator.generate(comment: comment)
+    key = Ssh::KeyGenerator.generate(comment: comment)
     new(public_key: key.public_key, private_key: key.private_key, fingerprint: key.fingerprint, state: state)
   end
   private_class_method :build_generated

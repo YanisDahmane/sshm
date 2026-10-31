@@ -1,7 +1,7 @@
 require "test_helper"
 
 class KeyInsightsTest < ActiveSupport::TestCase
-  def unnamed_key = SshKeyGenerator.generate.public_key.split(" ").first(2).join(" ")
+  def unnamed_key = Ssh::KeyGenerator.generate.public_key.split(" ").first(2).join(" ")
 
   def record(server, *lines)
     AccountSnapshot.record!(server, AuthorizedKeysAccount.login(server), AuthorizedKey.parse(lines.join("\n")))
@@ -18,7 +18,7 @@ class KeyInsightsTest < ActiveSupport::TestCase
 
   test "lists the keys without public_key per server" do
     unnamed = unnamed_key
-    bob = SshKeyGenerator.generate(comment: "bob@desktop").public_key
+    bob = Ssh::KeyGenerator.generate(comment: "bob@desktop").public_key
     record(servers(:web), unnamed, bob, public_keys(:alice).content, ssh_keys(:main).public_key)
     travel_to(1.day.ago) { record(servers(:db), public_keys(:ci).content) }
 

@@ -123,8 +123,8 @@ class ServersIndexTest < ActionDispatch::IntegrationTest
   end
 
   test "notes the unknown keys of scanned servers" do
-    unnamed = SshKeyGenerator.generate.public_key.split(" ").first(2).join(" ")
-    bob = SshKeyGenerator.generate(comment: "bob@desktop").public_key
+    unnamed = Ssh::KeyGenerator.generate.public_key.split(" ").first(2).join(" ")
+    bob = Ssh::KeyGenerator.generate(comment: "bob@desktop").public_key
     AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse([ unnamed, bob, ssh_keys(:main).public_key, public_keys(:ci).content ].join("\n")))
     AccountSnapshot.record!(servers(:db), AuthorizedKeysAccount.login(servers(:db)), AuthorizedKey.parse(public_keys(:alice).content))
     sign_in users(:one)

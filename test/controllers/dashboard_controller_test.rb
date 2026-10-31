@@ -135,7 +135,7 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "shows the fleet figures" do
-    unnamed = SshKeyGenerator.generate.public_key.split(" ").first(2).join(" ")
+    unnamed = Ssh::KeyGenerator.generate.public_key.split(" ").first(2).join(" ")
     AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse(unnamed))
     servers(:web).update_columns(reachable: true)
     sign_in users(:one)
@@ -173,7 +173,7 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
   test "lists what needs attention, most serious first" do
     servers(:backup).update_columns(ssh_ok: false)
     servers(:web).update_columns(reachable: true, ssh_ok: true, health_status: "warn", health_reasons: [ { "tone" => "warn", "text" => "Redémarrage requis" } ])
-    unnamed = SshKeyGenerator.generate.public_key.split(" ").first(2).join(" ")
+    unnamed = Ssh::KeyGenerator.generate.public_key.split(" ").first(2).join(" ")
     AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse(unnamed))
     sign_in users(:one)
 

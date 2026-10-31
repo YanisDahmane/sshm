@@ -7,7 +7,7 @@ class Inventory::CollectorTest < ActiveSupport::TestCase
 
   def connect(fake, &block)
     known_hosts = Rails.root.join("tmp", "test", "collector-#{SecureRandom.hex(4)}", "known_hosts")
-    SshConnection.open(servers(:web), transport: fake, known_hosts_file: known_hosts, &block)
+    Ssh::Connection.open(servers(:web), transport: fake, known_hosts_file: known_hosts, &block)
   ensure
     FileUtils.rm_rf(known_hosts.dirname)
   end

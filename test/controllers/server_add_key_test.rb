@@ -10,7 +10,7 @@ class ServerAddKeyTest < ActionDispatch::IntegrationTest
   def added = PublicKeyAuthorization::Result.new(status: :added, error_title: nil, error_details: nil)
 
   def new_key_params(duration: "", **overrides)
-    { source: "new", duration: duration, public_key: { name: "Bob", kind: "person", content: SshKeyGenerator.generate(comment: "bob@laptop").public_key,
+    { source: "new", duration: duration, public_key: { name: "Bob", kind: "person", content: Ssh::KeyGenerator.generate(comment: "bob@laptop").public_key,
                                                   description: "Portable" }.merge(overrides) }
   end
 

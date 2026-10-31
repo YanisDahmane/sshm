@@ -113,7 +113,7 @@ class UiTest < ApplicationSystemTestCase
   end
 
   test "converting a key without public_key into a public_key from the server page" do
-    bob = SshKeyGenerator.generate(comment: "bob@desktop").public_key
+    bob = Ssh::KeyGenerator.generate(comment: "bob@desktop").public_key
     reader = ->(*, **) { AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse([ ssh_keys(:main).public_key, bob ].join("\n")), error_title: nil, error_details: nil) }
 
     stub_method(AuthorizedKeysReader, :call, reader) do

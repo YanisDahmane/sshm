@@ -15,7 +15,7 @@ class RotateSshKeyJobTest < ActiveJob::TestCase
     end
 
     def open(server, key:, **)
-      raise SshConnection::ConnectionError, "refused" if @failures[server.name] == "install"
+      raise Ssh::Connection::ConnectionError, "refused" if @failures[server.name] == "install"
 
       @installs << [ server.name, key.map(&:state) ]
       yield Object.new.tap { |ssh| def ssh.exec!(*) = true }
@@ -24,7 +24,7 @@ class RotateSshKeyJobTest < ActiveJob::TestCase
     def check(server, key:, **)
       @checks << [ server.name, key.state ]
       ok = @failures[server.name] != "verify"
-      SshCheck::Result.new(success: ok, message: ok ? "ok" : "Clé SSH refusée par le serveur", details: "x")
+      Ssh::Check::Result.new(success: ok, message: ok ? "ok" : "Clé SSH refusée par le serveur", details: "x")
     end
 
     def remove(server, blob, protected_keys:, key:, **)
@@ -35,8 +35,8 @@ class RotateSshKeyJobTest < ActiveJob::TestCase
   end
 
   def run_job(rotation, fake, **options)
-    stub_method(SshConnection, :open, ->(server, **kw, &block) { fake.open(server, **kw, &block) }) do
-      stub_method(SshCheck, :call, ->(server, **kw) { fake.check(server, **kw) }) do
+    stub_method(Ssh::Connection, :open, ->(server, **kw, &block) { fake.open(server, **kw, &block) }) do
+      stub_method(Ssh::Check, :call, ->(server, **kw) { fake.check(server, **kw) }) do
         stub_method(AuthorizedKeyRemoval, :call, ->(server, blob, **kw) { fake.remove(server, blob, **kw) }) do
           RotateSshKeyJob.perform_now(rotation, **options)
         end

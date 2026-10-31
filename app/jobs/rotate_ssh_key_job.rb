@@ -48,13 +48,13 @@ class RotateSshKeyJob < ApplicationJob
   def install(rotation, server, account)
     new_key = rotation.new_key
     script = PublicKeyAuthorization.append_script(new_key.public_key, new_key.blob, home: account.home)
-    SshConnection.open(server, key: [ rotation.old_key, new_key ]) { |ssh| ssh.exec!(account.command(script)) }
-  rescue SshConnection::Error => e
+    Ssh::Connection.open(server, key: [ rotation.old_key, new_key ]) { |ssh| ssh.exec!(account.command(script)) }
+  rescue Ssh::Connection::Error => e
     raise StepFailed.new("install", "#{e.title} — #{e.message}")
   end
 
   def verify(rotation, server)
-    check = SshCheck.call(server, key: rotation.new_key)
+    check = Ssh::Check.call(server, key: rotation.new_key)
     raise StepFailed.new("verify", "#{check.message} — #{check.details}") unless check.success?
   end
 

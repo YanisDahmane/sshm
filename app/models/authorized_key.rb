@@ -58,7 +58,7 @@ class AuthorizedKey
   def named? = comment.present?
 
   def fingerprint
-    SshKeyGenerator.fingerprint(Base64.strict_decode64(key))
+    Ssh::KeyGenerator.fingerprint(Base64.strict_decode64(key))
   end
 
   # True when this is the public key of the given SshKey, or of one of them

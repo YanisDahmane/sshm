@@ -67,7 +67,7 @@ class ServersController < ApplicationController
     active_temporary_accesses = @server.temporary_accesses.active.count
     @server.destroy!
     still_used = Server.exists?(host: @server.host, port: @server.port)
-    KnownHosts.forget(@server.host, @server.port) unless still_used
+    Ssh::KnownHosts.forget(@server.host, @server.port) unless still_used
     Activity.record!(:server_deleted, server_name: @server.name, address: "#{@server.username}@#{@server.host}:#{@server.port}",
                                       active_temporary_accesses: active_temporary_accesses)
 

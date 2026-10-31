@@ -19,12 +19,12 @@ class AuthorizedKeyRemoval
     return error("Clé invalide", "La clé à supprimer n'est pas une clé publique valide.") unless blob.to_s.match?(BLOB_FORMAT)
     return error("Suppression interdite", "La clé Elio ne peut pas être supprimée : l'application perdrait l'accès au serveur.") if Array(protected_keys).any? { |key| key.blob == blob }
 
-    output = SshConnection.open(server, **connection_options) do |ssh|
+    output = Ssh::Connection.open(server, **connection_options) do |ssh|
       ssh.exec!(account.command(remove_script(blob, home: account.home))).stdout
     end
 
     Result.new(status: output.include?("removed") ? :removed : :absent, error_title: nil, error_details: nil)
-  rescue SshConnection::Error => e
+  rescue Ssh::Connection::Error => e
     error(*account.error_for(e))
   end
 

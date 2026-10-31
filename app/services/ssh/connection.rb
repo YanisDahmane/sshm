@@ -2,7 +2,7 @@ require "net/ssh"
 
 # Opens an SSH session to a Server to run commands (no interactive shell).
 #
-#   SshConnection.open(server) do |ssh|
+#   Ssh::Connection.open(server) do |ssh|
 #     ssh.exec!("cat /root/.ssh/authorized_keys").stdout
 #   end
 #
@@ -10,7 +10,7 @@ require "net/ssh"
 # plus the pending one during a rotation), never ~/.ssh nor the ssh-agent.
 # Host keys are trusted on first use and pinned in KNOWN_HOSTS_FILE; a changed
 # key aborts the connection.
-class SshConnection
+class Ssh::Connection
   # Each error has a short French `title` to show in the UI next to its message.
   # `reason` lets the UI guide the user: :key_refused (install the app key on
   # the server) or :missing_key (generate it in the settings).
@@ -82,7 +82,7 @@ class SshConnection
   # `transport` is the Net::SSH-compatible entry point, swappable in tests.
   # `key`: one SshKey or a list, tried in order (the app keys by default).
   def initialize(server, key: SshKey.app_keys, timeout: DEFAULT_TIMEOUT, command_timeout: DEFAULT_COMMAND_TIMEOUT,
-                 known_hosts_file: KnownHosts.file, transport: Net::SSH)
+                 known_hosts_file: Ssh::KnownHosts.file, transport: Net::SSH)
     @server = server
     @keys = Array(key).compact
     @timeout = timeout
@@ -110,7 +110,7 @@ class SshConnection
   rescue Net::SSH::HostKeyMismatch => e
     raise HostKeyMismatchError.new("La clé d'hôte de #{server.host} a changé (#{e.fingerprint}). Connexion refusée.",
                                    new_fingerprint: e.fingerprint,
-                                   known_fingerprints: KnownHosts.fingerprints(server.host, server.port, file: @known_hosts_file))
+                                   known_fingerprints: Ssh::KnownHosts.fingerprints(server.host, server.port, file: @known_hosts_file))
   rescue Net::SSH::ConnectionTimeout, Net::SSH::Disconnect, Net::SSH::Exception, SocketError, SystemCallError, IOError, Timeout::Error => e
     raise ConnectionError, "Impossible de se connecter à #{server.host}:#{server.port} (#{e.class}: #{e.message})"
   end
@@ -119,7 +119,7 @@ class SshConnection
   # CommandTimeoutError (and shuts the session down) after `timeout` seconds.
   def exec(command, timeout: @command_timeout)
     raise CommandTimeoutError, "La session a été fermée après un délai dépassé." if @timed_out
-    raise Error, "No open session, call #exec inside SshConnection.open" unless @session
+    raise Error, "No open session, call #exec inside Ssh::Connection.open" unless @session
 
     stdout = +""
     stderr = +""

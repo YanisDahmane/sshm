@@ -1,9 +1,9 @@
 require "test_helper"
 require "open3"
 
-class SshKeyGeneratorTest < ActiveSupport::TestCase
+class Ssh::KeyGeneratorTest < ActiveSupport::TestCase
   setup do
-    @key = SshKeyGenerator.generate(comment: "elio-test")
+    @key = Ssh::KeyGenerator.generate(comment: "elio-test")
   end
 
   test "public key is a single OpenSSH ed25519 line with the comment" do
@@ -46,7 +46,7 @@ class SshKeyGeneratorTest < ActiveSupport::TestCase
   end
 
   test "each call generates a different key pair" do
-    other = SshKeyGenerator.generate
+    other = Ssh::KeyGenerator.generate
     assert_not_equal @key.public_key, other.public_key
     assert_not_equal @key.private_key, other.private_key
   end

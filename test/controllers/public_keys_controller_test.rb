@@ -4,7 +4,7 @@ class PublicKeysControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
 
   setup do
-    @key = SshKeyGenerator.generate(comment: "bob@desktop")
+    @key = Ssh::KeyGenerator.generate(comment: "bob@desktop")
   end
 
   def valid_params
@@ -203,7 +203,7 @@ class PublicKeysControllerTest < ActionDispatch::IntegrationTest
   test "create ignores a return path to another site" do
     [ "https://evil.example", "//evil.example", "/\\evil.example", "javascript:alert(1)" ].each_with_index do |return_to, index|
       sign_in users(:one)
-      post public_keys_path, params: { public_key: { name: "Bob #{index}", content: SshKeyGenerator.generate.public_key }, return_to: return_to }
+      post public_keys_path, params: { public_key: { name: "Bob #{index}", content: Ssh::KeyGenerator.generate.public_key }, return_to: return_to }
       assert_redirected_to public_key_path(PublicKey.find_by!(name: "Bob #{index}")), "#{return_to} should be ignored"
     end
   end

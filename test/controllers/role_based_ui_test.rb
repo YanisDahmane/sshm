@@ -6,7 +6,7 @@ class RoleBasedUiTest < ActionDispatch::IntegrationTest
   include StubHelpers
 
   setup do
-    keys = AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse([ ssh_keys(:main).public_key, SshKeyGenerator.generate(comment: "bob").public_key ].join("\n")), error_title: nil, error_details: nil)
+    keys = AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse([ ssh_keys(:main).public_key, Ssh::KeyGenerator.generate(comment: "bob").public_key ].join("\n")), error_title: nil, error_details: nil)
     stub_method_until_teardown(AuthorizedKeysReader, :call, keys)
   end
 
@@ -77,7 +77,7 @@ class RoleBasedUiTest < ActionDispatch::IntegrationTest
 
   test "the setup hint asks a non-admin to contact an administrator" do
     SshKey.delete_all
-    stub_method_until_teardown(SshCheck, :call, SshCheck::Result.new(success: false, message: "Aucune clé SSH configurée", details: "x", reason: :missing_key))
+    stub_method_until_teardown(Ssh::Check, :call, Ssh::Check::Result.new(success: false, message: "Aucune clé SSH configurée", details: "x", reason: :missing_key))
     sign_in users(:operator)
 
     get server_ssh_check_path(servers(:web))

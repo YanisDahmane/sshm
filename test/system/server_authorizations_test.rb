@@ -76,7 +76,7 @@ class ServerAuthorizationsTest < ApplicationSystemTestCase
       lines << "#{public_key.authorized_key.type} #{public_key.authorized_key.key} #{public_key.name}"
       PublicKeyAuthorization::Result.new(status: :added, error_title: nil, error_details: nil)
     end
-    bob = SshKeyGenerator.generate(comment: "bob@laptop").public_key
+    bob = Ssh::KeyGenerator.generate(comment: "bob@laptop").public_key
 
     stub_method(AuthorizedKeysReader, :call, reader) do
       stub_method(PublicKeyAuthorization, :call, authorizer) do

@@ -22,7 +22,7 @@ class AuthorizedKeysAccountTest < ActiveSupport::TestCase
   end
 
   test "shows connection errors as they are" do
-    error = SshConnection::AuthenticationError.new("refused")
+    error = Ssh::Connection::AuthenticationError.new("refused")
 
     assert_equal [ error.title, "refused" ], @account.error_for(error)
   end

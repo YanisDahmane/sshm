@@ -26,7 +26,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
 
   test "lists keys with keyring, unknown and master badges" do
     sign_in users(:one)
-    other = SshKeyGenerator.generate
+    other = Ssh::KeyGenerator.generate
     unnamed = other.public_key.split(" ").first(2).join(" ")
 
     stub_method(AuthorizedKeysReader, :call, keys_result(ssh_keys(:main).public_key, unnamed, public_keys(:alice).content)) do
@@ -73,7 +73,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
 
   test "shows options when a key has some" do
     sign_in users(:one)
-    key = SshKeyGenerator.generate(comment: "ci").public_key
+    key = Ssh::KeyGenerator.generate(comment: "ci").public_key
 
     stub_method(AuthorizedKeysReader, :call, keys_result(%(from="10.0.0.1",no-pty #{key}))) do
       get server_authorized_keys_path(servers(:web))
@@ -124,7 +124,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
 
   test "offers to delete every key except the Elio key" do
     sign_in users(:one)
-    named = SshKeyGenerator.generate(comment: "alice@laptop").public_key
+    named = Ssh::KeyGenerator.generate(comment: "alice@laptop").public_key
 
     stub_method(AuthorizedKeysReader, :call, keys_result(ssh_keys(:main).public_key, named)) do
       get server_authorized_keys_path(servers(:web))
@@ -271,8 +271,8 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
 
   test "highlights the unknown keys and offers to add them to the keyring" do
     sign_in users(:one)
-    unnamed = SshKeyGenerator.generate.public_key.split(" ").first(2).join(" ")
-    bob = SshKeyGenerator.generate(comment: "bob@desktop").public_key
+    unnamed = Ssh::KeyGenerator.generate.public_key.split(" ").first(2).join(" ")
+    bob = Ssh::KeyGenerator.generate(comment: "bob@desktop").public_key
     ci_unnamed = public_keys(:ci).content.split(" ").first(2).join(" ")
 
     stub_method(AuthorizedKeysReader, :call, keys_result(ssh_keys(:main).public_key, unnamed, %(no-pty #{bob}), ci_unnamed)) do
