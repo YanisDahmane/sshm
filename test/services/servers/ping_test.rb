@@ -1,20 +1,20 @@
 require "test_helper"
 
-class ServerPingTest < ActiveSupport::TestCase
+class Servers::PingTest < ActiveSupport::TestCase
   include TcpHelpers
 
   test "reachable? is true when the port accepts connections" do
     with_open_port do |port|
-      assert ServerPing.reachable?("127.0.0.1", port, timeout: 1)
+      assert Servers::Ping.reachable?("127.0.0.1", port, timeout: 1)
     end
   end
 
   test "reachable? is false when the connection is refused" do
-    assert_not ServerPing.reachable?("127.0.0.1", closed_port, timeout: 1)
+    assert_not Servers::Ping.reachable?("127.0.0.1", closed_port, timeout: 1)
   end
 
   test "reachable? is false when the host cannot be resolved" do
-    assert_not ServerPing.reachable?("unknown-host.invalid", 22, timeout: 1)
+    assert_not Servers::Ping.reachable?("unknown-host.invalid", 22, timeout: 1)
   end
 
   test "check! records a reachable server" do
@@ -23,7 +23,7 @@ class ServerPingTest < ActiveSupport::TestCase
     with_open_port do |port|
       server.update!(host: "127.0.0.1", port: port)
       travel_to Time.zone.local(2026, 10, 3, 12, 0, 0) do
-        assert ServerPing.check!(server, timeout: 1)
+        assert Servers::Ping.check!(server, timeout: 1)
       end
     end
 
@@ -36,7 +36,7 @@ class ServerPingTest < ActiveSupport::TestCase
     server = servers(:web)
     server.update!(host: "127.0.0.1", port: closed_port)
 
-    assert_not ServerPing.check!(server, timeout: 1)
+    assert_not Servers::Ping.check!(server, timeout: 1)
 
     server.reload
     assert_equal false, server.reachable
@@ -48,7 +48,7 @@ class ServerPingTest < ActiveSupport::TestCase
     server.update!(host: "127.0.0.1", port: closed_port)
 
     assert_no_changes -> { server.reload.updated_at } do
-      ServerPing.check!(server, timeout: 1)
+      Servers::Ping.check!(server, timeout: 1)
     end
   end
 
@@ -58,7 +58,7 @@ class ServerPingTest < ActiveSupport::TestCase
       servers(:db).update!(host: "127.0.0.1", port: closed_port)
       servers(:backup).update!(host: "unknown-host.invalid")
 
-      results = ServerPing.check_all!(Server.order(:name), timeout: 1)
+      results = Servers::Ping.check_all!(Server.order(:name), timeout: 1)
 
       assert_equal({ servers(:backup) => false, servers(:db) => false, servers(:web) => true }, results)
     end
@@ -69,7 +69,7 @@ class ServerPingTest < ActiveSupport::TestCase
   end
 
   test "check_all! returns an empty hash when there are no servers" do
-    assert_equal({}, ServerPing.check_all!(Server.none))
+    assert_equal({}, Servers::Ping.check_all!(Server.none))
   end
 
   test "check! logs a server going down" do
@@ -77,7 +77,7 @@ class ServerPingTest < ActiveSupport::TestCase
     server.update!(host: "127.0.0.1", port: closed_port)
     server.update_columns(reachable: true)
 
-    ServerPing.check!(server, timeout: 1)
+    Servers::Ping.check!(server, timeout: 1)
 
     assert_equal [ "server_unreachable" ], Activity.pluck(:kind)
   end

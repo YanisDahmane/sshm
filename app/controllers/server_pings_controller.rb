@@ -5,17 +5,17 @@ class ServerPingsController < ApplicationController
   # on display and on refresh).
   def show
     @server = Server.find(params[:server_id])
-    ServerPing.check!(@server)
+    Servers::Ping.check!(@server)
   end
 
   def create
     if params[:server_id]
       server = Server.find(params[:server_id])
-      reachable = ServerPing.check!(server)
+      reachable = Servers::Ping.check!(server)
       servers = [ server ]
       notice = "« #{server.name} » est #{reachable ? "en ligne" : "injoignable"}."
     else
-      results = ServerPing.check_all!(Server.all)
+      results = Servers::Ping.check_all!(Server.all)
       servers = results.keys
       notice = "Statuts actualisés : #{results.values.count(true)} en ligne, #{results.values.count(false)} injoignable(s)."
     end

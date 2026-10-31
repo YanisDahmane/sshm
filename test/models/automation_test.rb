@@ -62,7 +62,7 @@ class AutomationTest < ActiveSupport::TestCase
   test "the servers check pings every server" do
     automation = Automation.all_kinds.find { |a| a.kind == "servers_ping" }
 
-    result = stub_method(ServerPing, :check_all!, ->(servers, **) { servers.to_a.index_with { |server| server.name != "Database" } }) { automation.run! }
+    result = stub_method(Servers::Ping, :check_all!, ->(servers, **) { servers.to_a.index_with { |server| server.name != "Database" } }) { automation.run! }
 
     assert_equal "2/3 serveur(s) joignable(s)", result
   end

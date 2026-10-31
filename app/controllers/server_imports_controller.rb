@@ -11,21 +11,21 @@ class ServerImportsController < ApplicationController
 
   def preview
     read_params
-    @rows = ServerImport.parse(@text, format: @format, default_username: @default_username)
+    @rows = Servers::Import.parse(@text, format: @format, default_username: @default_username)
     render :new
-  rescue ServerImport::Error => e
+  rescue Servers::Import::Error => e
     flash.now[:alert] = e.message
     render :new, status: :unprocessable_entity
   end
 
   def create
     read_params
-    servers = ServerImport.import!(ServerImport.parse(@text, format: @format, default_username: @default_username))
+    servers = Servers::Import.import!(Servers::Import.parse(@text, format: @format, default_username: @default_username))
     return redirect_to(new_server_import_path, alert: "Aucun serveur valide à importer.") if servers.empty?
 
-    Activity.record!(:servers_imported, count: servers.size, format: ServerImport::FORMATS.fetch(@format), names: servers.first(10).map(&:name))
+    Activity.record!(:servers_imported, count: servers.size, format: Servers::Import::FORMATS.fetch(@format), names: servers.first(10).map(&:name))
     redirect_to servers_path, notice: "#{servers.size} serveur(s) importé(s). Installez-y la clé d'Elio puis lancez un scan des clés."
-  rescue ServerImport::Error => e
+  rescue Servers::Import::Error => e
     redirect_to new_server_import_path, alert: e.message
   rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique => e
     redirect_to new_server_import_path, alert: "Import annulé, rien n'a été créé : #{e.message}"
@@ -34,8 +34,8 @@ class ServerImportsController < ApplicationController
   private
 
   def read_params
-    @format = ServerImport::FORMATS.key?(params[:import_format]) ? params[:import_format] : "csv"
+    @format = Servers::Import::FORMATS.key?(params[:import_format]) ? params[:import_format] : "csv"
     @default_username = params[:default_username].to_s.strip.presence || "root"
-    @text = params[:file].respond_to?(:read) ? params[:file].read(ServerImport::MAX_SIZE + 1) : params[:content].to_s
+    @text = params[:file].respond_to?(:read) ? params[:file].read(Servers::Import::MAX_SIZE + 1) : params[:content].to_s
   end
 end

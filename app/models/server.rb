@@ -43,7 +43,7 @@ class Server < ApplicationRecord
     refresh_health! if changed && health_status.present?
   end
 
-  # Remembers a ping result (see ServerPing) and logs when the server goes
+  # Remembers a ping result (see Servers::Ping) and logs when the server goes
   # down (server_unreachable) or comes back (server_back_online).
   def record_reachability!(reachable)
     previous = self.reachable

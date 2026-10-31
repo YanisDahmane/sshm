@@ -70,7 +70,7 @@
       <fieldset>
         <legend class="<%= label_class %>">Format</legend>
         <div class="mt-2 flex flex-wrap gap-4 text-sm">
-          <% ServerImport::FORMATS.each do |value, label| %>
+          <% Servers::Import::FORMATS.each do |value, label| %>
             <label class="flex cursor-pointer items-center gap-2">
               <%= radio_button_tag :import_format, value, @format == value, class: "h-4 w-4 border-line text-accent" %> <%= label %>
             </label>

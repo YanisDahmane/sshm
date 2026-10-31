@@ -1,7 +1,7 @@
 require "test_helper"
 
-class ServerImportTest < ActiveSupport::TestCase
-  def parse(text, format: "csv", **options) = ServerImport.parse(text, format: format, **options)
+class Servers::ImportTest < ActiveSupport::TestCase
+  def parse(text, format: "csv", **options) = Servers::Import.parse(text, format: format, **options)
 
   test "CSV with a header, in any column order, French names and accents" do
     rows = parse(<<~CSV)
@@ -63,13 +63,13 @@ class ServerImportTest < ActiveSupport::TestCase
 
   test "refuses empty, unknown, oversized, non UTF-8 or malformed input" do
     { "" => "Collez", "\n\n" => "Collez", "Host *\n" => "Aucun serveur" }.each do |text, message|
-      assert_match message, assert_raises(ServerImport::Error) { parse(text, format: "ssh_config") }.message
+      assert_match message, assert_raises(Servers::Import::Error) { parse(text, format: "ssh_config") }.message
     end
-    assert_raises(ServerImport::Error) { parse("a,b", format: "xml") }
-    assert_match "trop gros", assert_raises(ServerImport::Error) { parse("a" * (ServerImport::MAX_SIZE + 1)) }.message
-    assert_match "UTF-8", assert_raises(ServerImport::Error) { parse("caf\xE9,10.0.0.1".b) }.message
-    assert_match "CSV invalide", assert_raises(ServerImport::Error) { parse("a,\"b\n") }.message
-    assert_match "Trop de lignes", assert_raises(ServerImport::Error) { parse((1..501).map { |n| "s#{n},10.0.0.1" }.join("\n")) }.message
+    assert_raises(Servers::Import::Error) { parse("a,b", format: "xml") }
+    assert_match "trop gros", assert_raises(Servers::Import::Error) { parse("a" * (Servers::Import::MAX_SIZE + 1)) }.message
+    assert_match "UTF-8", assert_raises(Servers::Import::Error) { parse("caf\xE9,10.0.0.1".b) }.message
+    assert_match "CSV invalide", assert_raises(Servers::Import::Error) { parse("a,\"b\n") }.message
+    assert_match "Trop de lignes", assert_raises(Servers::Import::Error) { parse((1..501).map { |n| "s#{n},10.0.0.1" }.join("\n")) }.message
   end
 
   test "a UTF-8 BOM is ignored" do
@@ -80,7 +80,7 @@ class ServerImportTest < ActiveSupport::TestCase
     rows = parse("A,10.0.0.1,22,root,production|Clients\nB,10.0.0.2,22,root,clients\nweb,10.0.0.3\nbad,\n")
 
     servers = assert_difference -> { Server.count } => 2, -> { ServerGroup.count } => 1 do
-      ServerImport.import!(rows)
+      Servers::Import.import!(rows)
     end
 
     assert_equal %w[A B], servers.map(&:name)

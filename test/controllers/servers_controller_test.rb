@@ -36,7 +36,7 @@ class ServersControllerTest < ActionDispatch::IntegrationTest
 
   test "the server page shows its groups" do
     sign_in users(:one)
-    stub_method(ServerPing, :reachable?, true) { get server_path(servers(:web)) }
+    stub_method(Servers::Ping, :reachable?, true) { get server_path(servers(:web)) }
 
     assert_select ".server-groups a.server-group-badge[href=?]", servers_path(group: server_groups(:production).id), text: "Production"
   end

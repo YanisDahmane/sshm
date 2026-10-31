@@ -14,7 +14,7 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
     ok_keys = Keys::AuthorizedKeysReader::Result.new(keys: [], error_title: nil, error_details: nil)
     stub_method_until_teardown(Keys::AuthorizedKeysReader, :call, ok_keys)
     stub_method_until_teardown(Ssh::Check, :call, Ssh::Check::Result.new(success: true, message: "ok", details: "ok"))
-    stub_method_until_teardown(ServerPing, :reachable?, true)
+    stub_method_until_teardown(Servers::Ping, :reachable?, true)
     stub_method_until_teardown(Keys::AccessGrant, :call, Keys::PublicKeyAuthorization::Result.new(status: :added, error_title: nil, error_details: nil))
     stub_method_until_teardown(Keys::Revocation, :call, Keys::AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil))
     stub_method_until_teardown(Notifications::Slack, :post, nil)

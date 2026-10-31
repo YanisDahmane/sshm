@@ -123,7 +123,7 @@ class Automation < ApplicationRecord
   end
 
   def run_servers_ping
-    results = ServerPing.check_all!(servers)
+    results = Servers::Ping.check_all!(servers)
     "#{results.values.count(true)}/#{results.size} serveur(s) joignable(s)"
   end
 end

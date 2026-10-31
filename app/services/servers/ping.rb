@@ -5,7 +5,7 @@ require "socket"
 #
 # A TCP connect is used rather than ICMP: it needs no root privileges and
 # tells us whether SSH is actually reachable, even when ICMP is filtered.
-class ServerPing
+class Servers::Ping
   DEFAULT_TIMEOUT = 3 # seconds
   PARALLEL_LIMIT = 32 # pings at once (network only, no database)
 

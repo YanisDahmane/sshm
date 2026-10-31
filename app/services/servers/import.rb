@@ -4,7 +4,7 @@ require "csv"
 # or from an OpenSSH client config (~/.ssh/config: Host / HostName / Port /
 # User), checks each row with the Server validations and flags duplicates,
 # so the page can show a preview before anything is created.
-class ServerImport
+class Servers::Import
   class Error < StandardError; end
 
   FORMATS = { "csv" => "CSV", "ssh_config" => "~/.ssh/config" }.freeze
