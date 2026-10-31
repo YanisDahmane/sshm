@@ -44,7 +44,7 @@ class Automation < ApplicationRecord
   def run_keys_scan
     servers = Server.order(:name).to_a
     detected_before = Activity.of_kind(:unknown_key_detected).count
-    scanned = servers.count { |server| ServerScan.call(server).success? }
+    scanned = BoundedParallel.map(servers) { |server| ServerScan.call(server).success? }.count(true)
     detected = Activity.of_kind(:unknown_key_detected).count - detected_before
 
     "#{scanned}/#{servers.size} serveur(s) scanné(s), #{detected} nouvelle(s) clé(s) inconnue(s)"

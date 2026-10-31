@@ -159,10 +159,11 @@ class SshConnectionTest < ActiveSupport::TestCase
     assert_equal "L'empreinte du serveur a changé", SshConnection::HostKeyMismatchError.new.title
     assert_equal "Aucune clé SSH configurée", SshConnection::MissingKeyError.new.title
     assert_equal "Erreur SSH", SshConnection::Error.new.title
+    assert_equal "Délai dépassé", SshConnection::CommandTimeoutError.new.title
   end
 
   test "all errors share a common base class" do
-    [ SshConnection::ConnectionError, SshConnection::AuthenticationError, SshConnection::HostKeyMismatchError, SshConnection::MissingKeyError, SshConnection::CommandError ].each do |klass|
+    [ SshConnection::ConnectionError, SshConnection::AuthenticationError, SshConnection::HostKeyMismatchError, SshConnection::MissingKeyError, SshConnection::CommandError, SshConnection::CommandTimeoutError ].each do |klass|
       assert_operator klass, :<, SshConnection::Error
     end
   end
@@ -235,5 +236,67 @@ class SshConnectionTest < ActiveSupport::TestCase
     SshConnection.open(servers(:web), key: [ other, nil ], transport: fake, known_hosts_file: @known_hosts) { }
 
     assert_equal [ "other" ], fake.started_with[:key_data]
+  end
+
+  test "a command running past its time limit raises and shuts the session down" do
+    fake = FakeSsh.new(responses: { "sleep 30" => FakeSsh::Response.new("", "", 0, true), "uname" => FakeSsh::Response.new("Linux\n", "", 0) })
+    errors = []
+
+    started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    connect(servers(:web), fake) do |ssh|
+      errors << assert_raises(SshConnection::CommandTimeoutError) { ssh.exec("sleep 30", timeout: 0.2) }
+      errors << assert_raises(SshConnection::CommandTimeoutError) { ssh.exec("uname") }
+    end
+
+    assert_in_delta 0.2, Process.clock_gettime(Process::CLOCK_MONOTONIC) - started, 0.5
+    assert_match "n'a pas répondu en 0.2 s sur 192.168.1.10 : sleep 30", errors.first.message
+    assert_equal "La session a été fermée après un délai dépassé.", errors.last.message
+    assert fake.sessions.sole.shut_down?
+    assert_equal [ "sleep 30" ], fake.commands
+  end
+
+  test "commands get the default time limit of the connection" do
+    fake = FakeSsh.new(responses: { "sleep 30" => FakeSsh::Response.new("", "", 0, true) })
+
+    assert_raises(SshConnection::CommandTimeoutError) do
+      SshConnection.open(servers(:web), transport: fake, known_hosts_file: @known_hosts, command_timeout: 0.1) { |ssh| ssh.exec!("sleep 30") }
+    end
+  end
+
+  test "keeps whitespace-only output" do
+    fake = FakeSsh.new(responses: { "printf '\\n'" => FakeSsh::Response.new("\n", "", 0) })
+
+    assert_equal "\n", connect(servers(:web), fake) { |ssh| ssh.exec("printf '\\n'").stdout }
+  end
+
+  test "privilege is :root when logged in as root, without asking" do
+    fake = FakeSsh.new
+
+    connect(servers(:backup), fake) do |ssh| # username root
+      assert_equal :root, ssh.privilege
+      assert ssh.privileged?
+      assert_equal "ss -tlnp", ssh.privileged("ss -tlnp")
+    end
+    assert_empty fake.commands
+  end
+
+  test "privilege is :sudo when passwordless sudo works, checked once per session" do
+    fake = FakeSsh.new(responses: { "sudo -n true" => FakeSsh::Response.new("", "", 0) })
+
+    connect(servers(:web), fake) do |ssh|
+      assert_equal :sudo, ssh.privilege
+      assert_equal "sudo -n ss -tlnp", ssh.privileged("ss -tlnp")
+    end
+    assert_equal [ "sudo -n true" ], fake.commands
+  end
+
+  test "privilege is :none without passwordless sudo" do
+    fake = FakeSsh.new(responses: { "sudo -n true" => FakeSsh::Response.new("", "sudo: a password is required\n", 1) })
+
+    connect(servers(:web), fake) do |ssh|
+      assert_equal :none, ssh.privilege
+      assert_not ssh.privileged?
+      assert_equal "ss -tln", ssh.privileged("ss -tln")
+    end
   end
 end

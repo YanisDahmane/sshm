@@ -48,6 +48,12 @@ class SshConnection
     def reason = :missing_key
   end
 
+  # The command ran longer than its time limit: its channel and the session
+  # are closed, so the connection cannot be used anymore.
+  class CommandTimeoutError < Error
+    def title = "Délai dépassé"
+  end
+
   class CommandError < Error
     attr_reader :result
 
@@ -64,7 +70,8 @@ class SshConnection
   end
 
   KNOWN_HOSTS_FILE = Rails.root.join("storage", "ssh", "known_hosts")
-  DEFAULT_TIMEOUT = 10 # seconds
+  DEFAULT_TIMEOUT = 10 # seconds, to connect
+  DEFAULT_COMMAND_TIMEOUT = 60 # seconds, per command
 
   attr_reader :server
 
@@ -74,10 +81,12 @@ class SshConnection
 
   # `transport` is the Net::SSH-compatible entry point, swappable in tests.
   # `key`: one SshKey or a list, tried in order (the app keys by default).
-  def initialize(server, key: SshKey.app_keys, timeout: DEFAULT_TIMEOUT, known_hosts_file: KnownHosts.file, transport: Net::SSH)
+  def initialize(server, key: SshKey.app_keys, timeout: DEFAULT_TIMEOUT, command_timeout: DEFAULT_COMMAND_TIMEOUT,
+                 known_hosts_file: KnownHosts.file, transport: Net::SSH)
     @server = server
     @keys = Array(key).compact
     @timeout = timeout
+    @command_timeout = command_timeout
     @known_hosts_file = Pathname(known_hosts_file)
     @transport = transport
   end
@@ -93,6 +102,8 @@ class SshConnection
       yield self
     ensure
       @session = nil
+      @privilege = nil
+      @timed_out = false
     end
   rescue Net::SSH::AuthenticationFailed => e
     raise AuthenticationError, "Authentification refusée pour #{server.username}@#{server.host} (#{e.message})"
@@ -104,26 +115,59 @@ class SshConnection
     raise ConnectionError, "Impossible de se connecter à #{server.host}:#{server.port} (#{e.class}: #{e.message})"
   end
 
-  # Runs a command and returns its Result, whatever the exit status.
-  def exec(command)
+  # Runs a command and returns its Result, whatever the exit status. Raises
+  # CommandTimeoutError (and shuts the session down) after `timeout` seconds.
+  def exec(command, timeout: @command_timeout)
+    raise CommandTimeoutError, "La session a été fermée après un délai dépassé." if @timed_out
     raise Error, "No open session, call #exec inside SshConnection.open" unless @session
 
     stdout = +""
     stderr = +""
-    status = {}
-    @session.exec!(command, status: status) do |_channel, stream, data|
-      (stream == :stderr ? stderr : stdout) << data
+    exit_status = -1
+    channel = @session.open_channel do |opened|
+      opened.exec(command) do |_channel, started|
+        next stderr << "the server refused to run the command" unless started
+
+        opened.on_data { |_, data| stdout << data }
+        opened.on_extended_data { |_, _, data| stderr << data }
+        opened.on_request("exit-status") { |_, data| exit_status = data.read_long }
+      end
     end
 
-    Result.new(stdout: stdout, stderr: stderr, exit_status: status.fetch(:exit_code, -1))
+    deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + timeout
+    @session.loop(0.1) { channel.active? && Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline }
+    raise_timeout(command, timeout) if channel.active?
+
+    Result.new(stdout: stdout, stderr: stderr, exit_status: exit_status)
   end
 
   # Runs a command and raises CommandError unless it succeeds.
-  def exec!(command)
-    exec(command).tap { |result| raise CommandError.new(command, result) unless result.success? }
+  def exec!(command, **options)
+    exec(command, **options).tap { |result| raise CommandError.new(command, result) unless result.success? }
   end
 
+  # How commands needing root can run on this server, checked once per session:
+  # :root (logged in as root), :sudo (passwordless `sudo -n`) or :none.
+  def privilege
+    @privilege ||= if server.username == "root" then :root
+    elsif exec("sudo -n true", timeout: 10).success? then :sudo
+    else :none
+    end
+  end
+
+  def privileged? = privilege != :none
+
+  # `command` prefixed with `sudo -n` when root is reached through sudo; as is
+  # otherwise (already root, or no root access: it runs with the user's rights).
+  def privileged(command) = privilege == :sudo ? "sudo -n #{command}" : command
+
   private
+
+  def raise_timeout(command, timeout)
+    @session.shutdown!
+    @timed_out = true
+    raise CommandTimeoutError, "La commande n'a pas répondu en #{timeout} s sur #{server.host} : #{command.truncate(80)}"
+  end
 
   def ssh_options
     {

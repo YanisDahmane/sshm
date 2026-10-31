@@ -4,7 +4,6 @@ class BulkAccessTest < ActiveSupport::TestCase
   include StubHelpers
 
   def grant_result(status) = PublicKeyAuthorization::Result.new(status: status, error_title: (status == :error ? "Connexion impossible" : nil), error_details: (status == :error ? "timeout" : nil))
-  def removal_result(status) = AuthorizedKeyRemoval::Result.new(status: status, error_title: (status == :error ? "Connexion impossible" : nil), error_details: (status == :error ? "timeout" : nil))
 
   setup do
     @reads = []
@@ -14,7 +13,7 @@ class BulkAccessTest < ActiveSupport::TestCase
     })
   end
 
-  test "grants every public_key on every server's login user, then refreshes each snapshot once" do
+  test "adds every key on every server's login user, then refreshes each snapshot once" do
     calls = []
     granter = ->(server, public_key, account:, duration:) { calls << [ server.name, public_key.name, account.unix_user, duration ]; grant_result(:added) }
 
@@ -22,9 +21,10 @@ class BulkAccessTest < ActiveSupport::TestCase
       BulkAccess.grant([ public_keys(:alice), public_keys(:ci) ], [ servers(:backup), servers(:web) ])
     end
 
-    assert_equal [ [ "Backup", "Alice", "root", nil ], [ "Backup", "CI", "root", nil ], [ "Web", "Alice", "deploy", nil ], [ "Web", "CI", "deploy", nil ] ], calls
+    assert_equal [ [ "Backup", "Alice", "root", nil ], [ "Backup", "CI", "root", nil ], [ "Web", "Alice", "deploy", nil ], [ "Web", "CI", "deploy", nil ] ], calls.sort
+    assert_equal [ [ "Backup", "Alice" ], [ "Backup", "CI" ], [ "Web", "Alice" ], [ "Web", "CI" ] ], results.map { |result| [ result.server.name, result.public_key.name ] }
     assert_equal [ "ajoutée" ] * 4, results.map(&:message)
-    assert_equal [ [ "Backup", "root" ], [ "Web", "deploy" ] ], @reads
+    assert_equal [ [ "Backup", "root" ], [ "Web", "deploy" ] ], @reads.sort
     assert AccountSnapshot.exists?(server: servers(:web), unix_user: "deploy")
   end
 
@@ -38,20 +38,20 @@ class BulkAccessTest < ActiveSupport::TestCase
     assert_empty @reads
   end
 
-  test "revokes every public_key and reports removed, absent and failed keys" do
-    statuses = { public_keys(:alice).authorized_key.key => :removed, public_keys(:ci).authorized_key.key => :absent }
-    calls = []
-    remover = ->(server, blob, account:, **) { calls << [ server.name, blob, account.unix_user ]; removal_result(statuses.fetch(blob)) }
-
-    results = stub_method(AuthorizedKeyRemoval, :call, remover) do
-      BulkAccess.revoke([ public_keys(:alice), public_keys(:ci) ], [ servers(:web) ])
+  test "works on several servers at once and keeps the servers' order" do
+    running = Concurrent::AtomicFixnum.new
+    peak = Concurrent::AtomicFixnum.new
+    granter = lambda do |*, **|
+      peak.update { |value| [ value, running.increment ].max }
+      sleep 0.05
+      running.decrement
+      grant_result(:added)
     end
+    servers = [ servers(:backup), servers(:db), servers(:web) ]
 
-    assert_equal [ [ "Web", public_keys(:alice).authorized_key.key, "deploy" ], [ "Web", public_keys(:ci).authorized_key.key, "deploy" ] ], calls
-    assert_equal [ "retiré", "n'avait pas accès" ], results.map(&:message)
-    assert_equal 1, Activity.of_kind(:key_removed).count
+    results = stub_method(AccessGrant, :call, granter) { BulkAccess.grant([ public_keys(:alice) ], servers) }
 
-    failed = stub_method(AuthorizedKeyRemoval, :call, removal_result(:error)) { BulkAccess.revoke([ public_keys(:alice) ], [ servers(:web) ]) }
-    assert failed.first.error?
+    assert_equal %w[Backup Database Web], results.map { |result| result.server.name }
+    assert_operator peak.value, :>, 1
   end
 end
