@@ -86,4 +86,50 @@ module UiHelper
     ServerGroup.left_joins(:memberships).group(:id).order(:name)
                .select("server_groups.*, COUNT(server_group_memberships.id) AS servers_count")
   end
+
+  # Line chart of a percentage over time (24 h by default), stretched to the
+  # width of its container: grid at 0/50/100 %, optional dashed threshold, and
+  # one hover zone per point with its time and value (native tooltip). Labels
+  # are HTML around the drawing so they keep their size.
+  def history_chart(points, label:, threshold: nil, color: "var(--color-accent)", from: 24.hours.ago, to: Time.current, height: 96)
+    points = points.select { |time, value| value && time >= from }
+    span = (to - from).to_f
+    x = ->(time) { ((time - from) / span * 100).clamp(0, 100).round(2) }
+    y = ->(value) { (100 - value.to_f.clamp(0, 100)).round(2) }
+    line = points.map.with_index { |(time, value), i| "#{i.zero? ? "M" : "L"}#{x.(time)},#{y.(value)}" }.join(" ")
+    zones = points.each_cons(2).map { |(a, _), (b, _)| (x.(b) - x.(a)) / 2 }
+    zones = [ 0, *zones, 0 ]
+
+    svg = tag.svg(viewBox: "0 0 100 100", preserveAspectRatio: "none", class: "block w-full overflow-visible", style: "height: #{height}px",
+                  role: "img", aria: { label: "#{label} sur 24 heures" }) do
+      safe_join([
+        *[ 0, 50, 100 ].map { |v| tag.line(x1: 0, x2: 100, y1: y.(v), y2: y.(v), stroke: "var(--color-line)", "vector-effect" => "non-scaling-stroke") },
+        (tag.line(x1: 0, x2: 100, y1: y.(threshold), y2: y.(threshold), stroke: "var(--color-warn)", "stroke-dasharray" => "4 3",
+                  "vector-effect" => "non-scaling-stroke", class: "chart-threshold") if threshold),
+        (tag.path(d: line, fill: "none", stroke: color, "stroke-width" => 2, "stroke-linejoin" => "round", "vector-effect" => "non-scaling-stroke") if points.size > 1),
+        *points.each_with_index.map do |(time, value), i|
+          left = x.(time) - zones[i]
+          tag.rect(x: left, y: 0, width: [ zones[i] + zones[i + 1], 0.5 ].max, height: 100, fill: "transparent", class: "chart-point") do
+            tag.title("#{l(time, format: "%H:%M")} — #{value.round} %")
+          end
+        end
+      ].compact)
+    end
+
+    tag.figure(class: "history-chart") do
+      safe_join([
+        tag.figcaption(class: "flex items-baseline justify-between text-xs") do
+          safe_join([ tag.span(label, class: "font-medium text-ink-2"),
+                      tag.span(points.any? ? "#{points.last.last.round} % maintenant" : "pas encore de mesure", class: "text-ink-3") ])
+        end,
+        tag.div(class: "relative mt-1.5 pl-7") do
+          safe_join([
+            tag.div(class: "absolute inset-y-0 left-0 flex flex-col justify-between text-[10px] text-ink-3") { safe_join([ tag.span("100"), tag.span("50"), tag.span("0") ]) },
+            svg
+          ])
+        end,
+        tag.div(class: "mt-1 flex justify-between pl-7 text-[10px] text-ink-3") { safe_join([ tag.span("il y a 24 h"), tag.span("12 h"), tag.span("maintenant") ]) }
+      ])
+    end
+  end
 end

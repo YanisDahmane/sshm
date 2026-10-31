@@ -78,4 +78,25 @@ class UiHelperTest < ActionView::TestCase
     assert_equal ServerGroup.order(:name).pluck(:name), counts.keys
     assert_equal servers(:web).server_groups.first.servers.count, counts[servers(:web).server_groups.first.name]
   end
+
+  test "history_chart draws the last 24 hours with a threshold and a tooltip per point" do
+    now = Time.zone.parse("2026-10-31 12:00")
+    points = [ [ now - 30.hours, 10.0 ], [ now - 12.hours, 40.0 ], [ now, 80.0 ] ]
+
+    render html: history_chart(points, label: "Mémoire", threshold: 90, from: now - 24.hours, to: now)
+
+    assert_select "figure.history-chart" do
+      assert_select "figcaption", text: /Mémoire\s*80 % maintenant/
+      assert_select "svg[role=img][aria-label='Mémoire sur 24 heures'] path[d='M50.0,60.0 L100.0,20.0']"
+      assert_select "line.chart-threshold[y1='10.0']"
+      assert_select "rect.chart-point", 2
+      assert_select "rect.chart-point title", "00:00 — 40 %"
+    end
+  end
+
+  test "history_chart without any point" do
+    render html: history_chart([], label: "Disque")
+    assert_select "figcaption", text: /pas encore de mesure/
+    assert_select "path", 0
+  end
 end

@@ -92,6 +92,20 @@ class ServerPingsControllerTest < ActionDispatch::IntegrationTest
     assert_no_turbo_stream action: :replace, target: dom_id(servers(:web), :status)
   end
 
+  test "from the fleet list, the refreshed badge shows the health state" do
+    servers(:db).update_columns(health_status: "warn", health_reasons: [ { "tone" => "warn", "text" => "Redémarrage requis" } ])
+    sign_in users(:one)
+
+    with_open_port do |port|
+      servers(:db).update_columns(port: port)
+      post server_ping_path(servers(:db)), params: { badge: "health" }, as: :turbo_stream
+    end
+
+    assert_turbo_stream action: :replace, target: dom_id(servers(:db), :status) do
+      assert_select ".server-status[data-state=warn][title=?]", "Redémarrage requis", text: "À surveiller"
+    end
+  end
+
   test "pinging all servers over Turbo Stream replaces every badge" do
     sign_in users(:one)
 

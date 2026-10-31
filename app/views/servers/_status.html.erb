@@ -1,13 +1,23 @@
+<%# Status badge of a server, refreshed in place by the pings (server_ping_controller.js).
+    By default: reachability of the SSH port. With `health: true`: the health state (fleet list). %>
+<% health = local_assigns[:health] %>
 <%
-  label, classes, dot = case server.reachable
-  when true  then [ "En ligne", "bg-emerald-50 text-emerald-700 ring-emerald-600/20", "bg-emerald-500" ]
-  when false then [ "Injoignable", "bg-red-50 text-red-700 ring-red-600/20", "bg-red-500" ]
-  else            [ "Inconnu", "bg-slate-100 text-slate-600 ring-slate-500/20", "bg-slate-400" ]
+  checked = server.last_checked_at ? "Vérifié #{relative_time_in_words(server.last_checked_at)} (#{l(server.last_checked_at, format: :short)})" : "Jamais vérifié"
+  tone, label, title = if health
+    case server.health_state
+    when "off" then [ :off, "Injoignable", checked ]
+    when "crit" then [ :crit, "Critique", server.health_reason_texts.join(" · ") ]
+    when "warn" then [ :warn, "À surveiller", server.health_reason_texts.join(" · ") ]
+    when "ok" then [ :good, "En ligne", "Aucun problème au dernier inventaire" ]
+    else server.reachable ? [ :good, "En ligne", "Pas encore d'inventaire" ] : [ :neutral, "Inconnu", checked ]
+    end
+  else
+    case server.reachable
+    when true then [ :good, "En ligne", checked ]
+    when false then [ :off, "Injoignable", checked ]
+    else [ :neutral, "Inconnu", checked ]
+    end
   end
-  title = server.last_checked_at ? "Vérifié #{relative_time_in_words(server.last_checked_at)} (#{l(server.last_checked_at, format: :short)})" : "Jamais vérifié"
 %>
-<span id="<%= dom_id(server, :status) %>" data-server-ping-target="badge"
-      class="server-status inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset <%= classes %>" title="<%= title %>">
-  <span class="h-1.5 w-1.5 rounded-full <%= dot %>"></span>
-  <%= label %>
-</span>
+<%= status_badge tone, label, id: dom_id(server, :status), title: title,
+      class: "server-status", data: { server_ping_target: "badge", state: (health ? server.health_state : server.reachable.to_s) } %>

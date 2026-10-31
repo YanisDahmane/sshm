@@ -45,6 +45,7 @@ Rails.application.routes.draw do
     end
     resources :invitations, only: %i[create destroy]
     resource :security, only: :update
+    resource :health_thresholds, only: :update
     resources :key_rotations, only: %i[create show] do
       member do
         post :retry

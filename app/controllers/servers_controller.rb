@@ -8,13 +8,19 @@ class ServersController < ApplicationController
     @group = @groups.find { |group| group.id.to_s == params[:group].to_s } if params[:group].present?
     @os_names = Server.where.not(os_name: nil).distinct.order(:os_name).pluck(:os_name)
     @os = params[:os].presence_in(@os_names)
-    @servers = (@group ? Server.in_group(@group) : Server.all).order(:name).includes(:server_groups)
-    @servers = @servers.where(os_name: @os) if @os
+    @state = params[:state].presence_in(Server::HEALTH_STATES + %w[off])
+    @summary = FleetSummary.new(Server.includes(:inventory_snapshots))
+    servers = (@group ? Server.in_group(@group) : Server.all).order(:name).includes(:server_groups, :inventory_snapshots)
+    servers = servers.where(os_name: @os) if @os
+    @servers = @state ? servers.select { |server| server.health_state == @state } : servers.to_a
+    @load_history = Inventory::HealthSample.where(server_id: @servers.map(&:id)).since(24.hours.ago)
+                                           .pluck(:server_id, :load_percent).group_by(&:first).transform_values { |rows| rows.map(&:last).compact }
     @insights = KeyInsights.new
   end
 
   def show
     @activities = Activity.recent.where(server: @server).includes(:user, :server, :public_key).limit(10)
+    @health_history = @server.health_samples.since(24.hours.ago).pluck(:collected_at, :load_percent, :memory_percent, :disk_percent)
   end
 
   def new

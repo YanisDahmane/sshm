@@ -9,7 +9,7 @@ class SignInTest < ApplicationSystemTestCase
 
     assert_selector "h1", text: "Vue d'ensemble"
     click_on "Serveurs", match: :first
-    assert_selector "h1", text: "Serveurs"
+    assert_selector "h1", text: "Parc"
     assert_selector ".sidebar .user-role", text: "Lecture"
   end
 end

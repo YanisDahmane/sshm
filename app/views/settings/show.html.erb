@@ -73,3 +73,29 @@
     </div>
   <% end %>
 </section>
+
+<% setting = AppSetting.current %>
+<section id="health-thresholds" class="card mt-6">
+  <div class="card-header">
+    <h2 class="font-semibold">Seuils de santé</h2>
+    <span class="text-xs text-ink-3">au-delà, un serveur est « à surveiller » ou « critique »</span>
+  </div>
+  <%= form_with model: setting, url: settings_health_thresholds_path, method: :patch, class: "grid gap-4 p-4 sm:grid-cols-5" do |f| %>
+    <% [ [ :health_disk_warn, "Disque : attention (%)" ], [ :health_disk_crit, "Disque : critique (%)" ], [ :health_memory_warn, "Mémoire : attention (%)" ],
+         [ :health_memory_crit, "Mémoire : critique (%)" ] ].each do |field, label| %>
+      <div>
+        <%= f.label field, label, class: "label text-xs" %>
+        <%= f.number_field field, in: 1..100, step: 1, required: true, class: "input mt-1" %>
+      </div>
+    <% end %>
+    <div>
+      <%= f.label :health_load_warn, "Charge : attention (× processeurs)", class: "label text-xs" %>
+      <%= f.number_field :health_load_warn, in: 0.1..50, step: 0.1, required: true, class: "input mt-1" %>
+    </div>
+    <div class="sm:col-span-5 flex items-center justify-between gap-3">
+      <p class="text-xs text-ink-3">Sont aussi « à surveiller » : redémarrage requis, service en échec, horloge non synchronisée, système plus supporté.</p>
+      <%= f.submit "Enregistrer les seuils", class: "btn btn-primary" %>
+    </div>
+  <% end %>
+</section>
+

@@ -97,7 +97,7 @@
     @apply bg-subtle text-[11px] tracking-wide text-ink-3 uppercase;
   }
   .table-dense th {
-    @apply px-3 py-2 font-medium;
+    @apply px-3 py-2 font-medium whitespace-nowrap;
   }
   .table-dense td {
     @apply border-t border-line px-3 py-2;

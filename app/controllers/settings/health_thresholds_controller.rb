@@ -1,0 +1,19 @@
+module Settings
+  # Thresholds of the health state (Inventory::HealthStatus), then the health
+  # of every server is recomputed with them.
+  class HealthThresholdsController < ApplicationController
+    require_permission :administer
+
+    FIELDS = %i[health_disk_warn health_disk_crit health_memory_warn health_memory_crit health_load_warn].freeze
+
+    def update
+      setting = AppSetting.current
+      if setting.update(params.expect(app_setting: FIELDS))
+        Server.find_each(&:refresh_health!)
+        redirect_to settings_path(anchor: "health-thresholds"), notice: "Seuils de santé enregistrés."
+      else
+        redirect_to settings_path(anchor: "health-thresholds"), alert: "Seuils invalides : #{setting.errors.full_messages.to_sentence}"
+      end
+    end
+  end
+end
