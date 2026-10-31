@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_31_110000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_31_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -57,6 +57,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_110000) do
     t.datetime "updated_at", null: false
     t.jsonb "state", default: {}, null: false
     t.index ["kind"], name: "index_automations_on_kind", unique: true
+  end
+
+  create_table "inventory_snapshots", force: :cascade do |t|
+    t.bigint "server_id", null: false
+    t.string "category", null: false
+    t.jsonb "data", default: {}, null: false
+    t.string "status", null: false
+    t.text "message"
+    t.boolean "privileged", default: false, null: false
+    t.datetime "collected_at"
+    t.datetime "checked_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["server_id", "category"], name: "index_inventory_snapshots_on_server_id_and_category", unique: true
+    t.index ["server_id"], name: "index_inventory_snapshots_on_server_id"
   end
 
   create_table "invitations", force: :cascade do |t|
@@ -159,6 +174,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_110000) do
     t.datetime "last_checked_at"
     t.boolean "ssh_ok"
     t.datetime "ssh_checked_at"
+    t.string "privilege"
+    t.datetime "inventoried_at"
     t.index ["name"], name: "index_servers_on_name", unique: true
   end
 
@@ -218,6 +235,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_110000) do
   add_foreign_key "activities", "public_keys", on_delete: :nullify
   add_foreign_key "activities", "servers", on_delete: :nullify
   add_foreign_key "activities", "users", on_delete: :nullify
+  add_foreign_key "inventory_snapshots", "servers", on_delete: :cascade
   add_foreign_key "invitations", "users", column: "invited_by_id"
   add_foreign_key "invitations", "users", on_delete: :nullify
   add_foreign_key "key_rotation_steps", "key_rotations", on_delete: :cascade

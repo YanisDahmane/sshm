@@ -6,6 +6,12 @@ class Server < ApplicationRecord
   has_many :activities, dependent: :nullify
   has_many :server_group_memberships, dependent: :delete_all
   has_many :server_groups, -> { order(:name) }, through: :server_group_memberships
+  has_many :inventory_snapshots, class_name: "Inventory::Snapshot", dependent: :delete_all
+
+  # How root commands run on the server (see SshConnection#privilege), as
+  # found by the last inventory: root, sudo or none.
+  PRIVILEGES = %w[root sudo none].freeze
+  validates :privilege, inclusion: { in: PRIVILEGES }, allow_nil: true
 
   scope :in_group, ->(group) { where(id: ServerGroupMembership.where(server_group: group).select(:server_id)) }
   HOSTNAME_REGEXP = /\A(?=.{1,253}\z)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\z/i
@@ -39,6 +45,8 @@ class Server < ApplicationRecord
       Activity.record!(:server_back_online, server: self)
     end
   end
+
+  def inventory(category) = inventory_snapshots.find { |snapshot| snapshot.category == category.to_s }
 
   private
 

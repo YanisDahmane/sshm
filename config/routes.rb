@@ -13,12 +13,14 @@ Rails.application.routes.draw do
 
   # Before `resources :servers`, or /servers/groups would be a server's page.
   resources :server_groups, except: :show, path: "servers/groups"
+  resource :server_inventories, only: :create, path: "servers/inventory"
   resource :server_import, only: %i[new create], path: "servers/import" do
     post :preview
   end
   resources :servers do
     resource :ping, only: %i[show create], controller: "server_pings"
     resource :ssh_check, only: :show, controller: "server_ssh_checks"
+    resource :inventory, only: :create, controller: "server_inventories"
     resource :host_key, only: :create, controller: "server_host_keys"
     resources :authorized_keys, only: :index, controller: "server_authorized_keys"
     resource :authorized_key, only: :destroy, controller: "server_authorized_keys"

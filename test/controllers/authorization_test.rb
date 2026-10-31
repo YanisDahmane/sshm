@@ -53,6 +53,8 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
       "update server group" => -> { patch server_group_path(server_groups(:production)), params: { server_group: { name: "Renamed" } } },
       "delete server group" => -> { delete server_group_path(server_groups(:production)) },
       "scan keys" => -> { post server_scans_path },
+      "inventory of a server" => -> { post server_inventory_path(servers(:web)) },
+      "inventory of every server" => -> { post server_inventories_path },
       "authorize a public_key" => -> { post server_authorizations_path(servers(:web)), params: { public_key_id: public_keys(:alice).id } },
       "remove a key" => -> { delete server_authorized_key_path(servers(:web)), params: { key: "AAAA" } },
       "new public_key" => -> { get new_public_key_path },

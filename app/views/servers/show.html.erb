@@ -15,6 +15,10 @@
     </div>
     <div class="flex shrink-0 items-center gap-2">
       <% if can?(:operate) %>
+        <%= button_to server_inventory_path(@server), form: { class: "refresh-inventory" },
+              class: "inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" do %>
+          <%= icon :arrow_path %> Actualiser l'inventaire
+        <% end %>
         <%= link_to edit_server_path(@server),
               class: "inline-flex shrink-0 items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" do %>
           <%= icon :pencil_square %> Modifier
