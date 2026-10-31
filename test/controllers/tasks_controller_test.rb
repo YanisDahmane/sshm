@@ -61,7 +61,7 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
 
     get tasks_path
     assert_select "tr.background-task", TasksController::PER_PAGE
-    assert_select "a[href=?]", tasks_path(page: 2), text: /Plus anciennes/
+    assert_select "nav.pagination a[rel=next][href=?]", tasks_path(page: 2)
 
     get tasks_path(page: 2)
     assert_select "tr.background-task", 1

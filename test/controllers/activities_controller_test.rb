@@ -62,13 +62,23 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     (ActivitiesController::PER_PAGE + 1).times { |index| travel_to(index.minutes.ago) { Activity.record!(:server_created, server: servers(:web)) } }
     sign_in users(:one)
 
-    get activities_path
+    get activities_path(category: "servers")
     assert_select "li.activity", ActivitiesController::PER_PAGE
-    assert_select "a[href=?]", activities_path(page: 2), text: "Plus anciennes →"
+    assert_select "nav.pagination .pagination-info", "1–#{ActivitiesController::PER_PAGE} sur #{ActivitiesController::PER_PAGE + 1} activités"
+    assert_select "nav.pagination a[rel=next][href=?]", activities_path(category: "servers", page: 2) # (the filters are kept)
+    assert_select "nav.pagination [aria-current=page]", "1"
 
-    get activities_path(page: 2)
+    get activities_path(category: "servers", page: 2)
     assert_select "li.activity", 1
-    assert_select "a[href=?]", activities_path(page: 1), text: "← Plus récentes"
+    assert_select "nav.pagination a[rel=prev][href=?]", activities_path(category: "servers", page: 1)
+    assert_select "nav.pagination a[rel=next]", 0
+  end
+
+  test "no pagination on a single page" do
+    Activity.record!(:server_created, server: servers(:web))
+    sign_in users(:one)
+    get activities_path
+    assert_select "nav.pagination", 0
   end
 
   test "empty state" do

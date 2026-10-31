@@ -1,4 +1,7 @@
 class ServersController < ApplicationController
+  PER_PAGE = 100
+  HISTORY_PER_PAGE = 30
+
   require_permission :operate, only: %i[new create edit update destroy]
 
   before_action :set_server, only: %i[show edit update destroy]
@@ -12,7 +15,8 @@ class ServersController < ApplicationController
     @summary = FleetSummary.new(Server.includes(:inventory_snapshots))
     servers = (@group ? Server.in_group(@group) : Server.all).order(:name).includes(:server_groups, :inventory_snapshots)
     servers = servers.where(os_name: @os) if @os
-    @servers = @state ? servers.select { |server| server.health_state == @state } : servers.to_a
+    @pager = paginate(@state ? servers.select { |server| server.health_state == @state } : servers, per_page: PER_PAGE)
+    @servers = @pager.records
     @load_history = Inventory::HealthSample.where(server_id: @servers.map(&:id)).since(24.hours.ago)
                                            .pluck(:server_id, :load_percent).group_by(&:first).transform_values { |rows| rows.map(&:last).compact }
     @insights = KeyInsights.new
@@ -23,7 +27,10 @@ class ServersController < ApplicationController
   # Tabbed page (?tab=), only the requested tab is rendered.
   def show
     @tab = params[:tab].presence_in(TABS) || "overview"
-    @activities = Activity.recent.where(server: @server).includes(:user, :server, :public_key).limit(30) if @tab == "history"
+    if @tab == "history"
+      @pager = paginate(Activity.recent.where(server: @server).includes(:user, :server, :public_key), per_page: HISTORY_PER_PAGE)
+      @activities = @pager.records
+    end
     @health_history = @server.health_samples.since(24.hours.ago).pluck(:collected_at, :load_percent, :memory_percent, :disk_percent) if @tab == "overview"
   end
 

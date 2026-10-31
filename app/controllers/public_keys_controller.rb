@@ -1,4 +1,6 @@
 class PublicKeysController < ApplicationController
+  PER_PAGE = 50
+
   require_permission :operate, only: %i[new create edit update destroy]
 
   before_action :set_public_key, only: %i[show edit update destroy]
@@ -6,8 +8,10 @@ class PublicKeysController < ApplicationController
   # Optional filter: ?kind=person|server.
   def index
     @kind = params[:kind].presence_in(PublicKey::KINDS.keys)
-    @public_keys = PublicKey.order(:name)
-    @public_keys = @public_keys.of_kind(@kind) if @kind
+    public_keys = PublicKey.order(:name)
+    public_keys = public_keys.of_kind(@kind) if @kind
+    @pager = paginate(public_keys, per_page: PER_PAGE)
+    @public_keys = @pager.records
   end
 
   def show

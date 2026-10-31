@@ -1,11 +1,14 @@
 module Settings
   class UsersController < ApplicationController
+    PER_PAGE = 50
+
     require_permission :administer
 
     before_action :set_user, only: %i[update deactivate reactivate reset_two_factor]
 
     def index
-      @users = User.order(:email)
+      @pager = paginate(User.order(:email), per_page: PER_PAGE)
+      @users = @pager.records
       @invitations = Invitation.pending.includes(:invited_by).order(created_at: :desc)
       @invitation = Invitation.new
       @setting = AppSetting.current

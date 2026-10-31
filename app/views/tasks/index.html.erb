@@ -52,10 +52,7 @@
     <% end %>
   </section>
 
-  <div class="mt-4 flex justify-between text-sm">
-    <% if @page > 1 %><%= link_to "← Plus récentes", tasks_path(status: @filter, page: @page - 1), class: "font-medium text-accent" %><% else %><span></span><% end %>
-    <% if @more %><%= link_to "Plus anciennes →", tasks_path(status: @filter, page: @page + 1), class: "font-medium text-accent" %><% end %>
-  </div>
+  <%= render "shared/pagination", pager: @pager, noun: "tâches" %>
 
   <section id="upcoming-automations" class="card mt-8">
     <div class="card-header">

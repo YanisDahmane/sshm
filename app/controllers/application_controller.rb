@@ -14,6 +14,11 @@ class ApplicationController < ActionController::Base
 
   private
 
+  # One page of a list (?page=), see Paginator and shared/_pagination.
+  def paginate(collection, per_page:)
+    Paginator.new(collection, page: params[:page], per_page: per_page)
+  end
+
   def set_current_user
     Current.user = current_user
   end

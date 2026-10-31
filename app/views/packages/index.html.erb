@@ -54,6 +54,7 @@
         </section>
       <% end %>
     </div>
+    <%= render "shared/pagination", pager: @pager, noun: "paquets" %>
   <% else %>
     <p class="card mt-5 px-4 py-6 text-sm text-ink-3">Aucun paquet ne contient « <%= @q %> ».</p>
   <% end %>
@@ -61,7 +62,7 @@
   <section class="security-updates card mt-5">
     <div class="card-header">
       <h2 class="flex items-center gap-2 font-semibold"><%= icon :shield_check, class: "h-4 w-4 text-ink-3" %> Mises à jour de sécurité en attente</h2>
-      <span class="text-xs text-ink-3"><%= pluralize_fr(@security.size, "paquet", "paquets") %></span>
+      <span class="text-xs text-ink-3"><%= pluralize_fr(@pager.total, "paquet", "paquets") %></span>
     </div>
     <% if @security.any? %>
       <table class="table-dense">
@@ -82,6 +83,7 @@
           <% end %>
         </tbody>
       </table>
+      <% if @pager.multiple_pages? %><div class="border-t border-line px-4 pb-3"><%= render "shared/pagination", pager: @pager, noun: "paquets" %></div><% end %>
     <% else %>
       <p class="flex items-center gap-2 px-4 py-4 text-sm text-good-ink"><%= icon :check_circle %> Aucune mise à jour de sécurité en attente.</p>
     <% end %>

@@ -91,6 +91,7 @@
         <ul class="mt-2 divide-y divide-line">
           <%= render partial: "activities/activity", collection: @activities, locals: { show_server: false } %>
         </ul>
+        <% if @pager.multiple_pages? %><div class="pb-3"><%= render "shared/pagination", pager: @pager, noun: "activités" %></div><% end %>
       <% else %>
         <p class="py-6 text-sm text-ink-3">Aucune activité sur ce serveur pour le moment.</p>
       <% end %>

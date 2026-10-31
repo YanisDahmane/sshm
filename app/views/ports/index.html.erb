@@ -31,6 +31,7 @@
       </tbody>
     </table>
   </div>
+  <%= render "shared/pagination", pager: @pager, noun: "ports publics" %>
 <% else %>
   <p class="card mt-3 px-4 py-6 text-sm text-ink-3"><%= @port ? "Aucun serveur n'expose le port #{@port}." : "Aucun port public connu." %></p>
 <% end %>
