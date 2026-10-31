@@ -1,0 +1,32 @@
+@@elio ss
+udp UNCONN 0      0         127.0.0.1:8125  0.0.0.0:* users:(("netdata",pid=677,fd=57))     
+udp UNCONN 0      0         127.0.0.1:323   0.0.0.0:* users:(("chronyd",pid=734,fd=5))      
+udp UNCONN 0      0             [::1]:8125     [::]:* users:(("netdata",pid=677,fd=95))     
+udp UNCONN 0      0             [::1]:323      [::]:* users:(("chronyd",pid=734,fd=6))      
+tcp LISTEN 0      128         0.0.0.0:22    0.0.0.0:* users:(("sshd",pid=732,fd=6))         
+tcp LISTEN 0      128       127.0.0.1:4317  0.0.0.0:* users:(("otel-plugin",pid=1315,fd=11))
+tcp LISTEN 0      4096        0.0.0.0:19999 0.0.0.0:* users:(("netdata",pid=677,fd=6))      
+tcp LISTEN 0      4096      127.0.0.1:8125  0.0.0.0:* users:(("netdata",pid=677,fd=96))     
+tcp LISTEN 0      65535  10.0.0.48:2379  0.0.0.0:* users:(("etcd",pid=676,fd=6))         
+tcp LISTEN 0      65535  10.0.0.48:2380  0.0.0.0:* users:(("etcd",pid=676,fd=3))         
+tcp LISTEN 0      2000        0.0.0.0:5432  0.0.0.0:* users:(("postgres",pid=1345,fd=7))    
+tcp LISTEN 0      5           0.0.0.0:8008  0.0.0.0:* users:(("patroni",pid=702,fd=6))      
+tcp LISTEN 0      65535     127.0.0.1:2379  0.0.0.0:* users:(("etcd",pid=676,fd=7))         
+tcp LISTEN 0      4096        0.0.0.0:6432  0.0.0.0:* users:(("pgbouncer",pid=777,fd=7))    
+tcp LISTEN 0      128            [::]:22       [::]:* users:(("sshd",pid=732,fd=7))         
+tcp LISTEN 0      4096           [::]:19999    [::]:* users:(("netdata",pid=677,fd=8))      
+tcp LISTEN 0      4096          [::1]:8125     [::]:* users:(("netdata",pid=677,fd=97))     
+@@elio cgroups
+1315 0::/system.slice/netdata.service
+1345 0::/system.slice/patroni.service
+676 0::/system.slice/etcd.service
+677 0::/system.slice/netdata.service
+702 0::/system.slice/patroni.service
+732 0::/system.slice/ssh.service
+734 0::/system.slice/chrony.service
+777 0::/system.slice/pgbouncer.service
+@@elio ufw
+absent
+@@elio nft
+@@elio iptables
+-P INPUT ACCEPT

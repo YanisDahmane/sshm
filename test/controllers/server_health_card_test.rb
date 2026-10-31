@@ -31,7 +31,7 @@ class ServerHealthCardTest < ActionDispatch::IntegrationTest
       assert_select ".health-disk .text-crit-ink", text: /94 %/
       assert_select ".health-reasons li", 2
       assert_select ".health-reasons li", text: "Disque / à 94 %"
-      assert_select ".health-facts", text: /4 dont 3 de sécurité/
+      assert_select ".health-facts", text: /3 dont 2 de sécurité/
       assert_select ".health-facts", text: /fail2ban\.service/
       assert_select ".history-chart", 3
       assert_select ".history-chart rect.chart-point", 6

@@ -93,11 +93,13 @@ class Inventory::Collectors::Health < Inventory::Collector
   end
   private_class_method :parse_inodes
 
-  # "Inst openssl [3.0.14-1~deb12u1] (3.0.15-1~deb12u1 Debian-Security:12/stable-security [amd64])"
+  # "Inst openssl [3.0.14-1~deb12u1] (3.0.15-1~deb12u1 Debian-Security:12/stable-security [amd64])".
+  # Only the upgrades of installed packages count (they have an "[old version]"),
+  # not the new packages an upgrade would pull (a new kernel…), like the packages page.
   def self.parse_updates(text)
     return if text.to_s.strip == "unsupported" || text.nil?
 
-    lines = text.lines.select { |line| line.start_with?("Inst ") }
+    lines = text.lines.select { |line| line.match?(/\AInst \S+ \[/) }
     { "total" => lines.size, "security" => lines.count { |line| line.match?(/-security\b/i) } }
   end
   private_class_method :parse_updates

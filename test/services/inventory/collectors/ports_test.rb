@@ -73,4 +73,12 @@ class Inventory::Collectors::PortsTest < ActiveSupport::TestCase
     assert_equal [ { kind: :port_opened, data: { port: "3306/tcp", process: "mariadbd" } }, { kind: :port_closed, data: { port: "8080/tcp" } } ],
                  Collector.changes(previous, data)
   end
+
+  test "an iptables or nftables that accepts everything without any rule is no firewall" do
+    accept_all = "-P INPUT ACCEPT\n-P FORWARD ACCEPT\n-P OUTPUT ACCEPT\n"
+    assert_equal({ "tool" => "none", "active" => false }, Collector.parse_firewall("ufw" => "absent", "nft" => "absent", "iptables" => accept_all))
+
+    open_nft = "table inet filter {\n\tchain input {\n\t\ttype filter hook input priority filter; policy accept;\n\t}\n}\n"
+    assert_equal({ "tool" => "none", "active" => false }, Collector.parse_firewall("ufw" => "absent", "nft" => open_nft, "iptables" => "absent"))
+  end
 end

@@ -1,0 +1,55 @@
+@@elio loadavg
+0.40 0.29 0.16 1/333 15008
+@@elio cpus
+4
+@@elio meminfo
+MemTotal:       16383208 kB
+MemAvailable:   14351516 kB
+SwapTotal:       4194300 kB
+SwapFree:        4194300 kB
+@@elio df
+Filesystem     Type 1024-blocks     Used Available Capacity Mounted on
+/dev/sda1      ext4    31113048 11764840  17742424      40% /
+@@elio inodes
+Filesystem     Type  Inodes IUsed   IFree IUse% Mounted on
+/dev/sda1      ext4 1986768 84564 1902204    5% /
+@@elio reboot
+no
+@@elio failed
+@@elio updates
+Inst base-files [13.8+deb13u6] (13.8+deb13u7 Debian:13.7/stable [amd64])
+Inst bash [5.2.37-2+b9] (5.2.37-2+b10 Debian:13.7/stable [amd64])
+Inst gzip [1.13-1] (1.13-1+deb13u1 Debian:13.7/stable [amd64])
+Inst libperl5.40 [5.40.1-6] (5.40.1-6+deb13u1 Debian:13.7/stable [amd64]) [perl:amd64 ]
+Inst perl [5.40.1-6] (5.40.1-6+deb13u1 Debian:13.7/stable [amd64]) []
+Inst perl-base [5.40.1-6] (5.40.1-6+deb13u1 Debian:13.7/stable [amd64]) []
+Inst perl-modules-5.40 [5.40.1-6] (5.40.1-6+deb13u1 Debian:13.7/stable [all])
+Inst logsave [1.47.2-3+b11] (1.47.2-3+b12 Debian:13.7/stable [amd64])
+Inst libext2fs2t64 [1.47.2-3+b11] (1.47.2-3+b12 Debian:13.7/stable [amd64]) [e2fsprogs:amd64 on libext2fs2t64:amd64] [e2fsprogs:amd64 ]
+Inst e2fsprogs [1.47.2-3+b11] (1.47.2-3+b12 Debian:13.7/stable [amd64])
+Inst linux-image-6.12.113+deb13-amd64 (6.12.113-1 Debian-Security:13/stable-security [amd64])
+Inst libpcre2-8-0 [10.46-1~deb13u1] (10.46-1~deb13u3 Debian-Security:13/stable-security [amd64])
+Inst libglib2.0-0t64 [2.84.4-3~deb13u3] (2.84.4-3~deb13u5 Debian:13.7/stable [amd64])
+Inst qemu-guest-agent [1:10.0.11+ds-0+deb13u1] (1:10.0.13+ds-0+deb13u1 Debian:13.7/stable [amd64])
+Inst libaudit-common [1:4.0.2-2] (1:4.0.2-2+deb13u1 Debian:13.7/stable [all])
+Inst libaudit1 [1:4.0.2-2+b2] (1:4.0.2-2+deb13u1 Debian:13.7/stable [amd64])
+Inst libcap2 [1:2.75-10+deb13u1+b1] (1:2.75-10+deb13u1+b3 Debian:13.7/stable [amd64])
+Inst liblzma5 [5.8.1-1+deb13u1] (5.8.1-1+deb13u2 Debian-Security:13/stable-security [amd64])
+Inst libsqlite3-0 [3.46.1-7+deb13u1] (3.46.1-7+deb13u2 Debian:13.7/stable [amd64])
+Inst tzdata [2026b-0+deb13u1] (2026e-0+deb13u1 Debian:13-updates/stable-updates [all])
+Inst dhcpcd-base [1:10.1.0-11+deb13u3] (1:10.1.0-11+deb13u4 Debian:13.7/stable [amd64])
+Inst bind9-host [1:9.20.26-1~deb13u1] (1:9.20.30-1~deb13u1 Debian-Security:13/stable-security [amd64]) []
+Inst bind9-dnsutils [1:9.20.26-1~deb13u1] (1:9.20.30-1~deb13u1 Debian-Security:13/stable-security [amd64]) []
+Inst bind9-libs [1:9.20.26-1~deb13u1] (1:9.20.30-1~deb13u1 Debian-Security:13/stable-security [amd64])
+Inst ca-certificates [20250419] (20250419+deb13u1 Debian-Security:13/stable-security [all])
+Inst xz-utils [5.8.1-1+deb13u1] (5.8.1-1+deb13u2 Debian-Security:13/stable-security [amd64])
+Inst busybox [1:1.37.0-6+b8] (1:1.37.0-6+b9 Debian:13.7/stable [amd64])
+Inst libbrotli1 [1.1.0-2+b7] (1.1.0-2+deb13u1 Debian-Security:13/stable-security [amd64])
+Inst libcap2-bin [1:2.75-10+deb13u1+b1] (1:2.75-10+deb13u1+b3 Debian:13.7/stable [amd64])
+Inst libcom-err2 [1.47.2-3+b11] (1.47.2-3+b12 Debian:13.7/stable [amd64])
+Inst libglib2.0-data [2.84.4-3~deb13u3] (2.84.4-3~deb13u5 Debian:13.7/stable [all])
+Inst libpng16-16t64 [1.6.48-1+deb13u5] (1.6.48-1+deb13u6 Debian-Security:13/stable-security [amd64])
+Inst libss2 [1.47.2-3+b11] (1.47.2-3+b12 Debian:13.7/stable [amd64])
+Inst linux-image-amd64 [6.12.107-1] (6.12.113-1 Debian-Security:13/stable-security [amd64])
+@@elio ntp
+no

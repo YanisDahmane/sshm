@@ -14,7 +14,7 @@ class Inventory::Collectors::HealthTest < ActiveSupport::TestCase
     assert_equal [ "ext4", 94.4, 1.3, 503_842_392 * 1024 ], root.values_at("type", "used_percent", "inodes_used_percent", "size")
     assert_not data["disks"].second.key?("inodes_used_percent")
     assert_equal 94.4, data["disk_max_percent"]
-    assert_equal [ false, [ "fail2ban.service" ], { "total" => 4, "security" => 3 }, true ],
+    assert_equal [ false, [ "fail2ban.service" ], { "total" => 3, "security" => 2 }, true ],
                  data.values_at("reboot_required", "failed_units", "updates", "ntp_synchronized")
   end
 

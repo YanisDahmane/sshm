@@ -1,0 +1,281 @@
+@@elio units
+apparmor.service                         loaded    active   exited  Load AppArmor profiles
+auditd.service                           not-found inactive dead    auditd.service
+chrony.service                           loaded    active   running chrony, an NTP client/server
+console-screen.service                   not-found inactive dead    console-screen.service
+console-setup.service                    loaded    active   exited  Set console font and keymap
+cron.service                             loaded    active   running Regular background program processing daemon
+dbus.service                             loaded    active   running D-Bus System Message Bus
+disable-transparent-huge-pages.service   loaded    inactive dead    Disable Transparent Huge Pages
+display-manager.service                  not-found inactive dead    display-manager.service
+dpkg-db-backup.service                   loaded    inactive dead    Daily dpkg database backup service
+e2scrub_all.service                      loaded    inactive dead    Online ext4 Metadata Check for All Filesystems
+e2scrub_reap.service                     loaded    inactive dead    Remove Stale Online ext4 Metadata Check Snapshots
+emergency.service                        loaded    inactive dead    Emergency Shell
+etcd.service                             loaded    active   running Etcd Server
+fstrim.service                           loaded    inactive dead    Discard unused blocks on filesystems from /etc/fstab
+getty-static.service                     loaded    inactive dead    getty on tty2-tty6 if dbus and logind are not available
+getty@tty1.service                       loaded    active   running Getty on tty1
+grub-common.service                      loaded    inactive dead    Record successful boot for GRUB
+ifup@ens18.service                       loaded    active   exited  ifup for ens18
+ifupdown-pre.service                     loaded    active   exited  Helper to synchronize boot up for ifupdown
+initrd-cleanup.service                   loaded    inactive dead    Cleaning Up and Shutting Down Daemons
+initrd-parse-etc.service                 loaded    inactive dead    Mountpoints Configured in the Real Root
+initrd-switch-root.service               loaded    inactive dead    Switch Root
+initrd-udevadm-cleanup-db.service        loaded    inactive dead    Cleanup udev Database
+kbd.service                              not-found inactive dead    kbd.service
+keyboard-setup.service                   loaded    active   exited  Set the console keyboard layout
+kmod-static-nodes.service                loaded    active   exited  Create List of Static Device Nodes
+ldconfig.service                         loaded    inactive dead    Rebuild Dynamic Linker Cache
+logrotate.service                        loaded    inactive dead    Rotate log files
+man-db.service                           loaded    inactive dead    Daily man-db regeneration
+modprobe@configfs.service                loaded    inactive dead    Load Kernel Module configfs
+modprobe@drm.service                     loaded    inactive dead    Load Kernel Module drm
+modprobe@efi_pstore.service              loaded    inactive dead    Load Kernel Module efi_pstore
+modprobe@fuse.service                    loaded    inactive dead    Load Kernel Module fuse
+netdata.service                          loaded    active   running Netdata, X-Ray Vision for your infrastructure!
+networking.service                       loaded    active   exited  Raise network interfaces
+ntp.service                              not-found inactive dead    ntp.service
+ntpsec.service                           not-found inactive dead    ntpsec.service
+openntpd.service                         not-found inactive dead    openntpd.service
+patroni.service                          loaded    active   running Runners to orchestrate a high-availability PostgreSQL - Patroni
+pgbouncer.service                        loaded    active   running pgBouncer connection pooling for PostgreSQL
+plymouth-quit-wait.service               not-found inactive dead    plymouth-quit-wait.service
+plymouth-start.service                   not-found inactive dead    plymouth-start.service
+postgresql.service                       loaded    active   exited  PostgreSQL RDBMS
+rc-local.service                         loaded    inactive dead    /etc/rc.local Compatibility
+rescue.service                           loaded    inactive dead    Rescue Shell
+ssh.service                              loaded    active   running OpenBSD Secure Shell server
+sshd-keygen.service                      loaded    inactive dead    Generate sshd host keys on first boot
+sshd@sshd-keygen.service                 loaded    inactive dead    OpenBSD Secure Shell server per-connection daemon
+syslog.service                           not-found inactive dead    syslog.service
+systemd-ask-password-console.service     loaded    inactive dead    Dispatch Password Requests to Console
+systemd-ask-password-wall.service        loaded    inactive dead    Forward Password Requests to Wall
+systemd-battery-check.service            loaded    inactive dead    Check battery level during early boot
+systemd-binfmt.service                   loaded    active   exited  Set Up Additional Binary Formats
+systemd-bsod.service                     loaded    inactive dead    Display Boot-Time Emergency Messages In Full Screen
+systemd-confext.service                  loaded    inactive dead    Merge System Configuration Images into /etc/
+systemd-firstboot.service                loaded    inactive dead    First Boot Wizard
+systemd-fsck-root.service                loaded    inactive dead    File System Check on Root Device
+systemd-hibernate-clear.service          loaded    inactive dead    Clear Stale Hibernate Storage Info
+systemd-hibernate-resume.service         loaded    inactive dead    Resume from hibernation
+systemd-hibernate.service                loaded    inactive dead    System Hibernate
+systemd-hostnamed.service                loaded    inactive dead    Hostname Service
+systemd-hwdb-update.service              loaded    inactive dead    Rebuild Hardware Database
+systemd-hybrid-sleep.service             loaded    inactive dead    System Hybrid Suspend+Hibernate
+systemd-initctl.service                  loaded    inactive dead    initctl Compatibility Daemon
+systemd-journal-catalog-update.service   loaded    inactive dead    Rebuild Journal Catalog
+systemd-journal-flush.service            loaded    active   exited  Flush Journal to Persistent Storage
+systemd-journald-sync@netdata.service    loaded    active   exited  Sync Journal for Namespace netdata
+systemd-journald.service                 loaded    active   running Journal Service
+systemd-journald@netdata.service         loaded    active   running Journal Service for Namespace netdata
+systemd-logind.service                   loaded    active   running User Login Management
+systemd-machine-id-commit.service        loaded    inactive dead    Save Transient machine-id to Disk
+systemd-modules-load.service             loaded    active   exited  Load Kernel Modules
+systemd-oomd.service                     not-found inactive dead    systemd-oomd.service
+systemd-pcrmachine.service               loaded    inactive dead    TPM PCR Machine ID Measurement
+systemd-pcrphase-initrd.service          loaded    inactive dead    TPM PCR Barrier (initrd)
+systemd-pcrphase-sysinit.service         loaded    inactive dead    TPM PCR Barrier (Initialization)
+systemd-pcrphase.service                 loaded    inactive dead    TPM PCR Barrier (User)
+systemd-pstore.service                   loaded    inactive dead    Platform Persistent Storage Archival
+systemd-quotacheck-root.service          loaded    inactive dead    Root File System Quota Check
+systemd-random-seed.service              loaded    active   exited  Load/Save OS Random Seed
+systemd-remount-fs.service               loaded    active   exited  Remount Root and Kernel File Systems
+systemd-soft-reboot.service              loaded    inactive dead    Reboot System Userspace
+systemd-suspend-then-hibernate.service   loaded    inactive dead    System Suspend then Hibernate
+systemd-suspend.service                  loaded    inactive dead    System Suspend
+systemd-sysctl.service                   loaded    active   exited  Apply Kernel Variables
+systemd-sysext.service                   loaded    inactive dead    Merge System Extension Images into /usr/ and /opt/
+systemd-sysusers.service                 loaded    inactive dead    Create System Users
+systemd-timedated.service                loaded    active   running Time & Date Service
+systemd-tmpfiles-clean.service           loaded    inactive dead    Cleanup of Temporary Directories
+systemd-tmpfiles-setup-dev-early.service loaded    active   exited  Create Static Device Nodes in /dev gracefully
+systemd-tmpfiles-setup-dev.service       loaded    active   exited  Create Static Device Nodes in /dev
+systemd-tmpfiles-setup.service           loaded    active   exited  Create System Files and Directories
+systemd-tpm2-setup-early.service         loaded    inactive dead    Early TPM SRK Setup
+systemd-tpm2-setup.service               loaded    inactive dead    TPM SRK Setup
+systemd-udev-load-credentials.service    loaded    active   exited  Load udev Rules from Credentials
+systemd-udev-settle.service              loaded    inactive dead    Wait for udev To Complete Device Initialization
+systemd-udev-trigger.service             loaded    active   exited  Coldplug All udev Devices
+systemd-udevd.service                    loaded    active   running Rule-based Manager for Device Events and Files
+systemd-update-done.service              loaded    inactive dead    Update is Completed
+systemd-user-sessions.service            loaded    active   exited  Permit User Sessions
+systemd-vconsole-setup.service           not-found inactive dead    systemd-vconsole-setup.service
+user-runtime-dir@0.service               loaded    active   exited  User Runtime Directory /run/user/0
+user-runtime-dir@1000.service            loaded    active   exited  User Runtime Directory /run/user/1000
+user@0.service                           loaded    active   running User Manager for UID 0
+user@1000.service                        loaded    active   running User Manager for UID 1000
+wtmpdb-update-boot.service               loaded    active   exited  Write boot and shutdown times into wtmpdb
+@@elio unit-files
+apparmor.service                             enabled         enabled
+apt-daily-upgrade.service                    masked          enabled
+apt-daily.service                            masked          enabled
+apt-listchanges.service                      static          -
+autovt@.service                              alias           -
+capsule@.service                             static          -
+chrony-dnssrv@.service                       static          -
+chrony-wait.service                          disabled        enabled
+chrony.service                               enabled         enabled
+chronyd-restricted.service                   disabled        enabled
+chronyd.service                              alias           -
+console-getty.service                        disabled        disabled
+console-setup.service                        enabled         enabled
+container-getty@.service                     static          -
+cron.service                                 enabled         enabled
+cryptdisks-early.service                     masked          enabled
+cryptdisks.service                           masked          enabled
+dbus-org.freedesktop.hostname1.service       alias           -
+dbus-org.freedesktop.locale1.service         alias           -
+dbus-org.freedesktop.login1.service          alias           -
+dbus-org.freedesktop.timedate1.service       alias           -
+dbus.service                                 static          -
+debug-shell.service                          disabled        disabled
+disable-transparent-huge-pages.service       enabled         enabled
+dpkg-db-backup.service                       static          -
+e2scrub@.service                             static          -
+e2scrub_all.service                          static          -
+e2scrub_fail@.service                        static          -
+e2scrub_reap.service                         enabled         enabled
+emergency.service                            static          -
+etcd.service                                 enabled         enabled
+fstrim.service                               static          -
+getty-static.service                         static          -
+getty@.service                               enabled         enabled
+grub-common.service                          enabled         enabled
+hwclock.service                              masked          enabled
+ifup@.service                                static          -
+ifupdown-pre.service                         static          -
+ifupdown-wait-online.service                 disabled        enabled
+initrd-cleanup.service                       static          -
+initrd-parse-etc.service                     static          -
+initrd-switch-root.service                   static          -
+initrd-udevadm-cleanup-db.service            static          -
+keyboard-setup.service                       enabled         enabled
+kmod-static-nodes.service                    static          -
+kmod.service                                 alias           -
+ldconfig.service                             static          -
+logrotate.service                            static          -
+man-db.service                               static          -
+modprobe@.service                            static          -
+netdata-updater.service                      static          -
+netdata.service                              enabled         enabled
+networking.service                           enabled         enabled
+nftables.service                             disabled        enabled
+pam_namespace.service                        static          -
+patroni.service                              enabled         enabled
+patroni@.service                             disabled        enabled
+pg_basebackup@.service                       static          -
+pg_compresswal@.service                      static          -
+pg_dump@.service                             static          -
+pg_receivewal@.service                       disabled        enabled
+pgbouncer.service                            enabled         enabled
+postgresql.service                           enabled         enabled
+postgresql@.service                          disabled        enabled
+procps.service                               alias           -
+qemu-guest-agent.service                     static          -
+quotaon-root.service                         static          -
+quotaon@.service                             static          -
+rc-local.service                             static          -
+rescue.service                               static          -
+serial-getty@.service                        disabled        enabled
+ssh.service                                  enabled         enabled
+sshd-keygen.service                          enabled         enabled
+sshd-unix-local@.service                     alias           -
+sshd.service                                 alias           -
+sshd@.service                                indirect        enabled
+sudo.service                                 masked          enabled
+sysstat-collect.service                      static          -
+sysstat-rotate.service                       static          -
+sysstat-summary.service                      static          -
+sysstat.service                              disabled        enabled
+system-update-cleanup.service                static          -
+systemd-ask-password-console.service         static          -
+systemd-ask-password-wall.service            static          -
+systemd-backlight@.service                   static          -
+systemd-battery-check.service                static          -
+systemd-binfmt.service                       static          -
+systemd-boot-check-no-failures.service       disabled        disabled
+systemd-bsod.service                         static          -
+systemd-confext.service                      disabled        enabled
+systemd-creds@.service                       static          -
+systemd-exit.service                         static          -
+systemd-firstboot.service                    static          -
+systemd-fsck-root.service                    enabled-runtime enabled
+systemd-fsck@.service                        static          -
+systemd-growfs-root.service                  static          -
+systemd-growfs@.service                      static          -
+systemd-halt.service                         static          -
+systemd-hibernate-clear.service              static          -
+systemd-hibernate-resume.service             static          -
+systemd-hibernate.service                    static          -
+systemd-hostnamed.service                    static          -
+systemd-hwdb-update.service                  static          -
+systemd-hybrid-sleep.service                 static          -
+systemd-initctl.service                      static          -
+systemd-journal-catalog-update.service       static          -
+systemd-journal-flush.service                static          -
+systemd-journald-sync@.service               static          -
+systemd-journald.service                     static          -
+systemd-journald@.service                    static          -
+systemd-kexec.service                        static          -
+systemd-localed.service                      static          -
+systemd-logind.service                       static          -
+systemd-machine-id-commit.service            static          -
+systemd-modules-load.service                 static          -
+systemd-network-generator.service            disabled        enabled
+systemd-networkd-persistent-storage.service  static          -
+systemd-networkd-wait-online.service         disabled        enabled
+systemd-networkd-wait-online@.service        disabled        enabled
+systemd-networkd.service                     disabled        enabled
+systemd-pcrextend@.service                   static          -
+systemd-pcrfs-root.service                   static          -
+systemd-pcrfs@.service                       static          -
+systemd-pcrlock-file-system.service          disabled        enabled
+systemd-pcrlock-firmware-code.service        disabled        enabled
+systemd-pcrlock-firmware-config.service      disabled        enabled
+systemd-pcrlock-machine-id.service           disabled        enabled
+systemd-pcrlock-make-policy.service          disabled        enabled
+systemd-pcrlock-secureboot-authority.service disabled        enabled
+systemd-pcrlock-secureboot-policy.service    disabled        enabled
+systemd-pcrlock@.service                     static          -
+systemd-pcrmachine.service                   static          -
+systemd-pcrphase-initrd.service              static          -
+systemd-pcrphase-sysinit.service             static          -
+systemd-pcrphase.service                     static          -
+systemd-poweroff.service                     static          -
+systemd-pstore.service                       enabled         enabled
+systemd-quotacheck-root.service              static          -
+systemd-quotacheck@.service                  static          -
+systemd-random-seed.service                  static          -
+systemd-reboot.service                       static          -
+systemd-remount-fs.service                   enabled-runtime enabled
+systemd-rfkill.service                       static          -
+systemd-soft-reboot.service                  static          -
+systemd-storagetm.service                    static          -
+systemd-suspend-then-hibernate.service       static          -
+systemd-suspend.service                      static          -
+systemd-sysctl.service                       static          -
+systemd-sysext.service                       disabled        enabled
+systemd-sysext@.service                      static          -
+systemd-sysusers.service                     static          -
+systemd-timedated.service                    static          -
+systemd-tmpfiles-clean.service               static          -
+systemd-tmpfiles-setup-dev-early.service     static          -
+systemd-tmpfiles-setup-dev.service           static          -
+systemd-tmpfiles-setup.service               static          -
+systemd-tpm2-setup-early.service             static          -
+systemd-tpm2-setup.service                   static          -
+systemd-udev-load-credentials.service        disabled        enabled
+systemd-udev-settle.service                  static          -
+systemd-udev-trigger.service                 static          -
+systemd-udevd.service                        static          -
+systemd-update-done.service                  static          -
+systemd-user-sessions.service                static          -
+systemd-volatile-root.service                static          -
+udev.service                                 alias           -
+unattended-upgrades.service                  masked          enabled
+user-runtime-dir@.service                    static          -
+user@.service                                static          -
+wtmpdb-update-boot.service                   enabled         enabled
+x11-common.service                           masked          enabled
+@@elio docker

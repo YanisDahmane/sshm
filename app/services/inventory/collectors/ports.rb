@@ -115,17 +115,24 @@ class Inventory::Collectors::Ports < Inventory::Collector
     { "tool" => "ufw", "active" => true, "default_incoming" => default, "allowed" => allowed.uniq }
   end
 
+  # An nftables input chain that accepts everything without any rule filters nothing.
   def self.parse_nft(text)
     input = text[/chain input \{.*?\n\s*\}/m].to_s
     policy = input[/policy (\w+);/, 1]
+    rules = input.lines.count { |line| line.match?(/\b(accept|drop|reject)\b/) && !line.include?("policy") }
+    return { "tool" => "none", "active" => false } if policy != "drop" && rules.zero?
+
     allowed = input.scan(/(tcp|udp) dport (\{[^}]+\}|\d+(?:-\d+)?) .*?accept/).flat_map do |proto, ports|
       ports.delete("{} ").split(",").map { |port| { "rule" => "#{port.tr("-", ":")}/#{proto}" } }
     end
     { "tool" => "nftables", "active" => true, "default_incoming" => (policy == "drop" ? "deny" : policy), "allowed" => allowed.uniq }
   end
 
+  # "-P INPUT ACCEPT" without any "-A INPUT" rule (the Debian default) filters nothing.
   def self.parse_iptables(text)
     policy = text[/^-P INPUT (\w+)/, 1]
+    return { "tool" => "none", "active" => false } if policy == "ACCEPT" && text.lines.none? { |line| line.start_with?("-A INPUT") }
+
     allowed = text.lines.filter_map do |line|
       next unless line.include?("-j ACCEPT") && (port = line[/--dports? (\S+)/, 1])
 
