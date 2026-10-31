@@ -1,7 +1,8 @@
 <% input_class = "mt-1 block w-full rounded-md border border-line px-3 py-2 text-sm shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent" %>
 <% label_class = "block text-sm font-medium text-ink-2" %>
 
-<%= form_with model: channel, url: (channel.persisted? ? settings_notification_channel_path(channel) : settings_notification_channels_path), class: "space-y-6" do |f| %>
+<%= form_with model: channel, url: (channel.persisted? ? settings_notification_channel_path(channel) : settings_notification_channels_path), class: "space-y-6",
+      data: { controller: "kind-fields" } do |f| %>
   <%= render "shared/form_errors", record: channel %>
 
   <div>
@@ -9,13 +10,36 @@
     <%= f.text_field :name, required: true, autofocus: true, placeholder: "#ops-alertes", class: input_class %>
   </div>
 
-  <div>
-    <%= f.label :webhook_url, "URL du webhook Slack", class: label_class %>
-    <%= f.password_field :webhook_url, value: nil, required: channel.new_record?, autocomplete: "off",
-          placeholder: (channel.persisted? ? "#{channel.masked_webhook_url} (laisser vide pour la conserver)" : "https://hooks.slack.com/services/…"),
+  <fieldset>
+    <legend class="<%= label_class %>">Type</legend>
+    <div class="mt-2 flex flex-wrap gap-4">
+      <% NotificationChannel::KINDS.each do |value, label| %>
+        <label class="flex cursor-pointer items-center gap-2 text-sm text-ink-2">
+          <%= f.radio_button :kind, value, disabled: channel.persisted? && channel.kind != value,
+                data: { kind_fields_target: "kind", action: "kind-fields#update" }, class: "h-4 w-4 border-line text-accent" %>
+          <%= label %>
+        </label>
+      <% end %>
+    </div>
+  </fieldset>
+
+  <div data-kind-fields-target="field" data-kinds="slack discord webhook">
+    <%= f.label :webhook_url, "URL du webhook", class: label_class %>
+    <%= f.password_field :webhook_url, value: nil, autocomplete: "off",
+          placeholder: (channel.persisted? && channel.webhook_url ? "#{channel.masked_destination} (laisser vide pour la conserver)" : "https://…"),
           class: "#{input_class} font-mono text-xs" %>
     <p class="mt-1 text-xs text-ink-3">
-      Dans Slack : <em>Apps → Incoming Webhooks → Add to Slack</em>, choisissez le canal, puis copiez l'URL. Elle est stockée chiffrée.
+      Slack : <em>Apps → Incoming Webhooks</em> · Discord : <em>Paramètres du salon → Intégrations → Webhooks</em> ·
+      Webhook : toute URL HTTPS qui reçoit du JSON signé (en-tête <code class="font-mono">X-Elio-Signature</code>). Stockée chiffrée.
+    </p>
+  </div>
+
+  <div data-kind-fields-target="field" data-kinds="email">
+    <%= f.label :recipients, "Destinataires", class: label_class %>
+    <%= f.text_field :recipients, placeholder: "ops@acme.fr, alice@acme.fr", autocomplete: "off", class: input_class %>
+    <p class="mt-1 text-xs text-ink-3">
+      Jusqu'à <%= NotificationChannel::MAX_RECIPIENTS %> adresses séparées par des virgules.
+      <% unless Rails.configuration.x.mail_enabled %><span class="text-warn-ink">L'envoi d'emails n'est pas configuré (variables SMTP_*) : rien ne partira.</span><% end %>
     </p>
   </div>
 
@@ -44,9 +68,13 @@
   </fieldset>
 
   <div class="space-y-3">
-    <label class="flex cursor-pointer items-start gap-2 text-sm text-ink-2">
+    <label class="flex cursor-pointer items-start gap-2 text-sm text-ink-2" data-kind-fields-target="field" data-kinds="slack discord">
       <%= f.check_box :mention_channel, class: "mt-0.5 h-4 w-4 rounded border-line text-accent" %>
-      <span>Mentionner <code class="font-mono text-xs">@channel</code> <span class="text-ink-3">— tous les membres du canal Slack reçoivent une alerte.</span></span>
+      <span>Mentionner tout le monde <span class="text-ink-3">— <code class="font-mono text-xs">@channel</code> sur Slack, <code class="font-mono text-xs">@everyone</code> sur Discord.</span></span>
+    </label>
+    <label class="flex cursor-pointer items-start gap-2 text-sm text-ink-2">
+      <%= f.check_box :daily_digest, class: "mt-0.5 h-4 w-4 rounded border-line text-accent" %>
+      <span>Résumé quotidien <span class="text-ink-3">— chaque matin à 8 h : état du parc et activité de la veille.</span></span>
     </label>
     <label class="flex cursor-pointer items-start gap-2 text-sm text-ink-2">
       <%= f.check_box :enabled, class: "mt-0.5 h-4 w-4 rounded border-line text-accent" %>

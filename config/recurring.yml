@@ -16,6 +16,9 @@ shared: &shared
   run_due_automations:
     class: RunDueAutomationsJob
     schedule: every minute
+  notification_digests:
+    class: NotificationDigestJob
+    schedule: every day at 8am
   purge_health_samples:
     class: Inventory::PurgeHealthSamplesJob
     schedule: every day at 4am

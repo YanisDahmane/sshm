@@ -26,6 +26,7 @@ fr:
       notification_channel:
         name: Nom
         webhook_url: L'URL du webhook
+        recipients: Les destinataires
         activity_kinds: Les activités
       automation:
         interval_minutes: La fréquence
@@ -39,6 +40,11 @@ fr:
         password_confirmation: Confirmation du mot de passe
     errors:
       models:
+        notification_channel:
+          attributes:
+            recipients:
+              too_many: "ne peuvent pas dépasser %{count} adresses"
+              invalid_emails: "contiennent des adresses invalides : %{emails}"
         server_group:
           attributes:
             expected_ports:

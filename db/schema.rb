@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_31_170000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_31_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -150,7 +150,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_170000) do
   create_table "notification_channels", force: :cascade do |t|
     t.string "name", null: false
     t.string "kind", default: "slack", null: false
-    t.text "webhook_url", null: false
+    t.text "webhook_url"
     t.jsonb "activity_kinds", default: [], null: false
     t.boolean "mention_channel", default: false, null: false
     t.boolean "enabled", default: true, null: false
@@ -158,6 +158,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_170000) do
     t.text "last_error"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "recipients"
+    t.text "signing_secret"
+    t.boolean "daily_digest", default: false, null: false
+    t.datetime "last_digest_at"
     t.index ["name"], name: "index_notification_channels_on_name", unique: true
   end
 

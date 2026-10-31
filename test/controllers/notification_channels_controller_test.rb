@@ -40,7 +40,7 @@ class NotificationChannelsControllerTest < ActionDispatch::IntegrationTest
       assert_select ".channel-error", text: /Slack a répondu 404/
     end
     assert_no_match "XXXXXXXXXXXXXXXX", response.body
-    assert_select "a[href=?]", new_settings_notification_channel_path, text: "Ajouter un canal Slack"
+    assert_select "a[href=?]", new_settings_notification_channel_path, text: "Ajouter un canal"
   end
 
   test "empty state" do
@@ -144,5 +144,34 @@ class NotificationChannelsControllerTest < ActionDispatch::IntegrationTest
     end
     assert_equal "Échec de l'envoi à « #ops » : Slack a répondu 404 : no_service", flash[:alert]
     assert_equal "Slack a répondu 404 : no_service", channel.reload.last_error
+  end
+
+  test "creates a Discord, a webhook or an email channel, with the daily digest" do
+    sign_in users(:one)
+
+    post settings_notification_channels_path, params: { notification_channel: { name: "Equipe", kind: "email", recipients: "ops@acme.fr", daily_digest: "1", activity_kinds: [ "server_unreachable" ] } }
+    assert_redirected_to settings_notifications_path
+    channel = NotificationChannel.find_by!(name: "Equipe")
+    assert_equal [ "email", "ops@acme.fr", true ], [ channel.kind, channel.recipients, channel.daily_digest ]
+
+    post settings_notification_channels_path, params: { notification_channel: { name: "Hook", kind: "webhook", webhook_url: "https://hooks.acme.fr/elio", activity_kinds: [ "server_unreachable" ] } }
+    get settings_notifications_path
+    assert_select "##{ActionView::RecordIdentifier.dom_id(NotificationChannel.find_by!(name: "Hook"))}" do
+      assert_select ".channel-kind-label", "Webhook (JSON signé)"
+      assert_select "details.channel-secret input[value=?]", NotificationChannel.find_by!(name: "Hook").signing_secret
+    end
+    assert_select "##{ActionView::RecordIdentifier.dom_id(channel)} .channel-digest", "résumé quotidien"
+  end
+
+  test "the form shows the fields of each kind" do
+    sign_in users(:one)
+    get new_settings_notification_channel_path
+
+    assert_select "form[data-controller=kind-fields]" do
+      assert_select "input[type=radio][name='notification_channel[kind]']", 4
+      assert_select "[data-kind-fields-target=field][data-kinds='slack discord webhook'] input[name='notification_channel[webhook_url]']"
+      assert_select "[data-kind-fields-target=field][data-kinds=email] input[name='notification_channel[recipients]']"
+      assert_select "input[type=checkbox][name='notification_channel[daily_digest]']"
+    end
   end
 end

@@ -1,11 +1,8 @@
-require "net/http"
-
 # Sends messages to a Slack incoming webhook.
 class SlackNotifier
-  class DeliveryError < StandardError; end
+  DeliveryError = NotificationDeliveryError
 
   SEVERITY_EMOJIS = { info: ":information_source:", warning: ":warning:", critical: ":rotating_light:" }.freeze
-  TIMEOUT = 5 # seconds
 
   def self.deliver(channel, activity)
     post(channel.webhook_url, activity_payload(activity, mention: channel.mention_channel))
@@ -37,15 +34,11 @@ class SlackNotifier
     text.to_s.gsub("&", "&amp;").gsub("<", "&lt;").gsub(">", "&gt;")
   end
 
-  def self.post(url, payload)
-    uri = URI(url)
-    response = Net::HTTP.start(uri.host, uri.port, use_ssl: true, open_timeout: TIMEOUT, read_timeout: TIMEOUT) do |http|
-      http.post(uri.request_uri, payload.to_json, "Content-Type" => "application/json")
-    end
-    raise DeliveryError, "Slack a répondu #{response.code} : #{response.body.to_s.truncate(200)}" unless response.is_a?(Net::HTTPSuccess)
+  def self.deliver_digest(channel, digest)
+    post(channel.webhook_url, { text: "*#{escape(digest.title)}*\n#{digest.lines.map { |line| escape(line) }.join("\n")}" })
+  end
 
-    response
-  rescue SocketError, SystemCallError, IOError, Timeout::Error, OpenSSL::SSL::SSLError, Net::HTTPBadResponse => e
-    raise DeliveryError, "Impossible de joindre Slack (#{e.class}: #{e.message})"
+  def self.post(url, payload)
+    NotificationHttp.post(url, payload.to_json, service: "Slack")
   end
 end

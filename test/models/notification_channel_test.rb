@@ -42,7 +42,7 @@ class NotificationChannelTest < ActiveSupport::TestCase
 
     raw = NotificationChannel.connection.select_value("SELECT webhook_url FROM notification_channels WHERE id = #{channel.id}")
     assert_not_includes raw, "hooks.slack.com"
-    assert_equal "https://hooks.slack.com/services/T000…", channel.masked_webhook_url
+    assert_equal "https://hooks.slack.com/services/T0…", channel.masked_destination
   end
 
   test "subscribed_to lists the enabled channels receiving a kind" do

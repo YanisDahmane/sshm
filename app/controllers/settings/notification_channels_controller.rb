@@ -40,10 +40,10 @@ module Settings
     end
 
     def test
-      SlackNotifier.deliver_test(@channel)
+      @channel.notifier.deliver_test(@channel)
       @channel.record_delivery!
       redirect_to settings_notifications_path, notice: "Message de test envoyé à « #{@channel.name} »."
-    rescue SlackNotifier::DeliveryError => e
+    rescue NotificationDeliveryError => e
       @channel.record_delivery!(error: e.message)
       redirect_to settings_notifications_path, alert: "Échec de l'envoi à « #{@channel.name} » : #{e.message}"
     end
@@ -55,7 +55,7 @@ module Settings
     end
 
     def channel_params
-      params.expect(notification_channel: [ :name, :webhook_url, :mention_channel, :enabled, activity_kinds: [] ])
+      params.expect(notification_channel: [ :name, :kind, :webhook_url, :recipients, :mention_channel, :daily_digest, :enabled, activity_kinds: [] ])
     end
   end
 end

@@ -1,0 +1,5 @@
+<%= @activity.label %>
+
+<%= @activity.summary %>
+
+Par <%= @activity.author_name %><% if @activity.server_name %> · Serveur : <%= @activity.server_name %><% end %> · <%= l(@activity.created_at, format: :long) %>

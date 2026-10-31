@@ -15,10 +15,10 @@ class NotificationChannelsTest < ApplicationSystemTestCase
   test "adding a Slack channel, sending a test and deleting it" do
     visit settings_path
     within("nav.settings-nav") { click_on "Notifications" }
-    click_on "Ajouter un canal Slack"
+    click_on "Ajouter un canal"
 
     fill_in "Nom", with: "#ops"
-    fill_in "URL du webhook Slack", with: WEBHOOK
+    fill_in "URL du webhook", with: WEBHOOK
     within(".activity-kind-group", text: "Clés SSH") { click_on "Tout / rien" }
     check "Mentionner"
     click_on "Ajouter le canal"
