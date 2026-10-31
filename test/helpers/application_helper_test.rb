@@ -42,13 +42,15 @@ class ApplicationHelperTest < ActionView::TestCase
   test "command_palette_items lists pages, servers and public_keys" do
     items = command_palette_items
 
-    assert_equal %w[Pages Groupes Serveurs Trousseau], items.map { |item| item[:group] }.uniq
+    assert_equal [ "Pages", "Groupes", "Serveurs", "Trousseau", "Onglets des serveurs" ], items.map { |item| item[:group] }.uniq
     assert_includes items, { group: "Pages", label: "Parc", hint: "serveurs", url: servers_path }
     assert_includes items, { group: "Groupes", label: "Production", hint: "serveurs du groupe", url: servers_path(group: server_groups(:production).id) }
     assert_includes items, { group: "Serveurs", label: "Web", hint: "deploy@192.168.1.10 · Production", url: server_path(servers(:web)) }
     assert_includes items, { group: "Serveurs", label: "Backup", hint: "root@10.0.0.5", url: server_path(servers(:backup)) }
     assert_includes items, { group: "Trousseau", label: "Alice", hint: "Personne", url: public_key_path(public_keys(:alice)) }
     assert_includes items, { group: "Trousseau", label: "CI", hint: "Serveur", url: public_key_path(public_keys(:ci)) }
+    assert_includes items, { group: "Onglets des serveurs", label: "Web › Ports", url: server_path(servers(:web), tab: "ports"), typed: true }
+    assert_equal 5 * Server.count, items.count { |item| item[:typed] }
   end
 
   test "ssh_key_install_command appends the public key with strict permissions" do

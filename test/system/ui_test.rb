@@ -43,7 +43,7 @@ class UiTest < ApplicationSystemTestCase
 
     within("#command-palette[open]") do
       find("input[type=search]").fill_in(with: "dat")
-      assert_selector ".command-palette-item", count: 1, text: "Database"
+      assert_selector ".command-palette-item[aria-selected=true]", text: /\ADatabase/
       find("input[type=search]").send_keys(:enter)
     end
 
@@ -60,7 +60,31 @@ class UiTest < ApplicationSystemTestCase
       assert_selector ".command-palette-item[aria-selected=true]", text: "Paramètres"
       find("input[type=search]").fill_in(with: "zzz")
       assert_text "Aucun résultat."
+      assert_selector ".command-palette-item", count: 1, text: "Chercher le paquet « zzz » sur le parc"
     end
+  end
+
+  test "quick search reaches a server's tab, a package and a port" do
+    visit root_path
+    find("body").send_keys([ :control, "k" ])
+
+    within("#command-palette[open]") do
+      assert_no_selector ".command-palette-item", text: "›"
+      find("input[type=search]").fill_in(with: "web paquets")
+      assert_selector ".command-palette-item", text: "Web › Paquets"
+      find("input[type=search]").send_keys(:enter)
+    end
+    assert_selector "nav.server-tabs a[aria-current=page][data-tab=packages]"
+
+    find("body").send_keys([ :control, "k" ])
+    within("#command-palette[open]") do
+      find("input[type=search]").fill_in(with: "3306")
+      assert_selector ".command-palette-item", text: "Qui expose le port 3306 ?"
+      assert_selector ".command-palette-item", text: "Chercher le paquet « 3306 » sur le parc"
+      find(".command-palette-item", text: "Qui expose le port 3306 ?").click
+    end
+    assert_field "q", with: "3306"
+    assert_current_path ports_path(q: "3306")
   end
 
   test "authorizing a public_key on several servers at once" do

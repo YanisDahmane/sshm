@@ -1,7 +1,10 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Quick search over pages, servers and public_keys. Opens with ⌘K / Ctrl+K or
-// the navbar button; arrows to move, Enter to open, Escape to close.
+// Quick search over pages, groups, servers, keyring keys and server tabs
+// (the items marked `typed` only once something is typed), plus a fleet
+// package search and, for a number, the servers exposing that port.
+// Opens with ⌘K / Ctrl+K or the sidebar button; arrows to move, Enter to
+// open, Escape to close.
 export default class extends Controller {
   static targets = ["dialog", "input", "results", "empty", "items"]
 
@@ -33,13 +36,28 @@ export default class extends Controller {
   }
 
   filter() {
-    const words = normalize(this.inputTarget.value).split(/\s+/).filter(Boolean)
+    const query = this.inputTarget.value.trim()
+    const words = normalize(query).split(/\s+/).filter(Boolean)
     this.matches = this.items.filter((item) => {
+      if (item.typed && words.length === 0) return false
       const haystack = normalize(`${item.label} ${item.hint || ""} ${item.group}`)
       return words.every((word) => haystack.includes(word))
     })
+    this.matches.push(...this.searches(query))
     this.selected = 0
     this.render()
+  }
+
+  // "Chercher le paquet « … »" and, for a port number, "Qui expose le port … ?".
+  searches(query) {
+    if (query.length < 2) return []
+    const { packagesUrl, portsUrl } = this.dialogTarget.dataset
+    const searches = []
+    if (/^\d{1,5}$/.test(query) && Number(query) <= 65535) {
+      searches.push({ group: "Rechercher", label: `Qui expose le port ${query} ?`, url: `${portsUrl}?q=${query}` })
+    }
+    searches.push({ group: "Rechercher", label: `Chercher le paquet « ${query} » sur le parc`, url: `${packagesUrl}?q=${encodeURIComponent(query)}` })
+    return searches
   }
 
   navigate(event) {
@@ -62,22 +80,24 @@ export default class extends Controller {
 
   render() {
     this.resultsTarget.replaceChildren()
-    this.emptyTarget.hidden = this.matches.length > 0
+    this.emptyTarget.hidden = this.matches.some((item) => item.group !== "Rechercher")
     let group = null
 
     this.matches.forEach((item, index) => {
       if (item.group !== group) {
         group = item.group
         const heading = document.createElement("li")
+        heading.setAttribute("role", "presentation")
         heading.className = "px-2 pb-1 pt-3 text-xs font-semibold uppercase tracking-wide text-ink-3"
         heading.textContent = group
         this.resultsTarget.append(heading)
       }
 
       const option = document.createElement("li")
+      option.id = `command-palette-option-${index}`
       option.setAttribute("role", "option")
       option.setAttribute("aria-selected", index === this.selected)
-      option.className = "command-palette-item flex cursor-pointer items-center justify-between gap-3 rounded-md px-3 py-2 text-sm aria-selected:bg-accent aria-selected:text-white"
+      option.className = "command-palette-item flex cursor-pointer items-center justify-between gap-3 rounded-md px-3 py-2 text-sm aria-selected:bg-accent-fill aria-selected:text-white"
       const label = document.createElement("span")
       label.className = "truncate font-medium"
       label.textContent = item.label
@@ -93,6 +113,11 @@ export default class extends Controller {
       this.resultsTarget.append(option)
       if (index === this.selected) option.scrollIntoView({ block: "nearest" })
     })
+    if (this.matches.length) {
+      this.inputTarget.setAttribute("aria-activedescendant", `command-palette-option-${this.selected}`)
+    } else {
+      this.inputTarget.removeAttribute("aria-activedescendant")
+    }
   }
 }
 

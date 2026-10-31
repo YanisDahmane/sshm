@@ -37,7 +37,10 @@ module ApplicationHelper
     "mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo '#{ssh_key.public_key}' >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
   end
 
-  # Entries of the ⌘K quick search: pages, then servers and public_keys.
+  SERVER_TAB_LABELS = { "packages" => "Paquets", "services" => "Services", "ports" => "Ports", "keys" => "Clés SSH", "history" => "Historique" }.freeze
+
+  # Entries of the ⌘K quick search: pages, groups, servers, keyring keys, and
+  # the tabs of each server (`typed: true`: only listed once something is typed).
   def command_palette_items
     pages = [
       { label: "Vue d'ensemble", url: root_path }, { label: "Parc", hint: "serveurs", url: servers_path }, { label: "Paquets", hint: "recherche sur tout le parc", url: packages_path }, { label: "Ports", hint: "ports publics du parc", url: ports_path }, { label: "Trousseau", hint: "clés SSH", url: public_keys_path },
@@ -59,8 +62,11 @@ module ApplicationHelper
       { group: "Serveurs", label: server.name, hint: [ "#{server.username}@#{server.host}", *server.server_groups.map(&:name) ].join(" · "), url: server_path(server) }
     end
     public_keys = PublicKey.order(:name).map { |public_key| { group: "Trousseau", label: public_key.name, hint: public_key.kind_label, url: public_key_path(public_key) } }
+    tabs = Server.order(:name).flat_map do |server|
+      SERVER_TAB_LABELS.map { |tab, label| { group: "Onglets des serveurs", label: "#{server.name} › #{label}", url: server_path(server, tab: tab), typed: true } }
+    end
 
-    pages + groups + servers + public_keys
+    pages + groups + servers + public_keys + tabs
   end
 
   # PublicKey name proposed for an authorized key: its comment without the host
