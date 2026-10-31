@@ -26,15 +26,17 @@ class SettingsUsersTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "an admin invites someone" do
+  test "an admin invites someone, by email when emails can be sent" do
     sign_in users(:one)
 
-    post settings_invitations_path, params: { invitation: { email: "Dave@example.com", role: "operator" } }
+    assert_enqueued_email_with InvitationMailer, :invite, args: ->(args) { args.first.email == "dave@example.com" } do
+      post settings_invitations_path, params: { invitation: { email: "Dave@example.com", role: "operator" } }
+    end
 
     invitation = Invitation.sole
     assert_equal [ "dave@example.com", "operator", users(:one) ], [ invitation.email, invitation.role, invitation.invited_by ]
     assert_redirected_to settings_users_path
-    assert_equal "Invitation créée pour dave@example.com. Copiez le lien et envoyez-le-lui.", flash[:notice]
+    assert_equal "Invitation envoyée par email à dave@example.com. Le lien reste copiable ci-dessous.", flash[:notice]
     assert_equal "dave@example.com invité (Opérateur)", Activity.of_kind(:user_invited).sole.summary
   end
 
@@ -152,5 +154,15 @@ class SettingsUsersTest < ActionDispatch::IntegrationTest
 
     assert_not users(:operator).reload.two_factor_enabled?
     assert_equal "2FA de operator@example.com réinitialisée par one@example.com", Activity.of_kind(:two_factor_disabled).sole.summary
+  end
+
+  test "without emails, the invitation link is to be copied" do
+    Rails.configuration.x.mail_enabled = false
+    sign_in users(:one)
+
+    assert_no_enqueued_emails { post settings_invitations_path, params: { invitation: { email: "eve@example.com", role: "viewer" } } }
+    assert_equal "Invitation créée pour eve@example.com. Copiez le lien et envoyez-le-lui.", flash[:notice]
+  ensure
+    Rails.configuration.x.mail_enabled = true
   end
 end

@@ -7,7 +7,12 @@ module Settings
 
       if @invitation.save
         Activity.record!(:user_invited, email: @invitation.email, role_label: @invitation.role_label)
-        redirect_to settings_users_path, notice: "Invitation créée pour #{@invitation.email}. Copiez le lien et envoyez-le-lui."
+        if Rails.configuration.x.mail_enabled
+          InvitationMailer.invite(@invitation).deliver_later
+          redirect_to settings_users_path, notice: "Invitation envoyée par email à #{@invitation.email}. Le lien reste copiable ci-dessous."
+        else
+          redirect_to settings_users_path, notice: "Invitation créée pour #{@invitation.email}. Copiez le lien et envoyez-le-lui."
+        end
       else
         redirect_to settings_users_path, alert: "Invitation impossible : #{@invitation.errors.full_messages.to_sentence}"
       end

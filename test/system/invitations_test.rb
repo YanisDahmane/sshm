@@ -11,7 +11,7 @@ class InvitationsTest < ApplicationSystemTestCase
     select "Opérateur", from: "Rôle"
     click_on "Créer l'invitation"
 
-    assert_text "Invitation créée pour dave@example.com."
+    assert_text "Invitation envoyée par email à dave@example.com."
     link = find("input.invitation-link").value
     assert_match %r{/invitations/\S+\z}, link
 

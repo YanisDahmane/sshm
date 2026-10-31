@@ -1,0 +1,7 @@
+Bonjour,
+
+<%= @invitation.invited_by&.email || "Un administrateur" %> vous invite à rejoindre Elio, le gestionnaire du parc de serveurs, avec le rôle <%= @invitation.role_label %>.
+
+Choisissez votre mot de passe : <%= @url %>
+
+Ce lien est personnel, utilisable une seule fois et valable jusqu'au <%= l(@invitation.expires_at, format: :long) %>.
