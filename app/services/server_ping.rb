@@ -11,7 +11,14 @@ class ServerPing
   NETWORK_ERRORS = [ SocketError, SystemCallError, IOError, Timeout::Error ].freeze
 
   def self.reachable?(host, port, timeout: DEFAULT_TIMEOUT)
-    Socket.tcp(host, port, connect_timeout: timeout, resolv_timeout: timeout) { true }
+    # Ruby 3.4's Happy Eyeballs `Socket.tcp` can yield a socket whose
+    # connection was in fact refused (seen on macOS): asking for the peer
+    # address (getpeername) raises in that case, so only a real connection
+    # counts as reachable.
+    Socket.tcp(host, port, connect_timeout: timeout, resolv_timeout: timeout) do |socket|
+      socket.remote_address
+      true
+    end
   rescue *NETWORK_ERRORS
     false
   end
