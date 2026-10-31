@@ -56,6 +56,7 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
 
   test "hides the checklist once everything is done" do
     servers(:web).record_ssh_status!(true)
+    servers(:web).update_columns(inventoried_at: Time.current)
     AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse(public_keys(:alice).content))
     sign_in users(:one)
 
@@ -64,56 +65,9 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_select "#onboarding", 0
   end
 
-  test "shows the key figures" do
-    unnamed = SshKeyGenerator.generate.public_key.split(" ").first(2).join(" ")
-    AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse(unnamed))
-    TemporaryAccess.create!(server: servers(:web), public_key: public_keys(:ci), unix_user: "deploy", key_blob: public_keys(:ci).authorized_key.key,
-                            fingerprint: public_keys(:ci).fingerprint, expires_at: 9.minutes.from_now)
-    sign_in users(:one)
 
-    get root_path
 
-    assert_select "a#stat-online[href=?] .stat-value", servers_path, "1/3"
-    assert_select "a#stat-orphans[href='#attention'] .stat-value", "1"
-    assert_select "#stat-temporary .stat-value", "1"
-    assert_select "a#stat-keyring[href=?] .stat-value", public_keys_path, "2"
-  end
 
-  test "the keys without public_key figure asks for a scan before any read" do
-    sign_in users(:one)
-    get root_path
-
-    assert_select "#stat-orphans .stat-value", "—"
-    assert_select "#stat-orphans", text: /Lancez un scan/
-    assert_select "form[action=?]", server_scans_path
-  end
-
-  test "lists the temporary accesses in progress" do
-    access = TemporaryAccess.create!(server: servers(:web), public_key: public_keys(:ci), unix_user: "deploy", key_blob: public_keys(:ci).authorized_key.key,
-                                     fingerprint: public_keys(:ci).fingerprint, expires_at: 9.minutes.from_now + 30.seconds)
-    sign_in users(:one)
-
-    get root_path
-
-    assert_select "#temporary-accesses ##{ActionView::RecordIdentifier.dom_id(access)}" do
-      assert_select "p", text: "CI"
-      assert_select "a[href=?]", server_path(servers(:web)), text: "Web"
-      assert_select "time[data-controller=relative-time]", text: "Expire dans 10 minutes"
-    end
-  end
-
-  test "lists the servers that need attention" do
-    servers(:backup).record_ssh_status!(false)
-    sign_in users(:one)
-
-    get root_path
-
-    assert_select "#attention li", 2
-    assert_select "#attention li", text: /Database/ # unreachable
-    assert_select "#attention li", text: /Backup/ do # key refused
-      assert_select ".ssh-status", text: /Clé refusée/
-    end
-  end
 
   test "has the main navigation with the current page highlighted" do
     sign_in users(:one)
@@ -167,28 +121,7 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "warns about keys without public_key in the attention list, with their names" do
-    keys = [ "alice2@laptop", "bob@desktop", nil, "dave@ci" ].map { |comment| SshKeyGenerator.generate(comment: comment.to_s).public_key.strip }
-    AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse(keys.join("\n")))
-    sign_in users(:one)
 
-    get root_path
-
-    assert_select "#attention-#{ActionView::RecordIdentifier.dom_id(servers(:web))}" do
-      assert_select ".orphan-keys", text: "4 clés inconnues"
-      assert_select ".attention-orphans", text: /alice2@laptop, bob@desktop, sans nom et 1 autre\(s\)/
-      assert_select ".attention-orphans a[href=?]", server_path(servers(:web), tab: "keys"), text: "ajouter au trousseau"
-    end
-  end
-
-  test "a named key without public_key is to watch too" do
-    AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse(SshKeyGenerator.generate(comment: "bob@desktop").public_key))
-    sign_in users(:one)
-
-    get root_path
-
-    assert_select "#attention-#{ActionView::RecordIdentifier.dom_id(servers(:web))} .attention-orphans", text: /bob@desktop/
-  end
 
   test "shows the recent activity" do
     9.times { |index| travel_to(index.minutes.ago) { Activity.record!(:server_created, server: servers(:web)) } }
@@ -199,5 +132,79 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_select "#recent-activity li.activity", 8
     assert_select "#recent-activity a[href=?]", activities_path, text: "Tout voir"
     assert_select "nav.main-nav a[href=?]", activities_path, text: "Activité"
+  end
+
+  test "shows the fleet figures" do
+    unnamed = SshKeyGenerator.generate.public_key.split(" ").first(2).join(" ")
+    AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse(unnamed))
+    servers(:web).update_columns(reachable: true)
+    sign_in users(:one)
+
+    get root_path
+
+    assert_select "#stat-online .stat-value", "1/3"
+    assert_select "#stat-critical .stat-value", "1"
+    assert_select "#stat-orphans .stat-value", "1"
+  end
+
+  test "the unknown keys figure asks for a scan before any read" do
+    sign_in users(:one)
+    get root_path
+
+    assert_select "#stat-orphans .stat-value", "—"
+    assert_select "#stat-orphans", text: /lancez un scan des clés/
+    assert_select "form[action=?]", server_scans_path
+  end
+
+  test "lists the temporary accesses in progress" do
+    TemporaryAccess.create!(server: servers(:web), public_key: public_keys(:ci), unix_user: "deploy", key_blob: public_keys(:ci).authorized_key.key,
+                            fingerprint: public_keys(:ci).fingerprint, expires_at: 9.minutes.from_now + 30.seconds)
+    sign_in users(:one)
+
+    get root_path
+
+    assert_select "#temporary-accesses li.temporary-access" do
+      assert_select "p", text: "CI"
+      assert_select "a[href=?]", server_path(servers(:web), tab: "keys"), text: "Web"
+      assert_select "time[data-controller=relative-time]", text: "expire dans 10 minutes"
+    end
+  end
+
+  test "lists what needs attention, most serious first" do
+    servers(:backup).update_columns(ssh_ok: false)
+    servers(:web).update_columns(reachable: true, ssh_ok: true, health_status: "warn", health_reasons: [ { "tone" => "warn", "text" => "Redémarrage requis" } ])
+    unnamed = SshKeyGenerator.generate.public_key.split(" ").first(2).join(" ")
+    AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse(unnamed))
+    sign_in users(:one)
+
+    get root_path
+
+    assert_select "#attention li.attention-item", 5
+    assert_select "#attention li.attention-item:last-child[data-tone=info]", text: /Web.*Pas encore d'inventaire/m
+    assert_select "#attention li.attention-item:nth-child(1)[data-tone=crit]", text: /Backup.*clé d'Elio est refusée/m
+    assert_select "#attention li.attention-item:nth-child(2)[data-tone=crit]", text: /Database.*Ne répond plus/m
+    assert_select "#attention li.attention-item[data-tone=warn]", text: /Web.*Redémarrage requis/m
+    assert_select "#attention li.attention-item a[href=?]", server_path(servers(:web), tab: "keys"), text: "Voir les clés"
+  end
+
+  test "nothing to report" do
+    Server.update_all(reachable: true, ssh_ok: true, inventoried_at: Time.current, health_status: "ok")
+    sign_in users(:one)
+
+    get root_path
+
+    assert_select "#attention .attention-empty", text: /Rien à signaler/
+  end
+
+  test "counts the systems of the fleet" do
+    servers(:web).update_columns(os_name: "Debian GNU/Linux 12 (bookworm)")
+    servers(:db).update_columns(os_name: "Debian GNU/Linux 12 (bookworm)")
+    sign_in users(:viewer)
+
+    get root_path
+
+    assert_select "#systems li", 1
+    assert_select "#systems a[href=?]", servers_path(os: "Debian GNU/Linux 12 (bookworm)")
+    assert_select "#systems li span", "2"
   end
 end

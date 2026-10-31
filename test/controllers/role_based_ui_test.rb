@@ -52,6 +52,7 @@ class RoleBasedUiTest < ActionDispatch::IntegrationTest
   end
 
   test "an operator manages servers, keys and public_keys but not the settings" do
+    servers(:web).update_columns(ssh_ok: true, inventoried_at: Time.current)
     sign_in users(:operator)
 
     get root_path

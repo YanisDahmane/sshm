@@ -32,8 +32,10 @@
                       class: "mt-3 inline-flex rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-white hover:bg-accent-hover" %>
               <% when :public_key %>
                 <%= link_to "Ajouter une clé", new_public_key_path, class: "inline-flex rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-white hover:bg-accent-hover" %>
-              <% when :authorize %>
-                <%= link_to "Choisir un serveur", servers_path, class: "inline-flex rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-white hover:bg-accent-hover" %>
+              <% when :inventory %>
+                <% if can?(:operate) && (server = Server.where(ssh_ok: true).order(:name).first) %>
+                  <%= button_to "Inventorier #{server.name}", server_inventory_path(server), class: "btn btn-primary" %>
+                <% end %>
               <% end %>
             </div>
           <% end %>
