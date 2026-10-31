@@ -47,7 +47,7 @@ class RotateSshKeyJob < ApplicationJob
 
   def install(rotation, server, account)
     new_key = rotation.new_key
-    script = PublicKeyAuthorization.append_script(new_key.public_key, new_key.blob, home: account.home)
+    script = Keys::PublicKeyAuthorization.append_script(new_key.public_key, new_key.blob, home: account.home)
     Ssh::Connection.open(server, key: [ rotation.old_key, new_key ]) { |ssh| ssh.exec!(account.command(script)) }
   rescue Ssh::Connection::Error => e
     raise StepFailed.new("install", "#{e.title} — #{e.message}")
@@ -61,7 +61,7 @@ class RotateSshKeyJob < ApplicationJob
   def cleanup(rotation, server, account)
     return unless rotation.old_key
 
-    removal = AuthorizedKeyRemoval.call(server, rotation.old_key.blob, account: account, protected_keys: [ rotation.new_key ], key: rotation.new_key)
+    removal = Keys::AuthorizedKeyRemoval.call(server, rotation.old_key.blob, account: account, protected_keys: [ rotation.new_key ], key: rotation.new_key)
     raise StepFailed.new("cleanup", "#{removal.error_title} — #{removal.error_details}") unless removal.success?
   end
 end

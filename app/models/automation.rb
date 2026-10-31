@@ -102,7 +102,7 @@ class Automation < ApplicationRecord
     servers = self.servers.to_a
     detected_before = Activity.of_kind(:unknown_key_detected).count
     scanned = each_tracked(servers) do |server, item|
-      scan = ServerScan.call(server)
+      scan = Keys::ServerScan.call(server)
       item&.finish!(scan.success? ? :succeeded : :failed, scan.error_title)
       scan.success?
     end.count(true)

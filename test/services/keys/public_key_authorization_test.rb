@@ -1,6 +1,6 @@
 require "test_helper"
 
-class PublicKeyAuthorizationTest < ActiveSupport::TestCase
+class Keys::PublicKeyAuthorizationTest < ActiveSupport::TestCase
   include LocalShellHelpers
 
   setup do
@@ -18,11 +18,11 @@ class PublicKeyAuthorizationTest < ActiveSupport::TestCase
   def authorized_keys = authorized_keys_file
 
   def run_script(line: "#{@type} #{@blob} Alice", blob: @blob)
-    run_local_script(PublicKeyAuthorization.append_script(line, blob))
+    run_local_script(Keys::PublicKeyAuthorization.append_script(line, blob))
   end
 
   def authorize(fake, public_key: @public_key)
-    PublicKeyAuthorization.call(servers(:web), public_key, transport: fake, known_hosts_file: @known_hosts)
+    Keys::PublicKeyAuthorization.call(servers(:web), public_key, transport: fake, known_hosts_file: @known_hosts)
   end
 
   test "script creates ~/.ssh and authorized_keys with private permissions" do
@@ -117,7 +117,7 @@ class PublicKeyAuthorizationTest < ActiveSupport::TestCase
     custom = @home.join("other")
     custom.mkpath
 
-    run_local_script(PublicKeyAuthorization.append_script("#{@type} #{@blob} Alice", @blob, home: Shellwords.escape(custom.to_s)))
+    run_local_script(Keys::PublicKeyAuthorization.append_script("#{@type} #{@blob} Alice", @blob, home: Shellwords.escape(custom.to_s)))
 
     assert custom.join(".ssh", "authorized_keys").exist?
     assert_not authorized_keys.exist?
@@ -126,12 +126,12 @@ class PublicKeyAuthorizationTest < ActiveSupport::TestCase
   test "an expiring line carries an OpenSSH expiry-time option in UTC" do
     expires_at = Time.zone.parse("2026-10-03 16:42:18 +02:00")
 
-    assert_equal %(expiry-time="20261003144218Z" #{@type} #{@blob} Alice), PublicKeyAuthorization.line_for(@public_key, expires_at)
-    assert_equal "#{@type} #{@blob} Alice", PublicKeyAuthorization.line_for(@public_key)
+    assert_equal %(expiry-time="20261003144218Z" #{@type} #{@blob} Alice), Keys::PublicKeyAuthorization.line_for(@public_key, expires_at)
+    assert_equal "#{@type} #{@blob} Alice", Keys::PublicKeyAuthorization.line_for(@public_key)
   end
 
   test "the expiring line is parsed back with its option" do
-    run_script(line: PublicKeyAuthorization.line_for(@public_key, 10.minutes.from_now))
+    run_script(line: Keys::PublicKeyAuthorization.line_for(@public_key, 10.minutes.from_now))
 
     key = AuthorizedKey.parse(authorized_keys.read).sole
     assert_match(/\Aexpiry-time="\d{14}Z"\z/, key.options)
@@ -143,7 +143,7 @@ class PublicKeyAuthorizationTest < ActiveSupport::TestCase
     authorized_keys.dirname.mkpath
     authorized_keys.write(%(# team\nexpiry-time="20261003144218Z" #{@type} #{@blob} Alice\n#{other}\n))
 
-    output = run_local_script(PublicKeyAuthorization.append_script("#{@type} #{@blob} Alice", @blob, replace: true))
+    output = run_local_script(Keys::PublicKeyAuthorization.append_script("#{@type} #{@blob} Alice", @blob, replace: true))
 
     assert_equal "added", output
     assert_equal "# team\n#{other}\n#{@type} #{@blob} Alice\n", authorized_keys.read
@@ -162,7 +162,7 @@ class PublicKeyAuthorizationTest < ActiveSupport::TestCase
     authorized_keys.dirname.mkpath
     authorized_keys.write(%(expiry-time="20261003144218Z" #{@type} #{@blob} Alice\n))
 
-    result = PublicKeyAuthorization.call(servers(:web), @public_key, expires_at: Time.utc(2030, 1, 1), replace: true,
+    result = Keys::PublicKeyAuthorization.call(servers(:web), @public_key, expires_at: Time.utc(2030, 1, 1), replace: true,
                                        transport: fake, known_hosts_file: @known_hosts)
 
     assert result.added?

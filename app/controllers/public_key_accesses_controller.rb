@@ -9,7 +9,7 @@ class PublicKeyAccessesController < ApplicationController
     servers = Server.where(id: params[:server_ids]).order(:name)
     return redirect_to(public_key_path(@public_key), alert: "Choisissez au moins un serveur.") if servers.empty?
 
-    @results = BulkAccess.grant([ @public_key ], servers, duration: requested_duration)
+    @results = Keys::BulkAccess.grant([ @public_key ], servers, duration: requested_duration)
 
     respond_with_accesses(:notice, "Ajouts terminés : #{@results.count { |result| !result.error? }}/#{@results.size} serveur(s).")
   end
@@ -17,7 +17,7 @@ class PublicKeyAccessesController < ApplicationController
   def destroy
     server = Server.find(params.expect(:server_id))
     account = AuthorizedKeysAccount.login(server)
-    result = KeyRevocation.call(server, @public_key.authorized_key.key, account: account, key_name: @public_key.authorized_key.comment || @public_key.name, public_key: @public_key)
+    result = Keys::Revocation.call(server, @public_key.authorized_key.key, account: account, key_name: @public_key.authorized_key.comment || @public_key.name, public_key: @public_key)
 
     if result.success?
       respond_with_accesses(:notice, "L'accès de « #{@public_key.name} » à « #{server.name} » a été retiré.")

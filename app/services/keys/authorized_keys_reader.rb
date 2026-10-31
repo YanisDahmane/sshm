@@ -1,7 +1,7 @@
 # Reads the authorized_keys file of an account (see AuthorizedKeysAccount) and
 # parses it into AuthorizedKey objects. A missing file means no keys. Never
 # raises: failures are returned in the Result.
-class AuthorizedKeysReader
+class Keys::AuthorizedKeysReader
   Result = Data.define(:keys, :error_title, :error_details, :reason) do
     def initialize(keys:, error_title:, error_details:, reason: nil) = super
     def success? = error_title.nil?
@@ -20,7 +20,7 @@ class AuthorizedKeysReader
   end
 
   def self.read_script(home)
-    AuthorizedKeysScript.prelude(home) + <<~SH
+    Keys::AuthorizedKeysScript.prelude(home) + <<~SH
       file="$home/.ssh/authorized_keys"
       if [ -f "$file" ]; then cat "$file"; fi
     SH

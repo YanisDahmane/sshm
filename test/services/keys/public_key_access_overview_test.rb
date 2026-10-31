@@ -1,6 +1,6 @@
 require "test_helper"
 
-class PublicKeyAccessOverviewTest < ActiveSupport::TestCase
+class Keys::PublicKeyAccessOverviewTest < ActiveSupport::TestCase
   include TemporaryAccessHelpers
 
   def record(server, *lines)
@@ -13,13 +13,13 @@ class PublicKeyAccessOverviewTest < ActiveSupport::TestCase
     record(servers(:backup), public_keys(:alice).content)
     temporary = create_temporary_access(unix_user: "deploy")
 
-    accesses = PublicKeyAccessOverview.new(public_keys(:ci)).accesses
+    accesses = Keys::PublicKeyAccessOverview.new(public_keys(:ci)).accesses
 
     assert_equal [ [ "Database", "admin" ], [ "Web", "deploy" ] ], accesses.map { |access| [ access.server.name, access.unix_user ] }
     assert_equal [ nil, temporary ], accesses.map(&:temporary_access)
   end
 
   test "empty when the key was never seen" do
-    assert_empty PublicKeyAccessOverview.new(public_keys(:alice)).accesses
+    assert_empty Keys::PublicKeyAccessOverview.new(public_keys(:alice)).accesses
   end
 end

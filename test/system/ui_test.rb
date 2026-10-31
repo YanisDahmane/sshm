@@ -91,12 +91,12 @@ class UiTest < ApplicationSystemTestCase
     granted = []
     granter = lambda do |server, _public_key, account:, **|
       granted << [ server.name, account.unix_user ]
-      PublicKeyAuthorization::Result.new(status: :added, error_title: nil, error_details: nil)
+      Keys::PublicKeyAuthorization::Result.new(status: :added, error_title: nil, error_details: nil)
     end
-    reader = ->(*, **) { AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(public_keys(:alice).content), error_title: nil, error_details: nil) }
+    reader = ->(*, **) { Keys::AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(public_keys(:alice).content), error_title: nil, error_details: nil) }
 
-    stub_method(AccessGrant, :call, granter) do
-      stub_method(AuthorizedKeysReader, :call, reader) do
+    stub_method(Keys::AccessGrant, :call, granter) do
+      stub_method(Keys::AuthorizedKeysReader, :call, reader) do
         visit public_key_path(public_keys(:alice))
         within("#bulk-authorize") do
           click_on "Tout cocher / décocher"
@@ -114,9 +114,9 @@ class UiTest < ApplicationSystemTestCase
 
   test "converting a key without public_key into a public_key from the server page" do
     bob = Ssh::KeyGenerator.generate(comment: "bob@desktop").public_key
-    reader = ->(*, **) { AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse([ ssh_keys(:main).public_key, bob ].join("\n")), error_title: nil, error_details: nil) }
+    reader = ->(*, **) { Keys::AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse([ ssh_keys(:main).public_key, bob ].join("\n")), error_title: nil, error_details: nil) }
 
-    stub_method(AuthorizedKeysReader, :call, reader) do
+    stub_method(Keys::AuthorizedKeysReader, :call, reader) do
       visit server_path(servers(:web), tab: "keys")
 
       within("#server-authorized-keys") do

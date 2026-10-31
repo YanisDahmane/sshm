@@ -1,7 +1,7 @@
 # Last known authorized keys of a server account, as read over SSH. Keeps the
 # dashboard figures and "where is this key installed?" answerable
 # without connecting to every server. Refreshed on each successful read
-# (key list, ServerScan) and when an expired key is removed.
+# (key list, Keys::ServerScan) and when an expired key is removed.
 class AccountSnapshot < ApplicationRecord
   belongs_to :server
 

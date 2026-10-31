@@ -30,14 +30,14 @@ class RotateSshKeyJobTest < ActiveJob::TestCase
     def remove(server, blob, protected_keys:, key:, **)
       @removals << [ server.name, blob, protected_keys.map(&:state), key.state ]
       ok = @failures[server.name] != "cleanup"
-      AuthorizedKeyRemoval::Result.new(status: ok ? :removed : :error, error_title: "Connexion impossible", error_details: "x")
+      Keys::AuthorizedKeyRemoval::Result.new(status: ok ? :removed : :error, error_title: "Connexion impossible", error_details: "x")
     end
   end
 
   def run_job(rotation, fake, **options)
     stub_method(Ssh::Connection, :open, ->(server, **kw, &block) { fake.open(server, **kw, &block) }) do
       stub_method(Ssh::Check, :call, ->(server, **kw) { fake.check(server, **kw) }) do
-        stub_method(AuthorizedKeyRemoval, :call, ->(server, blob, **kw) { fake.remove(server, blob, **kw) }) do
+        stub_method(Keys::AuthorizedKeyRemoval, :call, ->(server, blob, **kw) { fake.remove(server, blob, **kw) }) do
           RotateSshKeyJob.perform_now(rotation, **options)
         end
       end

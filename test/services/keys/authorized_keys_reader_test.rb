@@ -1,6 +1,6 @@
 require "test_helper"
 
-class AuthorizedKeysReaderTest < ActiveSupport::TestCase
+class Keys::AuthorizedKeysReaderTest < ActiveSupport::TestCase
   include LocalShellHelpers
 
   setup do
@@ -14,7 +14,7 @@ class AuthorizedKeysReaderTest < ActiveSupport::TestCase
   end
 
   def read(fake, account: nil)
-    AuthorizedKeysReader.call(servers(:web), account: account, transport: fake, known_hosts_file: @known_hosts)
+    Keys::AuthorizedKeysReader.call(servers(:web), account: account, transport: fake, known_hosts_file: @known_hosts)
   end
 
   test "reads and parses the SSH user's authorized_keys" do

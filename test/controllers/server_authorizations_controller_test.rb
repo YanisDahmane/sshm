@@ -8,7 +8,7 @@ class ServerAuthorizationsControllerTest < ActionDispatch::IntegrationTest
   include TemporaryAccessHelpers
 
   def result(status, title: nil, details: nil)
-    PublicKeyAuthorization::Result.new(status: status, error_title: title, error_details: details)
+    Keys::PublicKeyAuthorization::Result.new(status: status, error_title: title, error_details: details)
   end
 
   test "requires authentication" do
@@ -35,7 +35,7 @@ class ServerAuthorizationsControllerTest < ActionDispatch::IntegrationTest
   test "authorizes the public_key and reloads the key list over Turbo Stream" do
     sign_in users(:one)
 
-    stub_method(PublicKeyAuthorization, :call, result(:added)) do
+    stub_method(Keys::PublicKeyAuthorization, :call, result(:added)) do
       post server_authorizations_path(servers(:web)), params: { public_key_id: public_keys(:alice).id }, as: :turbo_stream
     end
 
@@ -51,7 +51,7 @@ class ServerAuthorizationsControllerTest < ActionDispatch::IntegrationTest
   test "reports a public_key that was already authorized" do
     sign_in users(:one)
 
-    stub_method(PublicKeyAuthorization, :call, result(:already_present)) do
+    stub_method(Keys::PublicKeyAuthorization, :call, result(:already_present)) do
       post server_authorizations_path(servers(:web)), params: { public_key_id: public_keys(:alice).id }, as: :turbo_stream
     end
 
@@ -74,7 +74,7 @@ class ServerAuthorizationsControllerTest < ActionDispatch::IntegrationTest
   test "the HTML fallback redirects to the server page" do
     sign_in users(:one)
 
-    stub_method(PublicKeyAuthorization, :call, result(:added)) do
+    stub_method(Keys::PublicKeyAuthorization, :call, result(:added)) do
       post server_authorizations_path(servers(:web)), params: { public_key_id: public_keys(:alice).id }
     end
 
@@ -91,7 +91,7 @@ class ServerAuthorizationsControllerTest < ActionDispatch::IntegrationTest
     end
 
     freeze_time do
-      stub_method(AccessGrant, :call, granter) do
+      stub_method(Keys::AccessGrant, :call, granter) do
         post server_authorizations_path(servers(:web)), params: { public_key_id: public_keys(:alice).id, duration: "10" }, as: :turbo_stream
       end
 
@@ -106,7 +106,7 @@ class ServerAuthorizationsControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:one)
     durations = []
 
-    stub_method(AccessGrant, :call, ->(*, duration:, **) { durations << duration; result(:added) }) do
+    stub_method(Keys::AccessGrant, :call, ->(*, duration:, **) { durations << duration; result(:added) }) do
       post server_authorizations_path(servers(:web)), params: { public_key_id: public_keys(:alice).id, duration: "" }, as: :turbo_stream
     end
 

@@ -1,15 +1,15 @@
 require "test_helper"
 
-class BulkAccessTest < ActiveSupport::TestCase
+class Keys::BulkAccessTest < ActiveSupport::TestCase
   include StubHelpers
 
-  def grant_result(status) = PublicKeyAuthorization::Result.new(status: status, error_title: (status == :error ? "Connexion impossible" : nil), error_details: (status == :error ? "timeout" : nil))
+  def grant_result(status) = Keys::PublicKeyAuthorization::Result.new(status: status, error_title: (status == :error ? "Connexion impossible" : nil), error_details: (status == :error ? "timeout" : nil))
 
   setup do
     @reads = []
-    stub_method_until_teardown(AuthorizedKeysReader, :call, ->(server, account:) {
+    stub_method_until_teardown(Keys::AuthorizedKeysReader, :call, ->(server, account:) {
       @reads << [ server.name, account.unix_user ]
-      AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(public_keys(:alice).content), error_title: nil, error_details: nil)
+      Keys::AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(public_keys(:alice).content), error_title: nil, error_details: nil)
     })
   end
 
@@ -17,8 +17,8 @@ class BulkAccessTest < ActiveSupport::TestCase
     calls = []
     granter = ->(server, public_key, account:, duration:) { calls << [ server.name, public_key.name, account.unix_user, duration ]; grant_result(:added) }
 
-    results = stub_method(AccessGrant, :call, granter) do
-      BulkAccess.grant([ public_keys(:alice), public_keys(:ci) ], [ servers(:backup), servers(:web) ])
+    results = stub_method(Keys::AccessGrant, :call, granter) do
+      Keys::BulkAccess.grant([ public_keys(:alice), public_keys(:ci) ], [ servers(:backup), servers(:web) ])
     end
 
     assert_equal [ [ "Backup", "Alice", "root", nil ], [ "Backup", "CI", "root", nil ], [ "Web", "Alice", "deploy", nil ], [ "Web", "CI", "deploy", nil ] ], calls.sort
@@ -29,8 +29,8 @@ class BulkAccessTest < ActiveSupport::TestCase
   end
 
   test "a failed grant is an error and does not refresh the snapshot" do
-    results = stub_method(AccessGrant, :call, grant_result(:error)) do
-      BulkAccess.grant([ public_keys(:alice) ], [ servers(:web) ])
+    results = stub_method(Keys::AccessGrant, :call, grant_result(:error)) do
+      Keys::BulkAccess.grant([ public_keys(:alice) ], [ servers(:web) ])
     end
 
     assert results.first.error?
@@ -49,7 +49,7 @@ class BulkAccessTest < ActiveSupport::TestCase
     end
     servers = [ servers(:backup), servers(:db), servers(:web) ]
 
-    results = stub_method(AccessGrant, :call, granter) { BulkAccess.grant([ public_keys(:alice) ], servers) }
+    results = stub_method(Keys::AccessGrant, :call, granter) { Keys::BulkAccess.grant([ public_keys(:alice) ], servers) }
 
     assert_equal %w[Backup Database Web], results.map { |result| result.server.name }
     assert_operator peak.value, :>, 1

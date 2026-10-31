@@ -1,4 +1,4 @@
-<%# Outcome of BulkAccess, one line per server (and per public_key with show_public_key). %>
+<%# Outcome of Keys::BulkAccess, one line per server (and per public_key with show_public_key). %>
 <ul class="bulk-results mt-4 divide-y divide-line rounded-md border border-line text-sm">
   <% results.each do |result| %>
     <li class="bulk-result flex items-start gap-3 px-4 py-2 <%= result.error? ? "is-error" : "is-success" %>">

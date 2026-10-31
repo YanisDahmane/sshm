@@ -1,6 +1,6 @@
 require "test_helper"
 
-class AuthorizedKeyRemovalTest < ActiveSupport::TestCase
+class Keys::AuthorizedKeyRemovalTest < ActiveSupport::TestCase
   include LocalShellHelpers
 
   setup do
@@ -18,13 +18,13 @@ class AuthorizedKeyRemovalTest < ActiveSupport::TestCase
   end
 
   def remove(blob, fake: FakeSsh.new(handler: local_shell))
-    AuthorizedKeyRemoval.call(servers(:web), blob, transport: fake, known_hosts_file: @known_hosts)
+    Keys::AuthorizedKeyRemoval.call(servers(:web), blob, transport: fake, known_hosts_file: @known_hosts)
   end
 
   test "script removes the key and keeps everything else byte for byte" do
     authorized_keys_file.write("# team keys\n#{@bob}\n#{@alice}\n\n# end\n")
 
-    assert_equal "removed", run_local_script(AuthorizedKeyRemoval.remove_script(@alice_blob))
+    assert_equal "removed", run_local_script(Keys::AuthorizedKeyRemoval.remove_script(@alice_blob))
     assert_equal "# team keys\n#{@bob}\n\n# end\n", authorized_keys_file.read
   end
 
@@ -32,7 +32,7 @@ class AuthorizedKeyRemovalTest < ActiveSupport::TestCase
     type = @alice.split(" ")[0]
     authorized_keys_file.write("#{@alice}\nno-pty,from=\"10.0.0.1\" #{type} #{@alice_blob} again\n#{@bob}\n")
 
-    run_local_script(AuthorizedKeyRemoval.remove_script(@alice_blob))
+    run_local_script(Keys::AuthorizedKeyRemoval.remove_script(@alice_blob))
 
     assert_equal "#{@bob}\n", authorized_keys_file.read
   end
@@ -40,20 +40,20 @@ class AuthorizedKeyRemovalTest < ActiveSupport::TestCase
   test "script leaves the file untouched when the key is absent" do
     authorized_keys_file.write(@bob) # no trailing newline
 
-    assert_equal "absent", run_local_script(AuthorizedKeyRemoval.remove_script(@alice_blob))
+    assert_equal "absent", run_local_script(Keys::AuthorizedKeyRemoval.remove_script(@alice_blob))
     assert_equal @bob, authorized_keys_file.read
   end
 
   test "script does not match the blob inside a comment or another field" do
     authorized_keys_file.write("#{@bob} copy-of-#{@alice_blob}\n")
 
-    assert_equal "absent", run_local_script(AuthorizedKeyRemoval.remove_script(@alice_blob))
+    assert_equal "absent", run_local_script(Keys::AuthorizedKeyRemoval.remove_script(@alice_blob))
   end
 
   test "script reports absent when there is no authorized_keys file" do
     authorized_keys_file.delete if authorized_keys_file.exist?
 
-    assert_equal "absent", run_local_script(AuthorizedKeyRemoval.remove_script(@alice_blob))
+    assert_equal "absent", run_local_script(Keys::AuthorizedKeyRemoval.remove_script(@alice_blob))
     assert_not authorized_keys_file.exist?
   end
 
@@ -61,7 +61,7 @@ class AuthorizedKeyRemovalTest < ActiveSupport::TestCase
     authorized_keys_file.write("#{@alice}\n#{@bob}\n")
     authorized_keys_file.chmod(0o600)
 
-    run_local_script(AuthorizedKeyRemoval.remove_script(@alice_blob))
+    run_local_script(Keys::AuthorizedKeyRemoval.remove_script(@alice_blob))
 
     assert_equal "600", format("%o", authorized_keys_file.stat.mode & 0o777)
     assert_equal [ "authorized_keys" ], authorized_keys_file.dirname.children.map { |path| path.basename.to_s }
@@ -121,7 +121,7 @@ class AuthorizedKeyRemovalTest < ActiveSupport::TestCase
     custom.join("authorized_keys").write("#{@alice}\n#{@bob}\n")
     authorized_keys_file.write("#{@alice}\n")
 
-    run_local_script(AuthorizedKeyRemoval.remove_script(@alice_blob, home: Shellwords.escape(custom.dirname.to_s)))
+    run_local_script(Keys::AuthorizedKeyRemoval.remove_script(@alice_blob, home: Shellwords.escape(custom.dirname.to_s)))
 
     assert_equal "#{@bob}\n", custom.join("authorized_keys").read
     assert_equal "#{@alice}\n", authorized_keys_file.read
@@ -139,7 +139,7 @@ class AuthorizedKeyRemovalTest < ActiveSupport::TestCase
     authorized_keys_file.write("#{ssh_keys(:main).public_key}\n#{@bob}\n")
     new_key = SshKey.generate_pending!
 
-    result = AuthorizedKeyRemoval.call(servers(:web), ssh_keys(:main).blob, protected_keys: [ new_key ],
+    result = Keys::AuthorizedKeyRemoval.call(servers(:web), ssh_keys(:main).blob, protected_keys: [ new_key ],
                                        transport: FakeSsh.new(handler: local_shell), known_hosts_file: @known_hosts)
 
     assert result.removed?

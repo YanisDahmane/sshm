@@ -10,7 +10,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
   def frame_id = dom_id(servers(:web), :authorized_keys)
 
   def keys_result(*lines)
-    AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(lines.join("\n")), error_title: nil, error_details: nil)
+    Keys::AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(lines.join("\n")), error_title: nil, error_details: nil)
   end
 
   test "requires authentication" do
@@ -29,7 +29,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     other = Ssh::KeyGenerator.generate
     unnamed = other.public_key.split(" ").first(2).join(" ")
 
-    stub_method(AuthorizedKeysReader, :call, keys_result(ssh_keys(:main).public_key, unnamed, public_keys(:alice).content)) do
+    stub_method(Keys::AuthorizedKeysReader, :call, keys_result(ssh_keys(:main).public_key, unnamed, public_keys(:alice).content)) do
       get server_authorized_keys_path(servers(:web))
     end
 
@@ -63,7 +63,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:one)
     renamed = ssh_keys(:main).public_key.split(" ").first(2).join(" ")
 
-    stub_method(AuthorizedKeysReader, :call, keys_result(renamed)) do
+    stub_method(Keys::AuthorizedKeysReader, :call, keys_result(renamed)) do
       get server_authorized_keys_path(servers(:web))
     end
 
@@ -75,7 +75,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:one)
     key = Ssh::KeyGenerator.generate(comment: "ci").public_key
 
-    stub_method(AuthorizedKeysReader, :call, keys_result(%(from="10.0.0.1",no-pty #{key}))) do
+    stub_method(Keys::AuthorizedKeysReader, :call, keys_result(%(from="10.0.0.1",no-pty #{key}))) do
       get server_authorized_keys_path(servers(:web))
     end
 
@@ -85,7 +85,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
   test "shows an empty state when there are no keys" do
     sign_in users(:one)
 
-    stub_method(AuthorizedKeysReader, :call, keys_result) do
+    stub_method(Keys::AuthorizedKeysReader, :call, keys_result) do
       get server_authorized_keys_path(servers(:web))
     end
 
@@ -114,7 +114,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:one)
     type, blob = public_keys(:alice).content.split(" ")
 
-    stub_method(AuthorizedKeysReader, :call, keys_result("#{type} #{blob} renamed")) do
+    stub_method(Keys::AuthorizedKeysReader, :call, keys_result("#{type} #{blob} renamed")) do
       get server_authorized_keys_path(servers(:web))
     end
 
@@ -126,7 +126,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:one)
     named = Ssh::KeyGenerator.generate(comment: "alice@laptop").public_key
 
-    stub_method(AuthorizedKeysReader, :call, keys_result(ssh_keys(:main).public_key, named)) do
+    stub_method(Keys::AuthorizedKeysReader, :call, keys_result(ssh_keys(:main).public_key, named)) do
       get server_authorized_keys_path(servers(:web))
     end
 
@@ -152,9 +152,9 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
 
   test "destroy removes the key and reloads the list over Turbo Stream" do
     sign_in users(:one)
-    removed = AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil)
+    removed = Keys::AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil)
 
-    stub_method(AuthorizedKeyRemoval, :call, removed) do
+    stub_method(Keys::AuthorizedKeyRemoval, :call, removed) do
       delete server_authorized_key_path(servers(:web)), params: { key: "AAAA", name: "alice@laptop" }, as: :turbo_stream
     end
 
@@ -169,9 +169,9 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
 
   test "destroy reports a key that was already gone, unnamed" do
     sign_in users(:one)
-    absent = AuthorizedKeyRemoval::Result.new(status: :absent, error_title: nil, error_details: nil)
+    absent = Keys::AuthorizedKeyRemoval::Result.new(status: :absent, error_title: nil, error_details: nil)
 
-    stub_method(AuthorizedKeyRemoval, :call, absent) do
+    stub_method(Keys::AuthorizedKeyRemoval, :call, absent) do
       delete server_authorized_key_path(servers(:web)), params: { key: "AAAA" }, as: :turbo_stream
     end
 
@@ -192,9 +192,9 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
 
   test "destroy HTML fallback redirects to the server page" do
     sign_in users(:one)
-    removed = AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil)
+    removed = Keys::AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil)
 
-    stub_method(AuthorizedKeyRemoval, :call, removed) do
+    stub_method(Keys::AuthorizedKeyRemoval, :call, removed) do
       delete server_authorized_key_path(servers(:web)), params: { key: "AAAA", name: "bob" }
     end
 
@@ -210,7 +210,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
       keys_result
     end
 
-    stub_method(AuthorizedKeysReader, :call, reader) do
+    stub_method(Keys::AuthorizedKeysReader, :call, reader) do
       get server_authorized_keys_path(servers(:web))
     end
 
@@ -224,7 +224,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     access = create_temporary_access(expires_at: 9.minutes.from_now + 30.seconds)
     type, blob = public_keys(:ci).content.split(" ")
 
-    stub_method(AuthorizedKeysReader, :call, keys_result(%(expiry-time="20300101000000Z" #{type} #{blob} CI), public_keys(:alice).content)) do
+    stub_method(Keys::AuthorizedKeysReader, :call, keys_result(%(expiry-time="20300101000000Z" #{type} #{blob} CI), public_keys(:alice).content)) do
       get server_authorized_keys_path(servers(:web))
     end
 
@@ -236,7 +236,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:one)
     create_temporary_access(expires_at: 1.minute.ago)
 
-    stub_method(AuthorizedKeysReader, :call, keys_result(public_keys(:ci).content)) do
+    stub_method(Keys::AuthorizedKeysReader, :call, keys_result(public_keys(:ci).content)) do
       get server_authorized_keys_path(servers(:web))
     end
 
@@ -247,9 +247,9 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:one)
     access = create_temporary_access
     other = create_temporary_access(server: servers(:db), unix_user: "admin")
-    removed = AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil)
+    removed = Keys::AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil)
 
-    stub_method(AuthorizedKeyRemoval, :call, removed) do
+    stub_method(Keys::AuthorizedKeyRemoval, :call, removed) do
       delete server_authorized_key_path(servers(:web)), params: { key: public_keys(:ci).authorized_key.key }, as: :turbo_stream
     end
 
@@ -260,9 +260,9 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
   test "destroy keeps the temporary access when the removal fails" do
     sign_in users(:one)
     access = create_temporary_access
-    failed = AuthorizedKeyRemoval::Result.new(status: :error, error_title: "Connexion impossible", error_details: "")
+    failed = Keys::AuthorizedKeyRemoval::Result.new(status: :error, error_title: "Connexion impossible", error_details: "")
 
-    stub_method(AuthorizedKeyRemoval, :call, failed) do
+    stub_method(Keys::AuthorizedKeyRemoval, :call, failed) do
       delete server_authorized_key_path(servers(:web)), params: { key: public_keys(:ci).authorized_key.key }, as: :turbo_stream
     end
 
@@ -275,7 +275,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     bob = Ssh::KeyGenerator.generate(comment: "bob@desktop").public_key
     ci_unnamed = public_keys(:ci).content.split(" ").first(2).join(" ")
 
-    stub_method(AuthorizedKeysReader, :call, keys_result(ssh_keys(:main).public_key, unnamed, %(no-pty #{bob}), ci_unnamed)) do
+    stub_method(Keys::AuthorizedKeysReader, :call, keys_result(ssh_keys(:main).public_key, unnamed, %(no-pty #{bob}), ci_unnamed)) do
       get server_authorized_keys_path(servers(:web))
     end
 
@@ -293,7 +293,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
   test "no warning when every key is identified" do
     sign_in users(:one)
 
-    stub_method(AuthorizedKeysReader, :call, keys_result(ssh_keys(:main).public_key, public_keys(:alice).content)) do
+    stub_method(Keys::AuthorizedKeysReader, :call, keys_result(ssh_keys(:main).public_key, public_keys(:alice).content)) do
       get server_authorized_keys_path(servers(:web))
     end
 
@@ -305,7 +305,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
   test "records the snapshot and the SSH status on a successful read" do
     sign_in users(:one)
 
-    stub_method(AuthorizedKeysReader, :call, keys_result(public_keys(:alice).content)) do
+    stub_method(Keys::AuthorizedKeysReader, :call, keys_result(public_keys(:alice).content)) do
       get server_authorized_keys_path(servers(:web))
     end
 
@@ -316,9 +316,9 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
 
   test "records a refused key and guides the user to install the Elio key" do
     sign_in users(:one)
-    refused = AuthorizedKeysReader::Result.new(keys: [], error_title: "Clé SSH refusée par le serveur", error_details: "x", reason: :key_refused)
+    refused = Keys::AuthorizedKeysReader::Result.new(keys: [], error_title: "Clé SSH refusée par le serveur", error_details: "x", reason: :key_refused)
 
-    stub_method(AuthorizedKeysReader, :call, refused) do
+    stub_method(Keys::AuthorizedKeysReader, :call, refused) do
       get server_authorized_keys_path(servers(:web))
     end
 
@@ -330,9 +330,9 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
 
   test "points to the settings when there is no Elio key" do
     sign_in users(:one)
-    missing = AuthorizedKeysReader::Result.new(keys: [], error_title: "Aucune clé SSH configurée", error_details: "x", reason: :missing_key)
+    missing = Keys::AuthorizedKeysReader::Result.new(keys: [], error_title: "Aucune clé SSH configurée", error_details: "x", reason: :missing_key)
 
-    stub_method(AuthorizedKeysReader, :call, missing) do
+    stub_method(Keys::AuthorizedKeysReader, :call, missing) do
       get server_authorized_keys_path(servers(:web))
     end
 
@@ -342,9 +342,9 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
 
   test "destroy logs the removed key" do
     sign_in users(:one)
-    removed = AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil)
+    removed = Keys::AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil)
 
-    stub_method(AuthorizedKeyRemoval, :call, removed) do
+    stub_method(Keys::AuthorizedKeyRemoval, :call, removed) do
       delete server_authorized_key_path(servers(:web)), params: { key: "AAAA", name: "bob" }, as: :turbo_stream
     end
 
@@ -356,7 +356,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:one)
     line = %(no-pty #{public_keys(:alice).content})
 
-    stub_method(AuthorizedKeysReader, :call, keys_result(line)) do
+    stub_method(Keys::AuthorizedKeysReader, :call, keys_result(line)) do
       get server_authorized_keys_path(servers(:web))
     end
 
@@ -380,7 +380,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
   test "each key gets its own dialog ids" do
     sign_in users(:one)
 
-    stub_method(AuthorizedKeysReader, :call, keys_result(public_keys(:alice).content, public_keys(:ci).content)) do
+    stub_method(Keys::AuthorizedKeysReader, :call, keys_result(public_keys(:alice).content, public_keys(:ci).content)) do
       get server_authorized_keys_path(servers(:web))
     end
 

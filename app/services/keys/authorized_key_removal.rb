@@ -5,7 +5,7 @@ require "shellwords"
 # every line whose key blob is `blob` is dropped, other lines (comments,
 # other keys) are kept byte for byte. The Elio key can never be removed,
 # since the app would lose access to the server.
-class AuthorizedKeyRemoval
+class Keys::AuthorizedKeyRemoval
   BLOB_FORMAT = %r{\A[A-Za-z0-9+/]+={0,2}\z}
 
   Result = Data.define(:status, :error_title, :error_details) do
@@ -34,12 +34,12 @@ class AuthorizedKeyRemoval
   def self.remove_script(blob, home: "$HOME")
     blob = Shellwords.escape(blob)
 
-    AuthorizedKeysScript.prelude(home) + <<~SH
+    Keys::AuthorizedKeysScript.prelude(home) + <<~SH
       file="$home/.ssh/authorized_keys"
       if [ ! -f "$file" ]; then echo absent; exit 0; fi
       matches=$(awk -v blob=#{blob} '{ for (i = 1; i <= NF; i++) if ($i == blob) { n++; break } } END { print n + 0 }' "$file")
       if [ "$matches" -eq 0 ]; then echo absent; exit 0; fi
-      #{AuthorizedKeysScript.drop_lines(blob)}
+      #{Keys::AuthorizedKeysScript.drop_lines(blob)}
       echo removed
     SH
   end

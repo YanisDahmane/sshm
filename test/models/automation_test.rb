@@ -46,10 +46,10 @@ class AutomationTest < ActiveSupport::TestCase
     automation = Automation.all_kinds.find { |a| a.kind == "keys_scan" }
     scan = lambda do |server, **|
       Activity.record!(:unknown_key_detected, server: server) if server.name == "Web"
-      ServerScan::Result.new(error_title: (server.name == "Backup" ? "Connexion impossible" : nil))
+      Keys::ServerScan::Result.new(error_title: (server.name == "Backup" ? "Connexion impossible" : nil))
     end
 
-    result = stub_method(ServerScan, :call, scan) { automation.run! }
+    result = stub_method(Keys::ServerScan, :call, scan) { automation.run! }
 
     assert_equal "2/3 serveur(s) scanné(s), 1 nouvelle(s) clé(s) inconnue(s)", result
     assert_equal result, automation.reload.last_result

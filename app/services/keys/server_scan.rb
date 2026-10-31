@@ -1,13 +1,13 @@
 # Reads the authorized keys of a server (login account) and refreshes its
 # AccountSnapshot and the server's SSH status. Never raises.
-class ServerScan
+class Keys::ServerScan
   Result = Data.define(:error_title) do
     def success? = error_title.nil?
   end
 
   def self.call(server, **connection_options)
     account = AuthorizedKeysAccount.login(server)
-    read = AuthorizedKeysReader.call(server, account: account, **connection_options)
+    read = Keys::AuthorizedKeysReader.call(server, account: account, **connection_options)
 
     if read.success?
       server.record_ssh_status!(true)

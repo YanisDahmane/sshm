@@ -1,5 +1,5 @@
 # Shell snippets shared by the scripts that work on an account's authorized_keys.
-module AuthorizedKeysScript
+module Keys::AuthorizedKeysScript
   # Stops on the first error and resolves the home directory.
   def self.prelude(home)
     <<~SH

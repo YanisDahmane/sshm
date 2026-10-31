@@ -13,7 +13,7 @@ class ExpireTemporaryAccessJob < ApplicationJob
     return unless access.active?
     return self.class.set(wait_until: access.expires_at).perform_later(access) unless access.expired?
 
-    result = AuthorizedKeyRemoval.call(access.server, access.key_blob, account: access.account)
+    result = Keys::AuthorizedKeyRemoval.call(access.server, access.key_blob, account: access.account)
     raise RemovalFailed, "#{result.error_title}: #{result.error_details}" unless result.success?
 
     access.end!

@@ -9,14 +9,14 @@ class PublicKeyAccessesControllerTest < ActionDispatch::IntegrationTest
     @public_key = public_keys(:alice)
     @grants = []
     # After a grant, the controller re-reads the account to refresh its snapshot.
-    stub_method_until_teardown(AuthorizedKeysReader, :call, ->(*, **) { AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(@public_key.content), error_title: nil, error_details: nil) })
+    stub_method_until_teardown(Keys::AuthorizedKeysReader, :call, ->(*, **) { Keys::AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(@public_key.content), error_title: nil, error_details: nil) })
   end
 
   def granter(status_for = ->(_server) { :added })
     lambda do |server, public_key, account:, duration:, **|
       @grants << [ server.name, public_key.name, account.unix_user, duration ]
       status = status_for.call(server)
-      PublicKeyAuthorization::Result.new(status: status, error_title: (status == :error ? "Connexion impossible" : nil), error_details: (status == :error ? "refused" : nil))
+      Keys::PublicKeyAuthorization::Result.new(status: status, error_title: (status == :error ? "Connexion impossible" : nil), error_details: (status == :error ? "refused" : nil))
     end
   end
 
@@ -31,7 +31,7 @@ class PublicKeyAccessesControllerTest < ActionDispatch::IntegrationTest
   test "grants the public_key on each selected server's login user" do
     sign_in users(:one)
 
-    stub_method(AccessGrant, :call, granter) do
+    stub_method(Keys::AccessGrant, :call, granter) do
       post public_key_accesses_path(@public_key), params: { server_ids: [ servers(:web).id, servers(:db).id ] }, as: :turbo_stream
     end
 
@@ -52,7 +52,7 @@ class PublicKeyAccessesControllerTest < ActionDispatch::IntegrationTest
   test "grants for a limited time" do
     sign_in users(:one)
 
-    stub_method(AccessGrant, :call, granter) do
+    stub_method(Keys::AccessGrant, :call, granter) do
       post public_key_accesses_path(@public_key), params: { server_ids: [ servers(:web).id ], duration: "60" }, as: :turbo_stream
     end
 
@@ -66,7 +66,7 @@ class PublicKeyAccessesControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:one)
     statuses = { "Web" => :already_present, "Database" => :error }
 
-    stub_method(AccessGrant, :call, granter(->(server) { statuses.fetch(server.name) })) do
+    stub_method(Keys::AccessGrant, :call, granter(->(server) { statuses.fetch(server.name) })) do
       post public_key_accesses_path(@public_key), params: { server_ids: [ servers(:web).id, servers(:db).id ] }, as: :turbo_stream
     end
 
@@ -103,10 +103,10 @@ class PublicKeyAccessesControllerTest < ActionDispatch::IntegrationTest
     calls = []
     remover = lambda do |server, blob, account:, **|
       calls << [ server, blob, account.unix_user ]
-      AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil)
+      Keys::AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil)
     end
 
-    stub_method(AuthorizedKeyRemoval, :call, remover) do
+    stub_method(Keys::AuthorizedKeyRemoval, :call, remover) do
       delete public_key_access_path(public_key), params: { server_id: servers(:web).id }, as: :turbo_stream
     end
 
@@ -124,9 +124,9 @@ class PublicKeyAccessesControllerTest < ActionDispatch::IntegrationTest
   test "keeps everything when the revocation fails" do
     sign_in users(:one)
     AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse(@public_key.content))
-    failed = AuthorizedKeyRemoval::Result.new(status: :error, error_title: "Connexion impossible", error_details: "refused")
+    failed = Keys::AuthorizedKeyRemoval::Result.new(status: :error, error_title: "Connexion impossible", error_details: "refused")
 
-    stub_method(AuthorizedKeyRemoval, :call, failed) do
+    stub_method(Keys::AuthorizedKeyRemoval, :call, failed) do
       delete public_key_access_path(@public_key), params: { server_id: servers(:web).id }, as: :turbo_stream
     end
 

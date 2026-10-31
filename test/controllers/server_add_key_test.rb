@@ -7,7 +7,7 @@ class ServerAddKeyTest < ActionDispatch::IntegrationTest
   include ActionView::RecordIdentifier
   include StubHelpers
 
-  def added = PublicKeyAuthorization::Result.new(status: :added, error_title: nil, error_details: nil)
+  def added = Keys::PublicKeyAuthorization::Result.new(status: :added, error_title: nil, error_details: nil)
 
   def new_key_params(duration: "", **overrides)
     { source: "new", duration: duration, public_key: { name: "Bob", kind: "person", content: Ssh::KeyGenerator.generate(comment: "bob@laptop").public_key,
@@ -52,7 +52,7 @@ class ServerAddKeyTest < ActionDispatch::IntegrationTest
     granted = []
 
     assert_difference -> { PublicKey.count } do
-      stub_method(AccessGrant, :call, ->(server, public_key, **options) { granted << [ server, public_key.name, options[:duration] ] && added }) do
+      stub_method(Keys::AccessGrant, :call, ->(server, public_key, **options) { granted << [ server, public_key.name, options[:duration] ] && added }) do
         post server_authorizations_path(servers(:web)), params: new_key_params(duration: "60"), as: :turbo_stream
       end
     end
@@ -70,7 +70,7 @@ class ServerAddKeyTest < ActionDispatch::IntegrationTest
     sign_in users(:one)
 
     assert_no_difference -> { PublicKey.count } do
-      stub_method(AccessGrant, :call, ->(*) { flunk "nothing must be added" }) do
+      stub_method(Keys::AccessGrant, :call, ->(*) { flunk "nothing must be added" }) do
         post server_authorizations_path(servers(:web)), params: new_key_params(name: "Bob", content: "pas une clé"), as: :turbo_stream
       end
     end
@@ -94,9 +94,9 @@ class ServerAddKeyTest < ActionDispatch::IntegrationTest
 
   test "when the server refuses, the new key stays in the keyring" do
     sign_in users(:one)
-    failed = PublicKeyAuthorization::Result.new(status: :error, error_title: "Connexion impossible", error_details: "refusée")
+    failed = Keys::PublicKeyAuthorization::Result.new(status: :error, error_title: "Connexion impossible", error_details: "refusée")
 
-    stub_method(AccessGrant, :call, failed) do
+    stub_method(Keys::AccessGrant, :call, failed) do
       post server_authorizations_path(servers(:web)), params: new_key_params, as: :turbo_stream
     end
 

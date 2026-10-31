@@ -1,6 +1,6 @@
 require "test_helper"
 
-class ServerScanTest < ActiveSupport::TestCase
+class Keys::ServerScanTest < ActiveSupport::TestCase
   include StubHelpers
 
   setup do
@@ -8,14 +8,14 @@ class ServerScanTest < ActiveSupport::TestCase
   end
 
   def read_result(keys: "", error_title: nil, reason: nil)
-    AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(keys), error_title: error_title, error_details: nil, reason: reason)
+    Keys::AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(keys), error_title: error_title, error_details: nil, reason: reason)
   end
 
   test "reads the login account and records its snapshot" do
     accounts = []
     reader = ->(_server, account:, **) { accounts << account.unix_user; read_result(keys: public_keys(:alice).content) }
 
-    result = stub_method(AuthorizedKeysReader, :call, reader) { ServerScan.call(@server) }
+    result = stub_method(Keys::AuthorizedKeysReader, :call, reader) { Keys::ServerScan.call(@server) }
 
     assert result.success?
     assert_equal %w[deploy], accounts
@@ -26,7 +26,7 @@ class ServerScanTest < ActiveSupport::TestCase
   test "records a refused key and no snapshot" do
     refused = read_result(error_title: "Clé SSH refusée par le serveur", reason: :key_refused)
 
-    result = stub_method(AuthorizedKeysReader, :call, refused) { ServerScan.call(@server) }
+    result = stub_method(Keys::AuthorizedKeysReader, :call, refused) { Keys::ServerScan.call(@server) }
 
     assert_not result.success?
     assert_equal "Clé SSH refusée par le serveur", result.error_title
@@ -35,7 +35,7 @@ class ServerScanTest < ActiveSupport::TestCase
   end
 
   test "an unreachable server keeps its SSH status" do
-    stub_method(AuthorizedKeysReader, :call, read_result(error_title: "Connexion impossible")) { ServerScan.call(@server) }
+    stub_method(Keys::AuthorizedKeysReader, :call, read_result(error_title: "Connexion impossible")) { Keys::ServerScan.call(@server) }
 
     assert_nil @server.reload.ssh_ok
   end

@@ -14,15 +14,15 @@ class AuthorizedKeyRemovalSystemTest < ApplicationSystemTestCase
     lines = [ ssh_keys(:main).public_key, bob ]
     reader = lambda do |_server, account:, **|
       keys = AuthorizedKey.parse(lines.join("\n"))
-      AuthorizedKeysReader::Result.new(keys: keys, error_title: nil, error_details: nil)
+      Keys::AuthorizedKeysReader::Result.new(keys: keys, error_title: nil, error_details: nil)
     end
     remover = lambda do |_server, blob, **|
       lines.reject! { |line| line.split(" ")[1] == blob }
-      AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil)
+      Keys::AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil)
     end
 
-    stub_method(AuthorizedKeysReader, :call, reader) do
-      stub_method(AuthorizedKeyRemoval, :call, remover) do
+    stub_method(Keys::AuthorizedKeysReader, :call, reader) do
+      stub_method(Keys::AuthorizedKeyRemoval, :call, remover) do
         visit server_path(servers(:web), tab: "keys")
 
         within("#server-authorized-keys") do

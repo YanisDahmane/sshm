@@ -16,9 +16,9 @@ class AutomationJobsTest < ActiveJob::TestCase
   test "RunAutomationJob follows its task, one item per server" do
     automation = Automation.all_kinds.find { |automation| automation.kind == "keys_scan" }
     task = automation.enqueue!(user: users(:one))
-    scans = { "Web" => ServerScan::Result.new(error_title: nil), "Database" => ServerScan::Result.new(error_title: "Clé refusée") }
+    scans = { "Web" => Keys::ServerScan::Result.new(error_title: nil), "Database" => Keys::ServerScan::Result.new(error_title: "Clé refusée") }
 
-    stub_method(ServerScan, :call, ->(server, **) { scans.fetch(server.name, ServerScan::Result.new(error_title: nil)) }) do
+    stub_method(Keys::ServerScan, :call, ->(server, **) { scans.fetch(server.name, Keys::ServerScan::Result.new(error_title: nil)) }) do
       RunAutomationJob.perform_now(automation, task)
     end
 

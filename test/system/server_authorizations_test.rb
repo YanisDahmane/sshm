@@ -12,14 +12,14 @@ class ServerAuthorizationsTest < ApplicationSystemTestCase
   # authorization appends to it.
   test "authorizing a public_key" do
     lines = [ ssh_keys(:main).public_key ]
-    reader = ->(*, **) { AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(lines.join("\n")), error_title: nil, error_details: nil) }
+    reader = ->(*, **) { Keys::AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(lines.join("\n")), error_title: nil, error_details: nil) }
     authorizer = lambda do |_server, public_key, **|
       lines << "#{public_key.authorized_key.type} #{public_key.authorized_key.key} #{public_key.name}"
-      PublicKeyAuthorization::Result.new(status: :added, error_title: nil, error_details: nil)
+      Keys::PublicKeyAuthorization::Result.new(status: :added, error_title: nil, error_details: nil)
     end
 
-    stub_method(AuthorizedKeysReader, :call, reader) do
-      stub_method(PublicKeyAuthorization, :call, authorizer) do
+    stub_method(Keys::AuthorizedKeysReader, :call, reader) do
+      stub_method(Keys::PublicKeyAuthorization, :call, authorizer) do
         visit server_path(servers(:web), tab: "keys")
 
         assert_selector "li.authorized-key", count: 1
@@ -40,14 +40,14 @@ class ServerAuthorizationsTest < ApplicationSystemTestCase
 
   test "authorizing a public_key for a limited time shows when it expires" do
     lines = [ ssh_keys(:main).public_key ]
-    reader = ->(*, **) { AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(lines.join("\n")), error_title: nil, error_details: nil) }
+    reader = ->(*, **) { Keys::AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(lines.join("\n")), error_title: nil, error_details: nil) }
     authorizer = lambda do |_server, public_key, expires_at:, **|
-      lines << PublicKeyAuthorization.line_for(public_key, expires_at)
-      PublicKeyAuthorization::Result.new(status: :added, error_title: nil, error_details: nil)
+      lines << Keys::PublicKeyAuthorization.line_for(public_key, expires_at)
+      Keys::PublicKeyAuthorization::Result.new(status: :added, error_title: nil, error_details: nil)
     end
 
-    stub_method(AuthorizedKeysReader, :call, reader) do
-      stub_method(PublicKeyAuthorization, :call, authorizer) do
+    stub_method(Keys::AuthorizedKeysReader, :call, reader) do
+      stub_method(Keys::PublicKeyAuthorization, :call, authorizer) do
         visit server_path(servers(:web), tab: "keys")
 
         click_on "Ajouter une clé"
@@ -71,15 +71,15 @@ class ServerAuthorizationsTest < ApplicationSystemTestCase
 
   test "adding a new key: errors keep the dialog open, then it lands in the keyring and on the server" do
     lines = [ ssh_keys(:main).public_key ]
-    reader = ->(*, **) { AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(lines.join("\n")), error_title: nil, error_details: nil) }
+    reader = ->(*, **) { Keys::AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(lines.join("\n")), error_title: nil, error_details: nil) }
     authorizer = lambda do |_server, public_key, **|
       lines << "#{public_key.authorized_key.type} #{public_key.authorized_key.key} #{public_key.name}"
-      PublicKeyAuthorization::Result.new(status: :added, error_title: nil, error_details: nil)
+      Keys::PublicKeyAuthorization::Result.new(status: :added, error_title: nil, error_details: nil)
     end
     bob = Ssh::KeyGenerator.generate(comment: "bob@laptop").public_key
 
-    stub_method(AuthorizedKeysReader, :call, reader) do
-      stub_method(PublicKeyAuthorization, :call, authorizer) do
+    stub_method(Keys::AuthorizedKeysReader, :call, reader) do
+      stub_method(Keys::PublicKeyAuthorization, :call, authorizer) do
         visit server_path(servers(:web), tab: "keys")
         assert_selector "li.authorized-key", count: 1
 

@@ -13,7 +13,7 @@ class ServerAuthorizationsController < ApplicationController
     return unless public_key
 
     account = authorized_keys_account(server)
-    result = AccessGrant.call(server, public_key, account: account, duration: duration)
+    result = Keys::AccessGrant.call(server, public_key, account: account, duration: duration)
     respond_with_authorized_keys_refresh(account, *grant_message(server, public_key, result, duration),
                                          streams: [ turbo_stream.replace(helpers.dom_id(server, :add_key), partial: "servers/add_key_dialog", locals: { server: server }) ])
   end

@@ -1,6 +1,6 @@
 # Where a keyring key's key is installed, from the AccountSnapshots (last known
 # keys of each server account), with the active temporary accesses.
-class PublicKeyAccessOverview
+class Keys::PublicKeyAccessOverview
   Access = Data.define(:server, :unix_user, :read_at, :temporary_access)
 
   def initialize(public_key)

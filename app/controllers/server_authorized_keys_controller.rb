@@ -6,7 +6,7 @@ class ServerAuthorizedKeysController < ApplicationController
   before_action :set_server_and_account
 
   def index
-    @result = AuthorizedKeysReader.call(@server, account: @account)
+    @result = Keys::AuthorizedKeysReader.call(@server, account: @account)
     record_ssh_status
     @app_key = SshKey.app_keys
     @public_keys_by_fingerprint = PublicKey.where(fingerprint: @result.keys.map(&:fingerprint)).index_by(&:fingerprint)
@@ -17,7 +17,7 @@ class ServerAuthorizedKeysController < ApplicationController
   # Removes the key whose base64 blob is params[:key] from the account's file.
   def destroy
     name = params[:name].presence || "sans nom"
-    result = KeyRevocation.call(@server, params.expect(:key), account: @account, key_name: params[:name].presence)
+    result = Keys::Revocation.call(@server, params.expect(:key), account: @account, key_name: params[:name].presence)
     target = "« #{@server.name} »"
 
     flash_type, message = if result.removed?

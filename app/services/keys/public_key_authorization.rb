@@ -6,7 +6,7 @@ require "shellwords"
 # up as "known". With `expires_at`, the line gets an OpenSSH `expiry-time`
 # option (OpenSSH >= 8.2) so sshd refuses the key afterwards. With `replace`,
 # existing lines for the key are removed first (to change or drop an expiry).
-class PublicKeyAuthorization
+class Keys::PublicKeyAuthorization
   Result = Data.define(:status, :error_title, :error_details) do
     def success? = status != :error
     def added? = status == :added
@@ -40,12 +40,12 @@ class PublicKeyAuthorization
   def self.append_script(line, blob, home: "$HOME", replace: false)
     blob = Shellwords.escape(blob)
 
-    AuthorizedKeysScript.prelude(home) + <<~SH
+    Keys::AuthorizedKeysScript.prelude(home) + <<~SH
       umask 077
       mkdir -p "$home/.ssh"
       file="$home/.ssh/authorized_keys"
       touch "$file"
-      #{AuthorizedKeysScript.drop_lines(blob) if replace}
+      #{Keys::AuthorizedKeysScript.drop_lines(blob) if replace}
       if grep -qF -- #{blob} "$file"; then
         echo present
       else

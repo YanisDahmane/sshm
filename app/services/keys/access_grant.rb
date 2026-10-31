@@ -5,12 +5,12 @@
 # - any new grant for a key that has an active temporary access replaces its
 #   authorized_keys line (to change or drop the expiry) and ends the old access;
 # - a key already authorized permanently stays as it is.
-class AccessGrant
+class Keys::AccessGrant
   def self.call(server, public_key, account:, duration: nil, **connection_options)
     active = TemporaryAccess.active.find_by(server: server, unix_user: account.unix_user, fingerprint: public_key.fingerprint)
     expires_at = duration && Time.current + duration
 
-    result = PublicKeyAuthorization.call(server, public_key, account: account, expires_at: expires_at, replace: active.present?, **connection_options)
+    result = Keys::PublicKeyAuthorization.call(server, public_key, account: account, expires_at: expires_at, replace: active.present?, **connection_options)
     return result unless result.success?
 
     TemporaryAccess.transaction do

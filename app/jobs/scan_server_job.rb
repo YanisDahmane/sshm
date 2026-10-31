@@ -9,7 +9,7 @@ class ScanServerJob < ApplicationJob
 
   def perform(server, task_item: nil)
     tracking(task_item) do
-      scan = ServerScan.call(server)
+      scan = Keys::ServerScan.call(server)
       task_item&.finish!(scan.success? ? :succeeded : :failed, scan.error_title)
     end
   end
