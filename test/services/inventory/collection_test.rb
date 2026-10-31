@@ -185,4 +185,17 @@ class Inventory::CollectionTest < ActiveSupport::TestCase
     assert_equal 94.4, @server.health_samples.sole.disk_percent
     assert_equal [ "crit", "Disque / à 94 %" ], [ @server.health_status, @server.health_reason_texts.first ]
   end
+
+  test "the packages collector keeps the counts in the snapshot and the list in the table" do
+    output = file_fixture("inventory/packages/ubuntu2404.txt").read
+    fake = FakeSsh.new(handler: ->(command) { FakeSsh::Response.new(output, "", 0) if command.start_with?("sh -c") },
+                       responses: { "sudo -n true" => FakeSsh::Response.new("", "", 0) })
+
+    collect(fake, registry: Inventory::Collector::CATEGORIES.slice("packages"))
+
+    snapshot = @server.inventory_snapshots.of_category(:packages).sole
+    assert_equal [ 4, 1, 1 ], snapshot.data.values_at("total", "upgradable", "security")
+    assert_not snapshot.data.key?("packages")
+    assert_equal %w[bash core22 lxd snapd], @server.packages.order(:name).pluck(:name)
+  end
 end

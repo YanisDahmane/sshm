@@ -40,7 +40,7 @@ module ApplicationHelper
   # Entries of the ⌘K quick search: pages, then servers and public_keys.
   def command_palette_items
     pages = [
-      { label: "Vue d'ensemble", url: root_path }, { label: "Parc", hint: "serveurs", url: servers_path }, { label: "Trousseau", hint: "clés SSH", url: public_keys_path },
+      { label: "Vue d'ensemble", url: root_path }, { label: "Parc", hint: "serveurs", url: servers_path }, { label: "Paquets", hint: "recherche sur tout le parc", url: packages_path }, { label: "Trousseau", hint: "clés SSH", url: public_keys_path },
       { label: "Groupes de serveurs", url: server_groups_path },
       { label: "Activité", url: activities_path }
     ]

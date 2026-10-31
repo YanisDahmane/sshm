@@ -21,6 +21,7 @@ Rails.application.routes.draw do
     resource :ping, only: %i[show create], controller: "server_pings"
     resource :ssh_check, only: :show, controller: "server_ssh_checks"
     resource :inventory, only: :create, controller: "server_inventories"
+    resources :packages, only: :index, controller: "server_packages"
     resource :host_key, only: :create, controller: "server_host_keys"
     resources :authorized_keys, only: :index, controller: "server_authorized_keys"
     resource :authorized_key, only: :destroy, controller: "server_authorized_keys"
@@ -61,6 +62,7 @@ Rails.application.routes.draw do
     end
   end
   resources :activities, only: :index
+  resources :packages, only: :index
   scope "settings" do
     resource :ssh_key, only: :create
   end

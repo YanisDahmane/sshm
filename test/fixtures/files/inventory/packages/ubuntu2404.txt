@@ -1,0 +1,11 @@
+@@elio dpkg
+ii 	bash	5.2.21-2ubuntu4	amd64
+ii 	snapd	2.63+24.04	amd64
+@@elio upgradable
+Listing...
+snapd/noble-updates,noble-security 2.65.3+24.04 amd64 [upgradable from: 2.63+24.04]
+@@elio snap
+Name    Version    Rev    Tracking       Publisher   Notes
+core22  20240904   1621   latest/stable  canonical✓  base
+lxd     5.21.2     30131  5.21/stable    canonical✓  -
+@@elio docker

@@ -23,6 +23,8 @@ class Activity < ApplicationRecord
     Kind.new(:health_warning, "Serveur à surveiller", :servers, :warning, "La santé d'un serveur se dégrade (disque, mémoire, charge, redémarrage requis…)."),
     Kind.new(:health_critical, "Serveur en état critique", :servers, :critical, "Un seuil critique est dépassé sur un serveur (disque ou mémoire presque pleins…)."),
     Kind.new(:health_recovered, "Serveur de nouveau sain", :servers, :info, "Un serveur à surveiller ou critique est revenu à la normale."),
+    Kind.new(:packages_changed, "Paquets modifiés", :servers, :info, "Des paquets ont été installés, mis à jour ou supprimés sur un serveur (inventaire)."),
+    Kind.new(:security_updates_available, "Mises à jour de sécurité", :security, :warning, "Des mises à jour de sécurité sont disponibles sur un serveur qui n'en avait pas."),
     Kind.new(:server_created, "Serveur ajouté", :servers, :info, "Un serveur a été ajouté à Elio."),
     Kind.new(:server_updated, "Serveur modifié", :servers, :info, "Les informations de connexion d'un serveur ont changé."),
     Kind.new(:servers_imported, "Serveurs importés", :servers, :info, "Des serveurs ont été importés depuis un fichier CSV ou un ~/.ssh/config."),
@@ -99,6 +101,11 @@ class Activity < ApplicationRecord
     when :health_warning then "« #{server_name} » est à surveiller : #{Array(data["reasons"]).join(", ")}"
     when :health_critical then "« #{server_name} » est en état critique : #{Array(data["reasons"]).join(", ")}"
     when :health_recovered then "« #{server_name} » est de nouveau sain"
+    when :packages_changed
+      counts = { "installed" => "installé", "upgraded" => "mis à jour", "removed" => "supprimé" }
+                 .filter_map { |key, label| "#{data[key]} #{label}#{"s" if data[key].to_i > 1}" if data[key].to_i.positive? }
+      "Paquets de « #{server_name} » : #{counts.join(", ")}#{" (#{Array(data["examples"]).join(", ")})" if Array(data["examples"]).any?}"
+    when :security_updates_available then "#{data["count"]} mise(s) à jour de sécurité disponible(s) sur « #{server_name} »"
     when :server_created then "Serveur « #{server_name} » ajouté"
     when :server_updated then "Serveur « #{server_name} » modifié"
     when :servers_imported

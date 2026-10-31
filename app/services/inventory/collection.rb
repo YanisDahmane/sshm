@@ -63,18 +63,19 @@ class Inventory::Collection
     if outcome.status == "error"
       snapshot.update!(status: "error", message: outcome.message, checked_at: now)
     else
-      snapshot.update!(status: outcome.status, message: outcome.message, data: outcome.data, privileged: privileged,
-                       collected_at: now, checked_at: now)
-      log_changes(category, previous, outcome.data) if previous
       collector = Inventory::Collector.for(category)
-      attributes = collector.server_attributes(outcome.data.as_json)
+      data = outcome.data.as_json
+      kept = collector.snapshot_data(data)
+      snapshot.update!(status: outcome.status, message: outcome.message, data: kept, privileged: privileged, collected_at: now, checked_at: now)
+      log_changes(collector, previous, kept) if previous
+      attributes = collector.server_attributes(data)
       @server.update_columns(attributes) if attributes.any?
-      collector.record(@server, outcome.data.as_json, now)
+      collector.record(@server, data, now)
     end
   end
 
-  def log_changes(category, previous, data)
-    Inventory::Collector.for(category).changes(previous, data.as_json).each do |change|
+  def log_changes(collector, previous, data)
+    collector.changes(previous, data).each do |change|
       Activity.record!(change.fetch(:kind), server: @server, user: nil, **change.fetch(:data, {}))
     end
   end

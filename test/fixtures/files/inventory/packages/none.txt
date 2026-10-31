@@ -1,0 +1,6 @@
+@@elio dpkg
+unsupported
+@@elio upgradable
+@@elio snap
+unsupported
+@@elio docker

@@ -1,0 +1,18 @@
+@@elio dpkg
+ii 	adduser	3.134	all
+ii 	curl	7.88.1-10+deb12u7	amd64
+ii 	libssl3	3.0.14-1~deb12u1	amd64
+ii 	libssl3	3.0.14-1~deb12u1	i386
+hi 	linux-image-amd64	6.1.106-3	amd64
+rc 	old-package	1.0	amd64
+ii 	openssl	3.0.14-1~deb12u1	amd64
+ii 	postgresql-15	15.8-0+deb12u1	amd64
+@@elio upgradable
+Listing...
+curl/stable 7.88.1-10+deb12u8 amd64 [upgradable from: 7.88.1-10+deb12u7]
+libssl3/stable-security 3.0.15-1~deb12u1 amd64 [upgradable from: 3.0.14-1~deb12u1]
+openssl/stable-security,stable-security 3.0.15-1~deb12u1 amd64 [upgradable from: 3.0.14-1~deb12u1]
+@@elio snap
+unsupported
+@@elio docker
+present

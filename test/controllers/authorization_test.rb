@@ -29,6 +29,8 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
       "server port check" => -> { get server_ping_path(servers(:web)) },
       "server SSH check" => -> { get server_ssh_check_path(servers(:web)) },
       "server keys" => -> { get server_authorized_keys_path(servers(:web)) },
+      "server packages" => -> { get server_packages_path(servers(:web)) },
+      "fleet packages" => -> { get packages_path(q: "ssl") },
       "ping one server" => -> { post server_ping_path(servers(:web)) },
       "ping all servers" => -> { post server_pings_path },
       "public_keys index" => -> { get public_keys_path },

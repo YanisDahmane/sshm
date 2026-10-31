@@ -1,0 +1,4 @@
+<%# Lazy-loaded packages of a server (ServerPackagesController#index). %>
+<turbo-frame id="<%= dom_id(server, :packages) %>" src="<%= server_packages_path(server) %>" loading="lazy" class="block">
+  <p class="flex items-center gap-2 px-4 py-4 text-sm text-ink-3"><%= icon :arrow_path, class: "h-4 w-4 animate-spin" %> Chargement des paquets…</p>
+</turbo-frame>

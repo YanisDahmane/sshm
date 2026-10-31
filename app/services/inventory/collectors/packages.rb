@@ -1,0 +1,129 @@
+require "shellwords"
+
+# Packages of a server: dpkg packages with the updates apt knows about
+# (security ones flagged), snaps, and Docker images when Docker can be read
+# (docker group or root). The full list goes to Inventory::Package (replaced
+# at each collection); the snapshot only keeps the counts.
+class Inventory::Collectors::Packages < Inventory::Collector
+  SCRIPT = <<~'SH'.freeze
+    echo "@@elio dpkg"; if command -v dpkg-query >/dev/null 2>&1; then dpkg-query -W -f='${db:Status-Abbrev}\t${Package}\t${Version}\t${Architecture}\n' 2>/dev/null; else echo unsupported; fi
+    echo "@@elio upgradable"; if command -v apt >/dev/null 2>&1; then apt list --upgradable 2>/dev/null; fi
+    echo "@@elio snap"; if command -v snap >/dev/null 2>&1; then snap list 2>/dev/null; else echo unsupported; fi
+    echo "@@elio docker"; if command -v docker >/dev/null 2>&1; then echo present; fi
+  SH
+
+  DOCKER_IMAGES = "docker image ls --format '{{.Repository}}\t{{.Tag}}\t{{.ID}}'".freeze
+
+  def collect
+    result = run("sh -c #{Shellwords.escape(SCRIPT)}")
+    raise Error, "Lecture des paquets impossible : #{result.stderr.strip.presence || "code #{result.exit_status}"}" if result.stdout.blank?
+
+    sections = self.class.sections(result.stdout)
+    return unsupported("Ni dpkg ni snap sur ce système") if sections["dpkg"].strip == "unsupported" && sections["snap"].strip == "unsupported"
+
+    packages = self.class.parse_dpkg(sections["dpkg"], self.class.parse_upgradable(sections["upgradable"])) + self.class.parse_snap(sections["snap"])
+    docker_error = nil
+    if sections["docker"].strip == "present"
+      images = run(DOCKER_IMAGES, privileged: true)
+      images.success? ? packages.concat(self.class.parse_docker(images.stdout)) : docker_error = "Images Docker illisibles : #{images.stderr.strip.truncate(120)}"
+    end
+
+    data = self.class.summarize(packages)
+    docker_error ? partial(data, docker_error) : ok(data)
+  end
+
+  # Only the counts go to the snapshot; the list goes to Inventory::Package.
+  def self.snapshot_data(data) = data.except("packages")
+
+  def self.summarize(packages)
+    { "packages" => packages,
+      "total" => packages.size,
+      "by_manager" => packages.group_by { |package| package["manager"] }.transform_values(&:size),
+      "upgradable" => packages.count { |package| package["available_version"] },
+      "security" => packages.count { |package| package["security"] } }
+  end
+
+  # Replaces the server's packages, and logs what changed since the previous
+  # list (not on the first one).
+  def self.record(server, data, _at)
+    packages = Array(data["packages"])
+    existing = Inventory::Package.where(server_id: server.id)
+    previous = existing.pluck(:manager, :name, :arch, :version).to_h { |manager, name, arch, version| [ [ manager, name, arch ], version ] }
+    current = packages.to_h { |package| [ package.values_at("manager", "name", "arch"), package["version"] ] }
+
+    Inventory::Package.transaction do
+      existing.delete_all
+      rows = packages.map do |package|
+        { server_id: server.id, manager: package["manager"], name: package["name"], version: package["version"], arch: package["arch"],
+          available_version: package["available_version"], security: package["security"] == true }
+      end
+      Inventory::Package.insert_all(rows) if rows.any?
+    end
+    log_package_changes(server, previous, current) if previous.any?
+  end
+
+  def self.log_package_changes(server, previous, current)
+    installed = current.keys - previous.keys
+    removed = previous.keys - current.keys
+    upgraded = (current.keys & previous.keys).select { |key| current[key] != previous[key] }
+    return if installed.empty? && removed.empty? && upgraded.empty?
+
+    Activity.record!(:packages_changed, server: server, user: nil, installed: installed.size, upgraded: upgraded.size, removed: removed.size,
+                                        examples: (upgraded + installed + removed).first(5).map { |(_, name, _)| name })
+  end
+  private_class_method :log_package_changes
+
+  def self.changes(previous, data)
+    return [] unless previous["security"].to_i.zero? && data["security"].to_i.positive?
+
+    [ { kind: :security_updates_available, data: { count: data["security"] } } ]
+  end
+
+  def self.sections(output)
+    output.to_s.split(/^@@elio (\S+)\n/).drop(1).each_slice(2).to_h { |name, body| [ name, body.to_s ] }.tap { |sections| sections.default = "" }
+  end
+
+  # "ii \topenssl\t3.0.14-1~deb12u1\tamd64" (installed or on hold only)
+  def self.parse_dpkg(text, upgradable)
+    return [] if text.strip == "unsupported"
+
+    text.lines.filter_map do |line|
+      status, name, version, arch = line.chomp.split("\t")
+      next unless name && status.to_s.match?(/\A[ih]i/)
+
+      update = upgradable[name]
+      { "manager" => "dpkg", "name" => name, "version" => version, "arch" => arch,
+        "available_version" => update&.fetch("version"), "security" => update ? update["security"] : false }
+    end
+  end
+
+  # "openssl/stable-security 3.0.15-1~deb12u1 amd64 [upgradable from: 3.0.14-1~deb12u1]"
+  def self.parse_upgradable(text)
+    text.to_s.lines.filter_map do |line|
+      match = line.match(%r{\A(?<name>[^/\s]+)/(?<suites>\S+)\s+(?<version>\S+)\s+\S+\s+\[upgradable from})
+      next unless match
+
+      [ match[:name], { "version" => match[:version], "security" => match[:suites].split(",").any? { |suite| suite.end_with?("-security") } } ]
+    end.to_h
+  end
+
+  # Name Version Rev Tracking Publisher Notes
+  def self.parse_snap(text)
+    return [] if text.strip == "unsupported"
+
+    text.lines.drop(1).filter_map do |line|
+      name, version = line.split
+      { "manager" => "snap", "name" => name, "version" => version, "arch" => nil, "available_version" => nil, "security" => false } if name && version
+    end
+  end
+
+  # "nginx\t1.27-alpine\t3b25b682ea82"
+  def self.parse_docker(text)
+    text.lines.filter_map do |line|
+      repository, tag, id = line.chomp.split("\t")
+      next if repository.blank? || repository == "<none>"
+
+      { "manager" => "docker", "name" => repository, "version" => (tag == "<none>" ? id : tag), "arch" => nil, "available_version" => nil, "security" => false }
+    end
+  end
+end

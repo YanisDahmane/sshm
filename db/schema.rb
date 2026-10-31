@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_31_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_31_150000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -72,6 +72,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_140000) do
     t.float "disk_percent"
     t.index ["collected_at"], name: "index_inventory_health_samples_on_collected_at"
     t.index ["server_id", "collected_at"], name: "index_inventory_health_samples_on_server_id_and_collected_at"
+  end
+
+  create_table "inventory_packages", force: :cascade do |t|
+    t.bigint "server_id", null: false
+    t.string "manager", null: false
+    t.string "name", null: false
+    t.string "version"
+    t.string "arch"
+    t.string "available_version"
+    t.boolean "security", default: false, null: false
+    t.index ["name"], name: "index_inventory_packages_on_name"
+    t.index ["server_id"], name: "index_inventory_packages_on_server_id"
   end
 
   create_table "inventory_snapshots", force: :cascade do |t|
@@ -256,6 +268,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_140000) do
   add_foreign_key "activities", "servers", on_delete: :nullify
   add_foreign_key "activities", "users", on_delete: :nullify
   add_foreign_key "inventory_health_samples", "servers", on_delete: :cascade
+  add_foreign_key "inventory_packages", "servers", on_delete: :cascade
   add_foreign_key "inventory_snapshots", "servers", on_delete: :cascade
   add_foreign_key "invitations", "users", column: "invited_by_id"
   add_foreign_key "invitations", "users", on_delete: :nullify

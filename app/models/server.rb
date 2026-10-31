@@ -8,6 +8,7 @@ class Server < ApplicationRecord
   has_many :server_groups, -> { order(:name) }, through: :server_group_memberships
   has_many :inventory_snapshots, class_name: "Inventory::Snapshot", dependent: :delete_all
   has_many :health_samples, class_name: "Inventory::HealthSample", dependent: :delete_all
+  has_many :packages, class_name: "Inventory::Package", dependent: :delete_all
 
   HEALTH_STATES = %w[ok warn crit unknown].freeze
 

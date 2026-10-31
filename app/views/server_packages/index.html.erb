@@ -1,0 +1,59 @@
+<turbo-frame id="<%= dom_id(@server, :packages) %>" class="block">
+  <% if @snapshot.nil? || !@snapshot.collected? %>
+    <p class="packages-empty px-4 py-4 text-sm text-ink-3">
+      <%= @snapshot&.failed? ? @snapshot.message : "Pas encore d'inventaire des paquets." %>
+    </p>
+  <% elsif @snapshot.status == "unsupported" %>
+    <p class="packages-empty px-4 py-4 text-sm text-ink-3"><%= @snapshot.message %></p>
+  <% else %>
+    <% counts = @snapshot.data %>
+    <div class="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-line px-4 py-2.5 text-xs text-ink-2">
+      <span><strong class="text-ink"><%= counts["total"] %></strong> installés</span>
+      <% (counts["by_manager"] || {}).each do |manager, count| %>
+        <span><%= Inventory::Package::MANAGERS.fetch(manager, manager) %> : <%= count %></span>
+      <% end %>
+      <span><strong class="text-ink"><%= counts["upgradable"] %></strong> à mettre à jour<% if counts["security"].to_i.positive? %>, dont <strong class="text-crit-ink"><%= counts["security"] %> de sécurité</strong><% end %></span>
+      <% if @snapshot.status == "partial" %><%= inventory_status_badge(@snapshot) %><% end %>
+    </div>
+
+    <%= form_with url: server_packages_path(@server), method: :get, data: { controller: "auto-submit", turbo_frame: dom_id(@server, :packages) },
+          class: "packages-filters flex flex-wrap items-center gap-2 px-4 py-2.5" do |f| %>
+      <%= f.search_field :q, value: @q, placeholder: "Rechercher un paquet…", autocomplete: "off", aria: { label: "Rechercher un paquet" },
+            data: { action: "input->auto-submit#submitLater" }, class: "input w-64 py-1 text-xs" %>
+      <%= f.select :manager, [ [ "Tous les types", "" ], *Inventory::Package::MANAGERS.invert.to_a ], { selected: @manager },
+            aria: { label: "Type de paquet" }, data: { action: "change->auto-submit#submit" }, class: "input w-auto py-1 text-xs" %>
+      <label class="flex cursor-pointer items-center gap-1.5 text-xs text-ink-2">
+        <%= f.check_box :updates, { checked: @updates, data: { action: "change->auto-submit#submit" } }, "1", nil %> Mises à jour seulement
+      </label>
+      <noscript><%= f.submit "Filtrer", class: "btn btn-secondary" %></noscript>
+    <% end %>
+
+    <% if @packages.any? %>
+      <table class="packages table-dense">
+        <thead><tr><th class="pl-4">Paquet</th><th>Version</th><th>Mise à jour</th><th class="pr-4">Type</th></tr></thead>
+        <tbody>
+          <% @packages.each do |package| %>
+            <tr class="package">
+              <td class="pl-4 font-medium"><%= package.name %><% if package.arch && package.arch != "all" %><span class="ml-1 text-xs font-normal text-ink-3"><%= package.arch %></span><% end %></td>
+              <td class="font-mono text-xs text-ink-2"><%= package.version %></td>
+              <td class="text-xs">
+                <% if package.upgradable? %>
+                  <span class="font-mono text-ink-2">→ <%= package.available_version %></span>
+                  <% if package.security %><span class="badge ml-1 bg-crit-soft text-crit-ink">sécurité</span><% end %>
+                <% else %>
+                  <span class="text-ink-3">à jour</span>
+                <% end %>
+              </td>
+              <td class="pr-4 text-xs text-ink-3"><%= package.manager_label %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <% if @count > @packages.size %>
+        <p class="border-t border-line px-4 py-2 text-xs text-ink-3"><%= @packages.size %> sur <%= @count %> : affinez la recherche pour voir les autres.</p>
+      <% end %>
+    <% else %>
+      <p class="px-4 py-4 text-sm text-ink-3">Aucun paquet ne correspond.</p>
+    <% end %>
+  <% end %>
+</turbo-frame>
