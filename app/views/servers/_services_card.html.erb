@@ -1,0 +1,84 @@
+<%# Services of the server from its last inventory (Inventory::Collectors::Services): systemd units, then Docker containers by Compose project. %>
+<% snapshot = server.inventory("services") %>
+<% data = snapshot&.collected? ? snapshot.data : nil %>
+<section id="server-services" class="card mt-6">
+  <div class="card-header">
+    <h2 class="flex items-center gap-2 font-semibold"><%= icon :list_bullet, class: "h-4 w-4 text-ink-3" %> Services</h2>
+    <div class="flex items-center gap-2 text-xs text-ink-3">
+      <%= inventory_status_badge(snapshot) %>
+      <% if snapshot&.collected_at %>relevé <%= relative_time_tag snapshot.collected_at %><% end %>
+    </div>
+  </div>
+
+  <% if data && snapshot.status != "unsupported" %>
+    <% units = Array(data["units"]) %>
+    <% failed = units.select { |unit| unit["active"] == "failed" } %>
+    <% active = units.select { |unit| unit["active"] == "active" } %>
+    <% others = units - failed - active %>
+    <% containers = Array(data["containers"]) %>
+    <p class="services-summary border-b border-line px-4 py-2.5 text-xs text-ink-2">
+      <strong class="text-ink"><%= active.size %></strong> services actifs
+      <% if failed.any? %>· <strong class="text-crit-ink"><%= failed.size %> en échec</strong><% end %>
+      · <%= others.size %> inactifs
+      <% if data["docker"] == "ok" %>· <strong class="text-ink"><%= containers.count { |c| c["state"] == "running" } %></strong>/<%= containers.size %> conteneurs en cours<% end %>
+    </p>
+
+    <div class="grid lg:grid-cols-2 lg:divide-x lg:divide-line">
+      <div class="systemd-units">
+        <h3 class="px-4 pt-3 text-xs font-semibold tracking-wide text-ink-3 uppercase">systemd</h3>
+        <% if units.any? %>
+          <ul class="divide-y divide-line">
+            <%= render partial: "servers/systemd_unit", collection: failed + active, as: :unit %>
+          </ul>
+          <% if others.any? %>
+            <details class="border-t border-line">
+              <summary class="cursor-pointer px-4 py-2 text-xs text-ink-3 hover:text-ink">Afficher les <%= others.size %> services inactifs</summary>
+              <ul class="divide-y divide-line"><%= render partial: "servers/systemd_unit", collection: others, as: :unit %></ul>
+            </details>
+          <% end %>
+        <% else %>
+          <p class="px-4 py-3 text-sm text-ink-3">Pas de systemd sur ce système.</p>
+        <% end %>
+      </div>
+
+      <div class="docker-containers border-t border-line lg:border-t-0">
+        <h3 class="px-4 pt-3 text-xs font-semibold tracking-wide text-ink-3 uppercase">Docker</h3>
+        <% case data["docker"] %>
+        <% when "absent" %>
+          <p class="px-4 py-3 text-sm text-ink-3">Docker n'est pas installé.</p>
+        <% when "unreadable" %>
+          <p class="docker-unreadable px-4 py-3 text-sm text-warn-ink"><%= snapshot.message %> Elio a besoin de root (sudo sans mot de passe) ou du groupe docker.</p>
+        <% else %>
+          <% if containers.empty? %>
+            <p class="px-4 py-3 text-sm text-ink-3">Aucun conteneur.</p>
+          <% end %>
+          <% containers.group_by { |container| container["project"] }.sort_by { |project, _| project.to_s.empty? ? "~" : project }.each do |project, members| %>
+            <div class="compose-project px-4 py-2">
+              <p class="text-sm font-medium"><%= project || "Sans projet Compose" %></p>
+              <% if (files = members.first["config_files"]) %>
+                <p class="compose-files font-mono text-[11px] text-ink-3"><%= files.join(", ") %></p>
+              <% end %>
+              <ul class="mt-1 space-y-1">
+                <% members.sort_by { |container| container["name"] }.each do |container| %>
+                  <li class="docker-container flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs" data-state="<%= container["state"] %>">
+                    <% running = container["state"] == "running" %>
+                    <span class="w-24 shrink-0"><%= status_badge(running ? :good : :neutral, running ? "en cours" : (container["state"] == "exited" ? "arrêté" : container["state"])) %></span>
+                    <span class="font-mono"><%= container["name"] %></span>
+                    <span class="text-ink-3"><%= container["image"] %></span>
+                    <% if container["ports"] %><span class="ml-auto font-mono text-[11px] text-ink-2"><%= container["ports"] %></span><% end %>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  <% elsif snapshot&.status == "unsupported" %>
+    <p class="services-empty px-4 py-4 text-sm text-ink-3"><%= snapshot.message %></p>
+  <% elsif snapshot&.failed? %>
+    <p class="inventory-error px-4 py-4 text-sm text-crit-ink"><%= snapshot.message %></p>
+  <% else %>
+    <p class="services-empty px-4 py-4 text-sm text-ink-3">Pas encore d'inventaire des services.</p>
+  <% end %>
+</section>

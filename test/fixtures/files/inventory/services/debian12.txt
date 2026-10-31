@@ -1,0 +1,17 @@
+@@elio units
+cron.service loaded active running Regular background program processing daemon
+fail2ban.service loaded failed failed Fail2Ban Service
+postgresql@15-main.service loaded active running PostgreSQL Cluster 15-main
+ssh.service loaded active running OpenBSD Secure Shell server
+systemd-journald.service loaded active running Journal Service
+apt-daily.service loaded inactive dead Daily apt download activities
+unattended-upgrades.service loaded inactive dead Unattended Upgrades Shutdown
+@@elio unit-files
+cron.service enabled enabled
+fail2ban.service enabled enabled
+postgresql@.service indirect enabled
+ssh.service enabled enabled
+apt-daily.service static -
+unattended-upgrades.service disabled enabled
+@@elio docker
+present

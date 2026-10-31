@@ -65,6 +65,8 @@ class ActivityTest < ActiveSupport::TestCase
       [ :health_recovered, {} ] => "« Web » est de nouveau sain",
       [ :packages_changed, { installed: 2, upgraded: 1, removed: 0, examples: [ "curl" ] } ] => "Paquets de « Web » : 2 installés, 1 mis à jour (curl)",
       [ :security_updates_available, { count: 3 } ] => "3 mise(s) à jour de sécurité disponible(s) sur « Web »",
+      [ :service_failed, { service: "nginx.service" } ] => "nginx.service est en échec sur « Web »",
+      [ :container_stopped, { container: "pgbouncer" } ] => "Le conteneur pgbouncer s'est arrêté sur « Web »",
       [ :server_created, {} ] => "Serveur « Web » ajouté",
       [ :server_updated, {} ] => "Serveur « Web » modifié"
     }.each do |(kind, options), summary|

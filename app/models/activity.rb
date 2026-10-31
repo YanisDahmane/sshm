@@ -24,6 +24,10 @@ class Activity < ApplicationRecord
     Kind.new(:health_critical, "Serveur en état critique", :servers, :critical, "Un seuil critique est dépassé sur un serveur (disque ou mémoire presque pleins…)."),
     Kind.new(:health_recovered, "Serveur de nouveau sain", :servers, :info, "Un serveur à surveiller ou critique est revenu à la normale."),
     Kind.new(:packages_changed, "Paquets modifiés", :servers, :info, "Des paquets ont été installés, mis à jour ou supprimés sur un serveur (inventaire)."),
+    Kind.new(:service_failed, "Service en échec", :servers, :warning, "Un service systemd est passé en échec (inventaire)."),
+    Kind.new(:service_recovered, "Service rétabli", :servers, :info, "Un service systemd en échec fonctionne à nouveau."),
+    Kind.new(:container_stopped, "Conteneur arrêté", :servers, :warning, "Un conteneur Docker qui tournait s'est arrêté."),
+    Kind.new(:container_started, "Conteneur redémarré", :servers, :info, "Un conteneur Docker arrêté tourne à nouveau."),
     Kind.new(:security_updates_available, "Mises à jour de sécurité", :security, :warning, "Des mises à jour de sécurité sont disponibles sur un serveur qui n'en avait pas."),
     Kind.new(:server_created, "Serveur ajouté", :servers, :info, "Un serveur a été ajouté à Elio."),
     Kind.new(:server_updated, "Serveur modifié", :servers, :info, "Les informations de connexion d'un serveur ont changé."),
@@ -105,6 +109,10 @@ class Activity < ApplicationRecord
       counts = { "installed" => "installé", "upgraded" => "mis à jour", "removed" => "supprimé" }
                  .filter_map { |key, label| "#{data[key]} #{label}#{"s" if data[key].to_i > 1}" if data[key].to_i.positive? }
       "Paquets de « #{server_name} » : #{counts.join(", ")}#{" (#{Array(data["examples"]).join(", ")})" if Array(data["examples"]).any?}"
+    when :service_failed then "#{data["service"]} est en échec sur « #{server_name} »"
+    when :service_recovered then "#{data["service"]} fonctionne à nouveau sur « #{server_name} »"
+    when :container_stopped then "Le conteneur #{data["container"]} s'est arrêté sur « #{server_name} »"
+    when :container_started then "Le conteneur #{data["container"]} tourne à nouveau sur « #{server_name} »"
     when :security_updates_available then "#{data["count"]} mise(s) à jour de sécurité disponible(s) sur « #{server_name} »"
     when :server_created then "Serveur « #{server_name} » ajouté"
     when :server_updated then "Serveur « #{server_name} » modifié"
