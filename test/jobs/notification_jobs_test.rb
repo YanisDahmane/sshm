@@ -28,7 +28,7 @@ class NotificationJobsTest < ActiveJob::TestCase
     activity = Activity.record!(:ssh_access_lost, server: servers(:web))
     delivered = []
 
-    stub_method(SlackNotifier, :deliver, ->(c, a) { delivered << [ c, a ] }) { DeliverNotificationJob.perform_now(channel, activity) }
+    stub_method(Notifications::Slack, :deliver, ->(c, a) { delivered << [ c, a ] }) { DeliverNotificationJob.perform_now(channel, activity) }
 
     assert_equal [ [ channel, activity ] ], delivered
     assert_not_nil channel.reload.last_delivered_at
@@ -39,14 +39,14 @@ class NotificationJobsTest < ActiveJob::TestCase
     activity = Activity.record!(:ssh_access_lost, server: servers(:web))
     channel.update!(activity_kinds: %w[key_added])
 
-    stub_method(SlackNotifier, :deliver, ->(*) { flunk "should not deliver" }) { DeliverNotificationJob.perform_now(channel, activity) }
+    stub_method(Notifications::Slack, :deliver, ->(*) { flunk "should not deliver" }) { DeliverNotificationJob.perform_now(channel, activity) }
   end
 
   test "DeliverNotificationJob records the error and retries" do
     channel = create_channel
     activity = Activity.record!(:ssh_access_lost, server: servers(:web))
 
-    stub_method(SlackNotifier, :deliver, ->(*) { raise SlackNotifier::DeliveryError, "Slack a répondu 500" }) do
+    stub_method(Notifications::Slack, :deliver, ->(*) { raise Notifications::DeliveryError, "Slack a répondu 500" }) do
       DeliverNotificationJob.perform_now(channel, activity)
     end
 

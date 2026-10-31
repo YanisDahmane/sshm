@@ -16,7 +16,7 @@ class NotificationDigestJobTest < ActiveJob::TestCase
   test "sends the digest and remembers it" do
     channel = create_channel(daily_digest: true)
     sent = []
-    stub_method(SlackNotifier, :post, ->(url, payload) { sent << payload[:text] }) { NotificationDigestJob.perform_now(channel) }
+    stub_method(Notifications::Slack, :post, ->(url, payload) { sent << payload[:text] }) { NotificationDigestJob.perform_now(channel) }
 
     assert_match(/\A\*Résumé Elio du .*\*\nParc :/, sent.sole)
     assert channel.reload.last_digest_at
@@ -24,7 +24,7 @@ class NotificationDigestJobTest < ActiveJob::TestCase
 
   test "remembers a failure and retries" do
     channel = create_channel(daily_digest: true)
-    stub_method(SlackNotifier, :post, ->(*) { raise NotificationDeliveryError, "Slack a répondu 500" }) do
+    stub_method(Notifications::Slack, :post, ->(*) { raise Notifications::DeliveryError, "Slack a répondu 500" }) do
       assert_enqueued_jobs(1, only: NotificationDigestJob) { NotificationDigestJob.perform_now(channel) }
     end
     assert_equal "Slack a répondu 500", channel.reload.last_error

@@ -4,7 +4,7 @@
 # mention everyone (Slack, Discord), and whether it gets a daily digest.
 class NotificationChannel < ApplicationRecord
   KINDS = { "slack" => "Slack", "discord" => "Discord", "webhook" => "Webhook (JSON signé)", "email" => "Email" }.freeze
-  NOTIFIERS = { "slack" => "SlackNotifier", "discord" => "DiscordNotifier", "webhook" => "WebhookNotifier", "email" => "EmailNotifier" }.freeze
+  NOTIFIERS = { "slack" => "Notifications::Slack", "discord" => "Notifications::Discord", "webhook" => "Notifications::Webhook", "email" => "Notifications::Email" }.freeze
 
   SLACK_WEBHOOK = %r{\Ahttps://hooks\.slack\.com/services/[A-Za-z0-9/_-]+\z}
   DISCORD_WEBHOOK = %r{\Ahttps://(?:(?:ptb|canary)\.)?discord(?:app)?\.com/api/webhooks/\d+/[A-Za-z0-9_-]+\z}

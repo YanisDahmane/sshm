@@ -43,7 +43,7 @@ module Settings
       @channel.notifier.deliver_test(@channel)
       @channel.record_delivery!
       redirect_to settings_notifications_path, notice: "Message de test envoyé à « #{@channel.name} »."
-    rescue NotificationDeliveryError => e
+    rescue Notifications::DeliveryError => e
       @channel.record_delivery!(error: e.message)
       redirect_to settings_notifications_path, alert: "Échec de l'envoi à « #{@channel.name} » : #{e.message}"
     end

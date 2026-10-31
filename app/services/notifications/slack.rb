@@ -1,7 +1,5 @@
 # Sends messages to a Slack incoming webhook.
-class SlackNotifier
-  DeliveryError = NotificationDeliveryError
-
+class Notifications::Slack
   SEVERITY_EMOJIS = { info: ":information_source:", warning: ":warning:", critical: ":rotating_light:" }.freeze
 
   def self.deliver(channel, activity)
@@ -39,6 +37,6 @@ class SlackNotifier
   end
 
   def self.post(url, payload)
-    NotificationHttp.post(url, payload.to_json, service: "Slack")
+    Notifications::Http.post(url, payload.to_json, service: "Slack")
   end
 end

@@ -1,7 +1,7 @@
 # Sends messages to a Discord webhook, as an embed coloured by severity.
 # Mentions are only allowed for @everyone when the channel asks for it, so
 # text coming from servers cannot ping anyone.
-class DiscordNotifier
+class Notifications::Discord
   COLORS = { info: 0x2a78d6, warning: 0xfab219, critical: 0xd03b3b }.freeze
 
   def self.deliver(channel, activity)
@@ -21,7 +21,7 @@ class DiscordNotifier
 
   def self.post(channel, payload)
     payload = payload.merge(content: ("@everyone" if channel.mention_channel), allowed_mentions: { parse: channel.mention_channel ? [ "everyone" ] : [] }).compact
-    NotificationHttp.post(channel.webhook_url, payload.to_json, service: "Discord")
+    Notifications::Http.post(channel.webhook_url, payload.to_json, service: "Discord")
   end
 
   # Markdown and mentions of text coming from servers are neutralized.

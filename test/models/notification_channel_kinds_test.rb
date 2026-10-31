@@ -30,8 +30,8 @@ class NotificationChannelKindsTest < ActiveSupport::TestCase
   end
 
   test "labels, notifiers and masked destinations" do
-    assert_equal [ "Discord", DiscordNotifier ], build(kind: "discord").then { |channel| [ channel.kind_label, channel.notifier ] }
-    assert_equal EmailNotifier, build(kind: "email").notifier
+    assert_equal [ "Discord", Notifications::Discord ], build(kind: "discord").then { |channel| [ channel.kind_label, channel.notifier ] }
+    assert_equal Notifications::Email, build(kind: "email").notifier
     assert_equal "ops@acme.fr", build(kind: "email", recipients: "ops@acme.fr").tap(&:validate).masked_destination
     assert_equal "https://discord.com/api/webhook…", build(kind: "discord", webhook_url: "https://discord.com/api/webhooks/1/secret").masked_destination
     assert build(kind: "slack").mentions?

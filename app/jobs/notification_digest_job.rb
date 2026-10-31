@@ -3,7 +3,7 @@
 class NotificationDigestJob < ApplicationJob
   queue_as :default
 
-  retry_on NotificationDeliveryError, wait: :polynomially_longer, attempts: 5 do |job, error|
+  retry_on Notifications::DeliveryError, wait: :polynomially_longer, attempts: 5 do |job, error|
     job.arguments.first&.record_delivery!(error: error.message)
   end
 
@@ -14,7 +14,7 @@ class NotificationDigestJob < ApplicationJob
     channel.notifier.deliver_digest(channel, NotificationDigest.new)
     channel.update_columns(last_digest_at: Time.current)
     channel.record_delivery!
-  rescue NotificationDeliveryError => e
+  rescue Notifications::DeliveryError => e
     channel.record_delivery!(error: e.message)
     raise
   end

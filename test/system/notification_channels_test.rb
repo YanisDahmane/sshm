@@ -9,7 +9,7 @@ class NotificationChannelsTest < ApplicationSystemTestCase
     sign_in users(:one)
     # The app server runs in another thread: stub for the whole test so no request reaches Slack.
     @tests = []
-    stub_method_until_teardown(SlackNotifier, :post, ->(url, payload) { @tests << [ url, payload ] })
+    stub_method_until_teardown(Notifications::Slack, :post, ->(url, payload) { @tests << [ url, payload ] })
   end
 
   test "adding a Slack channel, sending a test and deleting it" do

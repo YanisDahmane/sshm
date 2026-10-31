@@ -17,7 +17,7 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
     stub_method_until_teardown(ServerPing, :reachable?, true)
     stub_method_until_teardown(Keys::AccessGrant, :call, Keys::PublicKeyAuthorization::Result.new(status: :added, error_title: nil, error_details: nil))
     stub_method_until_teardown(Keys::Revocation, :call, Keys::AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil))
-    stub_method_until_teardown(SlackNotifier, :post, nil)
+    stub_method_until_teardown(Notifications::Slack, :post, nil)
   end
 
 

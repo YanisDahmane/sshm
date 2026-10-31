@@ -133,13 +133,13 @@ class NotificationChannelsControllerTest < ActionDispatch::IntegrationTest
     channel = create_channel
     sign_in users(:one)
 
-    stub_method(SlackNotifier, :deliver_test, ->(c) { assert_equal channel, c }) do
+    stub_method(Notifications::Slack, :deliver_test, ->(c) { assert_equal channel, c }) do
       post test_settings_notification_channel_path(channel)
     end
     assert_equal "Message de test envoyé à « #ops ».", flash[:notice]
     assert_not_nil channel.reload.last_delivered_at
 
-    stub_method(SlackNotifier, :deliver_test, ->(*) { raise SlackNotifier::DeliveryError, "Slack a répondu 404 : no_service" }) do
+    stub_method(Notifications::Slack, :deliver_test, ->(*) { raise Notifications::DeliveryError, "Slack a répondu 404 : no_service" }) do
       post test_settings_notification_channel_path(channel)
     end
     assert_equal "Échec de l'envoi à « #ops » : Slack a répondu 404 : no_service", flash[:alert]

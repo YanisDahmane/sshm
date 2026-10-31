@@ -1,13 +1,13 @@
 require "test_helper"
 
-class OtherNotifiersTest < ActiveSupport::TestCase
+class Notifications::OtherNotifiersTest < ActiveSupport::TestCase
   include StubHelpers
   include ActionMailer::TestHelper
 
   setup do
     @activity = Activity.record!(:port_opened, server: servers(:web), user: nil, port: "3306/tcp", process: "mysql @everyone *bold*")
     @posts = []
-    stub_method_until_teardown(NotificationHttp, :post, ->(url, body, service:, headers: {}) { @posts << { url: url, body: JSON.parse(body), service: service, headers: headers } })
+    stub_method_until_teardown(Notifications::Http, :post, ->(url, body, service:, headers: {}) { @posts << { url: url, body: JSON.parse(body), service: service, headers: headers } })
   end
 
   def channel(kind, **attributes)
@@ -17,7 +17,7 @@ class OtherNotifiersTest < ActiveSupport::TestCase
   end
 
   test "Discord: an embed coloured by severity, markdown and mentions neutralized" do
-    DiscordNotifier.deliver(channel("discord"), @activity)
+    Notifications::Discord.deliver(channel("discord"), @activity)
 
     post = @posts.sole
     assert_equal [ "https://discord.com/api/webhooks/1/abc", "Discord" ], post.values_at(:url, :service)
@@ -29,7 +29,7 @@ class OtherNotifiersTest < ActiveSupport::TestCase
   end
 
   test "Discord: @everyone only when the channel asks for it" do
-    DiscordNotifier.deliver_test(channel("discord", mention_channel: true))
+    Notifications::Discord.deliver_test(channel("discord", mention_channel: true))
 
     assert_equal [ "@everyone", { "parse" => [ "everyone" ] } ], @posts.sole[:body].values_at("content", "allowed_mentions")
   end
@@ -37,7 +37,7 @@ class OtherNotifiersTest < ActiveSupport::TestCase
   test "webhook: a JSON event signed with the channel secret" do
     hook = channel("webhook")
 
-    WebhookNotifier.deliver(hook, @activity)
+    Notifications::Webhook.deliver(hook, @activity)
 
     post = @posts.sole
     assert_equal "activity", post[:body]["event"]
@@ -51,9 +51,9 @@ class OtherNotifiersTest < ActiveSupport::TestCase
     email = channel("email", recipients: "ops@acme.fr, alice@acme.fr")
 
     assert_emails(3) do
-      EmailNotifier.deliver(email, @activity)
-      EmailNotifier.deliver_test(email)
-      EmailNotifier.deliver_digest(email, NotificationDigest.new(from: 1.hour.ago, to: Time.current))
+      Notifications::Email.deliver(email, @activity)
+      Notifications::Email.deliver_test(email)
+      Notifications::Email.deliver_digest(email, NotificationDigest.new(from: 1.hour.ago, to: Time.current))
     end
     mail = ActionMailer::Base.deliveries.first
     assert_equal [ "ops@acme.fr", "alice@acme.fr" ], mail.to
@@ -63,7 +63,7 @@ class OtherNotifiersTest < ActiveSupport::TestCase
 
   test "email: an error without SMTP" do
     Rails.configuration.x.mail_enabled = false
-    error = assert_raises(NotificationDeliveryError) { EmailNotifier.deliver_test(channel("email")) }
+    error = assert_raises(Notifications::DeliveryError) { Notifications::Email.deliver_test(channel("email")) }
     assert_match "SMTP_", error.message
   ensure
     Rails.configuration.x.mail_enabled = true
