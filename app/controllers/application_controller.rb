@@ -22,12 +22,12 @@ class ApplicationController < ActionController::Base
   def require_two_factor_setup
     return unless current_user&.two_factor_required?
 
-    redirect_to account_path, alert: "La double authentification est obligatoire pour les administrateurs : activez-la pour continuer."
+    redirect_to main_app.account_path, alert: "La double authentification est obligatoire pour les administrateurs : activez-la pour continuer."
   end
 
   # Until the first admin exists, every page leads to the setup page.
   def require_setup
-    redirect_to new_setup_path if User.none?
+    redirect_to main_app.new_setup_path if User.none?
   end
 
   def layout_by_resource
