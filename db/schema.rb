@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_31_130000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_31_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -45,6 +45,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_130000) do
     t.boolean "require_admin_two_factor", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "health_disk_warn", default: 80, null: false
+    t.integer "health_disk_crit", default: 90, null: false
+    t.integer "health_memory_warn", default: 90, null: false
+    t.integer "health_memory_crit", default: 95, null: false
+    t.decimal "health_load_warn", precision: 4, scale: 1, default: "2.0", null: false
   end
 
   create_table "automations", force: :cascade do |t|
@@ -57,6 +62,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_130000) do
     t.datetime "updated_at", null: false
     t.jsonb "state", default: {}, null: false
     t.index ["kind"], name: "index_automations_on_kind", unique: true
+  end
+
+  create_table "inventory_health_samples", force: :cascade do |t|
+    t.bigint "server_id", null: false
+    t.datetime "collected_at", null: false
+    t.float "load_percent"
+    t.float "memory_percent"
+    t.float "disk_percent"
+    t.index ["collected_at"], name: "index_inventory_health_samples_on_collected_at"
+    t.index ["server_id", "collected_at"], name: "index_inventory_health_samples_on_server_id_and_collected_at"
   end
 
   create_table "inventory_snapshots", force: :cascade do |t|
@@ -179,6 +194,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_130000) do
     t.string "os_name"
     t.string "os_id"
     t.string "os_version"
+    t.string "health_status"
+    t.jsonb "health_reasons", default: [], null: false
     t.index ["name"], name: "index_servers_on_name", unique: true
   end
 
@@ -238,6 +255,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_130000) do
   add_foreign_key "activities", "public_keys", on_delete: :nullify
   add_foreign_key "activities", "servers", on_delete: :nullify
   add_foreign_key "activities", "users", on_delete: :nullify
+  add_foreign_key "inventory_health_samples", "servers", on_delete: :cascade
   add_foreign_key "inventory_snapshots", "servers", on_delete: :cascade
   add_foreign_key "invitations", "users", column: "invited_by_id"
   add_foreign_key "invitations", "users", on_delete: :nullify

@@ -61,6 +61,8 @@ class ActivityTest < ActiveSupport::TestCase
       [ :server_back_online, {} ] => "« Web » répond à nouveau",
       [ :os_upgraded, { from: "Debian 11", to: "Debian 12" } ] => "« Web » est passé de Debian 11 à Debian 12",
       [ :server_rebooted, {} ] => "« Web » a redémarré",
+      [ :health_warning, { reasons: [ "Redémarrage requis", "Mémoire à 92 %" ] } ] => "« Web » est à surveiller : Redémarrage requis, Mémoire à 92 %",
+      [ :health_recovered, {} ] => "« Web » est de nouveau sain",
       [ :server_created, {} ] => "Serveur « Web » ajouté",
       [ :server_updated, {} ] => "Serveur « Web » modifié"
     }.each do |(kind, options), summary|

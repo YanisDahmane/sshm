@@ -1,0 +1,107 @@
+require "shellwords"
+
+# Health of a server: load, memory, swap, disks (space and inodes), reboot
+# required, failed systemd units, pending updates (apt simulation) and clock
+# synchronization. One read-only command (no root needed), its sections
+# separated by "@@elio <name>" lines. Each collection also adds a point to the
+# 30-day history (Inventory::HealthSample).
+class Inventory::Collectors::Health < Inventory::Collector
+  EXCLUDED_FILESYSTEMS = %w[tmpfs devtmpfs overlay squashfs efivarfs ramfs nsfs].freeze
+
+  SCRIPT = <<~SH.freeze
+    excluded="#{EXCLUDED_FILESYSTEMS.map { |type| "-x #{type}" }.join(" ")}"
+    echo "@@elio loadavg"; cat /proc/loadavg
+    echo "@@elio cpus"; nproc 2>/dev/null || getconf _NPROCESSORS_ONLN
+    echo "@@elio meminfo"; grep -E '^(MemTotal|MemAvailable|SwapTotal|SwapFree):' /proc/meminfo
+    echo "@@elio df"; df -P -T -k $excluded 2>/dev/null
+    echo "@@elio inodes"; df -P -T -i $excluded 2>/dev/null
+    echo "@@elio reboot"; if [ -f /var/run/reboot-required ]; then echo yes; else echo no; fi
+    echo "@@elio failed"; systemctl --failed --no-legend --plain 2>/dev/null || true
+    echo "@@elio updates"; if command -v apt-get >/dev/null 2>&1; then apt-get -s -o Debug::NoLocking=true dist-upgrade 2>/dev/null | grep '^Inst ' || true; else echo unsupported; fi
+    echo "@@elio ntp"; timedatectl show -p NTPSynchronized --value 2>/dev/null || true
+  SH
+
+  def collect
+    result = run("sh -c #{Shellwords.escape(SCRIPT)}")
+    raise Error, "Lecture de la santé impossible : #{result.stderr.strip.presence || "code #{result.exit_status}"}" if result.stdout.blank?
+
+    ok(self.class.parse(result.stdout))
+  end
+
+  def self.parse(output)
+    sections = output.to_s.split(/^@@elio (\S+)\n/).drop(1).each_slice(2).to_h { |name, body| [ name, body.to_s ] }
+    cpus = sections["cpus"].to_s[/\d+/]&.to_i
+    load = sections["loadavg"].to_s.split.first(3).map(&:to_f)
+    memory = parse_meminfo(sections["meminfo"])
+    disks = parse_disks(sections["df"], parse_inodes(sections["inodes"]))
+
+    {
+      "load" => load.presence,
+      "cpus" => cpus,
+      "load_percent" => (percent(load.first, cpus) if load.any? && cpus.to_i.positive?),
+      "memory" => memory[:memory],
+      "swap" => memory[:swap],
+      "disks" => disks,
+      "disk_max_percent" => disks.map { |disk| disk["used_percent"] }.compact.max,
+      "reboot_required" => sections["reboot"].to_s.strip == "yes",
+      "failed_units" => sections["failed"].to_s.lines.filter_map { |line| line.split.first.presence },
+      "updates" => parse_updates(sections["updates"]),
+      "ntp_synchronized" => { "yes" => true, "no" => false }[sections["ntp"].to_s.strip]
+    }.compact
+  end
+
+  def self.record(server, data, at)
+    Inventory::HealthSample.create!(server: server, collected_at: at, load_percent: data["load_percent"],
+                                    memory_percent: data.dig("memory", "used_percent"), disk_percent: data["disk_max_percent"])
+  end
+
+  def self.parse_meminfo(text)
+    values = text.to_s.scan(/^(\w+):\s+(\d+)\s*kB/).to_h { |key, kb| [ key, kb.to_i * 1024 ] }
+    memory = if values["MemTotal"].to_i.positive?
+      used = values["MemTotal"] - values.fetch("MemAvailable", values["MemTotal"])
+      { "total" => values["MemTotal"], "available" => values["MemAvailable"], "used_percent" => percent(used, values["MemTotal"]) }.compact
+    end
+    swap = if values["SwapTotal"].to_i.positive?
+      { "total" => values["SwapTotal"], "used_percent" => percent(values["SwapTotal"] - values.fetch("SwapFree", 0), values["SwapTotal"]) }
+    end
+    { memory: memory, swap: swap }
+  end
+  private_class_method :parse_meminfo
+
+  # df -P -T -k: Filesystem Type 1024-blocks Used Available Capacity Mounted-on
+  def self.parse_disks(text, inodes)
+    text.to_s.lines.drop(1).filter_map do |line|
+      device, type, size, used, available, _capacity, *mount = line.split
+      next if mount.empty? || size.to_i.zero? || EXCLUDED_FILESYSTEMS.include?(type)
+
+      mount = mount.join(" ")
+      { "mount" => mount, "device" => device, "type" => type, "size" => size.to_i * 1024, "used" => used.to_i * 1024,
+        "available" => available.to_i * 1024, "used_percent" => percent(used.to_i, used.to_i + available.to_i),
+        "inodes_used_percent" => inodes[mount] }.compact
+    end.uniq { |disk| disk["mount"] }
+  end
+  private_class_method :parse_disks
+
+  # df -P -T -i: Filesystem Type Inodes IUsed IFree IUse% Mounted-on ("-" when not applicable)
+  def self.parse_inodes(text)
+    text.to_s.lines.drop(1).filter_map do |line|
+      _device, _type, total, used, _free, _use, *mount = line.split
+      next if mount.empty? || total.to_i.zero?
+
+      [ mount.join(" "), percent(used.to_i, total.to_i) ]
+    end.to_h
+  end
+  private_class_method :parse_inodes
+
+  # "Inst openssl [3.0.14-1~deb12u1] (3.0.15-1~deb12u1 Debian-Security:12/stable-security [amd64])"
+  def self.parse_updates(text)
+    return if text.to_s.strip == "unsupported" || text.nil?
+
+    lines = text.lines.select { |line| line.start_with?("Inst ") }
+    { "total" => lines.size, "security" => lines.count { |line| line.match?(/-security\b/i) } }
+  end
+  private_class_method :parse_updates
+
+  def self.percent(part, total) = total.to_f.positive? ? (part.to_f * 100 / total).round(1) : nil
+  private_class_method :percent
+end

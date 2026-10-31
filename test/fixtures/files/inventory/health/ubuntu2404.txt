@@ -1,0 +1,24 @@
+@@elio loadavg
+0.08 0.12 0.10 1/180 9876
+@@elio cpus
+4
+@@elio meminfo
+MemTotal:        8131256 kB
+MemAvailable:    6201348 kB
+SwapTotal:             0 kB
+SwapFree:              0 kB
+@@elio df
+Filesystem     Type 1024-blocks    Used Available Capacity Mounted on
+/dev/sda1      ext4    50620216 22940684  25074808      48% /
+/dev/sdb1      ext4    10255636  9334064    397004      96% /mnt/backup disk
+tmpfs          tmpfs     813128       0    813128       0% /run/user/1000
+@@elio inodes
+Filesystem     Type  Inodes  IUsed   IFree IUse% Mounted on
+/dev/sda1      ext4 3276800 3014656  262144   92% /
+/dev/sdb1      ext4  655360     120  655240    1% /mnt/backup disk
+@@elio reboot
+yes
+@@elio failed
+@@elio updates
+@@elio ntp
+no

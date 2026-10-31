@@ -18,7 +18,7 @@ class Inventory::Collector
   class Error < StandardError; end
 
   # Categories in collection order, with their collector class name.
-  CATEGORIES = { "os" => "Inventory::Collectors::Os" }.freeze
+  CATEGORIES = { "os" => "Inventory::Collectors::Os", "health" => "Inventory::Collectors::Health" }.freeze
 
   MAX_OUTPUT = 8.megabytes
 
@@ -36,6 +36,9 @@ class Inventory::Collector
 
     # Summary columns of the server to update from the collected data.
     def server_attributes(_data) = {}
+
+    # Extra records to keep for each successful collection (e.g. history).
+    def record(_server, _data, _at) = nil
   end
 
   attr_reader :ssh

@@ -7,6 +7,9 @@ class Server < ApplicationRecord
   has_many :server_group_memberships, dependent: :delete_all
   has_many :server_groups, -> { order(:name) }, through: :server_group_memberships
   has_many :inventory_snapshots, class_name: "Inventory::Snapshot", dependent: :delete_all
+  has_many :health_samples, class_name: "Inventory::HealthSample", dependent: :delete_all
+
+  HEALTH_STATES = %w[ok warn crit unknown].freeze
 
   # How root commands run on the server (see SshConnection#privilege), as
   # found by the last inventory: root, sudo or none.
@@ -30,8 +33,10 @@ class Server < ApplicationRecord
   # Logs ssh_access_lost when a server that accepted the Elio key refuses it.
   def record_ssh_status!(ok)
     lost = ssh_ok == true && ok == false
+    changed = ssh_ok != ok
     update_columns(ssh_ok: ok, ssh_checked_at: Time.current)
     Activity.record!(:ssh_access_lost, server: self) if lost
+    refresh_health! if changed && health_status.present?
   end
 
   # Remembers a ping result (see ServerPing) and logs when the server goes
@@ -47,6 +52,26 @@ class Server < ApplicationRecord
   end
 
   def inventory(category) = inventory_snapshots.find { |snapshot| snapshot.category == category.to_s }
+
+  # Health shown in the interface: "off" when the last ping failed, otherwise
+  # the state computed from the inventory (ok, warn, crit, unknown).
+  def health_state = reachable == false ? "off" : (health_status || "unknown")
+
+  # Main reasons of the health state, most serious first.
+  def health_reason_texts = Array(health_reasons).map { |reason| reason["text"] }
+
+  # Recomputes the health state (Inventory::HealthStatus) and logs when it
+  # changes between ok, warn and crit (not on the first evaluation).
+  def refresh_health!
+    previous = health_status
+    inventory_snapshots.reset
+    result = Inventory::HealthStatus.evaluate(self)
+    update_columns(health_status: result.state, health_reasons: result.reasons.map(&:to_h))
+    return if previous.nil? || previous == "unknown" || result.state == "unknown" || previous == result.state
+
+    kind = { "ok" => :health_recovered, "warn" => :health_warning, "crit" => :health_critical }.fetch(result.state)
+    Activity.record!(kind, server: self, user: nil, reasons: result.reasons.map(&:text).first(3))
+  end
 
   private
 

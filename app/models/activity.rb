@@ -20,6 +20,9 @@ class Activity < ApplicationRecord
     Kind.new(:server_back_online, "Serveur de nouveau joignable", :servers, :info, "Un serveur injoignable répond à nouveau."),
     Kind.new(:os_upgraded, "Système mis à niveau", :servers, :info, "La version du système d'un serveur a changé (inventaire)."),
     Kind.new(:server_rebooted, "Serveur redémarré", :servers, :info, "Un serveur a redémarré depuis le dernier inventaire."),
+    Kind.new(:health_warning, "Serveur à surveiller", :servers, :warning, "La santé d'un serveur se dégrade (disque, mémoire, charge, redémarrage requis…)."),
+    Kind.new(:health_critical, "Serveur en état critique", :servers, :critical, "Un seuil critique est dépassé sur un serveur (disque ou mémoire presque pleins…)."),
+    Kind.new(:health_recovered, "Serveur de nouveau sain", :servers, :info, "Un serveur à surveiller ou critique est revenu à la normale."),
     Kind.new(:server_created, "Serveur ajouté", :servers, :info, "Un serveur a été ajouté à Elio."),
     Kind.new(:server_updated, "Serveur modifié", :servers, :info, "Les informations de connexion d'un serveur ont changé."),
     Kind.new(:servers_imported, "Serveurs importés", :servers, :info, "Des serveurs ont été importés depuis un fichier CSV ou un ~/.ssh/config."),
@@ -93,6 +96,9 @@ class Activity < ApplicationRecord
     when :server_back_online then "« #{server_name} » répond à nouveau"
     when :os_upgraded then "« #{server_name} » est passé de #{data["from"]} à #{data["to"]}"
     when :server_rebooted then "« #{server_name} » a redémarré"
+    when :health_warning then "« #{server_name} » est à surveiller : #{Array(data["reasons"]).join(", ")}"
+    when :health_critical then "« #{server_name} » est en état critique : #{Array(data["reasons"]).join(", ")}"
+    when :health_recovered then "« #{server_name} » est de nouveau sain"
     when :server_created then "Serveur « #{server_name} » ajouté"
     when :server_updated then "Serveur « #{server_name} » modifié"
     when :servers_imported

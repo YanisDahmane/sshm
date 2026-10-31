@@ -1,0 +1,14 @@
+@@elio loadavg
+0.00 0.00 0.00 1/20 99
+@@elio cpus
+1
+@@elio meminfo
+MemTotal:         512000 kB
+@@elio df
+@@elio inodes
+@@elio reboot
+no
+@@elio failed
+@@elio updates
+unsupported
+@@elio ntp

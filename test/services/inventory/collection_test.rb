@@ -173,4 +173,16 @@ class Inventory::CollectionTest < ActiveSupport::TestCase
     assert_equal [ "Debian GNU/Linux 12 (bookworm)", "debian", "12" ], [ @server.os_name, @server.os_id, @server.os_version ]
     assert_equal "kvm", @server.inventory("os").data["virtualization"]
   end
+
+  test "the health collector keeps a point of history and the server's health" do
+    health_output = file_fixture("inventory/health/debian12.txt").read
+    fake = FakeSsh.new(handler: ->(command) { FakeSsh::Response.new(health_output, "", 0) if command.start_with?("sh -c") },
+                       responses: { "sudo -n true" => FakeSsh::Response.new("", "", 0) })
+
+    collect(fake, registry: Inventory::Collector::CATEGORIES.slice("health"))
+
+    @server.reload
+    assert_equal 94.4, @server.health_samples.sole.disk_percent
+    assert_equal [ "crit", "Disque / à 94 %" ], [ @server.health_status, @server.health_reason_texts.first ]
+  end
 end

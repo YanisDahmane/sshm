@@ -26,11 +26,13 @@ class Inventory::Collection
     end
 
     record(outcomes, privilege)
+    @server.refresh_health!
     outcomes
   rescue SshConnection::Error => e
     @server.record_ssh_status!(false) if e.reason == :key_refused
     failed = @categories.index_with { error_outcome("#{e.title} — #{e.message}") }
     failed.each { |category, outcome| save_snapshot(category, outcome, privileged: false) }
+    @server.refresh_health!
     failed
   end
 
@@ -64,8 +66,10 @@ class Inventory::Collection
       snapshot.update!(status: outcome.status, message: outcome.message, data: outcome.data, privileged: privileged,
                        collected_at: now, checked_at: now)
       log_changes(category, previous, outcome.data) if previous
-      attributes = Inventory::Collector.for(category).server_attributes(outcome.data.as_json)
+      collector = Inventory::Collector.for(category)
+      attributes = collector.server_attributes(outcome.data.as_json)
       @server.update_columns(attributes) if attributes.any?
+      collector.record(@server, outcome.data.as_json, now)
     end
   end
 
