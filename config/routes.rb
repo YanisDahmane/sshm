@@ -62,6 +62,7 @@ Rails.application.routes.draw do
     end
   end
   resources :activities, only: :index
+  resources :tasks, only: %i[index show]
   resources :packages, only: :index
   resources :ports, only: :index
   scope "settings" do

@@ -9,6 +9,9 @@ class Server < ApplicationRecord
   has_many :inventory_snapshots, class_name: "Inventory::Snapshot", dependent: :delete_all
   has_many :health_samples, class_name: "Inventory::HealthSample", dependent: :delete_all
   has_many :packages, class_name: "Inventory::Package", dependent: :delete_all
+  # Tasks keep the server's name; a server deleted while waiting fails its items.
+  has_many :background_task_items, dependent: :nullify
+  before_destroy(prepend: true) { BackgroundTaskItem.cancel_for_server!(self) }
 
   HEALTH_STATES = %w[ok warn crit unknown].freeze
 

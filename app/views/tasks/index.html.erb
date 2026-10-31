@@ -1,0 +1,85 @@
+<% content_for :title, "Tâches · Elio" %>
+
+<%# No src: auto-refresh sets it while tasks are unfinished (Turbo refuses a frame whose src is the page itself). %>
+<turbo-frame id="tasks" target="_top">
+  <% if @counts.slice("queued", "running").values.sum.positive? %><div data-controller="auto-refresh" data-auto-refresh-interval-value="3000" hidden></div><% end %>
+
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight">Tâches</h1>
+      <p class="mt-1 text-sm text-ink-3">Inventaires, scans des clés et automatisations lancés en arrière-plan, conservés <%= BackgroundTask::RETENTION.in_days.to_i %> jours.</p>
+    </div>
+    <% if can?(:administer) %>
+      <%= link_to "/jobs", class: "btn btn-secondary", data: { turbo: false } do %><%= icon :list_bullet, class: "h-4 w-4" %>Suivi technique des jobs<% end %>
+    <% end %>
+  </div>
+
+  <%= render "tasks/workers_warning", workers_running: @workers_running %>
+
+  <nav class="task-filters mt-6 flex flex-wrap gap-2" aria-label="Statut">
+    <% [ [ "Toutes", nil ], [ "À venir", "queued" ], [ "En cours", "running" ], [ "Terminées", "succeeded" ], [ "En échec", "failed" ] ].each do |label, filter| %>
+      <%= link_to tasks_path(status: filter), aria: { current: (@filter == filter ? "page" : nil) }, data: { filter: filter || "all" },
+            class: "rounded-full px-3 py-1 text-sm font-medium ring-1 ring-inset #{@filter == filter ? "bg-accent text-white ring-accent" : "bg-surface text-ink-2 ring-line hover:bg-subtle"}" do %>
+        <%= label %><% if filter %> <span class="tabular-nums opacity-70"><%= task_filter_count(filter) %></span><% end %>
+      <% end %>
+    <% end %>
+  </nav>
+
+  <section class="card mt-4 overflow-x-auto">
+    <% if @tasks.any? %>
+      <table id="background-tasks" class="table-dense w-full">
+        <thead>
+          <tr><th>Tâche</th><th>Statut</th><th>Progression</th><th>Lancée par</th><th>Lancée</th><th>Durée</th></tr>
+        </thead>
+        <tbody>
+          <% @tasks.each do |task| %>
+            <tr id="<%= dom_id(task) %>" class="background-task">
+              <td>
+                <%= link_to task.label, task_path(task), class: "font-medium text-ink hover:text-accent" %>
+                <span class="ml-1 text-xs text-ink-3"><%= task.kind_label %></span>
+              </td>
+              <td><%= task_status_badge(task.status) %></td>
+              <td><%= render "tasks/progress", task: task %></td>
+              <td class="text-ink-2"><%= task.author_name %></td>
+              <td class="text-ink-2"><%= relative_time_tag(task.created_at) %></td>
+              <td class="text-ink-2 tabular-nums"><%= task_duration(task.duration) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p class="py-10 text-center text-sm text-ink-3">Aucune tâche<%= " dans cette catégorie" if @filter %>.</p>
+    <% end %>
+  </section>
+
+  <div class="mt-4 flex justify-between text-sm">
+    <% if @page > 1 %><%= link_to "← Plus récentes", tasks_path(status: @filter, page: @page - 1), class: "font-medium text-accent" %><% else %><span></span><% end %>
+    <% if @more %><%= link_to "Plus anciennes →", tasks_path(status: @filter, page: @page + 1), class: "font-medium text-accent" %><% end %>
+  </div>
+
+  <section id="upcoming-automations" class="card mt-8">
+    <div class="card-header">
+      <h2 class="text-sm font-semibold">Prochaines automatisations</h2>
+      <% if can?(:administer) %><%= link_to "Gérer", settings_automations_path, class: "text-xs font-medium text-accent" %><% end %>
+    </div>
+    <% if @upcoming_automations.any? %>
+      <ul class="divide-y divide-line">
+        <% @upcoming_automations.each do |automation| %>
+          <li class="upcoming-automation flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-sm">
+            <span>
+              <span class="font-medium text-ink"><%= automation.label %></span>
+              <span class="text-xs text-ink-3">· <%= Automation::INTERVALS.fetch(automation.interval_minutes).downcase %> · <%= automation.scope_label %></span>
+              <% if automation.definition.quiet %><span class="text-xs text-ink-3">· discrète (non listée dans les tâches)</span><% end %>
+            </span>
+            <span class="text-xs text-ink-2">
+              <% next_run = automation.next_run_at %>
+              <%= next_run <= Time.current ? "à la prochaine minute" : relative_time_tag(next_run, prefix: "") %>
+            </span>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="px-4 py-6 text-center text-sm text-ink-3">Aucune automatisation activée.</p>
+    <% end %>
+  </section>
+</turbo-frame>

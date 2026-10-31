@@ -1,0 +1,13 @@
+<% progress = task.progress %>
+<% if progress[:total].positive? %>
+  <span class="task-progress inline-flex items-center gap-2 text-xs text-ink-2 tabular-nums">
+    <span class="block h-1.5 w-16 overflow-hidden rounded-full bg-track" role="progressbar" aria-label="Progression"
+          aria-valuenow="<%= progress[:done] %>" aria-valuemin="0" aria-valuemax="<%= progress[:total] %>">
+      <span class="block h-full rounded-full <%= progress[:failed].positive? ? "bg-crit" : "bg-ink-2" %>" style="width: <%= (progress[:done] * 100.0 / progress[:total]).round(1) %>%"></span>
+    </span>
+    <%= progress[:done] %>/<%= progress[:total] %>
+    <% if progress[:failed].positive? %><span class="text-crit-ink">· <%= pluralize_fr(progress[:failed], "erreur", "erreurs") %></span><% end %>
+  </span>
+<% else %>
+  <span class="text-xs text-ink-3">—</span>
+<% end %>

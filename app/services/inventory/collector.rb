@@ -22,6 +22,8 @@ class Inventory::Collector
                  "packages" => "Inventory::Collectors::Packages", "services" => "Inventory::Collectors::Services",
                  "ports" => "Inventory::Collectors::Ports" }.freeze
 
+  LABELS = { "os" => "Système", "health" => "Santé", "packages" => "Paquets", "services" => "Services", "ports" => "Ports" }.freeze
+
   MAX_OUTPUT = 8.megabytes
 
   class << self
@@ -31,6 +33,8 @@ class Inventory::Collector
     def registry = @registry ||= CATEGORIES.dup
 
     def categories = registry.keys
+
+    def label_for(category) = LABELS.fetch(category.to_s, category.to_s.humanize)
 
     def for(category) = registry.fetch(category.to_s).to_s.constantize
 

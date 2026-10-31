@@ -9,7 +9,7 @@ class RunDueAutomationsJob < ApplicationJob
   def perform
     Automation.all_kinds.select(&:due?).each do |automation|
       automation.update!(last_run_at: Time.current)
-      RunAutomationJob.perform_later(automation)
+      automation.enqueue!
     end
   end
 end

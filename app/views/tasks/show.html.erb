@@ -1,0 +1,67 @@
+<% content_for :title, "#{@task.label} · Tâches · Elio" %>
+
+<turbo-frame id="<%= dom_id(@task) %>" target="_top">
+  <% if @task.unfinished? %><div data-controller="auto-refresh" hidden></div><% end %>
+
+  <nav class="text-sm text-ink-3" aria-label="Fil d'Ariane"><%= link_to "Tâches", tasks_path, class: "hover:text-ink" %> /</nav>
+  <div class="mt-1 flex flex-wrap items-center gap-3">
+    <h1 class="text-2xl font-bold tracking-tight"><%= @task.label %></h1>
+    <%= task_status_badge(@task.status, id: "task-status") %>
+  </div>
+
+  <dl class="task-facts mt-4 grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-4">
+    <div><dt class="text-xs text-ink-3">Type</dt><dd><%= @task.kind_label %><% if @task.automation && can?(:administer) %> · <%= link_to "Gérer", settings_automations_path, class: "text-accent" %><% end %></dd></div>
+    <div><dt class="text-xs text-ink-3">Lancée par</dt><dd><%= @task.author_name %></dd></div>
+    <div><dt class="text-xs text-ink-3">Lancée</dt><dd><%= relative_time_tag(@task.created_at) %></dd></div>
+    <div><dt class="text-xs text-ink-3">Durée</dt><dd class="tabular-nums"><%= @task.started_at ? task_duration(@task.duration) : "pas encore commencée" %></dd></div>
+  </dl>
+
+  <% if @task.result.present? %>
+    <p id="task-result" class="mt-4 rounded-lg bg-subtle px-4 py-2.5 text-sm text-ink-2"><%= @task.result %></p>
+  <% end %>
+
+  <%= render "tasks/workers_warning", workers_running: @workers_running %>
+
+  <section class="card mt-6 overflow-x-auto">
+    <div class="card-header">
+      <h2 class="text-sm font-semibold">Serveurs</h2>
+      <%= render "tasks/progress", task: @task %>
+    </div>
+    <% if @items.any? %>
+      <table id="task-items" class="table-dense w-full">
+        <thead><tr><th>Serveur</th><th>Statut</th><th>Détails</th><th>Durée</th></tr></thead>
+        <tbody>
+          <% @items.each do |item| %>
+            <tr id="<%= dom_id(item) %>" class="task-item">
+              <td class="whitespace-nowrap">
+                <% if item.server %>
+                  <%= link_to item.server_name, server_path(item.server, tab: (@task.kind == "keys_scan" ? "keys" : nil)), class: "font-medium text-ink hover:text-accent" %>
+                <% else %>
+                  <span class="font-medium text-ink-2"><%= item.server_name %></span> <span class="text-xs text-ink-3">(supprimé)</span>
+                <% end %>
+              </td>
+              <td><%= task_status_badge(item.status) %></td>
+              <td class="text-xs text-ink-2">
+                <% if item.details.any? %>
+                  <ul class="flex flex-wrap gap-x-3 gap-y-1">
+                    <% item.details.each do |category, detail| %>
+                      <li class="task-category" data-category="<%= category %>" title="<%= detail["message"] %>">
+                        <%= Inventory::Collector.label_for(category) %> :
+                        <%= { "ok" => "✓", "partial" => "partiel", "unsupported" => "non disponible", "error" => "échec" }.fetch(detail["status"], detail["status"]) %>
+                      </li>
+                    <% end %>
+                  </ul>
+                <% end %>
+                <% if item.message.present? %><p class="task-item-message mt-1 <%= item.status == "failed" ? "text-crit-ink" : "text-warn-ink" %>"><%= item.message %></p><% end %>
+                <% if item.status == "running" && item.started_at %><p class="text-ink-3"><%= relative_time_tag(item.started_at, prefix: "commencé ") %></p><% end %>
+              </td>
+              <td class="whitespace-nowrap text-ink-2 tabular-nums"><%= task_duration(item.duration) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p class="px-4 py-6 text-center text-sm text-ink-3"><%= @task.finished? ? "Aucun serveur concerné." : "La liste des serveurs apparaîtra au démarrage." %></p>
+    <% end %>
+  </section>
+</turbo-frame>

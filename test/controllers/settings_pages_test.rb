@@ -14,13 +14,20 @@ class SettingsPagesTest < ActionDispatch::IntegrationTest
   test "settings pages share tabs, the current one highlighted" do
     sign_in users(:one)
 
-    { settings_path => "Général", settings_notifications_path => "Notifications", settings_automations_path => "Automatisations",
-      settings_users_path => "Utilisateurs" }.each do |path, label|
+    { settings_path => "Général", settings_notifications_path => "Notifications", settings_users_path => "Utilisateurs" }.each do |path, label|
       get path
-      assert_select "nav.settings-nav a", 4
+      assert_select "nav.settings-nav a", 3
       assert_select "nav.settings-nav a[aria-current=page]", label
-      assert_select "nav.main-nav a[aria-current=page]", path == settings_automations_path ? "Automatisations" : "Paramètres"
+      assert_select "nav.main-nav a[aria-current=page]", "Paramètres"
     end
+  end
+
+  test "the automations page is only in the sidebar, not in the settings tabs" do
+    sign_in users(:one)
+    get settings_automations_path
+    assert_select "nav.settings-nav", 0
+    assert_select "h1", "Automatisations"
+    assert_select "nav.main-nav a[aria-current=page]", "Automatisations"
   end
 
   test "the general settings keep the SSH key" do
@@ -81,14 +88,20 @@ class SettingsPagesTest < ActionDispatch::IntegrationTest
     assert_equal 360, scan.reload.interval_minutes
   end
 
-  test "running an automation now enqueues it" do
-    scan = Automation.all_kinds.find { |automation| automation.kind == "keys_scan" }
-    sign_in users(:one)
+  test "running an automation now enqueues it as a task, even a quiet one" do
+    %w[keys_scan health_check].each do |kind|
+      automation = Automation.all_kinds.find { |candidate| candidate.kind == kind }
+      sign_in users(:one)
 
-    post run_settings_automation_path(scan)
+      assert_difference -> { BackgroundTask.count } do
+        post run_settings_automation_path(automation)
+      end
 
-    assert_enqueued_with(job: RunAutomationJob, args: [ scan ])
-    assert_redirected_to settings_automations_path
+      task = BackgroundTask.recent.first
+      assert_equal [ "automation", automation, users(:one), "queued" ], [ task.kind, task.automation, task.user, task.status ]
+      assert_enqueued_with(job: RunAutomationJob, args: [ automation, task ])
+      assert_redirected_to task_path(task)
+    end
   end
 
   test "an automation can be limited to some groups" do

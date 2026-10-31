@@ -9,24 +9,28 @@ class ServerInventoriesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_user_session_path
   end
 
-  test "starts the inventory of one server in the background" do
+  test "starts the inventory of one server in the background, as a task" do
     sign_in users(:operator)
 
-    assert_enqueued_with(job: Inventory::CollectJob, args: [ servers(:web) ]) do
-      post server_inventory_path(servers(:web))
-    end
+    post server_inventory_path(servers(:web))
 
-    assert_redirected_to server_path(servers(:web))
-    assert_equal "Inventaire de « Web » lancé. Actualisez la page dans quelques instants.", flash[:notice]
+    task = BackgroundTask.sole
+    item = task.items.sole
+    assert_equal [ "inventory", "Inventaire de « Web »", users(:operator), "queued" ], [ task.kind, task.label, task.user, task.status ]
+    assert_equal [ servers(:web), "Web", "queued" ], [ item.server, item.server_name, item.status ]
+    assert_enqueued_with(job: Inventory::CollectJob, args: [ servers(:web), { task_item: item } ])
+    assert_redirected_to task_path(task)
+    assert_equal "Inventaire de « Web » lancé.", flash[:notice]
   end
 
-  test "starts the inventory of every server" do
+  test "starts the inventory of every server, one task" do
     sign_in users(:one)
 
     assert_enqueued_jobs(3, only: Inventory::CollectJob) { post server_inventories_path }
 
-    assert_redirected_to servers_path
-    assert_equal "Inventaire lancé sur 3 serveurs. Actualisez la page dans quelques instants.", flash[:notice]
+    task = BackgroundTask.sole
+    assert_equal [ "Inventaire du parc (3 serveurs)", 3 ], [ task.label, task.items.count ]
+    assert_redirected_to task_path(task)
   end
 
   test "returns 404 for an unknown server" do

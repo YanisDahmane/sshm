@@ -16,7 +16,9 @@ class ServerScansControllerTest < ActionDispatch::IntegrationTest
     post server_scans_path, headers: { "HTTP_REFERER" => servers_url }
 
     assert_enqueued_jobs 3, only: ScanServerJob
-    assert_redirected_to servers_url
-    assert_equal "Scan des clés lancé sur 3 serveurs. Actualisez la page dans quelques instants.", flash[:notice]
+    task = BackgroundTask.sole
+    assert_equal [ "keys_scan", "Scan des clés (3 serveurs)", 3 ], [ task.kind, task.label, task.items.count ]
+    assert_redirected_to task_path(task)
+    assert_equal "Scan des clés lancé.", flash[:notice]
   end
 end

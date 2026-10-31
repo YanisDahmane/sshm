@@ -6,11 +6,39 @@ class AutomationJobsTest < ActiveJob::TestCase
   test "RunAutomationJob runs the automation" do
     automation = Automation.all_kinds.find { |automation| automation.kind == "keys_scan" }
     ran = []
-    automation.define_singleton_method(:run!) { ran << kind }
+    automation.define_singleton_method(:run!) { |task: nil| ran << [ kind, task ] }
 
     RunAutomationJob.perform_now(automation)
 
-    assert_equal [ "keys_scan" ], ran
+    assert_equal [ [ "keys_scan", nil ] ], ran
+  end
+
+  test "RunAutomationJob follows its task, one item per server" do
+    automation = Automation.all_kinds.find { |automation| automation.kind == "keys_scan" }
+    task = automation.enqueue!(user: users(:one))
+    scans = { "Web" => ServerScan::Result.new(error_title: nil), "Database" => ServerScan::Result.new(error_title: "Clé refusée") }
+
+    stub_method(ServerScan, :call, ->(server, **) { scans.fetch(server.name, ServerScan::Result.new(error_title: nil)) }) do
+      RunAutomationJob.perform_now(automation, task)
+    end
+
+    task.reload
+    assert_equal "partial", task.status
+    assert_match "serveur(s) scanné(s)", task.result
+    assert_equal Server.count, task.items.count
+    failed = task.items.find_by!(server_name: "Database")
+    assert_equal [ "failed", "Clé refusée" ], [ failed.status, failed.message ]
+    assert task.started_at && task.finished_at
+  end
+
+  test "RunAutomationJob marks its task failed when the run crashes" do
+    automation = Automation.all_kinds.find { |automation| automation.kind == "keys_scan" }
+    task = automation.enqueue!(user: users(:one))
+    automation.define_singleton_method(:run!) { |task: nil| raise "boom" }
+
+    assert_raises(RuntimeError) { RunAutomationJob.perform_now(automation, task) }
+
+    assert_equal [ "failed", "Erreur interne (RuntimeError)" ], [ task.reload.status, task.result ]
   end
 
   test "RunDueAutomationsJob starts only the enabled automations that are due" do
@@ -24,7 +52,9 @@ class AutomationJobsTest < ActiveJob::TestCase
       RunDueAutomationsJob.perform_now
 
       assert_enqueued_jobs 1, only: RunAutomationJob
-      assert_enqueued_with(job: RunAutomationJob, args: [ scan ])
+      task = BackgroundTask.sole
+      assert_equal [ "automation", scan, nil, "Scan des clés" ], [ task.kind, task.automation, task.user, task.label ]
+      assert_enqueued_with(job: RunAutomationJob, args: [ scan, task ])
       assert_equal Time.current, scan.reload.last_run_at
     end
   end
@@ -41,8 +71,9 @@ class AutomationJobsTest < ActiveJob::TestCase
     RunDueAutomationsJob.perform_now
 
     assert_equal 7, Automation.count
-    assert_enqueued_with(job: RunAutomationJob, args: [ Automation.find_by!(kind: "health_check") ])
+    assert_enqueued_with(job: RunAutomationJob, args: [ Automation.find_by!(kind: "health_check"), nil ])
     assert_enqueued_jobs 1, only: RunAutomationJob
+    assert_equal 0, BackgroundTask.count, "the quiet health check is not listed in the tasks"
   end
 
   test "due automations are checked every minute in development and production" do

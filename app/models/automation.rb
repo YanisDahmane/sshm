@@ -68,7 +68,17 @@ class Automation < ApplicationRecord
 
   # Runs the task now, remembers its result and logs an automation_run
   # activity (except for the quiet ones).
-  def run!
+  # Enqueues a run, followed on the "Tâches" page except for the quiet
+  # automations started on schedule. Returns the task (or nil).
+  def enqueue!(user: nil, tracked: !definition.quiet)
+    task = BackgroundTask.enqueue!(kind: "automation", label: label, servers: [], user: user, automation: self) if tracked
+    RunAutomationJob.perform_later(self, task)
+    task
+  end
+
+  # With a BackgroundTask (see RunAutomationJob), one item per server is followed.
+  def run!(task: nil)
+    @task = task
     result = inventory? ? run_inventory : send("run_#{kind}")
     update!(last_run_at: Time.current, last_result: result)
     Activity.record!(:automation_run, user: nil, automation: kind, automation_label: label, result: result) unless definition.quiet
@@ -80,8 +90,10 @@ class Automation < ApplicationRecord
   # Collects the automation's categories on its servers, a few at a time.
   def run_inventory
     servers = self.servers.to_a
-    collected = BoundedParallel.map(servers) do |server|
-      Inventory::Collection.call(server, categories: definition.categories).values.none? { |outcome| outcome.status == "error" }
+    collected = each_tracked(servers) do |server, item|
+      outcomes = Inventory::Collection.call(server, categories: definition.categories)
+      item&.finish_inventory!(outcomes)
+      outcomes.values.none? { |outcome| outcome.status == "error" }
     end
     "#{collected.count(true)}/#{servers.size} serveur(s) inventorié(s)"
   end
@@ -89,10 +101,25 @@ class Automation < ApplicationRecord
   def run_keys_scan
     servers = self.servers.to_a
     detected_before = Activity.of_kind(:unknown_key_detected).count
-    scanned = BoundedParallel.map(servers) { |server| ServerScan.call(server).success? }.count(true)
+    scanned = each_tracked(servers) do |server, item|
+      scan = ServerScan.call(server)
+      item&.finish!(scan.success? ? :succeeded : :failed, scan.error_title)
+      scan.success?
+    end.count(true)
     detected = Activity.of_kind(:unknown_key_detected).count - detected_before
 
     "#{scanned}/#{servers.size} serveur(s) scanné(s), #{detected} nouvelle(s) clé(s) inconnue(s)"
+  end
+
+  # Runs the block on each server, a few at a time, with its task item (if any).
+  def each_tracked(servers)
+    @task&.add_items!(servers)
+    items = @task ? @task.items.index_by(&:server_id) : {}
+    BoundedParallel.map(servers) do |server|
+      item = items[server.id]
+      item&.update!(status: "running", started_at: Time.current)
+      yield server, item
+    end
   end
 
   def run_servers_ping

@@ -74,6 +74,8 @@ class ApplicationHelperTest < ActionView::TestCase
 
     assert_includes labels, "Parc"
     assert_includes labels, "Web"
+    assert_includes labels, "Tâches"
+    assert_not_includes labels, "Suivi technique des jobs"
     assert_not_includes labels, "Ajouter un serveur"
     assert_not_includes labels, "Paramètres"
 
@@ -81,5 +83,8 @@ class ApplicationHelperTest < ActionView::TestCase
     labels = command_palette_items.map { |item| item[:label] }
     assert_includes labels, "Ajouter un serveur"
     assert_not_includes labels, "Automatisations"
+
+    @user = users(:one)
+    assert_includes command_palette_items.map { |item| item[:label] }, "Suivi technique des jobs"
   end
 end

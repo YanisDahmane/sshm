@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_31_180000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_31_190000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -63,6 +63,38 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_180000) do
     t.jsonb "state", default: {}, null: false
     t.jsonb "server_group_ids", default: [], null: false
     t.index ["kind"], name: "index_automations_on_kind", unique: true
+  end
+
+  create_table "background_task_items", force: :cascade do |t|
+    t.bigint "background_task_id", null: false
+    t.bigint "server_id"
+    t.string "server_name", null: false
+    t.string "status", default: "queued", null: false
+    t.text "message"
+    t.jsonb "details", default: {}, null: false
+    t.datetime "started_at"
+    t.datetime "finished_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["background_task_id"], name: "index_background_task_items_on_background_task_id"
+    t.index ["server_id"], name: "index_background_task_items_on_server_id"
+  end
+
+  create_table "background_tasks", force: :cascade do |t|
+    t.string "kind", null: false
+    t.string "label", null: false
+    t.string "status", default: "queued", null: false
+    t.bigint "user_id"
+    t.bigint "automation_id"
+    t.text "result"
+    t.datetime "started_at"
+    t.datetime "finished_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["automation_id"], name: "index_background_tasks_on_automation_id"
+    t.index ["created_at"], name: "index_background_tasks_on_created_at"
+    t.index ["status", "created_at"], name: "index_background_tasks_on_status_and_created_at"
+    t.index ["user_id"], name: "index_background_tasks_on_user_id"
   end
 
   create_table "inventory_health_samples", force: :cascade do |t|
@@ -273,6 +305,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_180000) do
   add_foreign_key "activities", "public_keys", on_delete: :nullify
   add_foreign_key "activities", "servers", on_delete: :nullify
   add_foreign_key "activities", "users", on_delete: :nullify
+  add_foreign_key "background_task_items", "background_tasks", on_delete: :cascade
+  add_foreign_key "background_task_items", "servers", on_delete: :nullify
+  add_foreign_key "background_tasks", "automations", on_delete: :nullify
+  add_foreign_key "background_tasks", "users", on_delete: :nullify
   add_foreign_key "inventory_health_samples", "servers", on_delete: :cascade
   add_foreign_key "inventory_packages", "servers", on_delete: :cascade
   add_foreign_key "inventory_snapshots", "servers", on_delete: :cascade

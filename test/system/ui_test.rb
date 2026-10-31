@@ -17,6 +17,7 @@ class UiTest < ApplicationSystemTestCase
     find("#flash .toast button[aria-label=Fermer]").click
     assert_no_selector "#flash .toast"
 
+    visit servers_path
     click_on "Scanner les clés"
     assert_selector "#flash .toast"
     execute_script("document.querySelector('#flash [data-controller=toast]').dispatchEvent(new MouseEvent('mouseleave'))")

@@ -19,8 +19,8 @@ module Settings
     end
 
     def run
-      RunAutomationJob.perform_later(@automation)
-      redirect_to settings_automations_path, notice: "« #{@automation.label} » lancée. Le résultat apparaîtra dans l'activité."
+      task = @automation.enqueue!(user: current_user, tracked: true)
+      redirect_to task_path(task), notice: "« #{@automation.label} » lancée."
     end
 
     private
