@@ -6,11 +6,12 @@ module Settings
 
     def index
       @automations = Automation.all_kinds
+      @groups = ServerGroup.order(:name)
     end
 
     def update
       if @automation.update(automation_params)
-        state = @automation.enabled? ? "activée (#{Automation::INTERVALS.fetch(@automation.interval_minutes).downcase})" : "désactivée"
+        state = @automation.enabled? ? "activée (#{Automation::INTERVALS.fetch(@automation.interval_minutes).downcase}, #{@automation.scope_label.downcase_first})" : "désactivée"
         redirect_to settings_automations_path, notice: "« #{@automation.label} » #{state}."
       else
         redirect_to settings_automations_path, alert: @automation.errors.full_messages.to_sentence
@@ -29,7 +30,7 @@ module Settings
     end
 
     def automation_params
-      params.expect(automation: [ :enabled, :interval_minutes ])
+      params.expect(automation: [ :enabled, :interval_minutes, server_group_ids: [] ])
     end
   end
 end

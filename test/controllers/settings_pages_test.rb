@@ -30,12 +30,12 @@ class SettingsPagesTest < ActionDispatch::IntegrationTest
   end
 
   test "the automations page lists the automations with their state" do
-    Automation.all_kinds.first.update!(enabled: true, last_run_at: 1.hour.ago, last_result: "3/3 serveur(s) scanné(s)")
+    Automation.all_kinds.find { |automation| automation.kind == "keys_scan" }.update!(enabled: true, last_run_at: 1.hour.ago, last_result: "3/3 serveur(s) scanné(s)")
     sign_in users(:one)
 
     get settings_automations_path
 
-    assert_select "section.automation", 2
+    assert_select "section.automation", 7
     scan = Automation.find_by!(kind: "keys_scan")
     assert_select "##{ActionView::RecordIdentifier.dom_id(scan)}" do
       assert_select ".automation-state", "Activée"
@@ -48,19 +48,19 @@ class SettingsPagesTest < ActionDispatch::IntegrationTest
   end
 
   test "enabling an automation and choosing its frequency" do
-    scan = Automation.all_kinds.first
+    scan = Automation.all_kinds.find { |automation| automation.kind == "keys_scan" }
     sign_in users(:one)
 
     patch settings_automation_path(scan), params: { automation: { enabled: "1", interval_minutes: "60" } }
 
     assert_redirected_to settings_automations_path
-    assert_equal "« Scan des clés » activée (toutes les heures).", flash[:notice]
+    assert_equal "« Scan des clés » activée (toutes les heures, tout le parc).", flash[:notice]
     assert scan.reload.enabled?
     assert_equal 60, scan.interval_minutes
   end
 
   test "disabling an automation" do
-    scan = Automation.all_kinds.first
+    scan = Automation.all_kinds.find { |automation| automation.kind == "keys_scan" }
     scan.update!(enabled: true)
     sign_in users(:one)
 
@@ -71,7 +71,7 @@ class SettingsPagesTest < ActionDispatch::IntegrationTest
   end
 
   test "rejects a frequency that is not offered" do
-    scan = Automation.all_kinds.first
+    scan = Automation.all_kinds.find { |automation| automation.kind == "keys_scan" }
     sign_in users(:one)
 
     patch settings_automation_path(scan), params: { automation: { enabled: "1", interval_minutes: "7" } }
@@ -82,12 +82,31 @@ class SettingsPagesTest < ActionDispatch::IntegrationTest
   end
 
   test "running an automation now enqueues it" do
-    scan = Automation.all_kinds.first
+    scan = Automation.all_kinds.find { |automation| automation.kind == "keys_scan" }
     sign_in users(:one)
 
     post run_settings_automation_path(scan)
 
     assert_enqueued_with(job: RunAutomationJob, args: [ scan ])
     assert_redirected_to settings_automations_path
+  end
+
+  test "an automation can be limited to some groups" do
+    automation = Automation.all_kinds.find { |candidate| candidate.kind == "inventory_packages" }
+    sign_in users(:one)
+
+    get settings_automations_path
+    assert_select "##{ActionView::RecordIdentifier.dom_id(automation)}" do
+      assert_select ".automation-scope", "Tout le parc"
+      assert_select "details.automation-groups input[type=checkbox][name='automation[server_group_ids][]']", 2
+    end
+
+    patch settings_automation_path(automation), params: { automation: { enabled: "1", interval_minutes: "5", server_group_ids: [ "", server_groups(:production).id.to_s ] } }
+
+    assert_equal "« Inventaire des paquets » activée (toutes les 5 minutes, production).", flash[:notice]
+    assert_equal [ server_groups(:production).id ], automation.reload.server_group_ids
+
+    patch settings_automation_path(automation), params: { automation: { enabled: "1", interval_minutes: "5", server_group_ids: [ "" ] } }
+    assert_equal [], automation.reload.server_group_ids
   end
 end

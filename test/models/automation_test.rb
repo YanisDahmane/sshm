@@ -3,14 +3,14 @@ require "test_helper"
 class AutomationTest < ActiveSupport::TestCase
   include StubHelpers
 
-  test "all_kinds creates every automation once, disabled with its default interval" do
+  test "all_kinds creates every automation once, with its default interval; only the health check is on" do
     automations = Automation.all_kinds
 
-    assert_equal %w[keys_scan servers_ping], automations.map(&:kind)
-    assert_equal [ 360, 15 ], automations.map(&:interval_minutes)
-    assert automations.none?(&:enabled?)
+    assert_equal %w[health_check servers_ping inventory_os inventory_packages inventory_services inventory_ports keys_scan], automations.map(&:kind)
+    assert_equal [ 15, 15, 1440, 360, 60, 60, 360 ], automations.map(&:interval_minutes)
+    assert_equal %w[health_check], automations.select(&:enabled?).map(&:kind)
     assert_equal automations, Automation.all_kinds
-    assert_equal 2, Automation.count
+    assert_equal 7, Automation.count
   end
 
   test "validations" do
@@ -24,7 +24,7 @@ class AutomationTest < ActiveSupport::TestCase
   end
 
   test "due? and next_run_at" do
-    automation = Automation.all_kinds.first
+    automation = Automation.all_kinds.find { |automation| automation.kind == "keys_scan" }
     freeze_time do
       assert_not automation.due?
       assert_nil automation.next_run_at
@@ -70,5 +70,41 @@ class AutomationTest < ActiveSupport::TestCase
   def snapshot(server, unix_user, *public_keys)
     AccountSnapshot.create!(server: server, unix_user: unix_user, read_at: 1.minute.ago,
                             content: public_keys.map { |public_key| public_key.content }.join("\n"))
+  end
+
+  test "inventory automations collect their categories on their servers, a few at a time" do
+    automation = Automation.all_kinds.find { |candidate| candidate.kind == "inventory_ports" }
+    automation.update!(server_group_ids: [ server_groups(:production).id ])
+    calls = Concurrent::Array.new
+    collection = lambda do |server, categories:|
+      calls << [ server.name, categories ]
+      { "ports" => Inventory::Collector::Outcome.new(status: server.name == "Web" ? "error" : "ok", data: {}, message: nil) }
+    end
+
+    result = stub_method(Inventory::Collection, :call, collection) { automation.run! }
+
+    assert_equal [ [ "Database", %w[ports] ], [ "Web", %w[ports] ] ], calls.sort
+    assert_equal "1/2 serveur(s) inventorié(s)", result
+    assert_equal "Inventaire des ports : 1/2 serveur(s) inventorié(s)", Activity.of_kind(:automation_run).sole.summary
+    assert_equal "Production", automation.scope_label
+  end
+
+  test "frequent automations do not log their runs" do
+    automation = Automation.all_kinds.find { |candidate| candidate.kind == "health_check" }
+
+    assert_no_difference("Activity.of_kind(:automation_run).count") do
+      stub_method(Inventory::Collection, :call, ->(*, **) { {} }) { automation.run! }
+    end
+    assert_equal "3/3 serveur(s) inventorié(s)", automation.reload.last_result
+  end
+
+  test "scope: the groups, or the whole fleet" do
+    automation = Automation.all_kinds.find { |candidate| candidate.kind == "keys_scan" }
+    assert_equal %w[Backup Database Web], automation.servers.map(&:name)
+    assert_equal "Tout le parc", automation.scope_label
+
+    automation.update!(server_group_ids: [ "", server_groups(:production).id.to_s, server_groups(:production).id.to_s ])
+    assert_equal [ server_groups(:production).id ], automation.server_group_ids
+    assert_equal %w[Database Web], automation.servers.map(&:name)
   end
 end
