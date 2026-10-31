@@ -52,7 +52,7 @@ class ActivityTest < ActiveSupport::TestCase
       [ :key_expired, { profile: profiles(:ci), unix_user: "deploy" } ] => "Accès temporaire de « CI » retiré de « Web » pour deploy",
       [ :unknown_key_detected, { unix_user: "root" } ] => "Clé « sans nom » sans profil trouvée sur « Web » pour root",
       [ :key_disappeared, { unix_user: "root", key_name: "bob" } ] => "Clé « bob » disparue de « Web » pour root",
-      [ :ssh_access_lost, {} ] => "« Web » refuse la clé de SSHM",
+      [ :ssh_access_lost, {} ] => "« Web » refuse la clé d'Elio",
       [ :servers_imported, { count: 12, format: "CSV", names: %w[A B] } ] => "12 serveur(s) importé(s) (CSV) : A, B…",
       [ :access_requested, { requester: "v@x.fr", duration_label: "1 heure", reason: "incident" } ] => "v@x.fr demande 1 heure d'accès à « Web » : « incident »",
       [ :access_request_approved, { requester: "v@x.fr", duration_label: "1 heure" } ] => "Demande de v@x.fr acceptée : accès à « Web » pendant 1 heure",
@@ -75,8 +75,8 @@ class ActivityTest < ActiveSupport::TestCase
 
     assert_equal "Profil « Alice » créé", Activity.record!(:profile_created, profile: profiles(:alice)).summary
     assert_equal "Profil « Bob » supprimé", Activity.record!(:profile_deleted, profile_name: "Bob").summary
-    assert_equal "Clé SSHM générée", Activity.record!(:ssh_key_generated, regenerated: false).summary
-    assert_equal "Clé SSHM régénérée", Activity.record!(:ssh_key_generated, regenerated: true).summary
+    assert_equal "Clé Elio générée", Activity.record!(:ssh_key_generated, regenerated: false).summary
+    assert_equal "Clé Elio régénérée", Activity.record!(:ssh_key_generated, regenerated: true).summary
     assert_equal "Scan des clés : 2/2", Activity.record!(:automation_run, automation_label: "Scan des clés", result: "2/2").summary
   end
 
@@ -93,7 +93,7 @@ class ActivityTest < ActiveSupport::TestCase
 
   test "server_deleted summary uses the copied name" do
     activity = Activity.record!(:server_deleted, server_name: "Web")
-    assert_equal "Serveur « Web » supprimé de SSHM", activity.summary
+    assert_equal "Serveur « Web » supprimé d'Elio", activity.summary
     assert_equal :warning, activity.severity
   end
 end

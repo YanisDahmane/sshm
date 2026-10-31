@@ -7,7 +7,7 @@ class SshCheck
   end
 
   def self.call(server, **connection_options)
-    token = "sshm-check-#{SecureRandom.hex(4)}"
+    token = "elio-check-#{SecureRandom.hex(4)}"
     output = SshConnection.open(server, **connection_options) { |ssh| ssh.exec!("echo #{token}").stdout.strip }
 
     if output == token

@@ -45,7 +45,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
       assert_select "p", text: /3 clés/
       assert_select "li.authorized-key", 3
       assert_select "li.authorized-key:nth-child(1)" do
-        assert_select ".key-name", "sshm-fixture"
+        assert_select ".key-name", "elio-fixture"
         assert_select ".key-badge", text: "Connue"
         assert_select ".key-master", text: "Master"
       end
@@ -173,7 +173,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     assert_select "form.authorize-profile", 0
   end
 
-  test "offers to delete every key except the SSHM key" do
+  test "offers to delete every key except the Elio key" do
     sign_in users(:one)
     named = SshKeyGenerator.generate(comment: "alice@laptop").public_key
 
@@ -231,10 +231,10 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "destroy refuses the SSHM key" do
+  test "destroy refuses the Elio key" do
     sign_in users(:one)
 
-    delete server_authorized_key_path(servers(:web)), params: { key: ssh_keys(:main).public_key.split(" ")[1], name: "sshm" }, as: :turbo_stream
+    delete server_authorized_key_path(servers(:web)), params: { key: ssh_keys(:main).public_key.split(" ")[1], name: "elio" }, as: :turbo_stream
 
     assert_turbo_stream action: :update, target: "flash" do
       assert_select "div.toast-alert", text: /Suppression interdite/
@@ -465,7 +465,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     assert servers(:web).reload.ssh_ok
   end
 
-  test "records a refused key and guides the user to install the SSHM key" do
+  test "records a refused key and guides the user to install the Elio key" do
     sign_in users(:one)
     refused = AuthorizedKeysReader::Result.new(keys: [], error_title: "Clé SSH refusée par le serveur", error_details: "x", reason: :key_refused)
 
@@ -479,7 +479,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     assert_equal 0, AccountSnapshot.count
   end
 
-  test "points to the settings when there is no SSHM key" do
+  test "points to the settings when there is no Elio key" do
     sign_in users(:one)
     missing = AuthorizedKeysReader::Result.new(keys: [], error_title: "Aucune clé SSH configurée", error_details: "x", reason: :missing_key)
 

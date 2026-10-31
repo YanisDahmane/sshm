@@ -58,11 +58,11 @@ class ServerShowTest < ApplicationSystemTestCase
     accept_app_confirm("Supprimer le serveur") { first("button.delete-server").click }
 
     assert_selector "h1", text: "Serveurs"
-    assert_text "Le serveur « Backup » a été supprimé de SSHM."
+    assert_text "Le serveur « Backup » a été supprimé d'Elio."
     assert_no_selector "#servers", text: "Backup"
 
     visit activities_path
-    assert_selector "li.activity", text: "Serveur « Backup » supprimé de SSHM"
+    assert_selector "li.activity", text: "Serveur « Backup » supprimé d'Elio"
   end
 
   test "opening and closing the details of a key" do

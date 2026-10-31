@@ -1,6 +1,6 @@
 # The key pair the app uses to connect to every server. Its public key must be
 # added to the servers' authorized_keys. There is one active key, plus a
-# pending one while a KeyRotation replaces it: both are SSHM's keys then
+# pending one while a KeyRotation replaces it: both are Elio's keys then
 # (connections try both, neither counts as an unknown key nor can be removed).
 class SshKey < ApplicationRecord
   encrypts :private_key
@@ -13,21 +13,21 @@ class SshKey < ApplicationRecord
     active.order(:created_at).last
   end
 
-  # Active then pending key: the keys SSHM connects with and protects.
+  # Active then pending key: the keys Elio connects with and protects.
   def self.app_keys
     where(state: %w[active pending]).in_order_of(:state, %w[active pending]).to_a
   end
 
   # Replaces every key with a freshly generated active one (cuts the access to
   # servers until its public key is installed; see KeyRotation for no downtime).
-  def self.generate!(comment: "sshm")
+  def self.generate!(comment: "elio")
     transaction do
       delete_all
       build_generated(comment: comment).tap(&:save!)
     end
   end
 
-  def self.generate_pending!(comment: "sshm")
+  def self.generate_pending!(comment: "elio")
     build_generated(comment: comment, state: :pending).tap(&:save!)
   end
 

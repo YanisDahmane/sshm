@@ -1,5 +1,5 @@
-# Rotates SSHM's key on every server (see KeyRotation), through the account
-# SSHM logs in as: install the new key with the old one, check a login with
+# Rotates Elio's key on every server (see KeyRotation), through the account
+# Elio logs in as: install the new key with the old one, check a login with
 # the new key, remove the old key with the new one. retry_failed only redoes
 # the failed servers.
 class RotateSshKeyJob < ApplicationJob

@@ -1,4 +1,4 @@
-# Replaces SSHM's key without cutting the access to servers (RotateSshKeyJob):
+# Replaces Elio's key without cutting the access to servers (RotateSshKeyJob):
 # a pending key is installed on each server with the old key, checked, then the
 # old key is removed with the new one. Once every server is done (or when
 # forced), the new key becomes the active one and the old key is deleted.
@@ -37,7 +37,7 @@ class KeyRotation < ApplicationRecord
   end
 
   # Closes a run: activates the new key when every server succeeded, or when
-  # forced (the failed servers then lose SSHM's access).
+  # forced (the failed servers then lose Elio's access).
   def finish!(force: false)
     update!(finished_at: Time.current, forced: force)
     activate! if force || failed_count.zero?

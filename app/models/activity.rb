@@ -10,27 +10,27 @@ class Activity < ApplicationRecord
 
   KINDS = [
     Kind.new(:key_added, "Clé ajoutée", :keys, :info, "Un profil a été autorisé sur un compte d'un serveur."),
-    Kind.new(:key_removed, "Clé supprimée", :keys, :info, "Une clé a été supprimée d'un compte depuis SSHM."),
+    Kind.new(:key_removed, "Clé supprimée", :keys, :info, "Une clé a été supprimée d'un compte depuis Elio."),
     Kind.new(:access_requested, "Demande d'accès", :keys, :warning, "Un utilisateur demande un accès temporaire à un serveur."),
     Kind.new(:access_request_approved, "Demande d'accès acceptée", :keys, :info, "Une demande d'accès a été acceptée : l'accès temporaire est en place."),
     Kind.new(:access_request_denied, "Demande d'accès refusée", :keys, :info, "Une demande d'accès a été refusée."),
     Kind.new(:key_expired, "Accès temporaire expiré", :keys, :info, "Un accès temporaire a expiré et sa clé a été retirée."),
     Kind.new(:profile_revoked_everywhere, "Profil révoqué partout", :security, :critical, "La clé d'un profil a été retirée de tous les serveurs."),
     Kind.new(:unknown_key_detected, "Clé sans profil détectée", :security, :warning, "Une clé qui ne correspond à aucun profil a été trouvée sur un serveur."),
-    Kind.new(:key_disappeared, "Clé retirée hors de SSHM", :security, :warning, "Une clé a disparu d'un serveur sans passer par SSHM."),
+    Kind.new(:key_disappeared, "Clé retirée hors d'Elio", :security, :warning, "Une clé a disparu d'un serveur sans passer par Elio."),
     Kind.new(:access_drift_detected, "Écart avec les règles d'accès", :security, :warning, "Des clés attendues manquent ou des clés non prévues sont présentes sur des serveurs."),
-    Kind.new(:ssh_access_lost, "Accès SSH perdu", :security, :critical, "Le serveur refuse désormais la clé de SSHM."),
+    Kind.new(:ssh_access_lost, "Accès SSH perdu", :security, :critical, "Le serveur refuse désormais la clé d'Elio."),
     Kind.new(:host_key_changed, "Empreinte serveur remplacée", :security, :critical, "Un administrateur a accepté la nouvelle empreinte d'un serveur (réinstallation…)."),
     Kind.new(:server_unreachable, "Serveur injoignable", :servers, :warning, "Un serveur ne répond plus sur son port SSH."),
     Kind.new(:server_back_online, "Serveur de nouveau joignable", :servers, :info, "Un serveur injoignable répond à nouveau."),
-    Kind.new(:server_created, "Serveur ajouté", :servers, :info, "Un serveur a été ajouté à SSHM."),
+    Kind.new(:server_created, "Serveur ajouté", :servers, :info, "Un serveur a été ajouté à Elio."),
     Kind.new(:server_updated, "Serveur modifié", :servers, :info, "Les informations de connexion d'un serveur ont changé."),
     Kind.new(:servers_imported, "Serveurs importés", :servers, :info, "Des serveurs ont été importés depuis un fichier CSV ou un ~/.ssh/config."),
-    Kind.new(:server_deleted, "Serveur supprimé", :servers, :warning, "Un serveur a été retiré de SSHM (ses clés restent installées dessus)."),
+    Kind.new(:server_deleted, "Serveur supprimé", :servers, :warning, "Un serveur a été retiré d'Elio (ses clés restent installées dessus)."),
     Kind.new(:server_group_created, "Groupe de serveurs créé", :configuration, :info, "Un groupe de serveurs a été créé."),
     Kind.new(:server_group_deleted, "Groupe de serveurs supprimé", :configuration, :info, "Un groupe de serveurs a été supprimé (ses serveurs restent)."),
-    Kind.new(:user_invited, "Utilisateur invité", :configuration, :info, "Une invitation à rejoindre SSHM a été créée."),
-    Kind.new(:invitation_accepted, "Invitation acceptée", :security, :warning, "Un nouvel utilisateur a rejoint SSHM."),
+    Kind.new(:user_invited, "Utilisateur invité", :configuration, :info, "Une invitation à rejoindre Elio a été créée."),
+    Kind.new(:invitation_accepted, "Invitation acceptée", :security, :warning, "Un nouvel utilisateur a rejoint Elio."),
     Kind.new(:invitation_revoked, "Invitation révoquée", :configuration, :info, "Une invitation en attente a été annulée."),
     Kind.new(:user_role_changed, "Rôle modifié", :security, :warning, "Le rôle d'un utilisateur a changé."),
     Kind.new(:user_deactivated, "Utilisateur désactivé", :security, :warning, "Un compte a été désactivé : il ne peut plus se connecter."),
@@ -45,9 +45,9 @@ class Activity < ApplicationRecord
     Kind.new(:team_created, "Équipe créée", :configuration, :info, "Une équipe de profils a été créée."),
     Kind.new(:team_deleted, "Équipe supprimée", :configuration, :info, "Une équipe a été supprimée (ses profils et leurs accès restent)."),
     Kind.new(:profile_deleted, "Profil supprimé", :configuration, :info, "Un profil a été supprimé."),
-    Kind.new(:ssh_key_generated, "Clé SSHM générée", :security, :critical, "La clé SSH de SSHM a été générée ou régénérée."),
-    Kind.new(:ssh_key_rotation_started, "Rotation de la clé SSHM lancée", :security, :warning, "Une nouvelle clé SSHM est en cours d'installation sur les serveurs."),
-    Kind.new(:ssh_key_rotated, "Clé SSHM remplacée", :security, :critical, "La rotation est terminée : la nouvelle clé SSHM est active, l'ancienne supprimée."),
+    Kind.new(:ssh_key_generated, "Clé Elio générée", :security, :critical, "La clé SSH d'Elio a été générée ou régénérée."),
+    Kind.new(:ssh_key_rotation_started, "Rotation de la clé Elio lancée", :security, :warning, "Une nouvelle clé Elio est en cours d'installation sur les serveurs."),
+    Kind.new(:ssh_key_rotated, "Clé Elio remplacée", :security, :critical, "La rotation est terminée : la nouvelle clé Elio est active, l'ancienne supprimée."),
     Kind.new(:automation_run, "Automatisation exécutée", :configuration, :info, "Une automatisation s'est exécutée.")
   ].index_by(&:key).freeze
 
@@ -101,7 +101,7 @@ class Activity < ApplicationRecord
     when :unknown_key_detected then "Clé « #{key_name} » sans profil trouvée sur #{target}"
     when :key_disappeared then "Clé « #{key_name} » disparue de #{target}"
     when :access_drift_detected then "Écarts avec les règles d'accès : #{data["missing"]} clé(s) manquante(s), #{data["extra"]} clé(s) en trop"
-    when :ssh_access_lost then "« #{server_name} » refuse la clé de SSHM"
+    when :ssh_access_lost then "« #{server_name} » refuse la clé d'Elio"
     when :host_key_changed then "Nouvelle empreinte acceptée pour « #{server_name} » : #{data["new_fingerprint"]}"
     when :server_unreachable then "« #{server_name} » ne répond plus"
     when :server_back_online then "« #{server_name} » répond à nouveau"
@@ -111,11 +111,11 @@ class Activity < ApplicationRecord
       names = data["names"].to_a
       more = data["count"].to_i > names.size ? "…" : ""
       "#{data["count"]} serveur(s) importé(s) (#{data["format"]}) : #{names.join(", ")}#{more}"
-    when :server_deleted then "Serveur « #{server_name} » supprimé de SSHM"
+    when :server_deleted then "Serveur « #{server_name} » supprimé d'Elio"
     when :server_group_created then "Groupe « #{data["group_name"]} » créé (#{data["servers"]} serveur(s))"
     when :server_group_deleted then "Groupe « #{data["group_name"]} » supprimé"
     when :user_invited then "#{data["email"]} invité (#{data["role_label"]})"
-    when :invitation_accepted then "#{data["email"]} a rejoint SSHM (#{data["role_label"]})"
+    when :invitation_accepted then "#{data["email"]} a rejoint Elio (#{data["role_label"]})"
     when :invitation_revoked then "Invitation de #{data["email"]} révoquée"
     when :user_role_changed then "Rôle de #{data["email"]} : #{data["from"]} → #{data["to"]}"
     when :user_deactivated then "#{data["email"]} désactivé"
@@ -130,11 +130,11 @@ class Activity < ApplicationRecord
     when :team_created then "Équipe « #{data["team_name"]} » créée (#{data["profiles"]} profil(s))"
     when :team_deleted then "Équipe « #{data["team_name"]} » supprimée"
     when :profile_deleted then "Profil « #{profile_name} » supprimé"
-    when :ssh_key_generated then data["regenerated"] ? "Clé SSHM régénérée" : "Clé SSHM générée"
-    when :ssh_key_rotation_started then "Rotation de la clé SSHM lancée sur #{data["servers"]} serveur(s)"
+    when :ssh_key_generated then data["regenerated"] ? "Clé Elio régénérée" : "Clé Elio générée"
+    when :ssh_key_rotation_started then "Rotation de la clé Elio lancée sur #{data["servers"]} serveur(s)"
     when :ssh_key_rotated
       forced = data["forced"] ? " (finalisée malgré #{data["failed"]} échec(s))" : ""
-      "Clé SSHM remplacée sur #{data["servers"]} serveur(s)#{forced}"
+      "Clé Elio remplacée sur #{data["servers"]} serveur(s)#{forced}"
     when :automation_run then "#{data["automation_label"]} : #{data["result"]}"
     end
   end

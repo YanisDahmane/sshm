@@ -24,7 +24,7 @@ class InvitationsTest < ApplicationSystemTestCase
     fill_in "Confirmation du mot de passe", with: "password123"
     click_on "Créer mon compte"
 
-    assert_text "Bienvenue sur SSHM !"
+    assert_text "Bienvenue sur Elio !"
     assert_selector "nav .user-role", text: "Opérateur"
     assert_no_selector "nav a[title=Paramètres]"
   end

@@ -54,7 +54,7 @@ module ApplicationHelper
     ]
     pages += [ { label: "Importer des serveurs", hint: "CSV, ~/.ssh/config", url: new_server_import_path }, { label: "Ajouter un serveur", url: new_server_path }, { label: "Ajouter un profil", url: new_profile_path } ] if can?(:operate)
     pages += [
-      { label: "Paramètres", hint: "clé SSH de SSHM", url: settings_path },
+      { label: "Paramètres", hint: "clé SSH d'Elio", url: settings_path },
       { label: "Notifications", hint: "paramètres", url: settings_notifications_path },
       { label: "Automatisations", hint: "paramètres", url: settings_automations_path }
     ] if can?(:administer)

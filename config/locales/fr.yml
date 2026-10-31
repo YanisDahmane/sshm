@@ -67,7 +67,7 @@ fr:
             public_key:
               invalid: 'doit être une seule clé publique, par exemple « ssh-ed25519 AAAA… alice@laptop »'
               private_key: "ressemble à une clé privée : collez la clé publique (fichier .pub)"
-              app_key: "est la clé de SSHM et ne peut pas être utilisée par un profil"
+              app_key: "est la clé d'Elio et ne peut pas être utilisée par un profil"
             fingerprint:
               taken: "est déjà utilisée par un autre profil"
         user:

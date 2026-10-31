@@ -46,7 +46,7 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "the checklist starts with generating the SSHM key" do
+  test "the checklist starts with generating the Elio key" do
     SshKey.delete_all
     sign_in users(:one)
     get root_path

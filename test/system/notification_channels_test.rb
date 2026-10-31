@@ -33,7 +33,7 @@ class NotificationChannelsTest < ApplicationSystemTestCase
     click_on "Envoyer un test"
     assert_text "Message de test envoyé à « #ops »."
     assert_equal WEBHOOK, @tests.sole.first
-    assert @tests.sole.last[:text].start_with?("<!channel> :white_check_mark: Test SSHM")
+    assert @tests.sole.last[:text].start_with?("<!channel> :white_check_mark: Test Elio")
 
     accept_app_confirm { find("section.notification-channel button[title=Supprimer]").click }
     assert_text "Le canal « #ops » a été supprimé."

@@ -16,7 +16,7 @@ class InvitationsController < ApplicationController
     Activity.record!(:invitation_accepted, user: @user, email: @user.email, role_label: @user.role_label)
 
     sign_in(@user)
-    redirect_to root_path, notice: "Bienvenue sur SSHM !"
+    redirect_to root_path, notice: "Bienvenue sur Elio !"
   rescue ActiveRecord::RecordInvalid => e
     @user = e.record.is_a?(User) ? e.record : User.new(email: @invitation.email)
     render :show, status: :unprocessable_entity

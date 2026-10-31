@@ -85,7 +85,7 @@ class AuthorizedKeyRemovalTest < ActiveSupport::TestCase
     assert result.absent?
   end
 
-  test "refuses to remove the SSHM key without connecting" do
+  test "refuses to remove the Elio key without connecting" do
     fake = FakeSsh.new(handler: local_shell)
     master_blob = ssh_keys(:main).public_key.split(" ")[1]
     authorized_keys_file.write("#{ssh_keys(:main).public_key}\n")
@@ -127,7 +127,7 @@ class AuthorizedKeyRemovalTest < ActiveSupport::TestCase
     assert_includes script.lines, "home=~root\n"
   end
 
-  test "refuses to remove the SSHM key from root's file too" do
+  test "refuses to remove the Elio key from root's file too" do
     fake = FakeSsh.new
     master_blob = ssh_keys(:main).public_key.split(" ")[1]
 
@@ -159,7 +159,7 @@ class AuthorizedKeyRemovalTest < ActiveSupport::TestCase
     assert_equal "unknown user", error.strip
   end
 
-  test "the pending SSHM key is protected too" do
+  test "the pending Elio key is protected too" do
     pending = SshKey.generate_pending!
     fake = FakeSsh.new(handler: local_shell)
 

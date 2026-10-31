@@ -25,7 +25,7 @@ class SshCheckTest < ActiveSupport::TestCase
     assert result.success?
     assert_equal "Connexion SSH réussie", result.message
     assert_match "deploy@192.168.1.10", result.details
-    assert_match(/\Aecho sshm-check-\h{8}\z/, fake.commands.sole)
+    assert_match(/\Aecho elio-check-\h{8}\z/, fake.commands.sole)
   end
 
   test "uses a different token on each call" do

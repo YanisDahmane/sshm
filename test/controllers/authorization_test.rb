@@ -87,7 +87,7 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
     },
     administer: {
       "general settings" => -> { get settings_path },
-      "generate the SSHM key" => -> { post ssh_key_path },
+      "generate the Elio key" => -> { post ssh_key_path },
       "trust a new host key" => -> { post server_host_key_path(servers(:web)), params: { fingerprint: "SHA256:new" } },
       "notifications" => -> { get settings_notifications_path },
       "new channel" => -> { get new_settings_notification_channel_path },

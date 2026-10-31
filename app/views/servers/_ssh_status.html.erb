@@ -6,7 +6,7 @@
     <%= icon :check, class: "h-3.5 w-3.5" %> OK
   </span>
 <% else %>
-  <%= link_to server_path(server), title: "La clé de SSHM a été refusée #{relative_time_in_words(server.ssh_checked_at)}",
+  <%= link_to server_path(server), title: "La clé d'Elio a été refusée #{relative_time_in_words(server.ssh_checked_at)}",
         class: "ssh-status inline-flex items-center gap-1 text-xs font-medium text-red-700 hover:underline" do %>
     <%= icon :x_mark, class: "h-3.5 w-3.5" %> Clé refusée
   <% end %>

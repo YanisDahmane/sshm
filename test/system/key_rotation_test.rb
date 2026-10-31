@@ -5,7 +5,7 @@ class KeyRotationTest < ApplicationSystemTestCase
   include StubHelpers
   include ActiveJob::TestHelper
 
-  test "rotating the SSHM key without downtime" do
+  test "rotating the Elio key without downtime" do
     stub_method_until_teardown(SshConnection, :open, ->(*, **, &block) { block.call(Object.new.tap { |ssh| def ssh.exec!(*) = true }) })
     stub_method_until_teardown(SshCheck, :call, SshCheck::Result.new(success: true, message: "ok", details: "ok"))
     stub_method_until_teardown(AuthorizedKeyRemoval, :call, AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil))
@@ -15,7 +15,7 @@ class KeyRotationTest < ApplicationSystemTestCase
 
     accept_app_confirm("Lancer la rotation") { click_on "Faire tourner la clé" }
 
-    assert_selector "h2", text: "Rotation de la clé SSHM"
+    assert_selector "h2", text: "Rotation de la clé Elio"
     assert_selector ".rotation-status", text: "En cours : 0/3 serveur(s)"
     perform_enqueued_jobs # the page refreshes itself and shows the result
 

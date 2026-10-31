@@ -88,7 +88,7 @@ class ProfileTest < ActiveSupport::TestCase
     assert profile.errors.of_kind?(:fingerprint, :taken)
   end
 
-  test "rejects the SSHM key" do
+  test "rejects the Elio key" do
     profile = build_profile(public_key: ssh_keys(:main).public_key)
     assert_not profile.valid?
     assert profile.errors.added?(:public_key, :app_key)

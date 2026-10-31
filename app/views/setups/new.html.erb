@@ -1,7 +1,7 @@
-<% content_for :title, "Premier lancement · SSHM" %>
+<% content_for :title, "Premier lancement · Elio" %>
 
 <h2 class="text-xl font-semibold">Créer le compte administrateur</h2>
-<p class="mt-1 mb-6 text-sm text-slate-500">Premier lancement de SSHM : ce compte aura tous les droits. Les autres utilisateurs seront invités ensuite.</p>
+<p class="mt-1 mb-6 text-sm text-slate-500">Premier lancement d'Elio : ce compte aura tous les droits. Les autres utilisateurs seront invités ensuite.</p>
 
 <%= form_with model: @user, url: setup_path, scope: :user, class: "space-y-5" do |f| %>
   <%= render "shared/form_errors", record: @user %>

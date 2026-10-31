@@ -23,7 +23,7 @@ class Server < ApplicationRecord
   before_update :reset_reachability, if: -> { will_save_change_to_host? || will_save_change_to_port? }
 
   # Remembers whether the app could log in over SSH (see SshCheck); `nil` = unknown.
-  # Logs ssh_access_lost when a server that accepted the SSHM key refuses it.
+  # Logs ssh_access_lost when a server that accepted the Elio key refuses it.
   def record_ssh_status!(ok)
     lost = ssh_ok == true && ok == false
     update_columns(ssh_ok: ok, ssh_checked_at: Time.current)

@@ -1,12 +1,12 @@
-<% content_for :title, "Rotation de la clé SSHM · SSHM" %>
+<% content_for :title, "Rotation de la clé Elio · Elio" %>
 <%= render "settings/nav" %>
 
 <div class="mx-auto mt-8 max-w-3xl">
   <%= link_to "← Clé SSH de l'application", settings_path, class: "text-sm text-slate-500 hover:text-slate-700" %>
-  <h2 class="mt-2 text-xl font-semibold">Rotation de la clé SSHM</h2>
+  <h2 class="mt-2 text-xl font-semibold">Rotation de la clé Elio</h2>
   <p class="mt-1 text-sm text-slate-500">
     Lancée par <%= @rotation.started_by&.email || "un utilisateur supprimé" %> <%= relative_time_tag @rotation.created_at %>.
-    Pendant la rotation, SSHM se connecte avec l'ancienne ou la nouvelle clé : aucun serveur ne perd l'accès.
+    Pendant la rotation, Elio se connecte avec l'ancienne ou la nouvelle clé : aucun serveur ne perd l'accès.
   </p>
 
   <%# No src here: Turbo refuses a frame whose src is the page itself (auto-refresh sets it). %>
@@ -33,7 +33,7 @@
           <%= button_to "Relancer les échecs", retry_settings_key_rotation_path(@rotation), data: { turbo_frame: "_top" },
                 class: "cursor-pointer rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
           <%= button_to "Finaliser malgré les échecs", finalize_settings_key_rotation_path(@rotation),
-                form: { data: { turbo_frame: "_top", turbo_confirm: "L'ancienne clé sera supprimée : SSHM perdra l'accès aux serveurs en échec tant que la nouvelle clé n'y sera pas installée.",
+                form: { data: { turbo_frame: "_top", turbo_confirm: "L'ancienne clé sera supprimée : Elio perdra l'accès aux serveurs en échec tant que la nouvelle clé n'y sera pas installée.",
                                 confirm_label: "Finaliser", confirm_variant: "danger" } },
                 class: "cursor-pointer rounded-md border border-red-300 bg-white px-3 py-1.5 text-sm font-medium text-red-700 shadow-sm hover:bg-red-50" %>
         </div>

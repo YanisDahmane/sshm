@@ -1,4 +1,4 @@
-<% key = SshKeyGenerator.generate(comment: "sshm-fixture") %>
+<% key = SshKeyGenerator.generate(comment: "elio-fixture") %>
 main:
   public_key: <%= key.public_key %>
   private_key: <%= key.private_key.to_json %>

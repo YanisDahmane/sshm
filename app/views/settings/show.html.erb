@@ -1,11 +1,11 @@
-<% content_for :title, "Paramètres · SSHM" %>
+<% content_for :title, "Paramètres · Elio" %>
 
 <%= render "settings/nav" %>
 
 <section id="ssh-key" class="mt-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
   <h2 class="text-lg font-semibold">Clé SSH de l'application</h2>
   <p class="mt-1 text-sm text-slate-500">
-    SSHM se connecte à vos serveurs avec cette clé. Sa clé publique doit être ajoutée au fichier
+    Elio se connecte à vos serveurs avec cette clé. Sa clé publique doit être ajoutée au fichier
     <code class="rounded bg-slate-100 px-1 font-mono text-xs">~/.ssh/authorized_keys</code> de l'utilisateur configuré sur chaque serveur.
     La clé privée reste chiffrée dans la base et n'est jamais affichée.
   </p>
@@ -43,7 +43,7 @@
     <div id="key-rotation" class="mt-6 border-t border-slate-200 pt-6">
       <% if @rotation %>
         <div class="flex flex-wrap items-center justify-between gap-4 rounded-md border border-indigo-200 bg-indigo-50/50 px-4 py-3">
-          <p class="text-sm text-indigo-900">Une rotation de la clé est en cours : SSHM utilise l'ancienne et la nouvelle clé.</p>
+          <p class="text-sm text-indigo-900">Une rotation de la clé est en cours : Elio utilise l'ancienne et la nouvelle clé.</p>
           <%= link_to "Suivre la rotation", settings_key_rotation_path(@rotation), class: "text-sm font-medium text-indigo-700 hover:text-indigo-600" %>
         </div>
       <% else %>
@@ -53,14 +53,14 @@
             <p class="text-sm text-slate-500">Une nouvelle clé est installée sur chaque serveur avec l'ancienne, vérifiée, puis l'ancienne est retirée : aucune coupure.</p>
           </div>
           <%= button_to "Faire tourner la clé", settings_key_rotations_path,
-                data: { turbo_confirm: "Une nouvelle clé SSHM va remplacer l'actuelle sur les #{Server.count} serveur(s), sans coupure. Les serveurs injoignables pourront être relancés ensuite.", confirm_label: "Lancer la rotation" },
+                data: { turbo_confirm: "Une nouvelle clé Elio va remplacer l'actuelle sur les #{Server.count} serveur(s), sans coupure. Les serveurs injoignables pourront être relancés ensuite.", confirm_label: "Lancer la rotation" },
                 class: "shrink-0 cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
         </div>
       <% end %>
       <div class="mt-6 flex flex-wrap items-center justify-between gap-4">
         <p class="text-sm text-slate-500">En cas de compromission seulement : régénérer coupe immédiatement l'accès à tous les serveurs jusqu'à ce que la nouvelle clé publique y soit ajoutée à la main.</p>
         <%= button_to "Régénérer la clé", ssh_key_path,
-              data: { turbo_confirm: "L'ancienne clé sera définitivement supprimée et SSHM ne pourra plus se connecter aux serveurs tant que la nouvelle clé publique n'y aura pas été ajoutée.",
+              data: { turbo_confirm: "L'ancienne clé sera définitivement supprimée et Elio ne pourra plus se connecter aux serveurs tant que la nouvelle clé publique n'y aura pas été ajoutée.",
                       confirm_label: "Régénérer la clé", confirm_variant: "danger" },
               class: "shrink-0 cursor-pointer rounded-md border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 shadow-sm hover:bg-red-50" %>
       </div>

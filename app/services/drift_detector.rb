@@ -1,7 +1,7 @@
 # Compares the access rules with the last keys read on each account they
 # cover (AccountSnapshot): profiles whose key is missing, and keys present
 # that no rule expects ("extra"). Accounts covered by no rule are not managed
-# and never reported; SSHM's keys and active temporary accesses are never
+# and never reported; Elio's keys and active temporary accesses are never
 # extra. Keys are compared by fingerprint (comment and options ignored).
 class DriftDetector
   Entry = Data.define(:server, :unix_user, :snapshot, :expected, :missing, :extra) do

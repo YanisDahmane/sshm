@@ -23,7 +23,7 @@ class ServersController < ApplicationController
 
     if @server.save
       Activity.record!(:server_created, server: @server, address: "#{@server.username}@#{@server.host}:#{@server.port}")
-      redirect_to server_path(@server), notice: "Le serveur « #{@server.name} » a été ajouté. Installez-y la clé de SSHM puis testez la connexion."
+      redirect_to server_path(@server), notice: "Le serveur « #{@server.name} » a été ajouté. Installez-y la clé d'Elio puis testez la connexion."
     else
       render :new, status: :unprocessable_entity
     end
@@ -42,7 +42,7 @@ class ServersController < ApplicationController
     end
   end
 
-  # Removes the server from SSHM only: keys installed on the machine stay.
+  # Removes the server from Elio only: keys installed on the machine stay.
   def destroy
     active_temporary_accesses = @server.temporary_accesses.active.count
     @server.destroy!
@@ -51,7 +51,7 @@ class ServersController < ApplicationController
     Activity.record!(:server_deleted, server_name: @server.name, address: "#{@server.username}@#{@server.host}:#{@server.port}",
                                       active_temporary_accesses: active_temporary_accesses)
 
-    redirect_to servers_path, notice: "Le serveur « #{@server.name} » a été supprimé de SSHM. Les clés installées dessus n'ont pas été retirées.",
+    redirect_to servers_path, notice: "Le serveur « #{@server.name} » a été supprimé d'Elio. Les clés installées dessus n'ont pas été retirées.",
                               status: :see_other
   end
 

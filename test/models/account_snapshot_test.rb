@@ -26,7 +26,7 @@ class AccountSnapshotTest < ActiveSupport::TestCase
     assert_equal line, snapshot.reload.content
   end
 
-  test "keys without profile, named or not, except the SSHM key" do
+  test "keys without profile, named or not, except the Elio key" do
     ci_unnamed = profiles(:ci).public_key.split(" ").first(2).join(" ")
     named = SshKeyGenerator.generate(comment: "bob@desktop").public_key
     snapshot = AccountSnapshot.record!(servers(:web), @account, keys(@unnamed, named, ci_unnamed, ssh_keys(:main).public_key.split(" ").first(2).join(" "), profiles(:alice).public_key))
@@ -79,7 +79,7 @@ class AccountSnapshotTest < ActiveSupport::TestCase
     assert_equal [ "alice@laptop" ], Activity.of_kind(:key_disappeared).map(&:key_name)
   end
 
-  test "a key removed through SSHM is not reported as vanished" do
+  test "a key removed through Elio is not reported as vanished" do
     snapshot = AccountSnapshot.record!(servers(:web), @account, keys(profiles(:alice).public_key))
     snapshot.forget!(profiles(:alice).authorized_key.key)
 
@@ -88,7 +88,7 @@ class AccountSnapshotTest < ActiveSupport::TestCase
     assert_equal 0, Activity.of_kind(:key_disappeared).count
   end
 
-  test "the pending SSHM key is not reported as a key without profile" do
+  test "the pending Elio key is not reported as a key without profile" do
     pending = SshKey.generate_pending!
 
     AccountSnapshot.record!(servers(:web), @account, keys(pending.public_key))

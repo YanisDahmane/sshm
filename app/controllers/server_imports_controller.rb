@@ -24,7 +24,7 @@ class ServerImportsController < ApplicationController
     return redirect_to(new_server_import_path, alert: "Aucun serveur valide à importer.") if servers.empty?
 
     Activity.record!(:servers_imported, count: servers.size, format: ServerImport::FORMATS.fetch(@format), names: servers.first(10).map(&:name))
-    redirect_to servers_path, notice: "#{servers.size} serveur(s) importé(s). Installez-y la clé de SSHM puis lancez un scan des clés."
+    redirect_to servers_path, notice: "#{servers.size} serveur(s) importé(s). Installez-y la clé d'Elio puis lancez un scan des clés."
   rescue ServerImport::Error => e
     redirect_to new_server_import_path, alert: e.message
   rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique => e

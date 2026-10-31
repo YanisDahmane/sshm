@@ -1,13 +1,13 @@
 <div align="center">
 
-# 🔐 SSHM
+# Elio
 
-**Gérez les clés SSH de tous vos serveurs depuis une interface web.**
+**Le gestionnaire de votre parc de serveurs** (anciennement SSHM).
 
-Ajoutez vos serveurs, donnez ou retirez l'accès à une personne en un clic, pour toujours ou pour 10 minutes.
+Pour l'instant : les clés SSH de tous vos serveurs depuis une interface web. Bientôt : santé, système, paquets, services et ports de chaque serveur.
 
 ![Ruby](https://img.shields.io/badge/Ruby-3.4-CC342D?logo=ruby&logoColor=white)
-![Rails](https://img.shields.io/badge/Rails-8.0-D30001?logo=rubyonrails&logoColor=white)
+![Rails](https://img.shields.io/badge/Rails-8.1-D30001?logo=rubyonrails&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14%2B-4169E1?logo=postgresql&logoColor=white)
 ![Hotwire](https://img.shields.io/badge/Hotwire-Turbo%20%2B%20Stimulus-5CD8E5)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06B6D4?logo=tailwindcss&logoColor=white)
@@ -21,7 +21,7 @@ Ajoutez vos serveurs, donnez ou retirez l'accès à une personne en un clic, pou
 
 ## Sommaire
 
-- [Pourquoi SSHM ?](#pourquoi-sshm-)
+- [Pourquoi Elio ?](#pourquoi-elio-)
 - [Fonctionnalités](#fonctionnalités)
 - [Installation](#installation)
 - [Configuration](#configuration)
@@ -32,11 +32,11 @@ Ajoutez vos serveurs, donnez ou retirez l'accès à une personne en un clic, pou
 
 ---
 
-## Pourquoi SSHM ?
+## Pourquoi Elio ?
 
 Ajouter la clé d'un collègue sur dix serveurs, penser à la retirer à son départ, donner un accès « juste le temps d'une intervention »… À la main, on finit toujours par oublier une clé quelque part.
 
-SSHM se connecte à vos serveurs avec **sa propre clé SSH** et gère pour vous les fichiers `~/.ssh/authorized_keys` : il les lit, y ajoute des clés et en supprime, pour n'importe quel compte du serveur. Il n'y a pas de console web : SSHM exécute uniquement les commandes dont il a besoin.
+Elio se connecte à vos serveurs avec **sa propre clé SSH** et gère pour vous les fichiers `~/.ssh/authorized_keys` : il les lit, y ajoute des clés et en supprime, pour n'importe quel compte du serveur. Il n'y a pas de console web : Elio exécute uniquement les commandes dont il a besoin.
 
 ## Fonctionnalités
 
@@ -44,12 +44,12 @@ SSHM se connecte à vos serveurs avec **sa propre clé SSH** et gère pour vous 
 |---|---|
 | 🖥️ **Parc de serveurs** | Ajout, modification, statut en ligne / injoignable actualisable en direct |
 | 🔑 **Clé SSH de l'application** | Générée en un clic, clé privée chiffrée en base, commande d'installation prête à copier |
-| ✅ **Test de connexion** | Vérifie que SSHM peut se connecter et exécuter une commande sur le serveur |
+| ✅ **Test de connexion** | Vérifie qu'Elio peut se connecter et exécuter une commande sur le serveur |
 | 👀 **Clés autorisées** | Liste des clés de chaque compte (root, debian, deploy…) avec badges *Connue*, *Inconnue*, *Master* et *Profil* |
 | 👤 **Profils** | Une personne ou une machine = un nom + une clé publique |
 | ➕ **Autoriser un profil** | Sur le compte de son choix, de façon permanente ou temporaire (10 min → 7 jours) |
 | ⏱️ **Expiration automatique** | La clé est refusée par `sshd` à l'heure prévue, puis supprimée du serveur |
-| 🗑️ **Révocation** | Suppression de n'importe quelle clé, sauf celle de SSHM |
+| 🗑️ **Révocation** | Suppression de n'importe quelle clé, sauf celle d'Elio |
 
 ---
 
@@ -92,13 +92,13 @@ Le projet est prêt pour [Kamal](https://kamal-deploy.org) (`config/deploy.yml`)
    env:
      secret:
        - RAILS_MASTER_KEY
-       - SSHM_DATABASE_PASSWORD
+       - ELIO_DATABASE_PASSWORD
      clear:
        SOLID_QUEUE_IN_PUMA: true
        PGHOST: votre-serveur-postgres   # utilisé par les 4 bases (primary, cache, queue, cable)
    ```
 
-2. Ajoutez `SSHM_DATABASE_PASSWORD` dans `.kamal/secrets`. L'utilisateur PostgreSQL attendu est `sshm`, avec les bases `sshm_production`, `sshm_production_cache`, `sshm_production_queue` et `sshm_production_cable`.
+2. Ajoutez `ELIO_DATABASE_PASSWORD` dans `.kamal/secrets`. L'utilisateur PostgreSQL attendu est `elio`, avec les bases `elio_production`, `elio_production_cache`, `elio_production_queue` et `elio_production_cable`.
 
 3. Déployez :
 
@@ -108,7 +108,7 @@ Le projet est prêt pour [Kamal](https://kamal-deploy.org) (`config/deploy.yml`)
    ```
 
 > [!IMPORTANT]
-> Le volume `sshm_storage` (monté sur `/rails/storage`) contient `storage/ssh/known_hosts`, les empreintes des serveurs mémorisées par SSHM. Ne le supprimez pas : SSHM refuserait de se reconnecter à un serveur dont l'empreinte aurait « changé ».
+> Le volume `elio_storage` (monté sur `/rails/storage`) contient `storage/ssh/known_hosts`, les empreintes des serveurs mémorisées par Elio. Ne le supprimez pas : Elio refuserait de se reconnecter à un serveur dont l'empreinte aurait « changé ».
 
 ---
 
@@ -131,9 +131,9 @@ bin/rails credentials:edit        # collez-y ce bloc, enregistrez
 > [!CAUTION]
 > Si vous perdez le `master.key`, la clé privée SSH stockée en base devient illisible : il faudra en régénérer une et la redéployer sur tous les serveurs. Sauvegardez-le.
 
-### 2. Générer la clé SSH de SSHM
+### 2. Générer la clé SSH d'Elio
 
-Ouvrez **Paramètres** (icône ⚙️ en haut à droite), puis cliquez sur **Générer une clé SSH**. SSHM crée une paire de clés Ed25519 et affiche :
+Ouvrez **Paramètres** (icône ⚙️ en haut à droite), puis cliquez sur **Générer une clé SSH**. Elio crée une paire de clés Ed25519 et affiche :
 
 - l'**empreinte** (`SHA256:…`) ;
 - la **clé publique**, à copier ;
@@ -141,15 +141,15 @@ Ouvrez **Paramètres** (icône ⚙️ en haut à droite), puis cliquez sur **Gé
 
 ![Clé SSH de l'application](readme/settings-ssh-key.png)
 
-La clé privée n'est jamais affichée. **Régénérer la clé** supprime l'ancienne : SSHM perd l'accès à tous les serveurs tant que la nouvelle clé publique n'y a pas été installée.
+La clé privée n'est jamais affichée. **Régénérer la clé** supprime l'ancienne : Elio perd l'accès à tous les serveurs tant que la nouvelle clé publique n'y a pas été installée.
 
 ### 3. Installer la clé sur vos serveurs
 
-Sur chaque serveur, avec le compte que SSHM utilisera pour se connecter (par exemple `root`) :
+Sur chaque serveur, avec le compte qu'Elio utilisera pour se connecter (par exemple `root`) :
 
 ```bash
 mkdir -p ~/.ssh && chmod 700 ~/.ssh \
-  && echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA… sshm' >> ~/.ssh/authorized_keys \
+  && echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA… elio' >> ~/.ssh/authorized_keys \
   && chmod 600 ~/.ssh/authorized_keys
 ```
 
@@ -157,18 +157,18 @@ mkdir -p ~/.ssh && chmod 700 ~/.ssh \
 
 ### 4. Se connecter avec un utilisateur non root (optionnel)
 
-SSHM peut gérer les clés de **n'importe quel compte** du serveur :
+Elio peut gérer les clés de **n'importe quel compte** du serveur :
 
-- **Si SSHM se connecte en `root`**, il lit et modifie directement les fichiers des autres comptes, puis leur en redonne la propriété (`chown`).
+- **Si Elio se connecte en `root`**, il lit et modifie directement les fichiers des autres comptes, puis leur en redonne la propriété (`chown`).
 - **S'il se connecte avec un autre utilisateur** (par exemple `deploy`), il gère les fichiers de `deploy` directement, et ceux des autres comptes via `sudo -n` (sans mot de passe). Il faut donc autoriser `deploy` dans sudoers :
 
   ```bash
-  # /etc/sudoers.d/sshm — à éditer avec : visudo -f /etc/sudoers.d/sshm
+  # /etc/sudoers.d/elio — à éditer avec : visudo -f /etc/sudoers.d/elio
   deploy ALL=(root) NOPASSWD: /bin/sh, /usr/bin/sh
   ```
 
 > [!WARNING]
-> Autoriser `sh` en root revient à donner un accès root complet à ce compte. C'est nécessaire pour gérer les clés des autres utilisateurs. Sans cette règle, SSHM affiche « Accès root impossible » pour ces comptes, et seules les clés de `deploy` restent gérables.
+> Autoriser `sh` en root revient à donner un accès root complet à ce compte. C'est nécessaire pour gérer les clés des autres utilisateurs. Sans cette règle, Elio affiche « Accès root impossible » pour ces comptes, et seules les clés de `deploy` restent gérables.
 
 ---
 
@@ -187,7 +187,7 @@ Depuis le dashboard, **Ajouter un serveur** demande :
 
 ![Ajouter un serveur](readme/server-form.png)
 
-Il n'y a **pas de mot de passe** : toutes les connexions passent par la clé de SSHM.
+Il n'y a **pas de mot de passe** : toutes les connexions passent par la clé d'Elio.
 
 ### 🟢 Statut en ligne / injoignable
 
@@ -206,7 +206,7 @@ Cliquez sur le nom d'un serveur pour ouvrir sa page : statut, test de connexion 
 
 ![Page d'un serveur](readme/server-page.png)
 
-**Tester la connexion SSH** se connecte avec la clé de SSHM, lance `echo sshm-check-<aléatoire>` et vérifie la réponse. En cas d'échec, la cause est expliquée : *Aucune clé SSH configurée*, *Clé SSH refusée par le serveur*, *L'empreinte du serveur a changé*, *Connexion impossible*…
+**Tester la connexion SSH** se connecte avec la clé d'Elio, lance `echo elio-check-<aléatoire>` et vérifie la réponse. En cas d'échec, la cause est expliquée : *Aucune clé SSH configurée*, *Clé SSH refusée par le serveur*, *L'empreinte du serveur a changé*, *Connexion impossible*…
 
 ![Test SSH réussi](readme/ssh-check.png)
 
@@ -218,8 +218,8 @@ La section **Clés autorisées** affiche un **onglet par compte du serveur** : `
 |---|---|
 | ![](https://img.shields.io/badge/-Connue-ecfdf5?style=flat-square) | La clé a un commentaire (son « nom ») |
 | ![](https://img.shields.io/badge/-Inconnue-f1f5f9?style=flat-square) | Pas de commentaire : à qui est-elle ? |
-| ![](https://img.shields.io/badge/-Master-4f46e5?style=flat-square) | C'est la clé de SSHM (impossible à supprimer) |
-| ![](https://img.shields.io/badge/-Profil%20%3A%20Alice-f0f9ff?style=flat-square) | La clé appartient à un profil SSHM (reconnue par son empreinte, même renommée) |
+| ![](https://img.shields.io/badge/-Master-4f46e5?style=flat-square) | C'est la clé d'Elio (impossible à supprimer) |
+| ![](https://img.shields.io/badge/-Profil%20%3A%20Alice-f0f9ff?style=flat-square) | La clé appartient à un profil Elio (reconnue par son empreinte, même renommée) |
 | ![](https://img.shields.io/badge/-Expire%20dans%209%20minutes-fffbeb?style=flat-square) | Accès temporaire en cours |
 
 ![Clés autorisées](readme/authorized-keys.png)
@@ -232,11 +232,11 @@ Un profil, c'est **un nom et une clé publique**, par exemple `Alice` et `ssh-ed
 
 ![Profil](readme/profiles.png)
 
-SSHM refuse :
+Elio refuse :
 - une **clé privée** collée par erreur (avec un message explicite) ;
 - plusieurs clés d'un coup, ou une clé avec des options ;
 - une clé déjà utilisée par un autre profil ;
-- la clé de SSHM elle-même.
+- la clé d'Elio elle-même.
 
 ### ➕ Autoriser un profil, pour toujours ou pour 10 minutes
 
@@ -248,14 +248,14 @@ Sur la page d'un serveur, choisissez l'onglet du compte, puis **Autoriser un pro
 
 1. Ouvrez **Debian test**, puis l'onglet **debian**.
 2. Choisissez **Profil 1** et la durée **10 minutes**, puis cliquez sur **Autoriser**.
-3. SSHM ajoute cette ligne dans `/home/debian/.ssh/authorized_keys` :
+3. Elio ajoute cette ligne dans `/home/debian/.ssh/authorized_keys` :
 
    ```
    expiry-time="20261003145200Z" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA… Profil 1
    ```
 
 4. La personne peut se connecter : `ssh debian@192.168.1.16`.
-5. **À 14:52 UTC**, `sshd` refuse la clé, puis SSHM supprime la ligne du fichier.
+5. **À 14:52 UTC**, `sshd` refuse la clé, puis Elio supprime la ligne du fichier.
 
 ![Accès temporaire](readme/temporary-badge.png)
 
@@ -273,23 +273,23 @@ Quelques règles :
 ```mermaid
 sequenceDiagram
     participant U as Vous
-    participant S as SSHM
+    participant S as Elio
     participant J as Job d'expiration
     participant D as sshd (serveur)
     U->>S: Autoriser Profil 1 · 10 min
     S->>D: ajoute la ligne avec expiry-time="…Z"
     S->>J: planifie la suppression à l'échéance
-    Note over D: à l'échéance, sshd refuse la clé<br/>même si SSHM est arrêté
+    Note over D: à l'échéance, sshd refuse la clé<br/>même si Elio est arrêté
     J->>D: supprime la ligne de authorized_keys
     Note over J: serveur injoignable ? nouvel essai chaque minute
 ```
 
-1. **`sshd` refuse la clé à l'heure prévue** grâce à l'option OpenSSH `expiry-time`, que SSHM soit en marche ou non.
+1. **`sshd` refuse la clé à l'heure prévue** grâce à l'option OpenSSH `expiry-time`, qu'Elio soit en marche ou non.
 2. **Un job supprime ensuite la ligne.** En production, une tâche récurrente rattrape chaque minute les expirations manquées.
 
 ### 🗑️ Supprimer une clé
 
-L'icône 🗑️ d'une clé la supprime du compte, après confirmation. Toutes les lignes contenant cette clé sont retirées, le reste du fichier (commentaires, autres clés) est conservé à l'identique, ainsi que ses droits et son propriétaire. La clé **Master** de SSHM ne peut pas être supprimée : l'application perdrait l'accès au serveur.
+L'icône 🗑️ d'une clé la supprime du compte, après confirmation. Toutes les lignes contenant cette clé sont retirées, le reste du fichier (commentaires, autres clés) est conservé à l'identique, ainsi que ses droits et son propriétaire. La clé **Master** d'Elio ne peut pas être supprimée : l'application perdrait l'accès au serveur.
 
 ![Supprimer une clé](readme/delete-key.png)
 
@@ -298,19 +298,19 @@ L'icône 🗑️ d'une clé la supprime du compte, après confirmation. Toutes l
 ## Sécurité et limites
 
 > [!WARNING]
-> **L'inscription est ouverte.** Toute personne qui peut atteindre l'application peut se créer un compte et gérer les clés de vos serveurs. Placez SSHM derrière un VPN ou un réseau privé, ou désactivez l'inscription une fois votre compte créé (retirez `:registerable` dans `app/models/user.rb`).
+> **L'inscription est ouverte.** Toute personne qui peut atteindre l'application peut se créer un compte et gérer les clés de vos serveurs. Placez Elio derrière un VPN ou un réseau privé, ou désactivez l'inscription une fois votre compte créé (retirez `:registerable` dans `app/models/user.rb`).
 
-**Ce que SSHM protège :**
-- La clé privée de SSHM est chiffrée en base et n'est jamais affichée.
+**Ce qu'Elio protège :**
+- La clé privée d'Elio est chiffrée en base et n'est jamais affichée.
 - Les empreintes des serveurs sont mémorisées à la première connexion ; une empreinte qui change bloque la connexion.
-- SSHM n'utilise que sa propre clé : jamais vos clés `~/.ssh` ni votre ssh-agent.
+- Elio n'utilise que sa propre clé : jamais vos clés `~/.ssh` ni votre ssh-agent.
 - Toutes les valeurs envoyées dans les commandes shell sont échappées, et les noms d'utilisateur sont validés strictement.
 - Les fichiers écrits ont des droits stricts (`700` pour `~/.ssh`, `600` pour `authorized_keys`).
 
 **Limites des accès temporaires :**
 - Une session **déjà ouverte** n'est pas coupée à l'échéance : `sshd` ne vérifie l'expiration qu'à la connexion.
 - L'échéance dépend de **l'horloge du serveur** (gardez NTP actif).
-- Pendant son accès, une personne avec un shell peut **ajouter sa propre clé permanente** dans `authorized_keys`. Elle apparaîtra alors comme « Inconnue » dans SSHM. Pour l'empêcher, utilisez un fichier de clés non modifiable par l'utilisateur, par exemple `AuthorizedKeysFile /etc/ssh/authorized_keys/%u` (fichiers appartenant à root).
+- Pendant son accès, une personne avec un shell peut **ajouter sa propre clé permanente** dans `authorized_keys`. Elle apparaîtra alors comme « Inconnue » dans Elio. Pour l'empêcher, utilisez un fichier de clés non modifiable par l'utilisateur, par exemple `AuthorizedKeysFile /etc/ssh/authorized_keys/%u` (fichiers appartenant à root).
 
 ---
 

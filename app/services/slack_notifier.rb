@@ -12,7 +12,7 @@ class SlackNotifier
   end
 
   def self.deliver_test(channel)
-    text = "#{"<!channel> " if channel.mention_channel}:white_check_mark: Test SSHM : le canal « #{escape(channel.name)} » reçoit bien les notifications."
+    text = "#{"<!channel> " if channel.mention_channel}:white_check_mark: Test Elio : le canal « #{escape(channel.name)} » reçoit bien les notifications."
     post(channel.webhook_url, { text: text })
   end
 

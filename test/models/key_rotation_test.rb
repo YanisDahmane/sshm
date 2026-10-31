@@ -29,7 +29,7 @@ class KeyRotationTest < ActiveSupport::TestCase
     assert_not SshKey.exists?(old_key_id)
     assert_equal rotation.new_key, SshKey.current
     assert_nil KeyRotation.in_progress
-    assert_equal "Clé SSHM remplacée sur 3 serveur(s)", Activity.of_kind(:ssh_key_rotated).sole.summary
+    assert_equal "Clé Elio remplacée sur 3 serveur(s)", Activity.of_kind(:ssh_key_rotated).sole.summary
   end
 
   test "finish! keeps both keys when a server failed" do
@@ -52,7 +52,7 @@ class KeyRotationTest < ActiveSupport::TestCase
     assert_equal :activated, rotation.status
     assert rotation.forced
     assert_equal [ rotation.new_key ], SshKey.app_keys
-    assert_equal "Clé SSHM remplacée sur 3 serveur(s) (finalisée malgré 1 échec(s))", Activity.of_kind(:ssh_key_rotated).sole.summary
+    assert_equal "Clé Elio remplacée sur 3 serveur(s) (finalisée malgré 1 échec(s))", Activity.of_kind(:ssh_key_rotated).sole.summary
   end
 
   test "phase labels" do

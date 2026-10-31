@@ -1,5 +1,5 @@
 # A set of profiles (e.g. "Développeurs", "Astreinte") that can be granted or
-# revoked on servers in one go (see BulkAccess). Membership lives in SSHM
+# revoked on servers in one go (see BulkAccess). Membership lives in Elio
 # only: the servers still get one authorized_keys line per profile.
 class Team < ApplicationRecord
   has_many :memberships, class_name: "TeamMembership", dependent: :delete_all

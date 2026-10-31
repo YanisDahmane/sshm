@@ -10,7 +10,7 @@ class AccountSnapshot < ApplicationRecord
   # Saves the keys read on an account and logs what changed since the last
   # read: keys without profile that appeared (unknown_key_detected, also on the
   # first read) and keys that vanished (key_disappeared). Keys removed through
-  # SSHM are forgotten beforehand, so they are not reported as vanished.
+  # Elio are forgotten beforehand, so they are not reported as vanished.
   def self.record!(server, account, keys)
     snapshot = find_or_initialize_by(server: server, unix_user: account.unix_user)
     previous = snapshot.new_record? ? nil : snapshot.keys
@@ -32,7 +32,7 @@ class AccountSnapshot < ApplicationRecord
 
   def fingerprints = keys.map(&:fingerprint)
 
-  # Keys that match no profile (named or not), except SSHM's own key.
+  # Keys that match no profile (named or not), except Elio's own key.
   def keys_without_profile(profile_fingerprints:, app_key:)
     keys.reject { |key| key.matches?(app_key) || profile_fingerprints.include?(key.fingerprint) }
   end

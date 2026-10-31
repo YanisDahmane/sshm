@@ -270,7 +270,7 @@ class ServersControllerTest < ActionDispatch::IntegrationTest
     assert_not Server.exists?(server.id)
     assert_redirected_to servers_path
     assert_response :see_other
-    assert_equal "Le serveur « Web » a été supprimé de SSHM. Les clés installées dessus n'ont pas été retirées.", flash[:notice]
+    assert_equal "Le serveur « Web » a été supprimé d'Elio. Les clés installées dessus n'ont pas été retirées.", flash[:notice]
     assert_equal [ [ "192.168.1.10", 22 ] ], forgotten
 
     deleted = Activity.of_kind(:server_deleted).sole

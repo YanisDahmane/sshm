@@ -38,7 +38,7 @@ class AuthorizedKeyTest < ActiveSupport::TestCase
 
   test "skips blank lines, comments and invalid lines and keeps line numbers" do
     content = <<~KEYS
-      # Managed by SSHM
+      # Managed by Elio
 
       not a key at all
       ssh-ed25519 not-base64!! broken

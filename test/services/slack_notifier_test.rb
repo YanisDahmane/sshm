@@ -45,7 +45,7 @@ class SlackNotifierTest < ActiveSupport::TestCase
 
     stub_method(SlackNotifier, :post, ->(url, payload) { posts << payload }) { SlackNotifier.deliver_test(channel) }
 
-    assert_equal ":white_check_mark: Test SSHM : le canal « #ops &lt;b&gt; » reçoit bien les notifications.", posts.sole[:text]
+    assert_equal ":white_check_mark: Test Elio : le canal « #ops &lt;b&gt; » reçoit bien les notifications.", posts.sole[:text]
   end
 
   test "post succeeds on a 2xx response" do

@@ -53,7 +53,7 @@ class DriftDetectorTest < ActiveSupport::TestCase
     assert_not entry.drift?
   end
 
-  test "SSHM's keys and active temporary accesses are never extra; another profile's key is" do
+  test "Elio's keys and active temporary accesses are never extra; another profile's key is" do
     AccessRule.create!(profile: profiles(:alice), server: servers(:web))
     snapshot(servers(:web), "deploy", line(profiles(:alice)), ssh_keys(:main).public_key, line(profiles(:ci)))
     TemporaryAccess.create!(server: servers(:web), profile: profiles(:ci), unix_user: "deploy", key_blob: profiles(:ci).authorized_key.key,

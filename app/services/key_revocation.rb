@@ -1,5 +1,5 @@
 # Removes a key from a server account from the UI (see AuthorizedKeyRemoval)
-# and keeps SSHM in sync: ends its temporary accesses, drops it from the
+# and keeps Elio in sync: ends its temporary accesses, drops it from the
 # account snapshot and logs a key_removed activity.
 class KeyRevocation
   def self.call(server, blob, account:, key_name: nil, profile: nil, **connection_options)

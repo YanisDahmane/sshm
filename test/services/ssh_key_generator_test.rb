@@ -3,14 +3,14 @@ require "open3"
 
 class SshKeyGeneratorTest < ActiveSupport::TestCase
   setup do
-    @key = SshKeyGenerator.generate(comment: "sshm-test")
+    @key = SshKeyGenerator.generate(comment: "elio-test")
   end
 
   test "public key is a single OpenSSH ed25519 line with the comment" do
     type, blob, comment = @key.public_key.split(" ")
 
     assert_equal "ssh-ed25519", type
-    assert_equal "sshm-test", comment
+    assert_equal "elio-test", comment
     assert_equal 51, Base64.strict_decode64(blob).bytesize
     assert_no_match "\n", @key.public_key
   end

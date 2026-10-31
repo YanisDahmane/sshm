@@ -1,4 +1,4 @@
-# Invitation to join SSHM with a role, accepted through a single-use link
+# Invitation to join Elio with a role, accepted through a single-use link
 # (/invitations/:token) valid for VALIDITY. The token is encrypted
 # (deterministic, so it can be looked up) and kept so admins can copy the
 # link again while the invitation is pending.

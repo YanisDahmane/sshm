@@ -42,6 +42,6 @@ class SshKeysControllerTest < ActionDispatch::IntegrationTest
 
     activity = Activity.of_kind(:ssh_key_generated).sole
     assert_equal users(:one), activity.user
-    assert_equal "Clé SSHM régénérée", activity.summary
+    assert_equal "Clé Elio régénérée", activity.summary
   end
 end

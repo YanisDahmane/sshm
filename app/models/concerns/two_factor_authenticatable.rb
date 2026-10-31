@@ -4,7 +4,7 @@
 module TwoFactorAuthenticatable
   extend ActiveSupport::Concern
 
-  ISSUER = "SSHM".freeze
+  ISSUER = "Elio".freeze
   DRIFT = 30 # seconds of clock drift accepted on each side
   BACKUP_CODES_COUNT = 10
 

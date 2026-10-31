@@ -33,12 +33,12 @@ class SshKeyTest < ActiveSupport::TestCase
   test "generate! creates a key when there is none" do
     SshKey.delete_all
 
-    key = SshKey.generate!(comment: "sshm-test")
+    key = SshKey.generate!(comment: "elio-test")
 
     assert_equal 1, SshKey.count
     assert key.persisted?
     assert key.public_key.start_with?("ssh-ed25519 ")
-    assert key.public_key.end_with?(" sshm-test")
+    assert key.public_key.end_with?(" elio-test")
     assert_equal key, SshKey.current
   end
 

@@ -24,7 +24,7 @@ class AuthorizedKeysReaderTest < ActiveSupport::TestCase
     result = read(FakeSsh.new(handler: local_shell))
 
     assert result.success?
-    assert_equal [ "sshm-fixture", nil ], result.keys.map(&:name)
+    assert_equal [ "elio-fixture", nil ], result.keys.map(&:name)
   end
 
   test "returns no keys when the file does not exist" do

@@ -20,7 +20,7 @@ class KeyRotationsControllerTest < ActionDispatch::IntegrationTest
     rotation = KeyRotation.sole
     assert_enqueued_with(job: RotateSshKeyJob, args: [ rotation ])
     assert_redirected_to settings_key_rotation_path(rotation)
-    assert_equal "Rotation de la clé SSHM lancée sur 3 serveur(s)", Activity.of_kind(:ssh_key_rotation_started).sole.summary
+    assert_equal "Rotation de la clé Elio lancée sur 3 serveur(s)", Activity.of_kind(:ssh_key_rotation_started).sole.summary
 
     get settings_path
     assert_select "#key-rotation a[href=?]", settings_key_rotation_path(rotation), text: "Suivre la rotation"

@@ -12,7 +12,7 @@ class SshKeyGenerator
 
   Result = Data.define(:public_key, :private_key, :fingerprint)
 
-  def self.generate(comment: "sshm")
+  def self.generate(comment: "elio")
     signing_key = Ed25519::SigningKey.generate
     public_bytes = signing_key.verify_key.to_bytes
     public_blob = Net::SSH::Buffer.from(:string, KEY_TYPE, :string, public_bytes).to_s

@@ -27,7 +27,7 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to root_path
     assert_equal user, @invitation.reload.user
     activity = Activity.of_kind(:invitation_accepted).sole
-    assert_equal [ user, "dave@example.com a rejoint SSHM (Opérateur)" ], [ activity.user, activity.summary ]
+    assert_equal [ user, "dave@example.com a rejoint Elio (Opérateur)" ], [ activity.user, activity.summary ]
 
     follow_redirect!
     assert_select "nav .user-role", "Opérateur"

@@ -52,7 +52,7 @@ class ServerSshChecksControllerTest < ActionDispatch::IntegrationTest
     assert_equal false, servers(:web).reload.ssh_ok
   end
 
-  test "guides the user when the SSHM key is refused" do
+  test "guides the user when the Elio key is refused" do
     sign_in users(:one)
     refused = SshCheck::Result.new(success: false, message: "Clé SSH refusée par le serveur", details: "x", reason: :key_refused)
 
@@ -95,7 +95,7 @@ class ServerSshChecksControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "points to the settings and records nothing when there is no SSHM key" do
+  test "points to the settings and records nothing when there is no Elio key" do
     SshKey.delete_all
     sign_in users(:one)
 
