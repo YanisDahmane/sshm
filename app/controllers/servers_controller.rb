@@ -6,7 +6,10 @@ class ServersController < ApplicationController
   def index
     @groups = ServerGroup.order(:name)
     @group = @groups.find { |group| group.id.to_s == params[:group].to_s } if params[:group].present?
+    @os_names = Server.where.not(os_name: nil).distinct.order(:os_name).pluck(:os_name)
+    @os = params[:os].presence_in(@os_names)
     @servers = (@group ? Server.in_group(@group) : Server.all).order(:name).includes(:server_groups)
+    @servers = @servers.where(os_name: @os) if @os
     @insights = KeyInsights.new
   end
 

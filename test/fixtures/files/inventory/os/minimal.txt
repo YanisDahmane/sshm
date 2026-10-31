@@ -1,0 +1,14 @@
+@@elio os-release
+NAME="Alpine Linux"
+ID=alpine
+VERSION_ID=3.20.3
+@@elio uname
+Linux 6.6.49-0-lts x86_64
+@@elio hostname
+box
+@@elio virt
+@@elio uptime
+@@elio cpus
+1
+@@elio meminfo
+@@elio timezone

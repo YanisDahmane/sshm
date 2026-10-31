@@ -1,0 +1,22 @@
+@@elio os-release
+PRETTY_NAME="Ubuntu 22.04.5 LTS"
+NAME="Ubuntu"
+VERSION_ID="22.04"
+VERSION="22.04.5 LTS (Jammy Jellyfish)"
+VERSION_CODENAME=jammy
+ID=ubuntu
+ID_LIKE=debian
+UBUNTU_CODENAME=jammy
+@@elio uname
+Linux 5.15.0-122-generic x86_64
+@@elio hostname
+worker-1
+@@elio virt
+lxc
+@@elio uptime
+600.5 1200.1
+@@elio cpus
+2
+@@elio meminfo
+MemTotal:        4028180 kB
+@@elio timezone

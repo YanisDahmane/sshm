@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_31_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_31_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -176,6 +176,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_120000) do
     t.datetime "ssh_checked_at"
     t.string "privilege"
     t.datetime "inventoried_at"
+    t.string "os_name"
+    t.string "os_id"
+    t.string "os_version"
     t.index ["name"], name: "index_servers_on_name", unique: true
   end
 

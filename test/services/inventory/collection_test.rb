@@ -161,4 +161,16 @@ class Inventory::CollectionTest < ActiveSupport::TestCase
       assert_equal [], Inventory::Collector.changes({}, {})
     end
   end
+
+  test "the system collector summarises the OS on the server" do
+    os_output = file_fixture("inventory/os/debian12.txt").read
+    fake = FakeSsh.new(handler: ->(command) { FakeSsh::Response.new(os_output, "", 0) if command.start_with?("sh -c") },
+                       responses: { "sudo -n true" => FakeSsh::Response.new("", "", 0) })
+
+    collect(fake, registry: Inventory::Collector::CATEGORIES)
+
+    @server.reload
+    assert_equal [ "Debian GNU/Linux 12 (bookworm)", "debian", "12" ], [ @server.os_name, @server.os_id, @server.os_version ]
+    assert_equal "kvm", @server.inventory("os").data["virtualization"]
+  end
 end

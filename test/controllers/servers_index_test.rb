@@ -13,10 +13,10 @@ class ServersIndexTest < ActionDispatch::IntegrationTest
     get servers_path
 
     assert_select "#servers tbody tr", Server.count
-    assert_select "#servers tbody tr:first-child td:nth-child(2)", "Backup"
+    assert_select "#servers tbody tr:first-child td:nth-child(2) a", "Backup"
     assert_select "##{ActionView::RecordIdentifier.dom_id(servers(:web))}" do
-      assert_select "td", text: "192.168.1.10"
-      assert_select "td", text: "deploy"
+      assert_select ".server-address", "deploy@192.168.1.10"
+      assert_select ".server-os", text: "—"
     end
     assert_select "a[href=?]", new_server_path, text: "Ajouter un serveur"
   end
@@ -141,5 +141,37 @@ class ServersIndexTest < ActionDispatch::IntegrationTest
     sign_in users(:one)
     get servers_path
     assert_select "form[action=?] button", server_scans_path, text: /Scanner les clés/
+  end
+
+  test "shows each server's system and warns about its end of support" do
+    servers(:web).update_columns(os_name: "Debian GNU/Linux 12 (bookworm)", os_id: "debian", os_version: "12")
+    servers(:db).update_columns(os_name: "Debian GNU/Linux 10 (buster)", os_id: "debian", os_version: "10", port: 2222)
+    sign_in users(:one)
+
+    get servers_path
+
+    assert_select "##{ActionView::RecordIdentifier.dom_id(servers(:web))} .server-os", text: "Debian GNU/Linux 12 (bookworm)"
+    assert_select "##{ActionView::RecordIdentifier.dom_id(servers(:db))}" do
+      assert_select ".server-os .badge", text: "plus supporté"
+      assert_select ".server-address", "admin@db.example.com:2222"
+    end
+  end
+
+  test "filters the servers by system, within a group too" do
+    servers(:web).update_columns(os_name: "Debian GNU/Linux 12 (bookworm)")
+    servers(:db).update_columns(os_name: "Ubuntu 24.04.1 LTS")
+    sign_in users(:one)
+
+    get servers_path(os: "Ubuntu 24.04.1 LTS")
+    assert_select "#servers tbody tr", 1
+    assert_select "#servers tbody tr td a", text: "Database"
+    assert_select "form.os-filter[data-controller=auto-submit] select[name=os] option[selected]", "Ubuntu 24.04.1 LTS"
+
+    get servers_path(os: "Ubuntu 24.04.1 LTS", group: server_groups(:production).id)
+    assert_select "#servers tbody tr", 1
+    assert_select "form.os-filter input[type=hidden][name=group][value=?]", server_groups(:production).id.to_s
+
+    get servers_path(os: "Windows")
+    assert_select "#servers tbody tr", Server.count
   end
 end

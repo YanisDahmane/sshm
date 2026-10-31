@@ -1,0 +1,13 @@
+<%# System of a server in the fleet list: name, and a warning when its support ends soon or has ended. %>
+<% if server.os_name %>
+  <% eol = Inventory::EndOfLife.status(server.os_id, server.os_version) %>
+  <span class="<%= eol.ended? ? "text-crit-ink" : eol.soon? ? "text-warn-ink" : "text-ink-2" %>"
+        title="<%= "Fin de support : #{l(eol.date, format: :long)}" if eol.known? %>"><%= server.os_name %></span>
+  <% if eol.ended? %>
+    <%= status_badge :crit, "plus supporté", class: "ml-1" %>
+  <% elsif eol.soon? %>
+    <%= status_badge :warn, "fin de support proche", class: "ml-1" %>
+  <% end %>
+<% else %>
+  <span class="text-ink-3" title="Pas encore d'inventaire">—</span>
+<% end %>

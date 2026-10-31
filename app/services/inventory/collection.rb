@@ -64,6 +64,8 @@ class Inventory::Collection
       snapshot.update!(status: outcome.status, message: outcome.message, data: outcome.data, privileged: privileged,
                        collected_at: now, checked_at: now)
       log_changes(category, previous, outcome.data) if previous
+      attributes = Inventory::Collector.for(category).server_attributes(outcome.data.as_json)
+      @server.update_columns(attributes) if attributes.any?
     end
   end
 

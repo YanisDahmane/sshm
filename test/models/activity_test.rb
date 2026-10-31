@@ -59,6 +59,8 @@ class ActivityTest < ActiveSupport::TestCase
       [ :host_key_changed, { new_fingerprint: "SHA256:new" } ] => "Nouvelle empreinte acceptée pour « Web » : SHA256:new",
       [ :server_unreachable, {} ] => "« Web » ne répond plus",
       [ :server_back_online, {} ] => "« Web » répond à nouveau",
+      [ :os_upgraded, { from: "Debian 11", to: "Debian 12" } ] => "« Web » est passé de Debian 11 à Debian 12",
+      [ :server_rebooted, {} ] => "« Web » a redémarré",
       [ :server_created, {} ] => "Serveur « Web » ajouté",
       [ :server_updated, {} ] => "Serveur « Web » modifié"
     }.each do |(kind, options), summary|

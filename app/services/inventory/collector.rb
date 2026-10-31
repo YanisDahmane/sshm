@@ -18,7 +18,7 @@ class Inventory::Collector
   class Error < StandardError; end
 
   # Categories in collection order, with their collector class name.
-  CATEGORIES = {}.freeze
+  CATEGORIES = { "os" => "Inventory::Collectors::Os" }.freeze
 
   MAX_OUTPUT = 8.megabytes
 
@@ -33,6 +33,9 @@ class Inventory::Collector
     def for(category) = registry.fetch(category.to_s).to_s.constantize
 
     def changes(_previous_data, _data) = []
+
+    # Summary columns of the server to update from the collected data.
+    def server_attributes(_data) = {}
   end
 
   attr_reader :ssh

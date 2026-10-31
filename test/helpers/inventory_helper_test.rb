@@ -1,0 +1,42 @@
+require "test_helper"
+
+class InventoryHelperTest < ActionView::TestCase
+  include UiHelper
+  include IconsHelper
+
+  test "labels" do
+    assert_equal "Machine physique", virtualization_label("none")
+    assert_equal "Conteneur LXC", virtualization_label("lxc")
+    assert_equal "Bhyve", virtualization_label("bhyve")
+    assert_equal "Inconnue", virtualization_label(nil)
+    assert_equal "sudo sans mot de passe", privilege_label("sudo")
+    assert_equal "inconnu", privilege_label(nil)
+    assert_equal "31,3 Go", human_bytes(32_858_112 * 1024)
+    assert_equal "—", human_bytes(nil)
+  end
+
+  test "end_of_life_badge warns only when the end is near or past" do
+    travel_to Date.new(2026, 10, 31) do
+      render html: end_of_life_badge("debian", "10")
+      assert_select ".badge.end-of-life.bg-crit-soft", text: "Plus supporté depuis le 30 juin 2024"
+
+      render html: end_of_life_badge("debian", "12")
+      assert_select "span.end-of-life:not(.badge)", text: "support jusqu'au 30 juin 2028"
+
+      assert_nil end_of_life_badge("alpine", "3.20")
+    end
+    travel_to Date.new(2026, 4, 1) do
+      render html: end_of_life_badge("debian", "11")
+      assert_select ".badge.end-of-life.bg-warn-soft", text: "Fin de support le 31 août 2026"
+    end
+  end
+
+  test "inventory_status_badge" do
+    snapshot = Inventory::Snapshot.new(status: "partial", message: "sans root")
+    render html: inventory_status_badge(snapshot)
+    assert_select ".inventory-status[title='sans root']", text: "Partiel"
+
+    assert_nil inventory_status_badge(Inventory::Snapshot.new(status: "ok"))
+    assert_nil inventory_status_badge(nil)
+  end
+end
