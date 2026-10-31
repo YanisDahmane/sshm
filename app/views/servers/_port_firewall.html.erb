@@ -1,0 +1,9 @@
+<%# Firewall state of a public port (Inventory::PortAnalysis::Port#firewall). %>
+<% case port.firewall %>
+<% when "allowed" %><%= status_badge :good, "autorisé", class: "port-firewall" %>
+<% when "blocked" %><%= status_badge :neutral, "bloqué", class: "port-firewall", title: "Le firewall bloque ce port par défaut" %>
+<% when "docker" %><%= status_badge :warn, "publié par Docker", class: "port-firewall", title: "Docker contourne ufw : le port est joignable même sans règle" %>
+<% when "open" %><%= status_badge :crit, "non filtré", class: "port-firewall", title: "Aucun firewall ne filtre ce port" %>
+<% when "unknown" %><span class="port-firewall text-ink-3" title="Firewall illisible sans accès root">inconnu</span>
+<% else %><span class="port-firewall text-ink-3">—</span>
+<% end %>

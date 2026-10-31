@@ -1,0 +1,11 @@
+@@elio ss
+tcp   LISTEN 0      128          0.0.0.0:22         0.0.0.0:*
+tcp   LISTEN 0      511          0.0.0.0:80         0.0.0.0:*
+tcp   LISTEN 0      511             [::]:80            [::]:*
+@@elio cgroups
+@@elio ufw
+ERROR: You need to be root to run this script
+@@elio nft
+absent
+@@elio iptables
+iptables v1.8.9 (nf_tables): Could not fetch rule set generation id: Permission denied (you must be root)

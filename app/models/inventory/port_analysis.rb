@@ -1,0 +1,135 @@
+# What a server exposes, from its last inventory: the listening ports (ports
+# category) merged with the ports published by Docker containers (services
+# category, they may not show in ss), the firewall state, the ports expected
+# by its groups, and the ufw rules to copy. Elio never applies them.
+class Inventory::PortAnalysis
+  # firewall: allowed (rule found), blocked (default deny, no rule), open (no
+  # filtering firewall), docker (published by Docker, which bypasses ufw) or
+  # unknown (firewall not readable).
+  Port = Data.define(:port, :proto, :addresses, :scope, :process, :unit, :container, :firewall, :unexpected) do
+    def key = "#{port}/#{proto}"
+    def public? = scope == "public"
+  end
+
+  RULE = %r{\A(\d+(?:[:,]\d+)*)(?:/(tcp|udp))?\z}
+
+  attr_reader :server, :firewall
+
+  def initialize(server)
+    @server = server
+    @snapshot = server.inventory("ports")
+    @firewall = @snapshot&.collected? ? (@snapshot.data["firewall"] || {}) : {}
+  end
+
+  def collected? = @snapshot&.collected? || false
+
+  def snapshot = @snapshot
+
+  def expected_ports
+    @expected_ports ||= server.server_groups.filter_map(&:expected_port_list)
+  end
+
+  def ports
+    @ports ||= begin
+      entries = listening.group_by { |entry| [ entry["port"], entry["proto"] ] }
+      published.each { |(port, proto), container| entries[[ port, proto ]] ||= [ { "port" => port, "proto" => proto, "address" => container[:address], "process" => "dockerd" } ] }
+      entries.map { |(port, proto), group| build(port, proto, group, published[[ port, proto ]]) }
+             .sort_by { |entry| [ { "public" => 0, "private" => 1, "local" => 2 }.fetch(entry.scope, 3), entry.port, entry.proto ] }
+    end
+  end
+
+  def public_ports = ports.select(&:public?)
+
+  def unexpected_ports = ports.select(&:unexpected)
+
+  def firewall_active? = firewall["active"] == true
+
+  def firewall_label
+    case firewall["tool"]
+    when "ufw", "nftables", "iptables"
+      tool = { "ufw" => "ufw", "nftables" => "nftables", "iptables" => "iptables" }.fetch(firewall["tool"])
+      firewall_active? ? "#{tool} actif (entrant : #{firewall["default_incoming"] == "deny" ? "bloqué par défaut" : "autorisé par défaut"})" : "#{tool} inactif"
+    when "none" then "aucun firewall actif"
+    else "firewall inconnu (accès root requis)"
+    end
+  end
+
+  # Commands to copy, SSH first so the session is not cut.
+  def suggested_ufw_rules
+    ssh_port = server.port
+    lines = [ "# Règles ufw suggérées pour #{server.name} (à relire avant de les appliquer)",
+              "sudo ufw default deny incoming", "sudo ufw default allow outgoing",
+              "sudo ufw allow #{ssh_port}/tcp comment 'ssh (Elio)'" ]
+    public_ports.reject { |entry| entry.port == ssh_port && entry.proto == "tcp" }.each do |entry|
+      label = comment_for(entry)
+      lines << if entry.container
+        "# #{entry.key} publié par Docker (#{entry.container}) : ufw ne le filtre pas. Publiez-le sur 127.0.0.1 ou filtrez-le dans la chaîne DOCKER-USER."
+      elsif entry.unexpected
+        "# #{entry.key} (#{label}) : port inattendu, à fermer ou à ajouter aux ports attendus du groupe"
+      else
+        "sudo ufw allow #{entry.key} comment '#{label}'"
+      end
+    end
+    ports.select { |entry| entry.scope == "private" }.each do |entry|
+      lines << "# #{entry.key} (#{comment_for(entry)}) écoute sur le réseau privé (#{entry.addresses.join(", ")}) : à autoriser depuis ce réseau si besoin"
+    end
+    lines << "sudo ufw enable"
+    lines.join("\n")
+  end
+
+  private
+
+  def listening = collected? ? Array(@snapshot.data["listening"]) : []
+
+  # { [port, proto] => { name:, address: } } from the containers' published ports.
+  def published
+    @published ||= begin
+      services = server.inventory("services")
+      containers = services&.collected? ? Array(services.data["containers"]) : []
+      containers.each_with_object({}) do |container, result|
+        next unless container["state"] == "running"
+
+        container["ports"].to_s.scan(%r{(?:(\[?[\d.:a-f]*\]?):)?(\d+)->\d+/(tcp|udp)}).each do |address, port, proto|
+          result[[ port.to_i, proto ]] ||= { name: container["name"], address: address.to_s.delete("[]").presence || "0.0.0.0" }
+        end
+      end
+    end
+  end
+
+  def build(port, proto, group, container)
+    addresses = group.map { |entry| entry["address"] }.uniq
+    scopes = group.map { |entry| entry["scope"] || Inventory::Collectors::Ports.scope(entry["address"].to_s) }
+    scope = %w[public private local].find { |candidate| scopes.include?(candidate) }
+    main = group.find { |entry| entry["process"] } || group.first
+    container_name = container&.fetch(:name)
+    unexpected = scope == "public" && expected_ports.any? && expected_ports.none? { |list| list.include?(port, proto) }
+
+    Port.new(port: port, proto: proto, addresses: addresses, scope: scope, process: main["process"], unit: main["unit"], container: container_name,
+             firewall: (scope == "public" ? firewall_state(port, proto, container_name) : nil), unexpected: unexpected)
+  end
+
+  def firewall_state(port, proto, container)
+    return "unknown" if firewall["active"].nil?
+    return "open" unless firewall_active? && firewall["default_incoming"] == "deny"
+    return "docker" if container
+
+    rule_allows?(port, proto) ? "allowed" : "blocked"
+  end
+
+  def rule_allows?(port, proto)
+    Array(firewall["allowed"]).any? do |rule|
+      match = rule["rule"].to_s.match(RULE)
+      next false unless match && (match[2].nil? || match[2] == proto)
+
+      match[1].split(",").any? do |part|
+        from, to = part.split(":").map(&:to_i)
+        port.between?(from, to || from)
+      end
+    end
+  end
+
+  # Process or unit name, limited to safe characters for a ufw comment.
+  def comment_for(entry)
+    (entry.container || entry.unit&.delete_suffix(".service") || entry.process || "port #{entry.port}").gsub(/[^\w .@-]/, "").first(40)
+  end
+end

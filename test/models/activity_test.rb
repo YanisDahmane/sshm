@@ -67,6 +67,8 @@ class ActivityTest < ActiveSupport::TestCase
       [ :security_updates_available, { count: 3 } ] => "3 mise(s) à jour de sécurité disponible(s) sur « Web »",
       [ :service_failed, { service: "nginx.service" } ] => "nginx.service est en échec sur « Web »",
       [ :container_stopped, { container: "pgbouncer" } ] => "Le conteneur pgbouncer s'est arrêté sur « Web »",
+      [ :port_opened, { port: "3306/tcp", process: "mariadbd" } ] => "Port 3306/tcp ouvert publiquement sur « Web » (mariadbd)",
+      [ :port_closed, { port: "8080/tcp" } ] => "Port 8080/tcp fermé sur « Web »",
       [ :server_created, {} ] => "Serveur « Web » ajouté",
       [ :server_updated, {} ] => "Serveur « Web » modifié"
     }.each do |(kind, options), summary|

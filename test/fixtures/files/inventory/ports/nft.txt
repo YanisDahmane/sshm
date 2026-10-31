@@ -1,0 +1,18 @@
+@@elio ss
+tcp LISTEN 0 128 0.0.0.0:22 0.0.0.0:* users:(("sshd",pid=1,fd=3))
+@@elio cgroups
+@@elio ufw
+Status: inactive
+@@elio nft
+table inet filter {
+	chain input {
+		type filter hook input priority filter; policy drop;
+		ct state established,related accept
+		iif "lo" accept
+		tcp dport 22 accept
+		tcp dport { 80, 443 } accept
+		udp dport 51820 accept
+	}
+}
+@@elio iptables
+absent

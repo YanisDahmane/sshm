@@ -28,6 +28,8 @@ class Activity < ApplicationRecord
     Kind.new(:service_recovered, "Service rétabli", :servers, :info, "Un service systemd en échec fonctionne à nouveau."),
     Kind.new(:container_stopped, "Conteneur arrêté", :servers, :warning, "Un conteneur Docker qui tournait s'est arrêté."),
     Kind.new(:container_started, "Conteneur redémarré", :servers, :info, "Un conteneur Docker arrêté tourne à nouveau."),
+    Kind.new(:port_opened, "Port public ouvert", :security, :warning, "Un nouveau port écoute sur une adresse publique d'un serveur."),
+    Kind.new(:port_closed, "Port public fermé", :security, :info, "Un port public n'écoute plus sur un serveur."),
     Kind.new(:security_updates_available, "Mises à jour de sécurité", :security, :warning, "Des mises à jour de sécurité sont disponibles sur un serveur qui n'en avait pas."),
     Kind.new(:server_created, "Serveur ajouté", :servers, :info, "Un serveur a été ajouté à Elio."),
     Kind.new(:server_updated, "Serveur modifié", :servers, :info, "Les informations de connexion d'un serveur ont changé."),
@@ -113,6 +115,8 @@ class Activity < ApplicationRecord
     when :service_recovered then "#{data["service"]} fonctionne à nouveau sur « #{server_name} »"
     when :container_stopped then "Le conteneur #{data["container"]} s'est arrêté sur « #{server_name} »"
     when :container_started then "Le conteneur #{data["container"]} tourne à nouveau sur « #{server_name} »"
+    when :port_opened then "Port #{data["port"]} ouvert publiquement sur « #{server_name} »#{" (#{data["process"]})" if data["process"]}"
+    when :port_closed then "Port #{data["port"]} fermé sur « #{server_name} »"
     when :security_updates_available then "#{data["count"]} mise(s) à jour de sécurité disponible(s) sur « #{server_name} »"
     when :server_created then "Serveur « #{server_name} » ajouté"
     when :server_updated then "Serveur « #{server_name} » modifié"

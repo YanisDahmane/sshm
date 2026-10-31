@@ -18,6 +18,7 @@
     <%= sidebar_link "Parc", servers_path, icon: :server_stack, count: Server.count,
                      active: controller_name.start_with?("server") && controller_name != "server_groups" %>
     <%= sidebar_link "Paquets", packages_path, icon: :cube, active: controller_name == "packages" %>
+    <%= sidebar_link "Ports", ports_path, icon: :globe, active: controller_name == "ports" %>
     <%= sidebar_link "Trousseau", public_keys_path, icon: :key, count: PublicKey.count, active: controller_name == "public_keys" %>
     <%= sidebar_link "Activité", activities_path, icon: :pulse, active: controller_name == "activities" %>
     <% if can?(:administer) %>

@@ -15,7 +15,7 @@ class Inventory::HealthStatus
   end
 
   def evaluate
-    reasons = [ *access_reasons, *disk_reasons, *memory_reasons, *load_reasons, *system_reasons ]
+    reasons = [ *access_reasons, *disk_reasons, *memory_reasons, *load_reasons, *system_reasons, *port_reasons ]
     reasons = reasons.sort_by { |reason| reason.tone == "crit" ? 0 : 1 }
     state = if reasons.any? { |reason| reason.tone == "crit" } then "crit"
     elsif reasons.any? then "warn"
@@ -61,6 +61,13 @@ class Inventory::HealthStatus
       reasons << Reason.new("warn", "#{@os.data["name"]} n'est plus supporté")
     end
     reasons
+  end
+
+  def port_reasons
+    unexpected = Inventory::PortAnalysis.new(@server).unexpected_ports
+    return [] if unexpected.empty?
+
+    [ Reason.new("warn", unexpected.one? ? "Port #{unexpected.first.key} inattendu" : "#{unexpected.size} ports inattendus (#{unexpected.map(&:key).first(3).join(", ")})") ]
   end
 
   def threshold_reason(label, value, warn, crit)

@@ -1,0 +1,70 @@
+<%# Ports of the server and firewall (Inventory::PortAnalysis), with the ufw rules to copy. %>
+<% analysis = Inventory::PortAnalysis.new(server) %>
+<% snapshot = analysis.snapshot %>
+<section id="server-ports" class="card mt-6">
+  <div class="card-header">
+    <h2 class="flex items-center gap-2 font-semibold"><%= icon :globe, class: "h-4 w-4 text-ink-3" %> Ports</h2>
+    <div class="flex items-center gap-2 text-xs text-ink-3">
+      <%= inventory_status_badge(snapshot) %>
+      <% if snapshot&.collected_at %>relevé <%= relative_time_tag snapshot.collected_at %><% end %>
+    </div>
+  </div>
+
+  <% if analysis.collected? %>
+    <p class="ports-summary flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-line px-4 py-2.5 text-xs text-ink-2">
+      <span><strong class="text-ink"><%= analysis.public_ports.size %></strong> publics sur <%= analysis.ports.size %> en écoute</span>
+      <span class="firewall-state <%= analysis.firewall_active? ? "text-ink-2" : "text-warn-ink" %>">Firewall : <%= analysis.firewall_label %></span>
+      <% if analysis.expected_ports.any? %>
+        <span>Ports attendus : <%= server.server_groups.filter_map(&:expected_ports).join(" · ") %></span>
+      <% end %>
+    </p>
+
+    <% if analysis.public_ports.any? { |port| port.firewall == "docker" } %>
+      <p class="docker-bypass flex gap-2 border-b border-line bg-warn-soft px-4 py-2 text-xs text-warn-ink">
+        <%= icon :exclamation_triangle, class: "h-4 w-4 shrink-0" %>
+        Docker publie des ports en ajoutant ses propres règles : ufw ne les filtre pas. Publiez-les sur 127.0.0.1 (« 127.0.0.1:8080:80 ») ou filtrez-les dans la chaîne DOCKER-USER.
+      </p>
+    <% end %>
+
+    <% if analysis.ports.any? %>
+      <div class="overflow-x-auto">
+        <table class="ports table-dense">
+          <thead><tr><th class="pl-4">Port</th><th>Écoute</th><th>Exposition</th><th>Processus</th><th>Service / conteneur</th><th class="pr-4">Firewall</th></tr></thead>
+          <tbody>
+            <% analysis.ports.each do |port| %>
+              <tr class="port" data-scope="<%= port.scope %>">
+                <td class="pl-4 font-mono font-medium"><%= port.port %><span class="text-ink-3">/<%= port.proto %></span>
+                  <% if port.unexpected %><%= status_badge :warn, "inattendu", class: "port-unexpected ml-1" %><% end %></td>
+                <td class="font-mono text-xs text-ink-2"><%= port.addresses.join(", ") %></td>
+                <td><span class="badge <%= { "public" => "bg-crit-soft text-crit-ink", "private" => "bg-subtle text-ink-2", "local" => "bg-subtle text-ink-3" }.fetch(port.scope, "bg-subtle") %>"><%= { "public" => "public", "private" => "privé", "local" => "local" }.fetch(port.scope, port.scope) %></span></td>
+                <td class="font-mono text-xs"><%= port.process || tag.span("inconnu", class: "text-ink-3") %></td>
+                <td class="text-xs text-ink-2"><%= port.container ? "conteneur #{port.container}" : port.unit&.delete_suffix(".service") || "—" %></td>
+                <td class="pr-4 text-xs"><%= render "servers/port_firewall", port: port %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <p class="px-4 py-4 text-sm text-ink-3">Aucun port en écoute.</p>
+    <% end %>
+
+    <details class="ufw-rules border-t border-line" data-controller="clipboard">
+      <summary class="flex cursor-pointer items-center justify-between gap-3 px-4 py-2.5 text-sm font-medium">
+        Règles ufw suggérées
+        <span class="text-xs font-normal text-ink-3">Elio ne modifie jamais le firewall : relisez puis appliquez-les vous-même.</span>
+      </summary>
+      <div class="flex items-start gap-3 px-4 pb-4">
+        <textarea readonly rows="<%= analysis.suggested_ufw_rules.lines.size %>" data-clipboard-target="source" aria-label="Règles ufw suggérées"
+                  class="block w-full resize-none rounded-lg border border-line bg-subtle px-3 py-2 font-mono text-xs text-ink-2"><%= analysis.suggested_ufw_rules %></textarea>
+        <%= render "settings/copy_button" %>
+      </div>
+    </details>
+  <% elsif snapshot&.status == "unsupported" %>
+    <p class="ports-empty px-4 py-4 text-sm text-ink-3"><%= snapshot.message %></p>
+  <% elsif snapshot&.failed? %>
+    <p class="inventory-error px-4 py-4 text-sm text-crit-ink"><%= snapshot.message %></p>
+  <% else %>
+    <p class="ports-empty px-4 py-4 text-sm text-ink-3">Pas encore d'inventaire des ports.</p>
+  <% end %>
+</section>

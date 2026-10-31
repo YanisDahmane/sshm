@@ -16,6 +16,7 @@ fr:
       server_group:
         name: Nom
         color: Couleur
+        expected_ports: Les ports attendus
       public_key:
         name: Nom
         kind: Type
@@ -38,6 +39,10 @@ fr:
         password_confirmation: Confirmation du mot de passe
     errors:
       models:
+        server_group:
+          attributes:
+            expected_ports:
+              invalid_ports: "contiennent des valeurs invalides : %{ports} (exemple : « 22, 80, 443/tcp, 51820/udp »)"
         public_key:
           attributes:
             content:

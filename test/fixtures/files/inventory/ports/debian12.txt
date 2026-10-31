@@ -1,0 +1,35 @@
+@@elio ss
+tcp   LISTEN 0      128          0.0.0.0:22         0.0.0.0:*    users:(("sshd",pid=812,fd=3))
+tcp   LISTEN 0      128             [::]:22            [::]:*    users:(("sshd",pid=812,fd=4))
+tcp   LISTEN 0      244       10.0.1.20:5432       0.0.0.0:*    users:(("postgres",pid=1201,fd=6))
+tcp   LISTEN 0      4096         0.0.0.0:6432       0.0.0.0:*    users:(("docker-proxy",pid=2201,fd=4))
+tcp   LISTEN 0      4096       127.0.0.1:5050       0.0.0.0:*    users:(("docker-proxy",pid=2202,fd=4))
+tcp   LISTEN 0      4096               *:9100             *:*    users:(("node_exporter",pid=950,fd=3))
+tcp   LISTEN 0      80         127.0.0.1:3306       0.0.0.0:*    users:(("mariadbd",pid=1300,fd=20))
+udp   UNCONN 0      0      127.0.0.53%lo:53         0.0.0.0:*    users:(("systemd-resolve",pid=600,fd=13))
+udp   UNCONN 0      0       100.64.0.12:41641      0.0.0.0:*    users:(("tailscaled",pid=700,fd=9))
+@@elio cgroups
+1201 0::/system.slice/system-postgresql.slice/postgresql@15-main.service
+2201 0::/system.slice/docker.service
+2202 0::/system.slice/docker.service
+600 0::/system.slice/systemd-resolved.service
+700 0::/system.slice/tailscaled.service
+812 0::/system.slice/ssh.service
+950 0::/system.slice/node-exporter.service
+@@elio ufw
+Status: active
+Logging: on (low)
+Default: deny (incoming), allow (outgoing), disabled (routed)
+New profiles: skip
+
+To                         Action      From
+--                         ------      ----
+22/tcp                     ALLOW IN    Anywhere
+Nginx Full                 ALLOW IN    Anywhere
+5432                       ALLOW IN    10.0.0.0/16
+22/tcp (v6)                ALLOW IN    Anywhere (v6)
+@@elio nft
+table inet filter {
+}
+@@elio iptables
+-P INPUT DROP

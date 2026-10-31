@@ -17,11 +17,23 @@ class ServerGroup < ApplicationRecord
   has_many :servers, -> { order(:name) }, through: :memberships
 
   normalizes :name, with: ->(value) { value.squish }
+  normalizes :expected_ports, with: ->(value) { value.squish.presence }
 
   validates :name, presence: true, uniqueness: { case_sensitive: false }, length: { maximum: 50 }
   validates :color, inclusion: { in: COLORS.keys }
+  validate :expected_ports_must_be_valid
 
   def color_label = COLORS.dig(color, 0)
   def badge_classes = COLORS.dig(color, 1)
   def dot_classes = COLORS.dig(color, 2)
+
+  # Ports the servers of the group are expected to expose publicly (none = no check).
+  def expected_port_list = expected_ports.present? ? Inventory::PortList.new(expected_ports) : nil
+
+  private
+
+  def expected_ports_must_be_valid
+    invalid = Inventory::PortList.new(expected_ports).invalid
+    errors.add(:expected_ports, :invalid_ports, ports: invalid.join(", ")) if invalid.any?
+  end
 end

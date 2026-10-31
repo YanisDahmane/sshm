@@ -119,4 +119,19 @@ class ServerGroupsControllerTest < ActionDispatch::IntegrationTest
     assert_response :forbidden
     assert ServerGroup.exists?(server_groups(:staging).id)
   end
+
+  test "the expected ports of a group are optional and validated" do
+    sign_in users(:one)
+    group = server_groups(:production)
+
+    get edit_server_group_path(group)
+    assert_select "input[name='server_group[expected_ports]'][placeholder=?]", "22, 80, 443/tcp, 51820/udp"
+
+    patch server_group_path(group), params: { server_group: { name: group.name, color: group.color, expected_ports: "22, 443/tcp" } }
+    assert_equal "22, 443/tcp", group.reload.expected_ports
+
+    patch server_group_path(group), params: { server_group: { name: group.name, color: group.color, expected_ports: "22, https" } }
+    assert_response :unprocessable_entity
+    assert_select "li", text: /Les ports attendus contiennent des valeurs invalides : https/
+  end
 end

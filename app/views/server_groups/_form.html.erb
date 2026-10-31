@@ -22,6 +22,12 @@
     </div>
   </fieldset>
 
+  <div>
+    <%= f.label :expected_ports, class: label_class do %>Ports attendus <span class="font-normal text-slate-500">(facultatif)</span><% end %>
+    <%= f.text_field :expected_ports, placeholder: "22, 80, 443/tcp, 51820/udp", autocomplete: "off", class: "#{input_class} font-mono" %>
+    <p class="mt-1 text-xs text-slate-500">Ports que les serveurs du groupe peuvent exposer publiquement. Tout autre port public est signalé comme inattendu. Vide : pas de vérification.</p>
+  </div>
+
   <fieldset data-controller="check-all">
     <div class="flex items-center justify-between">
       <legend class="<%= label_class %>">Serveurs</legend>

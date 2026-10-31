@@ -63,6 +63,7 @@ Rails.application.routes.draw do
   end
   resources :activities, only: :index
   resources :packages, only: :index
+  resources :ports, only: :index
   scope "settings" do
     resource :ssh_key, only: :create
   end

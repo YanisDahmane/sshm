@@ -1,0 +1,40 @@
+<% content_for :title, "Ports · Elio" %>
+
+<div>
+  <h1 class="text-xl font-semibold">Ports publics</h1>
+  <p class="text-xs text-ink-3">Ce que chaque serveur expose sur ses adresses publiques, d'après son dernier inventaire. Les ports inattendus et non filtrés en premier.</p>
+</div>
+
+<%= form_with url: ports_path, method: :get, data: { controller: "auto-submit", turbo_action: "advance" }, class: "ports-filters mt-5 flex flex-wrap items-center gap-2" do |f| %>
+  <%= f.select :group, [ [ "Tous les groupes", "" ], *@groups.map { |group| [ group.name, group.id ] } ], { selected: @group&.id },
+        aria: { label: "Groupe" }, data: { action: "change->auto-submit#submit" }, class: "input w-auto py-1 text-xs" %>
+  <%= f.search_field :q, value: @port, placeholder: "Port (ex. 3306)", inputmode: "numeric", aria: { label: "Port" },
+        data: { action: "input->auto-submit#submitLater" }, class: "input w-36 py-1 text-xs" %>
+  <noscript><%= f.submit "Filtrer", class: "btn btn-secondary" %></noscript>
+<% end %>
+
+<% if @rows.any? %>
+  <div class="card mt-3 overflow-x-auto">
+    <table id="public-ports" class="table-dense">
+      <thead><tr><th class="pl-4">Port</th><th>Serveur</th><th>Processus</th><th>Service / conteneur</th><th class="pr-4">Firewall</th></tr></thead>
+      <tbody>
+        <% @rows.each do |server, port| %>
+          <tr class="public-port">
+            <td class="pl-4 font-mono font-medium"><%= port.port %><span class="text-ink-3">/<%= port.proto %></span>
+              <% if port.unexpected %><%= status_badge :warn, "inattendu", class: "port-unexpected ml-1" %><% end %></td>
+            <td><%= link_to server.name, server_path(server, anchor: "server-ports"), class: "font-medium hover:text-accent hover:underline" %></td>
+            <td class="font-mono text-xs"><%= port.process || tag.span("inconnu", class: "text-ink-3") %></td>
+            <td class="text-xs text-ink-2"><%= port.container ? "conteneur #{port.container}" : port.unit&.delete_suffix(".service") || "—" %></td>
+            <td class="pr-4 text-xs"><%= render "servers/port_firewall", port: port %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <p class="card mt-3 px-4 py-6 text-sm text-ink-3"><%= @port ? "Aucun serveur n'expose le port #{@port}." : "Aucun port public connu." %></p>
+<% end %>
+
+<% if @without_inventory.any? %>
+  <p class="mt-3 text-xs text-ink-3">Sans inventaire des ports : <%= safe_join(@without_inventory.map { |server| link_to(server.name, server_path(server), class: "hover:underline") }, ", ") %>.</p>
+<% end %>

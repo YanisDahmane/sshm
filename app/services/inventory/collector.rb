@@ -19,7 +19,8 @@ class Inventory::Collector
 
   # Categories in collection order, with their collector class name.
   CATEGORIES = { "os" => "Inventory::Collectors::Os", "health" => "Inventory::Collectors::Health",
-                 "packages" => "Inventory::Collectors::Packages", "services" => "Inventory::Collectors::Services" }.freeze
+                 "packages" => "Inventory::Collectors::Packages", "services" => "Inventory::Collectors::Services",
+                 "ports" => "Inventory::Collectors::Ports" }.freeze
 
   MAX_OUTPUT = 8.megabytes
 
