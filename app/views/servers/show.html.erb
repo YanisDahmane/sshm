@@ -70,8 +70,13 @@
     <%= render "servers/ports_card", server: @server %>
   <% when "keys" %>
     <section id="server-authorized-keys" class="card mt-6 p-5">
-      <h2 class="flex items-center gap-2 font-semibold"><%= icon :key, class: "h-4 w-4 text-ink-3" %> Clés SSH autorisées</h2>
-      <p class="mt-1 text-xs text-ink-3">Clés publiques qui peuvent se connecter à ce serveur avec le compte de connexion d'Elio.</p>
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 class="flex items-center gap-2 font-semibold"><%= icon :key, class: "h-4 w-4 text-ink-3" %> Clés SSH autorisées</h2>
+          <p class="mt-1 text-xs text-ink-3">Clés publiques qui peuvent se connecter à ce serveur avec le compte de connexion d'Elio.</p>
+        </div>
+        <% if can?(:operate) %><%= render "servers/add_key_dialog", server: @server %><% end %>
+      </div>
       <div class="mt-4">
         <%= render "server_authorized_keys/frame", server: @server %>
       </div>

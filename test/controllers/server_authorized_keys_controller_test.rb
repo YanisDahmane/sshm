@@ -110,20 +110,6 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     assert_select "#server-authorized-keys turbo-frame##{frame_id}[loading=lazy][src=?]", server_authorized_keys_path(servers(:web))
   end
 
-  test "offers to authorize the public_keys that are not on the server yet" do
-    sign_in users(:one)
-
-    stub_method(AuthorizedKeysReader, :call, keys_result(public_keys(:ci).content)) do
-      get server_authorized_keys_path(servers(:web))
-    end
-
-    assert_select "form.authorize-key[action=?][data-controller=quiet-submit]", server_authorizations_path(servers(:web)) do
-      assert_select "select[name=public_key_id] option", 1
-      assert_select "option[value=?]", public_keys(:alice).id.to_s, text: "Alice"
-      assert_select "button[type=submit]", text: /Ajouter/
-    end
-  end
-
   test "names the keys of the keyring, whatever their comment" do
     sign_in users(:one)
     type, blob = public_keys(:alice).content.split(" ")
@@ -134,38 +120,6 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
 
     assert_select "li.authorized-key a.key-keyring[href=?][data-turbo-frame=_top]", public_key_path(public_keys(:alice)), text: "Alice"
     assert_select "li.authorized-key .key-comment", "renamed"
-  end
-
-  test "says when every public_key is already authorized" do
-    sign_in users(:one)
-
-    stub_method(AuthorizedKeysReader, :call, keys_result(public_keys(:alice).content, public_keys(:ci).content)) do
-      get server_authorized_keys_path(servers(:web))
-    end
-
-    assert_select "form.authorize-key", 0
-    assert_select ".all-keys-authorized"
-  end
-
-  test "invites to create a public_key when there is none" do
-    PublicKey.delete_all
-    sign_in users(:one)
-
-    stub_method(AuthorizedKeysReader, :call, keys_result) do
-      get server_authorized_keys_path(servers(:web))
-    end
-
-    assert_select "form.authorize-key", 0
-    assert_select "a[href=?][data-turbo-frame=_top]", new_public_key_path
-  end
-
-  test "does not offer to authorize when the keys cannot be read" do
-    Server.update_all(host: "127.0.0.1", port: closed_port)
-    sign_in users(:one)
-
-    get server_authorized_keys_path(servers(:web))
-
-    assert_select "form.authorize-key", 0
   end
 
   test "offers to delete every key except the Elio key" do
@@ -244,7 +198,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
       delete server_authorized_key_path(servers(:web)), params: { key: "AAAA", name: "bob" }
     end
 
-    assert_redirected_to server_path(servers(:web))
+    assert_redirected_to server_path(servers(:web), tab: "keys")
     assert_response :see_other
   end
 
@@ -263,21 +217,6 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ "deploy" ], accounts.map(&:unix_user)
     assert_select "code", "~deploy/.ssh/authorized_keys"
     assert_select "nav.account-tabs", 0
-  end
-
-  test "the authorize form offers a duration, permanent by default" do
-    sign_in users(:one)
-
-    stub_method(AuthorizedKeysReader, :call, keys_result) do
-      get server_authorized_keys_path(servers(:web))
-    end
-
-    assert_select "form.authorize-key select[name=duration]" do
-      assert_select "option[selected]", 1
-      assert_select "option:first-child[value=''][selected]", "Permanent"
-      assert_select "option[value='10']", "10 minutes"
-      assert_select "option[value='10080']", "7 jours"
-    end
   end
 
   test "shows when a temporary access expires" do

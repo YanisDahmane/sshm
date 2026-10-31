@@ -15,35 +15,6 @@
     <% end %>
   </div>
 
-  <% if @result.success? && can?(:operate) %>
-    <% if @authorizable_public_keys.any? %>
-      <%= form_with url: server_authorizations_path(@server),
-            data: { controller: "quiet-submit", turbo_frame: "_top" },
-            class: "authorize-key mt-4 flex flex-wrap items-end gap-2 rounded-md bg-subtle p-3" do |f| %>
-        <div class="min-w-40 flex-1">
-          <%= f.label :public_key_id, "Ajouter une clé du trousseau", for: "public_key_id", class: "block text-xs font-medium text-ink-2" %>
-          <%= f.select :public_key_id, @authorizable_public_keys.map { |public_key| [ public_key.name, public_key.id ] }, {}, id: "public_key_id",
-                class: "mt-1 block w-full rounded-md border border-line bg-surface px-3 py-2 text-sm shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent" %>
-        </div>
-        <div>
-          <%= f.label :duration, "Durée", for: "duration", class: "block text-xs font-medium text-ink-2" %>
-          <%= f.select :duration, [ [ "Permanent", "" ], *TemporaryAccess::DURATIONS.map { |value, (label, _)| [ label, value ] } ], {}, id: "duration",
-                class: "mt-1 block rounded-md border border-line bg-surface px-3 py-2 text-sm shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent" %>
-        </div>
-        <%= f.button type: "submit",
-              class: "group inline-flex cursor-pointer items-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-accent-hover disabled:cursor-wait disabled:opacity-60" do %>
-          <%= icon :arrow_path, class: "hidden h-4 w-4 animate-spin group-disabled:block" %>
-          Ajouter
-        <% end %>
-      <% end %>
-    <% elsif PublicKey.none? %>
-      <p class="mt-4 text-xs text-ink-3">
-        <%= link_to "Ajoutez une clé au trousseau", new_public_key_path, data: { turbo_frame: "_top" }, class: "font-medium text-accent hover:text-accent" %> pour pouvoir l'autoriser sur ce serveur.
-      </p>
-    <% else %>
-      <p class="all-keys-authorized mt-4 text-xs text-ink-3">Toutes les clés du trousseau sont déjà sur ce serveur.</p>
-    <% end %>
-  <% end %>
 
   <div class="mt-4 group-aria-busy:opacity-50">
     <% if !@result.success? %>

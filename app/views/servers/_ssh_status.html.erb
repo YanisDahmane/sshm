@@ -1,12 +1,13 @@
 <%# Last known SSH login result (see Server#record_ssh_status!). %>
+<% checked = server.ssh_checked_at && " #{relative_time_in_words(server.ssh_checked_at)}" %>
 <% if server.ssh_ok.nil? %>
   <span class="ssh-status text-xs text-ink-3" title="Connexion SSH jamais testée">—</span>
 <% elsif server.ssh_ok %>
-  <span class="ssh-status inline-flex items-center gap-1 text-xs font-medium text-good-ink" title="Connexion SSH réussie <%= relative_time_in_words(server.ssh_checked_at) %>">
+  <span class="ssh-status inline-flex items-center gap-1 text-xs font-medium text-good-ink" title="Connexion SSH réussie<%= checked %>">
     <%= icon :check, class: "h-3.5 w-3.5" %> OK
   </span>
 <% else %>
-  <%= link_to server_path(server), title: "La clé d'Elio a été refusée #{relative_time_in_words(server.ssh_checked_at)}",
+  <%= link_to server_path(server), title: "La clé d'Elio a été refusée#{checked}",
         class: "ssh-status inline-flex items-center gap-1 text-xs font-medium text-crit-ink hover:underline" do %>
     <%= icon :x_mark, class: "h-3.5 w-3.5" %> Clé refusée
   <% end %>

@@ -10,7 +10,6 @@ class ServerAuthorizedKeysController < ApplicationController
     record_ssh_status
     @app_key = SshKey.app_keys
     @public_keys_by_fingerprint = PublicKey.where(fingerprint: @result.keys.map(&:fingerprint)).index_by(&:fingerprint)
-    @authorizable_public_keys = PublicKey.where.not(fingerprint: @public_keys_by_fingerprint.keys).order(:name) if @result.success?
     @orphan_keys = @result.keys.reject { |key| key.matches?(@app_key) || @public_keys_by_fingerprint.key?(key.fingerprint) }
     @temporary_accesses = TemporaryAccess.active.where(server: @server, unix_user: @account.unix_user).index_by(&:fingerprint)
   end

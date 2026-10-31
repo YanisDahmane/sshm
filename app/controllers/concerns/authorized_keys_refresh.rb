@@ -9,17 +9,19 @@ module AuthorizedKeysRefresh
 
   def authorized_keys_account(server) = AuthorizedKeysAccount.login(server)
 
-  def respond_with_authorized_keys_refresh(account, flash_type, message)
+  # `streams`: extra Turbo Stream actions (e.g. closing a dialog).
+  def respond_with_authorized_keys_refresh(account, flash_type, message, streams: [])
     respond_to do |format|
       format.turbo_stream do
         flash.now[flash_type] = message
         render turbo_stream: [
           turbo_stream.replace(helpers.dom_id(account.server, :authorized_keys), partial: "server_authorized_keys/frame",
                                                                                   locals: { server: account.server, loading: :eager }),
-          turbo_stream.update("flash", partial: "shared/flash")
+          turbo_stream.update("flash", partial: "shared/flash"),
+          *streams
         ]
       end
-      format.html { redirect_to server_path(account.server), flash: { flash_type => message }, status: :see_other }
+      format.html { redirect_to server_path(account.server, tab: "keys"), flash: { flash_type => message }, status: :see_other }
     end
   end
 end

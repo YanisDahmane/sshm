@@ -15,7 +15,7 @@ export default class extends Controller {
     this.fieldTargets.forEach((field) => {
       const visible = !kind || field.dataset.kinds.split(" ").includes(kind)
       field.hidden = !visible
-      field.querySelectorAll("input, textarea").forEach((input) => { input.disabled = !visible })
+      field.querySelectorAll("input, textarea, select").forEach((input) => { input.disabled = !visible })
     })
   }
 }

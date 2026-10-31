@@ -36,8 +36,10 @@ class RoleBasedUiTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", edit_server_path(servers(:web)), 0
     assert_select "button.delete-server", 0
 
+    get server_path(servers(:web), tab: "keys")
+    assert_select ".add-key", 0
+
     get server_authorized_keys_path(servers(:web))
-    assert_select "form.authorize-key", 0
     assert_select "button[title='Supprimer la clé']", 0
     assert_select "a.add-to-keyring", 0
     assert_select "button.key-details-button", 2
@@ -62,8 +64,10 @@ class RoleBasedUiTest < ActionDispatch::IntegrationTest
     get servers_path
     assert_select "a[href=?]", new_server_path
 
+    get server_path(servers(:web), tab: "keys")
+    assert_select ".add-key button.add-key-button"
+
     get server_authorized_keys_path(servers(:web))
-    assert_select "form.authorize-key"
     assert_select "button[title='Supprimer la clé']", 1
     assert_select "a.add-to-keyring", 1
 

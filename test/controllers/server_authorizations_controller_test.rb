@@ -78,7 +78,7 @@ class ServerAuthorizationsControllerTest < ActionDispatch::IntegrationTest
       post server_authorizations_path(servers(:web)), params: { public_key_id: public_keys(:alice).id }
     end
 
-    assert_redirected_to server_path(servers(:web))
+    assert_redirected_to server_path(servers(:web), tab: "keys")
     assert_equal "La clé « Alice » a été ajoutée sur « Web ».", flash[:notice]
   end
 

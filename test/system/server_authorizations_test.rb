@@ -22,10 +22,14 @@ class ServerAuthorizationsTest < ApplicationSystemTestCase
       stub_method(PublicKeyAuthorization, :call, authorizer) do
         visit server_path(servers(:web), tab: "keys")
 
+        assert_selector "li.authorized-key", count: 1
+        click_on "Ajouter une clé"
+        within("dialog.add-key-dialog[open]") do
+          select "CI", from: "Clé du trousseau"
+          click_on "Ajouter sur le serveur"
+        end
+        assert_no_selector "dialog.add-key-dialog[open]"
         within("#server-authorized-keys") do
-          assert_selector "li.authorized-key", count: 1
-          select "CI", from: "Ajouter une clé du trousseau"
-          click_on "Ajouter"
           assert_selector ".key-keyring", text: "CI"
           assert_selector "li.authorized-key", count: 2
         end
@@ -46,11 +50,14 @@ class ServerAuthorizationsTest < ApplicationSystemTestCase
       stub_method(PublicKeyAuthorization, :call, authorizer) do
         visit server_path(servers(:web), tab: "keys")
 
-        within("#server-authorized-keys") do
-          select "CI", from: "Ajouter une clé du trousseau"
+        click_on "Ajouter une clé"
+        within("dialog.add-key-dialog[open]") do
+          select "CI", from: "Clé du trousseau"
           select "10 minutes", from: "Durée"
-          click_on "Ajouter"
+          click_on "Ajouter sur le serveur"
+        end
 
+        within("#server-authorized-keys") do
           within("li.authorized-key", text: "CI") do
             assert_selector ".key-expiry", text: "Expire dans 10 minutes"
             assert_selector "dialog.key-details .key-options", text: "expiry-time=", visible: :all
@@ -58,6 +65,44 @@ class ServerAuthorizationsTest < ApplicationSystemTestCase
         end
         assert_selector "#flash", text: "La clé « CI » est ajoutée sur « Web » pendant 10 minutes"
         assert_equal 1, TemporaryAccess.active.count
+      end
+    end
+  end
+
+  test "adding a new key: errors keep the dialog open, then it lands in the keyring and on the server" do
+    lines = [ ssh_keys(:main).public_key ]
+    reader = ->(*, **) { AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(lines.join("\n")), error_title: nil, error_details: nil) }
+    authorizer = lambda do |_server, public_key, **|
+      lines << "#{public_key.authorized_key.type} #{public_key.authorized_key.key} #{public_key.name}"
+      PublicKeyAuthorization::Result.new(status: :added, error_title: nil, error_details: nil)
+    end
+    bob = SshKeyGenerator.generate(comment: "bob@laptop").public_key
+
+    stub_method(AuthorizedKeysReader, :call, reader) do
+      stub_method(PublicKeyAuthorization, :call, authorizer) do
+        visit server_path(servers(:web), tab: "keys")
+        assert_selector "li.authorized-key", count: 1
+
+        click_on "Ajouter une clé"
+        within("dialog.add-key-dialog[open]") do
+          choose "Nouvelle clé", allow_label_click: true
+          assert_no_field "Clé du trousseau"
+          fill_in "Nom", with: "Bob"
+          fill_in "Clé SSH publique", with: "pas une clé"
+          click_on "Ajouter sur le serveur"
+        end
+
+        within("dialog.add-key-dialog[open]") do
+          assert_selector "#error_explanation"
+          assert_field "Nom", with: "Bob"
+          fill_in "Clé SSH publique", with: bob
+          click_on "Ajouter sur le serveur"
+        end
+
+        assert_no_selector "dialog.add-key-dialog[open]"
+        assert_selector "#flash", text: "La clé « Bob » (ajoutée au trousseau) a été ajoutée sur « Web »."
+        within("#server-authorized-keys") { assert_selector ".key-keyring", text: "Bob" }
+        assert PublicKey.exists?(name: "Bob")
       end
     end
   end
