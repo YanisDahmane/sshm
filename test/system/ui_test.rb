@@ -76,7 +76,6 @@ class UiTest < ApplicationSystemTestCase
         within("#bulk-authorize") do
           click_on "Tout cocher / décocher"
           uncheck "Backup"
-          fill_in "Compte", with: "debian"
           click_on "Autoriser"
 
           assert_selector "li.bulk-result.is-success", count: 2
@@ -85,36 +84,33 @@ class UiTest < ApplicationSystemTestCase
       end
     end
 
-    assert_equal [ [ "Database", "debian" ], [ "Web", "debian" ] ], granted
+    assert_equal [ [ "Database", "admin" ], [ "Web", "deploy" ] ], granted
   end
 
   test "converting a key without profile into a profile from the server page" do
     bob = SshKeyGenerator.generate(comment: "bob@desktop").public_key
     reader = ->(*, **) { AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse([ ssh_keys(:main).public_key, bob ].join("\n")), error_title: nil, error_details: nil) }
-    accounts = ->(server, **) { ServerAccountsReader::Result.new(accounts: [ AuthorizedKeysAccount.login(server) ], error_title: nil, error_details: nil) }
 
     stub_method(AuthorizedKeysReader, :call, reader) do
-      stub_method(ServerAccountsReader, :call, accounts) do
-        visit server_path(servers(:web))
+      visit server_path(servers(:web))
 
-        within("#server-authorized-keys") do
-          assert_selector ".orphan-warning", text: "1 clé ne correspond à aucun profil"
-          within("li.is-orphan", text: "bob@desktop") { click_on "Créer un profil" }
-        end
+      within("#server-authorized-keys") do
+        assert_selector ".orphan-warning", text: "1 clé ne correspond à aucun profil"
+        within("li.is-orphan", text: "bob@desktop") { click_on "Créer un profil" }
+      end
 
-        assert_selector "h1", text: "Ajouter un profil"
-        assert_field "Nom", with: "bob"
-        assert_field "Clé SSH publique", with: bob
-        fill_in "Nom", with: "Bob"
-        click_on "Ajouter le profil"
+      assert_selector "h1", text: "Ajouter un profil"
+      assert_field "Nom", with: "bob"
+      assert_field "Clé SSH publique", with: bob
+      fill_in "Nom", with: "Bob"
+      click_on "Ajouter le profil"
 
-        assert_selector "#flash", text: "Le profil « Bob » a été ajouté."
-        assert_selector "h1", text: "Web"
-        within("#server-authorized-keys") do
-          assert_selector ".key-profile", text: "Profil : Bob"
-          assert_no_selector ".orphan-warning"
-          assert_no_selector "li.is-orphan"
-        end
+      assert_selector "#flash", text: "Le profil « Bob » a été ajouté."
+      assert_selector "h1", text: "Web"
+      within("#server-authorized-keys") do
+        assert_selector ".key-profile", text: "Profil : Bob"
+        assert_no_selector ".orphan-warning"
+        assert_no_selector "li.is-orphan"
       end
     end
   end

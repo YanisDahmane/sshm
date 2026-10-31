@@ -16,8 +16,6 @@ class SettingsUsersTest < ActionDispatch::IntegrationTest
     assert_select "##{ActionView::RecordIdentifier.dom_id(users(:one))} button", text: "Désactiver", count: 0
     assert_select "##{ActionView::RecordIdentifier.dom_id(users(:operator))}" do
       assert_select "select[name='user[role]'] option[selected][value=operator]"
-      assert_select "select[name='user[profile_id]'] option:first-child[value='']", "Aucun profil"
-      assert_select "select[name='user[profile_id]'] option[selected]", 0
       assert_select "form[action=?][data-turbo-confirm]", deactivate_settings_user_path(users(:operator))
       assert_select "p", text: /Jamais connecté\s+· 2FA désactivée/
     end
@@ -72,26 +70,17 @@ class SettingsUsersTest < ActionDispatch::IntegrationTest
   test "changing a role is logged" do
     sign_in users(:one)
 
-    patch settings_user_path(users(:viewer)), params: { user: { role: "operator", profile_id: "" } }
+    patch settings_user_path(users(:viewer)), params: { user: { role: "operator" } }
 
     assert users(:viewer).reload.operator?
     assert_redirected_to settings_users_path
     assert_equal "Rôle de viewer@example.com : Lecture → Opérateur", Activity.of_kind(:user_role_changed).sole.summary
   end
 
-  test "linking a profile does not log a role change" do
-    sign_in users(:one)
-
-    patch settings_user_path(users(:viewer)), params: { user: { role: "viewer", profile_id: profiles(:alice).id } }
-
-    assert_equal profiles(:alice), users(:viewer).reload.profile
-    assert_equal 0, Activity.of_kind(:user_role_changed).count
-  end
-
   test "the last admin cannot demote themselves" do
     sign_in users(:one)
 
-    patch settings_user_path(users(:one)), params: { user: { role: "viewer", profile_id: "" } }
+    patch settings_user_path(users(:one)), params: { user: { role: "viewer" } }
 
     assert users(:one).reload.admin?
     assert_match "au moins un administrateur actif", flash[:alert]

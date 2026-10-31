@@ -22,11 +22,6 @@ class User < ApplicationRecord
 
   enum :role, { admin: "admin", operator: "operator", viewer: "viewer" }, default: :viewer, validate: true
 
-  # The person's own profile (their SSH key), e.g. to request accesses.
-  belongs_to :profile, optional: true
-  has_many :access_requests, foreign_key: :requester_id, dependent: :delete_all, inverse_of: :requester
-
-  validates :profile_id, uniqueness: true, allow_nil: true
   validate :must_keep_an_active_admin, on: :update
 
   scope :active, -> { where(deactivated_at: nil) }

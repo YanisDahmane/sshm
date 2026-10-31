@@ -13,7 +13,6 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
     # Nothing may reach a real server or Slack.
     ok_keys = AuthorizedKeysReader::Result.new(keys: [], error_title: nil, error_details: nil)
     stub_method_until_teardown(AuthorizedKeysReader, :call, ok_keys)
-    stub_method_until_teardown(ServerAccountsReader, :call, ->(server, **) { ServerAccountsReader::Result.new(accounts: [ AuthorizedKeysAccount.login(server) ], error_title: nil, error_details: nil) })
     stub_method_until_teardown(SshCheck, :call, SshCheck::Result.new(success: true, message: "ok", details: "ok"))
     stub_method_until_teardown(ServerPing, :reachable?, true)
     stub_method_until_teardown(AccessGrant, :call, ProfileAuthorization::Result.new(status: :added, error_title: nil, error_details: nil))
@@ -34,14 +33,6 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
       "ping all servers" => -> { post server_pings_path },
       "profiles index" => -> { get profiles_path },
       "server groups" => -> { get server_groups_path },
-      "teams index" => -> { get teams_path },
-      "access rules" => -> { get access_rules_path },
-      "access requests" => -> { get access_requests_path },
-      "new access request" => -> { get new_access_request_path },
-      "create access request" => -> { post access_requests_path, params: { access_request: { server_id: servers(:web).id, duration_minutes: 60, reason: "x" } } },
-      "cancel an access request" => -> { post cancel_access_request_path(AccessRequest.create!(requester: users(:viewer), profile: profiles(:ci), server: servers(:web), duration_minutes: 60, reason: "x")) },
-      "drift" => -> { get drift_path },
-      "team page" => -> { get team_path(teams(:developers)) },
       "profile page" => -> { get profile_path(profiles(:alice)) },
       "activities" => -> { get activities_path },
       "own account" => -> { get account_path },
@@ -53,22 +44,9 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
       "edit server" => -> { get edit_server_path(servers(:web)) },
       "update server" => -> { patch server_path(servers(:web)), params: { server: { name: "Renamed" } } },
       "delete server" => -> { delete server_path(servers(:web)) },
-      "create access rule" => -> { post access_rules_path, params: { access_rule: { subject_key: "profile:#{profiles(:alice).id}", target_key: "server:#{servers(:web).id}" } } },
-      "delete access rule" => -> { delete access_rule_path(AccessRule.create!(profile: profiles(:ci), server: servers(:db))) },
-      "add missing keys" => -> { post drift_fix_path },
-      "approve an access request" => -> { post approve_access_request_path(AccessRequest.create!(requester: users(:viewer), profile: profiles(:ci), server: servers(:web), duration_minutes: 60, reason: "x")) },
-      "deny an access request" => -> { post deny_access_request_path(AccessRequest.create!(requester: users(:viewer), profile: profiles(:ci), server: servers(:web), duration_minutes: 60, reason: "x")) },
-      "remove an extra key" => -> { delete drift_fix_path, params: { server_id: servers(:web).id, account: "deploy", key: "AAAA" } },
       "import servers form" => -> { get new_server_import_path },
       "preview a server import" => -> { post preview_server_import_path, params: { content: "a,10.0.0.1", import_format: "csv" } },
       "import servers" => -> { post server_import_path, params: { content: "a,10.0.0.1", import_format: "csv" } },
-      "new team" => -> { get new_team_path },
-      "create team" => -> { post teams_path, params: { team: { name: "New" } } },
-      "edit team" => -> { get edit_team_path(teams(:developers)) },
-      "update team" => -> { patch team_path(teams(:developers)), params: { team: { name: "Renamed" } } },
-      "delete team" => -> { delete team_path(teams(:developers)) },
-      "grant a team on servers" => -> { post team_accesses_path(teams(:developers)), params: { server_ids: [ servers(:web).id ] } },
-      "revoke a team from servers" => -> { delete team_access_path(teams(:developers)), params: { server_ids: [ servers(:web).id ] } },
       "new server group" => -> { get new_server_group_path },
       "create server group" => -> { post server_groups_path, params: { server_group: { name: "New", color: "red" } } },
       "edit server group" => -> { get edit_server_group_path(server_groups(:production)) },
@@ -83,7 +61,7 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
       "update profile" => -> { patch profile_path(profiles(:alice)), params: { profile: { name: "Renamed" } } },
       "delete profile" => -> { delete profile_path(profiles(:alice)) },
       "grant a profile on servers" => -> { post profile_accesses_path(profiles(:alice)), params: { server_ids: [ servers(:web).id ] } },
-      "revoke a profile access" => -> { delete profile_access_path(profiles(:alice)), params: { server_id: servers(:web).id, account: "deploy" } }
+      "revoke a profile access" => -> { delete profile_access_path(profiles(:alice)), params: { server_id: servers(:web).id } }
     },
     administer: {
       "general settings" => -> { get settings_path },
@@ -105,9 +83,6 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
       "deactivate a user" => -> { post deactivate_settings_user_path(users(:viewer)) },
       "reactivate a user" => -> { post reactivate_settings_user_path(users(:viewer)) },
       "reset a user's 2FA" => -> { post reset_two_factor_settings_user_path(users(:viewer)) },
-      "revoke a profile everywhere" => -> { post profile_revocation_path(profiles(:alice)) },
-      "follow a revocation" => -> { get revocation_path(Revocation.start!(profiles(:alice), by: users(:one))) },
-      "retry a revocation" => -> { post retry_revocation_path(Revocation.start!(profiles(:alice), by: users(:one)).tap(&:finish!)) },
       "start a key rotation" => -> { post settings_key_rotations_path },
       "follow a key rotation" => -> { get settings_key_rotation_path(KeyRotation.start!(by: users(:one))) },
       "retry a key rotation" => -> { post retry_settings_key_rotation_path(KeyRotation.start!(by: users(:one))) },

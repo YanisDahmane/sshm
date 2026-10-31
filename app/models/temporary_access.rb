@@ -29,7 +29,7 @@ class TemporaryAccess < ApplicationRecord
     DURATIONS.values.find { |_label, value| value == duration }&.first || ActiveSupport::Duration.build(duration).inspect
   end
 
-  def account = AuthorizedKeysAccount.for(server, unix_user)
+  def account = AuthorizedKeysAccount.login(server)
 
   def active? = ended_at.nil?
 

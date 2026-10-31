@@ -3,9 +3,6 @@ fr:
     models:
       server: Serveur
       server_group: Groupe de serveurs
-      team: Équipe
-      access_rule: Règle d'accès
-      access_request: Demande d'accès
       profile: Profil
       user: Utilisateur
       notification_channel: Canal de notification
@@ -19,19 +16,6 @@ fr:
       server_group:
         name: Nom
         color: Couleur
-      access_request:
-        server: Serveur
-        unix_user: Compte
-        duration_minutes: Durée
-        reason: Motif
-        decision_note: Motif du refus
-      access_rule:
-        subject_key: Profil ou équipe
-        target_key: Serveur ou groupe
-        unix_user: Compte
-      team:
-        name: Nom
-        description: Description
       profile:
         name: Nom
         public_key: Clé SSH publique
@@ -47,21 +31,11 @@ fr:
         role: Le rôle
       user:
         role: Le rôle
-        profile: Le profil
-        profile_id: Le profil
         email: Email
         password: Mot de passe
         password_confirmation: Confirmation du mot de passe
     errors:
       models:
-        access_rule:
-          attributes:
-            base:
-              duplicate_rule: "Cette règle existe déjà"
-        access_request:
-          attributes:
-            base:
-              no_profile: "Votre compte n'est relié à aucun profil SSH : demandez à un administrateur de le relier à votre profil"
         profile:
           attributes:
             public_key:
@@ -74,8 +48,6 @@ fr:
           attributes:
             base:
               last_admin: "Il doit toujours rester au moins un administrateur actif."
-            profile_id:
-              taken: "est déjà relié à un autre utilisateur"
         invitation:
           attributes:
             email:

@@ -42,12 +42,11 @@ class ApplicationHelperTest < ActionView::TestCase
   test "command_palette_items lists pages, servers and profiles" do
     items = command_palette_items
 
-    assert_equal %w[Pages Groupes Serveurs Équipes Profils], items.map { |item| item[:group] }.uniq
+    assert_equal %w[Pages Groupes Serveurs Profils], items.map { |item| item[:group] }.uniq
     assert_includes items, { group: "Pages", label: "Serveurs", url: servers_path }
     assert_includes items, { group: "Groupes", label: "Production", hint: "serveurs du groupe", url: servers_path(group: server_groups(:production).id) }
     assert_includes items, { group: "Serveurs", label: "Web", hint: "deploy@192.168.1.10 · Production", url: server_path(servers(:web)) }
     assert_includes items, { group: "Serveurs", label: "Backup", hint: "root@10.0.0.5", url: server_path(servers(:backup)) }
-    assert_includes items, { group: "Équipes", label: "Développeurs", hint: "équipe", url: team_path(teams(:developers)) }
     assert_includes items, { group: "Profils", label: "Alice", hint: "alice@laptop", url: profile_path(profiles(:alice)) }
     assert_includes items, { group: "Profils", label: "CI", hint: nil, url: profile_path(profiles(:ci)) }
   end

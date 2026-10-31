@@ -24,7 +24,7 @@ class AccountSnapshot < ApplicationRecord
     includes(:server).select { |snapshot| snapshot.fingerprints.include?(fingerprint) }
   end
 
-  def account = AuthorizedKeysAccount.for(server, unix_user)
+  def account = AuthorizedKeysAccount.login(server)
 
   def keys
     @keys ||= AuthorizedKey.parse(content)

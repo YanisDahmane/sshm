@@ -5,8 +5,6 @@ class Server < ApplicationRecord
   has_many :temporary_accesses, dependent: :delete_all
   has_many :activities, dependent: :nullify
   has_many :server_group_memberships, dependent: :delete_all
-  has_many :access_rules, dependent: :delete_all
-  has_many :access_requests, dependent: :delete_all
   has_many :server_groups, -> { order(:name) }, through: :server_group_memberships
 
   scope :in_group, ->(group) { where(id: ServerGroupMembership.where(server_group: group).select(:server_id)) }

@@ -90,21 +90,6 @@ class UserTest < ActiveSupport::TestCase
     assert_not users(:one).update(role: :viewer)
   end
 
-  test "a profile belongs to one user at most" do
-    users(:operator).update!(profile: profiles(:alice))
-
-    user = users(:viewer)
-    assert_not user.update(profile: profiles(:alice))
-    assert user.errors.of_kind?(:profile_id, :taken)
-  end
-
-  test "deleting a profile unlinks its user" do
-    users(:operator).update!(profile: profiles(:alice))
-    profiles(:alice).destroy!
-
-    assert_nil users(:operator).reload.profile_id
-  end
-
   test "locking logs an activity and sends no email" do
     assert_no_emails do
       users(:viewer).lock_access!

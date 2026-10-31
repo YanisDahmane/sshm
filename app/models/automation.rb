@@ -6,11 +6,9 @@ class Automation < ApplicationRecord
 
   KINDS = [
     Definition.new(:keys_scan, "Scan des clés",
-                   "Lit les clés de tous les comptes de tous les serveurs et signale les clés sans profil ou disparues.", 360),
+                   "Lit les clés de tous les serveurs et signale les clés sans profil ou disparues.", 360),
     Definition.new(:servers_ping, "Vérification des serveurs",
-                   "Vérifie que chaque serveur répond sur son port SSH et signale ceux qui ne répondent plus.", 15),
-    Definition.new(:drift_check, "Détection des écarts",
-                   "Scanne les serveurs couverts par les règles d'accès puis compare leurs clés aux règles. Signale les nouveaux écarts ; peut ajouter automatiquement les clés manquantes.", 360)
+                   "Vérifie que chaque serveur répond sur son port SSH et signale ceux qui ne répondent plus.", 15)
   ].index_by(&:key).freeze
 
   INTERVALS = { 15 => "Toutes les 15 minutes", 60 => "Toutes les heures", 360 => "Toutes les 6 heures", 1440 => "Tous les jours" }.freeze
@@ -50,31 +48,6 @@ class Automation < ApplicationRecord
     detected = Activity.of_kind(:unknown_key_detected).count - detected_before
 
     "#{scanned}/#{servers.size} serveur(s) scanné(s), #{detected} nouvelle(s) clé(s) sans profil"
-  end
-
-  # Scans the servers covered by the rules, adds the missing keys when
-  # auto_fix is on (never removes anything), and logs access_drift_detected
-  # when the remaining differences changed since the last run.
-  def run_drift_check
-    servers = AccessRule.expectations.keys.map(&:first).uniq
-    servers.each { |server| ServerScan.call(server) }
-
-    report = DriftDetector.call
-    added = 0
-    if auto_fix? && report.missing_count.positive?
-      added = DriftCorrection.add_missing(report.drifts).count { |result| result.status == :added }
-      report = DriftDetector.call
-    end
-
-    signature = report.signature
-    if signature.any? && signature != state["signature"]
-      Activity.record!(:access_drift_detected, user: nil, missing: report.missing_count, extra: report.extra_count, accounts: report.drifts.size)
-    end
-    update!(state: state.merge("signature" => signature))
-
-    [ "#{report.drifts.size} compte(s) en écart : #{report.missing_count} clé(s) manquante(s), #{report.extra_count} en trop",
-      ("#{added} clé(s) ajoutée(s) automatiquement" if added.positive?),
-      ("#{report.unscanned.size} compte(s) jamais lu(s)" if report.unscanned.any?) ].compact.join(", ")
   end
 
   def run_servers_ping

@@ -9,7 +9,7 @@ class ServerAuthorizationsController < ApplicationController
     profile = Profile.find(params.expect(:profile_id))
     duration = requested_duration
     result = AccessGrant.call(server, profile, account: account, duration: duration)
-    target = "« #{server.name} » pour #{account.unix_user}"
+    target = "« #{server.name} »"
 
     flash_type, message = if result.added? && duration
       [ :notice, "Le profil « #{profile.name} » est autorisé sur #{target} pendant #{TemporaryAccess.label_for(duration)}, jusqu'à #{l(duration.from_now, format: :short)}." ]

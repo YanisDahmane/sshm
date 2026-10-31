@@ -5,18 +5,17 @@ module Settings
     before_action :set_user, only: %i[update deactivate reactivate reset_two_factor]
 
     def index
-      @users = User.includes(:profile).order(:email)
+      @users = User.order(:email)
       @invitations = Invitation.pending.includes(:invited_by).order(created_at: :desc)
       @invitation = Invitation.new
-      @profiles = Profile.order(:name)
       @setting = AppSetting.current
     end
 
-    # Role and linked profile.
+    # Role.
     def update
       previous_role = @user.role_label
 
-      if @user.update(params.expect(user: %i[role profile_id]))
+      if @user.update(params.expect(user: %i[role]))
         if @user.saved_change_to_role?
           Activity.record!(:user_role_changed, email: @user.email, from: previous_role, to: @user.role_label)
         end

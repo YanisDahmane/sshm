@@ -30,26 +30,6 @@ Rails.application.routes.draw do
   resources :profiles do
     resources :accesses, only: :create, controller: "profile_accesses"
     resource :access, only: :destroy, controller: "profile_accesses"
-    resource :revocation, only: :create
-  end
-  resources :teams do
-    resources :accesses, only: :create, controller: "team_accesses"
-    resource :access, only: :destroy, controller: "team_accesses"
-  end
-  scope "access" do
-    resources :access_rules, only: %i[index create destroy], path: "rules"
-    resource :drift, only: :show
-    resource :drift_fix, only: %i[create destroy], path: "drift/fix"
-    resources :access_requests, only: %i[index new create], path: "requests" do
-      member do
-        post :approve
-        post :deny
-        post :cancel
-      end
-    end
-  end
-  resources :revocations, only: :show do
-    post :retry, on: :member
   end
 
   resource :settings, only: :show

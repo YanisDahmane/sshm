@@ -12,7 +12,7 @@
       <% if @servers.any? %>
         <% if can?(:operate) %>
           <%= button_to server_scans_path,
-                title: "Lire les clés de tous les comptes de tous les serveurs",
+                title: "Lire les clés de tous les serveurs",
                 class: "inline-flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" do %>
             <%= icon :key, class: "h-4 w-4" %>
             Scanner les clés

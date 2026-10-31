@@ -1,9 +1,6 @@
 # A person or machine (e.g. "Alice", "CI") identified by an SSH public key,
 # that can be granted or denied access to servers.
 class Profile < ApplicationRecord
-  has_many :team_memberships, dependent: :delete_all
-  has_many :access_rules, dependent: :delete_all
-  has_many :teams, -> { order(:name) }, through: :team_memberships
   normalizes :name, with: ->(value) { value.squish }
   normalizes :public_key, with: ->(value) { value.strip }
 

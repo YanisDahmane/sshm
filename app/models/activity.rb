@@ -11,14 +11,9 @@ class Activity < ApplicationRecord
   KINDS = [
     Kind.new(:key_added, "Clé ajoutée", :keys, :info, "Un profil a été autorisé sur un compte d'un serveur."),
     Kind.new(:key_removed, "Clé supprimée", :keys, :info, "Une clé a été supprimée d'un compte depuis Elio."),
-    Kind.new(:access_requested, "Demande d'accès", :keys, :warning, "Un utilisateur demande un accès temporaire à un serveur."),
-    Kind.new(:access_request_approved, "Demande d'accès acceptée", :keys, :info, "Une demande d'accès a été acceptée : l'accès temporaire est en place."),
-    Kind.new(:access_request_denied, "Demande d'accès refusée", :keys, :info, "Une demande d'accès a été refusée."),
     Kind.new(:key_expired, "Accès temporaire expiré", :keys, :info, "Un accès temporaire a expiré et sa clé a été retirée."),
-    Kind.new(:profile_revoked_everywhere, "Profil révoqué partout", :security, :critical, "La clé d'un profil a été retirée de tous les serveurs."),
     Kind.new(:unknown_key_detected, "Clé sans profil détectée", :security, :warning, "Une clé qui ne correspond à aucun profil a été trouvée sur un serveur."),
     Kind.new(:key_disappeared, "Clé retirée hors d'Elio", :security, :warning, "Une clé a disparu d'un serveur sans passer par Elio."),
-    Kind.new(:access_drift_detected, "Écart avec les règles d'accès", :security, :warning, "Des clés attendues manquent ou des clés non prévues sont présentes sur des serveurs."),
     Kind.new(:ssh_access_lost, "Accès SSH perdu", :security, :critical, "Le serveur refuse désormais la clé d'Elio."),
     Kind.new(:host_key_changed, "Empreinte serveur remplacée", :security, :critical, "Un administrateur a accepté la nouvelle empreinte d'un serveur (réinstallation…)."),
     Kind.new(:server_unreachable, "Serveur injoignable", :servers, :warning, "Un serveur ne répond plus sur son port SSH."),
@@ -40,10 +35,6 @@ class Activity < ApplicationRecord
     Kind.new(:two_factor_disabled, "2FA désactivée", :security, :critical, "La double authentification d'un utilisateur a été désactivée ou réinitialisée."),
     Kind.new(:two_factor_backup_code_used, "Code de secours utilisé", :security, :warning, "Un utilisateur s'est connecté avec un code de secours."),
     Kind.new(:profile_created, "Profil créé", :configuration, :info, "Un profil a été créé."),
-    Kind.new(:access_rule_created, "Règle d'accès ajoutée", :configuration, :info, "Une règle d'accès (état souhaité) a été ajoutée."),
-    Kind.new(:access_rule_deleted, "Règle d'accès supprimée", :configuration, :info, "Une règle d'accès a été supprimée (les clés restent en place)."),
-    Kind.new(:team_created, "Équipe créée", :configuration, :info, "Une équipe de profils a été créée."),
-    Kind.new(:team_deleted, "Équipe supprimée", :configuration, :info, "Une équipe a été supprimée (ses profils et leurs accès restent)."),
     Kind.new(:profile_deleted, "Profil supprimé", :configuration, :info, "Un profil a été supprimé."),
     Kind.new(:ssh_key_generated, "Clé Elio générée", :security, :critical, "La clé SSH d'Elio a été générée ou régénérée."),
     Kind.new(:ssh_key_rotation_started, "Rotation de la clé Elio lancée", :security, :warning, "Une nouvelle clé Elio est en cours d'installation sur les serveurs."),
@@ -91,16 +82,9 @@ class Activity < ApplicationRecord
       duration = data["duration_label"] ? " pendant #{data["duration_label"]}" : ""
       "« #{profile_name} » autorisé sur #{target}#{duration}"
     when :key_removed then "Clé « #{key_name} » supprimée de #{target}"
-    when :profile_revoked_everywhere
-      failures = data["failed"].to_i.positive? ? ", #{data["failed"]} échec(s)" : ""
-      "Clé de « #{profile_name} » retirée partout : #{data["removed"]} compte(s)#{failures}"
-    when :access_requested then "#{data["requester"]} demande #{data["duration_label"]} d'accès à #{target} : « #{data["reason"]} »"
-    when :access_request_approved then "Demande de #{data["requester"]} acceptée : accès à #{target} pendant #{data["duration_label"]}"
-    when :access_request_denied then "Demande de #{data["requester"]} pour #{target} refusée#{data["note"] ? " : « #{data["note"]} »" : ""}"
     when :key_expired then "Accès temporaire de « #{profile_name || key_name} » retiré de #{target}"
     when :unknown_key_detected then "Clé « #{key_name} » sans profil trouvée sur #{target}"
     when :key_disappeared then "Clé « #{key_name} » disparue de #{target}"
-    when :access_drift_detected then "Écarts avec les règles d'accès : #{data["missing"]} clé(s) manquante(s), #{data["extra"]} clé(s) en trop"
     when :ssh_access_lost then "« #{server_name} » refuse la clé d'Elio"
     when :host_key_changed then "Nouvelle empreinte acceptée pour « #{server_name} » : #{data["new_fingerprint"]}"
     when :server_unreachable then "« #{server_name} » ne répond plus"
@@ -125,10 +109,6 @@ class Activity < ApplicationRecord
     when :two_factor_disabled then data["reset_by"] ? "2FA de #{data["email"]} réinitialisée par #{data["reset_by"]}" : "2FA désactivée pour #{data["email"]}"
     when :two_factor_backup_code_used then "#{data["email"]} s'est connecté avec un code de secours (#{data["left"]} restant(s))"
     when :profile_created then "Profil « #{profile_name} » créé"
-    when :access_rule_created then "Règle ajoutée : #{data["rule"]}"
-    when :access_rule_deleted then "Règle supprimée : #{data["rule"]}"
-    when :team_created then "Équipe « #{data["team_name"]} » créée (#{data["profiles"]} profil(s))"
-    when :team_deleted then "Équipe « #{data["team_name"]} » supprimée"
     when :profile_deleted then "Profil « #{profile_name} » supprimé"
     when :ssh_key_generated then data["regenerated"] ? "Clé Elio régénérée" : "Clé Elio générée"
     when :ssh_key_rotation_started then "Rotation de la clé Elio lancée sur #{data["servers"]} serveur(s)"

@@ -1,7 +1,7 @@
 class ServerScansController < ApplicationController
   require_permission :operate
 
-  # Reads the keys of every account of every server in the background.
+  # Reads the keys of every server in the background.
   def create
     servers = Server.all.to_a
     servers.each { |server| ScanServerJob.perform_later(server) }

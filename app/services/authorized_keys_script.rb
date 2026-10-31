@@ -1,12 +1,10 @@
 # Shell snippets shared by the scripts that work on an account's authorized_keys.
 module AuthorizedKeysScript
-  # Resolves the home directory and stops with "unknown user" when `~user`
-  # could not be expanded (the user does not exist).
+  # Stops on the first error and resolves the home directory.
   def self.prelude(home)
     <<~SH
       set -e
       home=#{home}
-      case "$home" in "~"*|"") echo "unknown user" >&2; exit 3 ;; esac
     SH
   end
 

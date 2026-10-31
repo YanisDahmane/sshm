@@ -41,10 +41,10 @@ class ServerAuthorizationsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_turbo_stream action: :replace, target: dom_id(servers(:web), :authorized_keys) do
-      assert_select "turbo-frame[loading=eager][src=?]", server_authorized_keys_path(servers(:web), account: "deploy")
+      assert_select "turbo-frame[loading=eager][src=?]", server_authorized_keys_path(servers(:web))
     end
     assert_turbo_stream action: :update, target: "flash" do
-      assert_select "div", text: "Le profil « Alice » est maintenant autorisé sur « Web » pour deploy."
+      assert_select "div", text: "Le profil « Alice » est maintenant autorisé sur « Web »."
     end
   end
 
@@ -56,7 +56,7 @@ class ServerAuthorizationsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_turbo_stream action: :update, target: "flash" do
-      assert_select "div", text: "Le profil « Alice » était déjà autorisé sur « Web » pour deploy."
+      assert_select "div", text: "Le profil « Alice » était déjà autorisé sur « Web »."
     end
   end
 
@@ -67,7 +67,7 @@ class ServerAuthorizationsControllerTest < ActionDispatch::IntegrationTest
     post server_authorizations_path(servers(:web)), params: { profile_id: profiles(:alice).id }, as: :turbo_stream
 
     assert_turbo_stream action: :update, target: "flash" do
-      assert_select "div.toast-alert", text: /Impossible d'autoriser « Alice » sur « Web » pour deploy : Connexion impossible/
+      assert_select "div.toast-alert", text: /Impossible d'autoriser « Alice » sur « Web » : Connexion impossible/
     end
   end
 
@@ -79,34 +79,7 @@ class ServerAuthorizationsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_redirected_to server_path(servers(:web))
-    assert_equal "Le profil « Alice » est maintenant autorisé sur « Web » pour deploy.", flash[:notice]
-  end
-
-  test "authorizes for root when requested" do
-    sign_in users(:one)
-    accounts = []
-    authorizer = lambda do |_server, _profile, account:, **|
-      accounts << account
-      result(:added)
-    end
-
-    stub_method(ProfileAuthorization, :call, authorizer) do
-      post server_authorizations_path(servers(:web)), params: { profile_id: profiles(:alice).id, account: "root" }, as: :turbo_stream
-    end
-
-    assert_equal [ "root" ], accounts.map(&:name)
-    assert_turbo_stream action: :replace, target: dom_id(servers(:web), :authorized_keys) do
-      assert_select "turbo-frame[src=?]", server_authorized_keys_path(servers(:web), account: "root")
-    end
-    assert_turbo_stream action: :update, target: "flash" do
-      assert_select "div", text: "Le profil « Alice » est maintenant autorisé sur « Web » pour root."
-    end
-  end
-
-  test "rejects an invalid account name" do
-    sign_in users(:one)
-    post server_authorizations_path(servers(:web)), params: { profile_id: profiles(:alice).id, account: "../root" }
-    assert_response :bad_request
+    assert_equal "Le profil « Alice » est maintenant autorisé sur « Web ».", flash[:notice]
   end
 
   test "grants a temporary access for the requested duration" do
@@ -119,12 +92,12 @@ class ServerAuthorizationsControllerTest < ActionDispatch::IntegrationTest
 
     freeze_time do
       stub_method(AccessGrant, :call, granter) do
-        post server_authorizations_path(servers(:web)), params: { profile_id: profiles(:alice).id, account: "debian", duration: "10" }, as: :turbo_stream
+        post server_authorizations_path(servers(:web)), params: { profile_id: profiles(:alice).id, duration: "10" }, as: :turbo_stream
       end
 
-      assert_equal [ [ profiles(:alice), "debian", 10.minutes ] ], calls
+      assert_equal [ [ profiles(:alice), "deploy", 10.minutes ] ], calls
       assert_turbo_stream action: :update, target: "flash" do
-        assert_select "div", text: "Le profil « Alice » est autorisé sur « Web » pour debian pendant 10 minutes, jusqu'à #{I18n.l(10.minutes.from_now, format: :short)}."
+        assert_select "div", text: "Le profil « Alice » est autorisé sur « Web » pendant 10 minutes, jusqu'à #{I18n.l(10.minutes.from_now, format: :short)}."
       end
     end
   end

@@ -6,7 +6,6 @@ class AuthorizedKeyRemovalSystemTest < ApplicationSystemTestCase
 
   setup do
     sign_in users(:one)
-    stub_method_until_teardown(ServerAccountsReader, :call, ->(server, **) { ServerAccountsReader::Result.new(accounts: [ AuthorizedKeysAccount.login(server) ], error_title: nil, error_details: nil) })
   end
 
   # Simulates the server's authorized_keys file in memory.
@@ -14,7 +13,7 @@ class AuthorizedKeyRemovalSystemTest < ApplicationSystemTestCase
     bob = SshKeyGenerator.generate(comment: "bob@desktop").public_key
     lines = [ ssh_keys(:main).public_key, bob ]
     reader = lambda do |_server, account:, **|
-      keys = account.root? ? [] : AuthorizedKey.parse(lines.join("\n"))
+      keys = AuthorizedKey.parse(lines.join("\n"))
       AuthorizedKeysReader::Result.new(keys: keys, error_title: nil, error_details: nil)
     end
     remover = lambda do |_server, blob, **|
@@ -37,7 +36,7 @@ class AuthorizedKeyRemovalSystemTest < ApplicationSystemTestCase
           assert_selector "li.authorized-key", count: 1
           assert_selector ".key-master", text: "Master"
         end
-        assert_selector "#flash", text: "La clé « bob@desktop » a été supprimée de « Web » pour deploy."
+        assert_selector "#flash", text: "La clé « bob@desktop » a été supprimée de « Web »."
       end
     end
   end

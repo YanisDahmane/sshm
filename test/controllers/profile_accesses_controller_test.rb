@@ -24,7 +24,7 @@ class ProfileAccessesControllerTest < ActionDispatch::IntegrationTest
     post profile_accesses_path(@profile), params: { server_ids: [ servers(:web).id ] }
     assert_redirected_to new_user_session_path
 
-    delete profile_access_path(@profile), params: { server_id: servers(:web).id, account: "deploy" }
+    delete profile_access_path(@profile), params: { server_id: servers(:web).id }
     assert_redirected_to new_user_session_path
   end
 
@@ -49,16 +49,16 @@ class ProfileAccessesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 2, AccountSnapshot.count
   end
 
-  test "grants the same named account everywhere, for a limited time" do
+  test "grants for a limited time" do
     sign_in users(:one)
 
     stub_method(AccessGrant, :call, granter) do
-      post profile_accesses_path(@profile), params: { server_ids: [ servers(:web).id ], account: " debian ", duration: "60" }, as: :turbo_stream
+      post profile_accesses_path(@profile), params: { server_ids: [ servers(:web).id ], duration: "60" }, as: :turbo_stream
     end
 
-    assert_equal [ [ "Web", "Alice", "debian", 1.hour ] ], @grants
+    assert_equal [ [ "Web", "Alice", "deploy", 1.hour ] ], @grants
     assert_turbo_stream action: :update, target: "bulk-results" do
-      assert_select "li.bulk-result", text: "Web · debian : autorisé pendant 1 heure"
+      assert_select "li.bulk-result", text: "Web · deploy : autorisé pendant 1 heure"
     end
   end
 
@@ -78,19 +78,6 @@ class ProfileAccessesControllerTest < ActionDispatch::IntegrationTest
       assert_select ".toast-notice", text: /1\/2/
     end
     assert_equal 1, AccountSnapshot.count
-  end
-
-  test "an invalid account name is reported, not granted" do
-    sign_in users(:one)
-
-    stub_method(AccessGrant, :call, granter) do
-      post profile_accesses_path(@profile), params: { server_ids: [ servers(:web).id ], account: "bad name" }, as: :turbo_stream
-    end
-
-    assert_empty @grants
-    assert_turbo_stream action: :update, target: "bulk-results" do
-      assert_select "li.bulk-result.is-error", text: /Nom de compte invalide/
-    end
   end
 
   test "asks to choose a server" do
@@ -120,7 +107,7 @@ class ProfileAccessesControllerTest < ActionDispatch::IntegrationTest
     end
 
     stub_method(AuthorizedKeyRemoval, :call, remover) do
-      delete profile_access_path(profile), params: { server_id: servers(:web).id, account: "deploy" }, as: :turbo_stream
+      delete profile_access_path(profile), params: { server_id: servers(:web).id }, as: :turbo_stream
     end
 
     assert_equal [ [ servers(:web), profile.authorized_key.key, "deploy" ] ], calls
@@ -130,7 +117,7 @@ class ProfileAccessesControllerTest < ActionDispatch::IntegrationTest
       assert_select "li.profile-access", 0
     end
     assert_turbo_stream action: :update, target: "flash" do
-      assert_select ".toast-notice", text: "L'accès de « CI » à « Web » pour deploy a été retiré."
+      assert_select ".toast-notice", text: "L'accès de « CI » à « Web » a été retiré."
     end
   end
 
@@ -140,19 +127,13 @@ class ProfileAccessesControllerTest < ActionDispatch::IntegrationTest
     failed = AuthorizedKeyRemoval::Result.new(status: :error, error_title: "Connexion impossible", error_details: "refused")
 
     stub_method(AuthorizedKeyRemoval, :call, failed) do
-      delete profile_access_path(@profile), params: { server_id: servers(:web).id, account: "deploy" }, as: :turbo_stream
+      delete profile_access_path(@profile), params: { server_id: servers(:web).id }, as: :turbo_stream
     end
 
     assert_equal [ @profile.fingerprint ], AccountSnapshot.sole.fingerprints
     assert_turbo_stream action: :update, target: "flash" do
       assert_select ".toast-alert", text: /Impossible de retirer l'accès : Connexion impossible/
     end
-  end
-
-  test "revoking rejects an invalid account name" do
-    sign_in users(:one)
-    delete profile_access_path(@profile), params: { server_id: servers(:web).id, account: "../root" }
-    assert_response :bad_request
   end
 
   test "the profile page shows its accesses and the bulk form" do
@@ -168,7 +149,7 @@ class ProfileAccessesControllerTest < ActionDispatch::IntegrationTest
     end
     assert_select "#bulk-authorize form[action=?]", profile_accesses_path(@profile) do
       assert_select "input[type=checkbox][name='server_ids[]']", 3
-      assert_select "input[name=account][placeholder=?]", "ex. debian"
+      assert_select "input[name=account]", 0
       assert_select "select[name=duration] option[value='60']", "1 heure"
     end
   end

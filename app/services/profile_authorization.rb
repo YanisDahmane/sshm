@@ -1,7 +1,7 @@
 require "shellwords"
 
 # Authorizes a profile on a server by appending its public key to the
-# authorized_keys file of an account (see AuthorizedKeysAccount), unless the
+# authorized_keys file of the login account (see AuthorizedKeysAccount), unless the
 # key is already there. The line's comment is the profile name, so it shows
 # up as "known". With `expires_at`, the line gets an OpenSSH `expiry-time`
 # option (OpenSSH >= 8.2) so sshd refuses the key afterwards. With `replace`,
@@ -16,7 +16,7 @@ class ProfileAuthorization
   def self.call(server, profile, account: nil, expires_at: nil, replace: false, **connection_options)
     account ||= AuthorizedKeysAccount.login(server)
     key = profile.authorized_key
-    script = append_script(line_for(profile, expires_at), key.key, home: account.home, owner: account.owner, replace: replace)
+    script = append_script(line_for(profile, expires_at), key.key, home: account.home, replace: replace)
 
     output = SshConnection.open(server, **connection_options) { |ssh| ssh.exec!(account.command(script)).stdout }
 
@@ -33,12 +33,11 @@ class ProfileAuthorization
   end
 
   # POSIX sh script: creates <home>/.ssh (700) and authorized_keys (600) if
-  # needed (owned by `owner` when given), optionally drops the lines holding
+  # needed, optionally drops the lines holding
   # the key blob, then prints "present" when the blob is still in the file,
   # otherwise appends the line (adding a newline first if the file does not
   # end with one) and prints "added".
-  def self.append_script(line, blob, home: "$HOME", owner: nil, replace: false)
-    owner = Shellwords.escape(owner) if owner
+  def self.append_script(line, blob, home: "$HOME", replace: false)
     blob = Shellwords.escape(blob)
 
     AuthorizedKeysScript.prelude(home) + <<~SH
@@ -46,7 +45,6 @@ class ProfileAuthorization
       mkdir -p "$home/.ssh"
       file="$home/.ssh/authorized_keys"
       touch "$file"
-      #{%(chown "#{owner}:$(id -gn #{owner})" "$home/.ssh" "$file") if owner}
       #{AuthorizedKeysScript.drop_lines(blob) if replace}
       if grep -qF -- #{blob} "$file"; then
         echo present

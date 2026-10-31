@@ -14,10 +14,6 @@
       <% end %>
     </div>
     <div class="flex shrink-0 items-center gap-2">
-      <% if current_user.profile %>
-        <%= link_to "Demander un accès", new_access_request_path(server_id: @server.id),
-              class: "request-access inline-flex shrink-0 items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" %>
-      <% end %>
       <% if can?(:operate) %>
         <%= link_to edit_server_path(@server),
               class: "inline-flex shrink-0 items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" do %>

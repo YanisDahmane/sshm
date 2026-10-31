@@ -115,29 +115,6 @@ class AuthorizedKeyRemovalTest < ActiveSupport::TestCase
     assert_equal "Connexion impossible", result.error_title
   end
 
-  test "removes from root's file through sudo" do
-    fake = FakeSsh.new(handler: ->(_command) { FakeSsh::Response.new("removed\n", "", 0) })
-
-    result = AuthorizedKeyRemoval.call(servers(:web), @alice_blob, account: AuthorizedKeysAccount.for(servers(:web), "root"),
-                                       transport: fake, known_hosts_file: @known_hosts)
-
-    assert result.removed?
-    *prefix, script = Shellwords.split(fake.commands.sole)
-    assert_equal %w[sudo -n sh -c], prefix
-    assert_includes script.lines, "home=~root\n"
-  end
-
-  test "refuses to remove the Elio key from root's file too" do
-    fake = FakeSsh.new
-    master_blob = ssh_keys(:main).public_key.split(" ")[1]
-
-    result = AuthorizedKeyRemoval.call(servers(:web), master_blob, account: AuthorizedKeysAccount.for(servers(:web), "root"),
-                                       transport: fake, known_hosts_file: @known_hosts)
-
-    assert_equal "Suppression interdite", result.error_title
-    assert_nil fake.started_with
-  end
-
   test "the script honours the home parameter" do
     custom = @home.join("other", ".ssh")
     custom.mkpath
@@ -148,15 +125,6 @@ class AuthorizedKeyRemovalTest < ActiveSupport::TestCase
 
     assert_equal "#{@bob}\n", custom.join("authorized_keys").read
     assert_equal "#{@alice}\n", authorized_keys_file.read
-  end
-
-  test "the script stops on an unknown user" do
-    script = AuthorizedKeyRemoval.remove_script(@alice_blob, home: "~nosuchuser#{SecureRandom.hex(2)}")
-
-    _output, error, status = Open3.capture3({ "HOME" => @home.to_s }, "sh", "-c", script)
-
-    assert_not status.success?
-    assert_equal "unknown user", error.strip
   end
 
   test "the pending Elio key is protected too" do

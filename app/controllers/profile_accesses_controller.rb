@@ -9,23 +9,21 @@ class ProfileAccessesController < ApplicationController
     servers = Server.where(id: params[:server_ids]).order(:name)
     return redirect_to(profile_path(@profile), alert: "Choisissez au moins un serveur.") if servers.empty?
 
-    @results = BulkAccess.grant([ @profile ], servers, account: params[:account], duration: requested_duration)
+    @results = BulkAccess.grant([ @profile ], servers, duration: requested_duration)
 
     respond_with_accesses(:notice, "Autorisations terminées : #{@results.count { |result| !result.error? }}/#{@results.size} serveur(s).")
   end
 
   def destroy
     server = Server.find(params.expect(:server_id))
-    account = AuthorizedKeysAccount.for(server, params.expect(:account))
+    account = AuthorizedKeysAccount.login(server)
     result = KeyRevocation.call(server, @profile.authorized_key.key, account: account, key_name: @profile.authorized_key.comment || @profile.name, profile: @profile)
 
     if result.success?
-      respond_with_accesses(:notice, "L'accès de « #{@profile.name} » à « #{server.name} » pour #{account.unix_user} a été retiré.")
+      respond_with_accesses(:notice, "L'accès de « #{@profile.name} » à « #{server.name} » a été retiré.")
     else
       respond_with_accesses(:alert, "Impossible de retirer l'accès : #{result.error_title} — #{result.error_details}")
     end
-  rescue ArgumentError
-    raise ActionController::BadRequest, "Invalid account"
   end
 
   private

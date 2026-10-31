@@ -74,8 +74,6 @@
         </div>
         <%= form_with model: user, url: settings_user_path(user), class: "flex flex-wrap items-center gap-2" do |f| %>
           <%= f.select :role, User::ROLE_LABELS.invert, {}, aria: { label: "Rôle de #{user.email}" }, class: select_class %>
-          <%= f.select :profile_id, @profiles.map { |profile| [ profile.name, profile.id ] }, { include_blank: "Aucun profil" },
-                aria: { label: "Profil de #{user.email}" }, class: select_class %>
           <%= f.submit "Enregistrer", class: "cursor-pointer rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" %>
         <% end %>
         <% if user.two_factor_enabled? && user != current_user %>

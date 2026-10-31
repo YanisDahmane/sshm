@@ -40,8 +40,8 @@ class TemporaryAccessTest < ActiveSupport::TestCase
     assert_equal ended_at, access.reload.ended_at
   end
 
-  test "account is the server's Unix account" do
-    assert_equal AuthorizedKeysAccount.for(servers(:web), "root"), create_temporary_access(unix_user: "root").account
+  test "account is the server's login account" do
+    assert_equal AuthorizedKeysAccount.login(servers(:web)), create_temporary_access.account
   end
 
   test "keeps the access when the profile is deleted" do

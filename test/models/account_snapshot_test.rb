@@ -2,7 +2,7 @@ require "test_helper"
 
 class AccountSnapshotTest < ActiveSupport::TestCase
   setup do
-    @account = AuthorizedKeysAccount.for(servers(:web), "root")
+    @account = AuthorizedKeysAccount.login(servers(:web))
     @unnamed = SshKeyGenerator.generate.public_key.split(" ").first(2).join(" ")
   end
 
@@ -63,7 +63,7 @@ class AccountSnapshotTest < ActiveSupport::TestCase
 
     detected = Activity.of_kind(:unknown_key_detected).order(:id)
     assert_equal [ nil, "bob@desktop" ], detected.map { |activity| activity.data["key_name"] }
-    assert detected.all? { |activity| activity.server == servers(:web) && activity.unix_user == "root" }
+    assert detected.all? { |activity| activity.server == servers(:web) && activity.unix_user == "deploy" }
     assert_equal 0, Activity.of_kind(:key_disappeared).count
   end
 

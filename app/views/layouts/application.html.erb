@@ -32,8 +32,7 @@
             <div class="main-nav hidden items-center gap-1 sm:flex">
               <%= nav_link_to "Dashboard", root_path, active: controller_name == "dashboard" %>
               <%= nav_link_to "Serveurs", servers_path, active: controller_name.start_with?("server") %>
-              <%= nav_link_to "Profils", profiles_path, active: %w[profiles teams].include?(controller_name) %>
-              <%= nav_link_to "Accès", access_rules_path, active: %w[access_rules drifts access_requests].include?(controller_name) %>
+              <%= nav_link_to "Profils", profiles_path, active: controller_name == "profiles" %>
               <%= nav_link_to "Activité", activities_path, active: controller_name == "activities" %>
             </div>
           <% end %>
@@ -61,8 +60,7 @@
         <div class="main-nav flex gap-1 border-t border-slate-100 px-4 py-2 sm:hidden">
           <%= nav_link_to "Dashboard", root_path, active: controller_name == "dashboard" %>
           <%= nav_link_to "Serveurs", servers_path, active: controller_name.start_with?("server") %>
-          <%= nav_link_to "Profils", profiles_path, active: %w[profiles teams].include?(controller_name) %>
-          <%= nav_link_to "Accès", access_rules_path, active: %w[access_rules drifts access_requests].include?(controller_name) %>
+          <%= nav_link_to "Profils", profiles_path, active: controller_name == "profiles" %>
           <%= nav_link_to "Activité", activities_path, active: controller_name == "activities" %>
         </div>
       <% end %>

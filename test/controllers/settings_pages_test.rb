@@ -35,10 +35,8 @@ class SettingsPagesTest < ActionDispatch::IntegrationTest
 
     get settings_automations_path
 
-    assert_select "section.automation", 3
-    drift = Automation.find_by!(kind: "drift_check")
-    assert_select "##{ActionView::RecordIdentifier.dom_id(drift)} input[type=checkbox][name='automation[auto_fix]']"
-    assert_select "##{ActionView::RecordIdentifier.dom_id(scan = Automation.find_by!(kind: "keys_scan"))} input[name='automation[auto_fix]']", 0
+    assert_select "section.automation", 2
+    scan = Automation.find_by!(kind: "keys_scan")
     assert_select "##{ActionView::RecordIdentifier.dom_id(scan)}" do
       assert_select ".automation-state", "Activée"
       assert_select ".automation-result", "3/3 serveur(s) scanné(s)"
@@ -59,15 +57,6 @@ class SettingsPagesTest < ActionDispatch::IntegrationTest
     assert_equal "« Scan des clés » activée (toutes les heures).", flash[:notice]
     assert scan.reload.enabled?
     assert_equal 60, scan.interval_minutes
-  end
-
-  test "turning on the automatic correction of the drift check" do
-    drift = Automation.all_kinds.find { |automation| automation.kind == "drift_check" }
-    sign_in users(:one)
-
-    patch settings_automation_path(drift), params: { automation: { enabled: "1", interval_minutes: "60", auto_fix: "1" } }
-
-    assert drift.reload.auto_fix?
   end
 
   test "disabling an automation" do

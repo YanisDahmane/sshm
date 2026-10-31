@@ -10,47 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_04_110000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_31_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
-
-  create_table "access_requests", force: :cascade do |t|
-    t.bigint "requester_id", null: false
-    t.bigint "profile_id"
-    t.bigint "server_id", null: false
-    t.string "unix_user", null: false
-    t.integer "duration_minutes", null: false
-    t.text "reason", null: false
-    t.string "status", default: "pending", null: false
-    t.bigint "decided_by_id"
-    t.datetime "decided_at"
-    t.text "decision_note"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["decided_by_id"], name: "index_access_requests_on_decided_by_id"
-    t.index ["profile_id"], name: "index_access_requests_on_profile_id"
-    t.index ["requester_id"], name: "index_access_requests_on_requester_id"
-    t.index ["server_id"], name: "index_access_requests_on_server_id"
-    t.index ["status"], name: "index_access_requests_on_status"
-  end
-
-  create_table "access_rules", force: :cascade do |t|
-    t.bigint "profile_id"
-    t.bigint "team_id"
-    t.bigint "server_id"
-    t.bigint "server_group_id"
-    t.string "unix_user"
-    t.bigint "created_by_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["created_by_id"], name: "index_access_rules_on_created_by_id"
-    t.index ["profile_id"], name: "index_access_rules_on_profile_id"
-    t.index ["server_group_id"], name: "index_access_rules_on_server_group_id"
-    t.index ["server_id"], name: "index_access_rules_on_server_id"
-    t.index ["team_id"], name: "index_access_rules_on_team_id"
-    t.check_constraint "num_nonnulls(profile_id, team_id) = 1", name: "access_rules_one_subject"
-    t.check_constraint "num_nonnulls(server_id, server_group_id) = 1", name: "access_rules_one_target"
-  end
 
   create_table "account_snapshots", force: :cascade do |t|
     t.bigint "server_id", null: false
@@ -93,7 +55,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_110000) do
     t.string "last_result"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.boolean "auto_fix", default: false, null: false
     t.jsonb "state", default: {}, null: false
     t.index ["kind"], name: "index_automations_on_kind", unique: true
   end
@@ -167,34 +128,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_110000) do
     t.index ["name"], name: "index_profiles_on_name", unique: true
   end
 
-  create_table "revocation_steps", force: :cascade do |t|
-    t.bigint "revocation_id", null: false
-    t.bigint "server_id"
-    t.string "server_name", null: false
-    t.string "unix_user"
-    t.string "status", null: false
-    t.text "error_message"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["revocation_id"], name: "index_revocation_steps_on_revocation_id"
-    t.index ["server_id"], name: "index_revocation_steps_on_server_id"
-  end
-
-  create_table "revocations", force: :cascade do |t|
-    t.bigint "profile_id"
-    t.string "profile_name", null: false
-    t.string "fingerprint", null: false
-    t.text "key_blob", null: false
-    t.bigint "started_by_id"
-    t.boolean "delete_profile", default: false, null: false
-    t.integer "servers_count", default: 0, null: false
-    t.datetime "finished_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["profile_id"], name: "index_revocations_on_profile_id"
-    t.index ["started_by_id"], name: "index_revocations_on_started_by_id"
-  end
-
   create_table "server_group_memberships", force: :cascade do |t|
     t.bigint "server_id", null: false
     t.bigint "server_group_id", null: false
@@ -236,24 +169,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_110000) do
     t.string "state", default: "active", null: false
   end
 
-  create_table "team_memberships", force: :cascade do |t|
-    t.bigint "team_id", null: false
-    t.bigint "profile_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["profile_id"], name: "index_team_memberships_on_profile_id"
-    t.index ["team_id", "profile_id"], name: "index_team_memberships_on_team_id_and_profile_id", unique: true
-    t.index ["team_id"], name: "index_team_memberships_on_team_id"
-  end
-
-  create_table "teams", force: :cascade do |t|
-    t.string "name", null: false
-    t.text "description"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index "lower((name)::text)", name: "index_teams_on_lower_name", unique: true
-  end
-
   create_table "temporary_accesses", force: :cascade do |t|
     t.bigint "server_id", null: false
     t.bigint "profile_id"
@@ -280,7 +195,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_110000) do
     t.datetime "updated_at", null: false
     t.string "role", default: "viewer", null: false
     t.datetime "deactivated_at"
-    t.bigint "profile_id"
     t.integer "sign_in_count", default: 0, null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
@@ -294,20 +208,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_110000) do
     t.string "unlock_token"
     t.datetime "locked_at"
     t.index ["email"], name: "index_users_on_email", unique: true
-    t.index ["profile_id"], name: "index_users_on_profile_id", unique: true, where: "(profile_id IS NOT NULL)"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
   end
 
-  add_foreign_key "access_requests", "profiles", on_delete: :nullify
-  add_foreign_key "access_requests", "servers", on_delete: :cascade
-  add_foreign_key "access_requests", "users", column: "decided_by_id", on_delete: :nullify
-  add_foreign_key "access_requests", "users", column: "requester_id", on_delete: :cascade
-  add_foreign_key "access_rules", "profiles", on_delete: :cascade
-  add_foreign_key "access_rules", "server_groups", on_delete: :cascade
-  add_foreign_key "access_rules", "servers", on_delete: :cascade
-  add_foreign_key "access_rules", "teams", on_delete: :cascade
-  add_foreign_key "access_rules", "users", column: "created_by_id", on_delete: :nullify
   add_foreign_key "account_snapshots", "servers", on_delete: :cascade
   add_foreign_key "activities", "profiles", on_delete: :nullify
   add_foreign_key "activities", "servers", on_delete: :nullify
@@ -319,15 +223,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_110000) do
   add_foreign_key "key_rotations", "ssh_keys", column: "new_key_id", on_delete: :nullify
   add_foreign_key "key_rotations", "ssh_keys", column: "old_key_id", on_delete: :nullify
   add_foreign_key "key_rotations", "users", column: "started_by_id", on_delete: :nullify
-  add_foreign_key "revocation_steps", "revocations", on_delete: :cascade
-  add_foreign_key "revocation_steps", "servers", on_delete: :nullify
-  add_foreign_key "revocations", "profiles", on_delete: :nullify
-  add_foreign_key "revocations", "users", column: "started_by_id", on_delete: :nullify
   add_foreign_key "server_group_memberships", "server_groups", on_delete: :cascade
   add_foreign_key "server_group_memberships", "servers", on_delete: :cascade
-  add_foreign_key "team_memberships", "profiles", on_delete: :cascade
-  add_foreign_key "team_memberships", "teams", on_delete: :cascade
   add_foreign_key "temporary_accesses", "profiles", on_delete: :nullify
   add_foreign_key "temporary_accesses", "servers", on_delete: :cascade
-  add_foreign_key "users", "profiles", on_delete: :nullify
 end

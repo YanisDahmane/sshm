@@ -9,12 +9,6 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
 
   def frame_id = dom_id(servers(:web), :authorized_keys)
 
-  setup do
-    # Server accounts discovered over SSH: the login user (deploy) and root.
-    accounts = ->(server, **) { ServerAccountsReader::Result.new(accounts: [ AuthorizedKeysAccount.login(server), AuthorizedKeysAccount.for(server, "root") ], error_title: nil, error_details: nil) }
-    stub_method_until_teardown(ServerAccountsReader, :call, accounts)
-  end
-
   def keys_result(*lines)
     AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(lines.join("\n")), error_title: nil, error_details: nil)
   end
@@ -60,7 +54,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
         assert_select ".key-badge", text: "Connue"
         assert_select ".key-master", 0
       end
-      assert_select "a[href=?][title=?]", server_authorized_keys_path(servers(:web), account: "deploy"), "Recharger les clés"
+      assert_select "a[href=?][title=?]", server_authorized_keys_path(servers(:web)), "Recharger les clés"
     end
   end
 
@@ -123,7 +117,6 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_select "form.authorize-profile[action=?][data-controller=quiet-submit]", server_authorizations_path(servers(:web)) do
-      assert_select "input[type=hidden][name=account][value=deploy]"
       assert_select "select[name=profile_id] option", 1
       assert_select "option[value=?]", profiles(:alice).id.to_s, text: "Alice"
       assert_select "button[type=submit]", text: /Autoriser/
@@ -211,10 +204,10 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_turbo_stream action: :replace, target: frame_id do
-      assert_select "turbo-frame[loading=eager][src=?]", server_authorized_keys_path(servers(:web), account: "deploy")
+      assert_select "turbo-frame[loading=eager][src=?]", server_authorized_keys_path(servers(:web))
     end
     assert_turbo_stream action: :update, target: "flash" do
-      assert_select "div", text: "La clé « alice@laptop » a été supprimée de « Web » pour deploy."
+      assert_select "div", text: "La clé « alice@laptop » a été supprimée de « Web »."
     end
   end
 
@@ -227,7 +220,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_turbo_stream action: :update, target: "flash" do
-      assert_select "div", text: "La clé « sans nom » n'était plus présente sur « Web » pour deploy."
+      assert_select "div", text: "La clé « sans nom » n'était plus présente sur « Web »."
     end
   end
 
@@ -253,82 +246,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     assert_response :see_other
   end
 
-  test "lists root's keys with account-specific frame, form and delete buttons" do
-    sign_in users(:one)
-    named = SshKeyGenerator.generate(comment: "ops").public_key
-    accounts = []
-    reader = lambda do |_server, account:, **|
-      accounts << account
-      keys_result(named)
-    end
-
-    stub_method(AuthorizedKeysReader, :call, reader) do
-      get server_authorized_keys_path(servers(:web), account: "root")
-    end
-
-    assert_equal [ "root" ], accounts.map(&:name)
-    assert_select "turbo-frame##{frame_id}" do
-      assert_select "code", "~root/.ssh/authorized_keys"
-      assert_select "a[href=?]", server_authorized_keys_path(servers(:web), account: "root")
-      assert_select "form.authorize-profile input[name=account][value=root]"
-      assert_select "label", text: "Autoriser un profil pour root"
-      assert_select "li.authorized-key form input[name=account][value=root]"
-    end
-  end
-
-  test "rejects an invalid account name" do
-    [ "../etc", "root; rm -rf /", "~bob", "" * 1 + "-x" ].each do |account|
-      sign_in users(:one)
-      get server_authorized_keys_path(servers(:web), account: account)
-      assert_response :bad_request, "#{account.inspect} should be rejected"
-    end
-  end
-
-  test "destroy targets the requested account" do
-    sign_in users(:one)
-    accounts = []
-    remover = lambda do |_server, _blob, account:, **|
-      accounts << account
-      AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil)
-    end
-
-    stub_method(AuthorizedKeyRemoval, :call, remover) do
-      delete server_authorized_key_path(servers(:web)), params: { key: "AAAA", name: "ops", account: "root" }, as: :turbo_stream
-    end
-
-    assert_equal [ "root" ], accounts.map(&:name)
-    assert_turbo_stream action: :replace, target: frame_id do
-      assert_select "turbo-frame[src=?]", server_authorized_keys_path(servers(:web), account: "root")
-    end
-    assert_turbo_stream action: :update, target: "flash" do
-      assert_select "div", text: "La clé « ops » a été supprimée de « Web » pour root."
-    end
-  end
-
-  test "shows a tab per server account, the current one highlighted" do
-    sign_in users(:one)
-
-    stub_method(AuthorizedKeysReader, :call, keys_result) do
-      get server_authorized_keys_path(servers(:web), account: "root")
-    end
-
-    assert_select "nav.account-tabs a.account-tab", 2
-    assert_select "a.account-tab[href=?]", server_authorized_keys_path(servers(:web), account: "deploy"), text: /deploy\s+connexion/
-    assert_select "a.account-tab[href=?][aria-current=page]", server_authorized_keys_path(servers(:web), account: "root"), text: /root\s+via sudo/
-  end
-
-  test "keeps a requested account in the tabs even if it was not discovered" do
-    sign_in users(:one)
-
-    stub_method(AuthorizedKeysReader, :call, keys_result) do
-      get server_authorized_keys_path(servers(:web), account: "bob")
-    end
-
-    assert_select "a.account-tab[aria-current=page]", text: /bob\s+via sudo/
-    assert_select "code", "~bob/.ssh/authorized_keys"
-  end
-
-  test "defaults to the login user" do
+  test "reads the login user's file" do
     sign_in users(:one)
     accounts = []
     reader = lambda do |_server, account:, **|
@@ -341,7 +259,8 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_equal [ "deploy" ], accounts.map(&:unix_user)
-    assert_select "a.account-tab[aria-current=page]", text: /deploy/
+    assert_select "code", "~deploy/.ssh/authorized_keys"
+    assert_select "nav.account-tabs", 0
   end
 
   test "the authorize form offers a duration, permanent by default" do
@@ -372,17 +291,6 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     assert_select "li.authorized-key:nth-child(2) .key-expiry", 0
   end
 
-  test "temporary access badges are per account" do
-    sign_in users(:one)
-    create_temporary_access(unix_user: "root")
-
-    stub_method(AuthorizedKeysReader, :call, keys_result(profiles(:ci).public_key)) do
-      get server_authorized_keys_path(servers(:web), account: "deploy")
-    end
-
-    assert_select ".key-expiry", 0
-  end
-
   test "flags an expired access waiting for its removal" do
     sign_in users(:one)
     create_temporary_access(expires_at: 1.minute.ago)
@@ -397,11 +305,11 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
   test "destroy ends the temporary access of the removed key" do
     sign_in users(:one)
     access = create_temporary_access
-    other = create_temporary_access(unix_user: "root")
+    other = create_temporary_access(server: servers(:db), unix_user: "admin")
     removed = AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil)
 
     stub_method(AuthorizedKeyRemoval, :call, removed) do
-      delete server_authorized_key_path(servers(:web)), params: { key: profiles(:ci).authorized_key.key, account: "deploy" }, as: :turbo_stream
+      delete server_authorized_key_path(servers(:web)), params: { key: profiles(:ci).authorized_key.key }, as: :turbo_stream
     end
 
     assert_not access.reload.active?
@@ -457,10 +365,10 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:one)
 
     stub_method(AuthorizedKeysReader, :call, keys_result(profiles(:alice).public_key)) do
-      get server_authorized_keys_path(servers(:web), account: "root")
+      get server_authorized_keys_path(servers(:web))
     end
 
-    snapshot = AccountSnapshot.find_by!(server: servers(:web), unix_user: "root")
+    snapshot = AccountSnapshot.find_by!(server: servers(:web), unix_user: "deploy")
     assert_equal [ profiles(:alice).fingerprint ], snapshot.fingerprints
     assert servers(:web).reload.ssh_ok
   end
@@ -475,7 +383,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal false, servers(:web).reload.ssh_ok
     assert_select ".ssh-setup-hint textarea", text: /#{Regexp.escape(ssh_keys(:main).public_key)}/
-    assert_select "a.retry-authorized-keys[href=?]", server_authorized_keys_path(servers(:web), account: "deploy")
+    assert_select "a.retry-authorized-keys[href=?]", server_authorized_keys_path(servers(:web))
     assert_equal 0, AccountSnapshot.count
   end
 
@@ -496,11 +404,11 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     removed = AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil)
 
     stub_method(AuthorizedKeyRemoval, :call, removed) do
-      delete server_authorized_key_path(servers(:web)), params: { key: "AAAA", name: "bob", account: "root" }, as: :turbo_stream
+      delete server_authorized_key_path(servers(:web)), params: { key: "AAAA", name: "bob" }, as: :turbo_stream
     end
 
     activity = Activity.of_kind(:key_removed).sole
-    assert_equal [ "root", "bob", users(:one) ], [ activity.unix_user, activity.key_name, activity.user ]
+    assert_equal [ "deploy", "bob", users(:one) ], [ activity.unix_user, activity.key_name, activity.user ]
   end
 
   test "keeps the type, fingerprint and options out of the rows, in a details modal" do
@@ -508,7 +416,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     line = %(no-pty #{profiles(:alice).public_key})
 
     stub_method(AuthorizedKeysReader, :call, keys_result(line)) do
-      get server_authorized_keys_path(servers(:web), account: "root")
+      get server_authorized_keys_path(servers(:web))
     end
 
     key = AuthorizedKey.parse(line).sole
@@ -516,7 +424,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
       assert_select "[data-controller=modal] button.key-details-button[data-action='modal#open'][title=?]", "Détails de la clé"
       assert_select "dialog.key-details[data-modal-target=dialog]" do
         assert_select "h2", "alice@laptop"
-        assert_select "p", "~root/.ssh/authorized_keys"
+        assert_select "p", "~deploy/.ssh/authorized_keys"
         assert_select ".key-fingerprint", key.fingerprint
         assert_select ".key-options", "no-pty"
         assert_select "dd a[href=?][data-turbo-frame=_top]", profile_path(profiles(:alice)), text: "Alice"

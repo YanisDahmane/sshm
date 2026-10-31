@@ -8,7 +8,6 @@ class RoleBasedUiTest < ActionDispatch::IntegrationTest
   setup do
     keys = AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse([ ssh_keys(:main).public_key, SshKeyGenerator.generate(comment: "bob").public_key ].join("\n")), error_title: nil, error_details: nil)
     stub_method_until_teardown(AuthorizedKeysReader, :call, keys)
-    stub_method_until_teardown(ServerAccountsReader, :call, ->(server, **) { ServerAccountsReader::Result.new(accounts: [ AuthorizedKeysAccount.login(server) ], error_title: nil, error_details: nil) })
   end
 
   test "the navbar shows the role, and the settings to admins only" do

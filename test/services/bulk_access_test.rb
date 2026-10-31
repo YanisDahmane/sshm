@@ -28,17 +28,6 @@ class BulkAccessTest < ActiveSupport::TestCase
     assert AccountSnapshot.exists?(server: servers(:web), unix_user: "deploy")
   end
 
-  test "uses the same named account everywhere and reports each outcome" do
-    statuses = { "Alice" => :added, "CI" => :already_present }
-    results = stub_method(AccessGrant, :call, ->(_server, profile, account:, duration:) { grant_result(statuses.fetch(profile.name)) }) do
-      BulkAccess.grant([ profiles(:alice), profiles(:ci) ], [ servers(:web) ], account: " debian ", duration: 1.hour)
-    end
-
-    assert_equal [ "debian", "debian" ], results.map(&:unix_user)
-    assert_equal [ "autorisé pendant 1 heure", "déjà autorisé" ], results.map(&:message)
-    assert_equal [ profiles(:alice), profiles(:ci) ], results.map(&:profile)
-  end
-
   test "a failed grant is an error and does not refresh the snapshot" do
     results = stub_method(AccessGrant, :call, grant_result(:error)) do
       BulkAccess.grant([ profiles(:alice) ], [ servers(:web) ])
@@ -47,16 +36,6 @@ class BulkAccessTest < ActiveSupport::TestCase
     assert results.first.error?
     assert_equal "Connexion impossible — timeout", results.first.message
     assert_empty @reads
-  end
-
-  test "an invalid account name is reported once per server without calling the server" do
-    results = stub_method(AccessGrant, :call, ->(*) { flunk "must not grant" }) do
-      BulkAccess.grant([ profiles(:alice), profiles(:ci) ], [ servers(:web), servers(:db) ], account: "bad name;")
-    end
-
-    assert_equal 2, results.size
-    assert results.all?(&:error?)
-    assert_equal [ "Nom de compte invalide" ] * 2, results.map(&:message)
   end
 
   test "revokes every profile and reports removed, absent and failed keys" do

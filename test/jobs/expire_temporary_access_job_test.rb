@@ -9,7 +9,7 @@ class ExpireTemporaryAccessJobTest < ActiveJob::TestCase
   end
 
   test "removes the key from the account and ends the access" do
-    access = create_temporary_access(unix_user: "root", expires_at: 1.minute.ago)
+    access = create_temporary_access(expires_at: 1.minute.ago)
     calls = []
     remover = lambda do |server, blob, account:, **|
       calls << [ server, blob, account ]
@@ -18,7 +18,7 @@ class ExpireTemporaryAccessJobTest < ActiveJob::TestCase
 
     stub_method(AuthorizedKeyRemoval, :call, remover) { ExpireTemporaryAccessJob.perform_now(access) }
 
-    assert_equal [ [ servers(:web), profiles(:ci).authorized_key.key, AuthorizedKeysAccount.for(servers(:web), "root") ] ], calls
+    assert_equal [ [ servers(:web), profiles(:ci).authorized_key.key, AuthorizedKeysAccount.login(servers(:web)) ] ], calls
     assert_not access.reload.active?
   end
 

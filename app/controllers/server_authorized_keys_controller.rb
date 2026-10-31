@@ -8,8 +8,6 @@ class ServerAuthorizedKeysController < ApplicationController
   def index
     @result = AuthorizedKeysReader.call(@server, account: @account)
     record_ssh_status
-    @accounts = @result.success? ? ServerAccountsReader.call(@server).accounts : [ @account ]
-    @accounts |= [ @account ]
     @app_key = SshKey.app_keys
     @profiles_by_fingerprint = Profile.where(fingerprint: @result.keys.map(&:fingerprint)).index_by(&:fingerprint)
     @authorizable_profiles = Profile.where.not(fingerprint: @profiles_by_fingerprint.keys).order(:name) if @result.success?
@@ -21,7 +19,7 @@ class ServerAuthorizedKeysController < ApplicationController
   def destroy
     name = params[:name].presence || "sans nom"
     result = KeyRevocation.call(@server, params.expect(:key), account: @account, key_name: params[:name].presence)
-    target = "« #{@server.name} » pour #{@account.unix_user}"
+    target = "« #{@server.name} »"
 
     flash_type, message = if result.removed?
       [ :notice, "La clé « #{name} » a été supprimée de #{target}." ]
