@@ -22,5 +22,4 @@ class OnboardingChecklist
 
   # The first step still to do.
   def current = steps.find { |step| !step.done? }
-
 end

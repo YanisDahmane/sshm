@@ -8,7 +8,7 @@ class SignInTest < ApplicationSystemTestCase
     click_on "Se connecter"
 
     assert_selector "h1", text: "Vue d'ensemble"
-    click_on "Serveurs", match: :first
+    within("nav.main-nav") { click_on "Parc" }
     assert_selector "h1", text: "Parc"
     assert_selector ".sidebar .user-role", text: "Lecture"
   end
