@@ -26,6 +26,10 @@
         class: "w-full cursor-pointer rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-accent-hover" %>
 <% end %>
 
+<% if Rails.configuration.x.mail_enabled %>
+  <p class="mt-4 text-center text-sm"><%= link_to "Mot de passe oublié ?", new_password_path(resource_name), class: "forgot-password text-accent hover:underline" %></p>
+<% end %>
+
 <p class="mt-6 text-center text-sm text-ink-3">
   Pas encore de compte ? Demandez une invitation à un administrateur.
 </p>

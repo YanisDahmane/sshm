@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  devise_for :users, controllers: { sessions: "users/sessions" }
+  devise_for :users, controllers: { sessions: "users/sessions", passwords: "users/passwords" }
   resource :two_factor_challenge, only: %i[new create]
   resource :account, only: %i[show] do
     patch :password
