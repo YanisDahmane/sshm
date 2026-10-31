@@ -1,6 +1,6 @@
 <%# Grants the keyring key access to several servers at once (PublicKeyAccessesController#create). %>
-<% select_class = "mt-1 block rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" %>
-<section id="bulk-authorize" class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+<% select_class = "mt-1 block rounded-md border border-line bg-surface px-3 py-2 text-sm shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent" %>
+<section id="bulk-authorize" class="mt-6 rounded-xl border border-line bg-surface p-6 shadow-sm">
   <h2 class="text-lg font-semibold">Ajouter sur plusieurs serveurs</h2>
 
   <% if Server.exists? %>
@@ -9,12 +9,12 @@
 
       <div class="flex flex-wrap items-end gap-4">
         <div>
-          <%= label_tag :bulk_duration, "Durée", class: "block text-sm font-medium text-slate-700" %>
+          <%= label_tag :bulk_duration, "Durée", class: "block text-sm font-medium text-ink-2" %>
           <%= select_tag :duration, options_for_select([ [ "Permanent", "" ], *TemporaryAccess::DURATIONS.map { |value, (label, _)| [ label, value ] } ]),
                 id: "bulk_duration", class: select_class %>
         </div>
         <div>
-          <%= f.button type: "submit", class: "group inline-flex cursor-pointer items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-wait disabled:opacity-60" do %>
+          <%= f.button type: "submit", class: "group inline-flex cursor-pointer items-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-accent-hover disabled:cursor-wait disabled:opacity-60" do %>
             <%= icon :arrow_path, class: "hidden h-4 w-4 animate-spin group-disabled:block" %>
             <span class="group-disabled:hidden">Ajouter</span>
             <span class="hidden group-disabled:inline">Ajout en cours…</span>
@@ -24,6 +24,6 @@
     <% end %>
     <div id="bulk-results"></div>
   <% else %>
-    <p class="mt-4 text-sm text-slate-500"><%= link_to "Ajoutez un serveur", new_server_path, class: "font-medium text-indigo-600 hover:text-indigo-500" %> pour pouvoir y ajouter cette clé.</p>
+    <p class="mt-4 text-sm text-ink-3"><%= link_to "Ajoutez un serveur", new_server_path, class: "font-medium text-accent hover:text-accent" %> pour pouvoir y ajouter cette clé.</p>
   <% end %>
 </section>

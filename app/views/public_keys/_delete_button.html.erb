@@ -2,7 +2,7 @@
       title: "Supprimer", aria: { label: "Supprimer #{public_key.name}" },
       form: { data: { turbo_confirm: "La clé « #{public_key.name} » sera retirée du trousseau. Là où elle est déjà installée, elle reste en place.",
                       confirm_label: "Supprimer", confirm_variant: "danger" } },
-      class: local_assigns.fetch(:class, "cursor-pointer rounded-md p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-600") do %>
+      class: local_assigns.fetch(:class, "cursor-pointer rounded-md p-1.5 text-ink-3 hover:bg-crit-soft hover:text-crit-ink") do %>
   <%= icon :trash %>
   <%= local_assigns[:label] %>
 <% end %>

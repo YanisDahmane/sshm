@@ -2,56 +2,56 @@
 <% key = @public_key.authorized_key %>
 
 <div class="mx-auto max-w-3xl">
-  <%= link_to "← Trousseau", public_keys_path, class: "text-sm text-slate-500 hover:text-slate-700" %>
+  <%= link_to "← Trousseau", public_keys_path, class: "text-sm text-ink-3 hover:text-ink-2" %>
 
   <div class="mt-2 flex items-start justify-between gap-4">
     <div>
       <h1 class="text-2xl font-bold tracking-tight"><%= @public_key.name %></h1>
-      <p class="mt-1 text-sm text-slate-500">
-        <span class="key-kind font-medium text-slate-700"><%= @public_key.kind_label %></span>
+      <p class="mt-1 text-sm text-ink-3">
+        <span class="key-kind font-medium text-ink-2"><%= @public_key.kind_label %></span>
         · ajoutée au trousseau <%= relative_time_tag @public_key.created_at %>
       </p>
       <% if @public_key.description %>
-        <p class="key-description mt-1 text-sm text-slate-600"><%= @public_key.description %></p>
+        <p class="key-description mt-1 text-sm text-ink-2"><%= @public_key.description %></p>
       <% end %>
     </div>
     <div class="flex shrink-0 items-center gap-2">
       <% if can?(:operate) %>
         <%= link_to edit_public_key_path(@public_key),
-              class: "inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" do %>
+              class: "inline-flex items-center gap-2 rounded-md border border-line bg-surface px-3 py-2 text-sm font-medium text-ink-2 shadow-sm hover:bg-subtle" do %>
           <%= icon :pencil_square %> Modifier
         <% end %>
         <%= render "delete_button", public_key: @public_key, label: "Supprimer",
-              class: "inline-flex cursor-pointer items-center gap-2 rounded-md border border-red-300 bg-white px-3 py-2 text-sm font-medium text-red-700 shadow-sm hover:bg-red-50" %>
+              class: "inline-flex cursor-pointer items-center gap-2 rounded-md border border-crit/40 bg-surface px-3 py-2 text-sm font-medium text-crit-ink shadow-sm hover:bg-crit-soft" %>
       <% end %>
     </div>
   </div>
 
-  <section id="keyring-key" class="mt-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+  <section id="keyring-key" class="mt-8 rounded-xl border border-line bg-surface p-6 shadow-sm">
     <h2 class="text-lg font-semibold">Clé SSH</h2>
 
     <dl class="mt-4 grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
       <div>
-        <dt class="font-medium text-slate-700">Type</dt>
-        <dd class="mt-1 font-mono text-slate-600"><%= key.type %></dd>
+        <dt class="font-medium text-ink-2">Type</dt>
+        <dd class="mt-1 font-mono text-ink-2"><%= key.type %></dd>
       </div>
       <div class="sm:col-span-2">
-        <dt class="font-medium text-slate-700">Empreinte</dt>
-        <dd id="keyring-fingerprint" class="mt-1 break-all font-mono text-slate-600"><%= @public_key.fingerprint %></dd>
+        <dt class="font-medium text-ink-2">Empreinte</dt>
+        <dd id="keyring-fingerprint" class="mt-1 break-all font-mono text-ink-2"><%= @public_key.fingerprint %></dd>
       </div>
       <div class="sm:col-span-3">
-        <dt class="font-medium text-slate-700">Commentaire</dt>
-        <dd class="mt-1 text-slate-600"><%= key.comment || tag.span("Aucun", class: "italic text-slate-400") %></dd>
+        <dt class="font-medium text-ink-2">Commentaire</dt>
+        <dd class="mt-1 text-ink-2"><%= key.comment || tag.span("Aucun", class: "italic text-ink-3") %></dd>
       </div>
     </dl>
 
     <div class="mt-6" data-controller="clipboard">
       <div class="flex items-end justify-between gap-4">
-        <label for="keyring-content" class="text-sm font-medium text-slate-700">Clé publique</label>
+        <label for="keyring-content" class="text-sm font-medium text-ink-2">Clé publique</label>
         <%= render "settings/copy_button" %>
       </div>
       <textarea id="keyring-content" readonly rows="3" data-clipboard-target="source"
-                class="mt-2 block w-full resize-none rounded-md border border-slate-300 bg-slate-50 px-3 py-2 font-mono text-xs text-slate-700"><%= @public_key.content %></textarea>
+                class="mt-2 block w-full resize-none rounded-md border border-line bg-subtle px-3 py-2 font-mono text-xs text-ink-2"><%= @public_key.content %></textarea>
     </div>
   </section>
 

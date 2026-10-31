@@ -1,5 +1,5 @@
-<% input_class = "mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" %>
-<% label_class = "block text-sm font-medium text-slate-700" %>
+<% input_class = "mt-1 block w-full rounded-md border border-line px-3 py-2 text-sm shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent" %>
+<% label_class = "block text-sm font-medium text-ink-2" %>
 
 <%= form_with model: server, class: "space-y-5" do |f| %>
   <%= render "shared/form_errors", record: server %>
@@ -32,7 +32,7 @@
         <%= f.collection_check_boxes :server_group_ids, ServerGroup.order(:name), :id, :name do |b| %>
           <label class="cursor-pointer">
             <%= b.check_box class: "peer sr-only" %>
-            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset opacity-50 peer-checked:opacity-100 peer-checked:ring-2 peer-checked:[&>svg]:block peer-focus-visible:outline-2 peer-focus-visible:outline-indigo-600 <%= b.object.badge_classes %>">
+            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset opacity-50 peer-checked:opacity-100 peer-checked:ring-2 peer-checked:[&>svg]:block peer-focus-visible:outline-2 peer-focus-visible:outline-accent <%= b.object.badge_classes %>">
               <%= icon :check, class: "hidden h-3 w-3" %><%= b.text %>
             </span>
           </label>
@@ -42,7 +42,7 @@
   <% end %>
 
   <div class="flex items-center justify-end gap-3 pt-2">
-    <%= link_to "Annuler", server.persisted? ? server_path(server) : servers_path, class: "rounded-md px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" %>
-    <%= f.submit server.persisted? ? "Enregistrer" : "Ajouter le serveur", class: "cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+    <%= link_to "Annuler", server.persisted? ? server_path(server) : servers_path, class: "rounded-md px-4 py-2 text-sm font-medium text-ink-2 hover:bg-subtle" %>
+    <%= f.submit server.persisted? ? "Enregistrer" : "Ajouter le serveur", class: "cursor-pointer rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-accent-hover" %>
   </div>
 <% end %>

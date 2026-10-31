@@ -4,28 +4,28 @@
 
 <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "space-y-5" }) do |f| %>
   <div>
-    <%= f.label :email, "Email", class: "block text-sm font-medium text-slate-700" %>
+    <%= f.label :email, "Email", class: "block text-sm font-medium text-ink-2" %>
     <%= f.email_field :email, autofocus: true, autocomplete: "email", required: true,
-          class: "mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" %>
+          class: "mt-1 block w-full rounded-md border border-line px-3 py-2 text-sm shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent" %>
   </div>
 
   <div>
-    <%= f.label :password, "Mot de passe", class: "block text-sm font-medium text-slate-700" %>
+    <%= f.label :password, "Mot de passe", class: "block text-sm font-medium text-ink-2" %>
     <%= f.password_field :password, autocomplete: "current-password", required: true,
-          class: "mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" %>
+          class: "mt-1 block w-full rounded-md border border-line px-3 py-2 text-sm shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent" %>
   </div>
 
   <% if devise_mapping.rememberable? %>
     <div class="flex items-center gap-2">
-      <%= f.check_box :remember_me, class: "h-4 w-4 rounded border-slate-300 text-indigo-600" %>
-      <%= f.label :remember_me, "Se souvenir de moi", class: "text-sm text-slate-700" %>
+      <%= f.check_box :remember_me, class: "h-4 w-4 rounded border-line text-accent" %>
+      <%= f.label :remember_me, "Se souvenir de moi", class: "text-sm text-ink-2" %>
     </div>
   <% end %>
 
   <%= f.submit "Se connecter",
-        class: "w-full cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+        class: "w-full cursor-pointer rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-accent-hover" %>
 <% end %>
 
-<p class="mt-6 text-center text-sm text-slate-500">
+<p class="mt-6 text-center text-sm text-ink-3">
   Pas encore de compte ? Demandez une invitation à un administrateur.
 </p>

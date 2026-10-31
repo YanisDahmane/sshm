@@ -1,7 +1,7 @@
 <%# Lazy-loaded key list of a server; reloads itself through its links. %>
 <turbo-frame id="<%= dom_id(server, :authorized_keys) %>" src="<%= server_authorized_keys_path(server) %>"
              loading="<%= local_assigns.fetch(:loading, :lazy) %>" class="group block">
-  <div class="flex items-center gap-2 py-6 text-sm text-slate-500">
+  <div class="flex items-center gap-2 py-6 text-sm text-ink-3">
     <%= icon :arrow_path, class: "h-4 w-4 animate-spin" %>
     Lecture des clés autorisées…
   </div>

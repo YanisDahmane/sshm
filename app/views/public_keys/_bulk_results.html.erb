@@ -1,8 +1,8 @@
 <%# Outcome of BulkAccess, one line per server (and per public_key with show_public_key). %>
-<ul class="bulk-results mt-4 divide-y divide-slate-100 rounded-md border border-slate-200 text-sm">
+<ul class="bulk-results mt-4 divide-y divide-line rounded-md border border-line text-sm">
   <% results.each do |result| %>
     <li class="bulk-result flex items-start gap-3 px-4 py-2 <%= result.error? ? "is-error" : "is-success" %>">
-      <%= icon(result.error? ? :x_mark : :check, class: "mt-0.5 h-4 w-4 shrink-0 #{result.error? ? "text-red-600" : "text-emerald-600"}") %>
+      <%= icon(result.error? ? :x_mark : :check, class: "mt-0.5 h-4 w-4 shrink-0 #{result.error? ? "text-crit-ink" : "text-good-ink"}") %>
       <span>
         <% if local_assigns[:show_public_key] && result.public_key %><span class="font-medium"><%= result.public_key.name %></span> → <% end %>
         <span class="font-medium"><%= result.server.name %></span> · <span class="font-mono"><%= result.unix_user %></span> : <%= result.message %>

@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "./legacy_dark.css";
 
 /* Dark mode: `.dark` on <html>, set before the first paint (layouts) and by theme_controller.js. */
 @custom-variant dark (&:where(.dark, .dark *));

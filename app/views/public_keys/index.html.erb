@@ -4,27 +4,27 @@
   <div class="flex items-center justify-between gap-4">
     <div>
       <h1 class="text-2xl font-bold tracking-tight">Trousseau</h1>
-      <p class="text-sm text-slate-500">
+      <p class="text-sm text-ink-3">
         <%= pluralize_fr(@public_keys.size, "clé", "clés") %>
       </p>
     </div>
     <% if can?(:operate) %>
       <%= link_to "Ajouter une clé", new_public_key_path,
-            class: "rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+            class: "rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-accent-hover" %>
     <% end %>
   </div>
 
   <nav class="key-kind-filter mt-4 flex flex-wrap gap-2" aria-label="Type de clé">
     <% [ [ "Toutes", nil ], [ "Personnes", "person" ], [ "Serveurs", "server" ] ].each do |label, value| %>
       <%= link_to label, public_keys_path(kind: value), aria: { current: (@kind == value ? "page" : nil) },
-            class: "rounded-full px-3 py-1 text-sm font-medium ring-1 ring-inset #{@kind == value ? "bg-indigo-600 text-white ring-indigo-600" : "bg-white text-slate-700 ring-slate-300 hover:bg-slate-50"}" %>
+            class: "rounded-full px-3 py-1 text-sm font-medium ring-1 ring-inset #{@kind == value ? "bg-accent text-white ring-accent" : "bg-surface text-ink-2 ring-line hover:bg-subtle"}" %>
     <% end %>
   </nav>
 
   <% if @public_keys.any? %>
-    <div class="mt-4 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-      <table id="keyring" class="min-w-full divide-y divide-slate-200 text-sm">
-        <thead class="bg-slate-50 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
+    <div class="mt-4 overflow-x-auto rounded-xl border border-line bg-surface shadow-sm">
+      <table id="keyring" class="min-w-full divide-y divide-line text-sm">
+        <thead class="bg-subtle text-left text-xs font-medium uppercase tracking-wide text-ink-3">
           <tr>
             <th scope="col" class="px-4 py-3">Nom</th>
             <th scope="col" class="px-4 py-3">Type</th>
@@ -33,24 +33,24 @@
             <th scope="col" class="px-4 py-3"><span class="sr-only">Actions</span></th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-slate-100">
+        <tbody class="divide-y divide-line">
           <% @public_keys.each do |public_key| %>
-            <tr id="<%= dom_id(public_key) %>" class="hover:bg-slate-50">
+            <tr id="<%= dom_id(public_key) %>" class="hover:bg-subtle">
               <td class="px-4 py-3">
-                <%= link_to public_key.name, public_key_path(public_key), class: "font-medium hover:text-indigo-600 hover:underline" %>
+                <%= link_to public_key.name, public_key_path(public_key), class: "font-medium hover:text-accent hover:underline" %>
                 <% if public_key.description %>
-                  <p class="key-description text-xs text-slate-500"><%= public_key.description %></p>
+                  <p class="key-description text-xs text-ink-3"><%= public_key.description %></p>
                 <% end %>
               </td>
-              <td class="key-kind px-4 py-3 text-slate-700"><%= public_key.kind_label %></td>
-              <td class="px-4 py-3 font-mono text-slate-700"><%= public_key.authorized_key&.type %></td>
-              <td class="px-4 py-3 font-mono text-xs text-slate-500"><%= public_key.fingerprint %></td>
+              <td class="key-kind px-4 py-3 text-ink-2"><%= public_key.kind_label %></td>
+              <td class="px-4 py-3 font-mono text-ink-2"><%= public_key.authorized_key&.type %></td>
+              <td class="px-4 py-3 font-mono text-xs text-ink-3"><%= public_key.fingerprint %></td>
               <td class="px-4 py-3">
                 <div class="flex items-center justify-end gap-1">
                   <% if can?(:operate) %>
                     <%= link_to edit_public_key_path(public_key),
                           title: "Modifier", aria: { label: "Modifier #{public_key.name}" },
-                          class: "rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700" do %>
+                          class: "rounded-md p-1.5 text-ink-3 hover:bg-subtle hover:text-ink-2" do %>
                       <%= icon :pencil_square %>
                     <% end %>
                   <% end %>
@@ -65,10 +65,10 @@
       </table>
     </div>
   <% else %>
-    <div class="mt-4 rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
-      <p class="text-sm text-slate-500">Le trousseau est vide.</p>
+    <div class="mt-4 rounded-xl border border-dashed border-line bg-surface px-6 py-12 text-center">
+      <p class="text-sm text-ink-3">Le trousseau est vide.</p>
       <% if can?(:operate) %>
-        <%= link_to "Ajouter la première clé", new_public_key_path, class: "mt-2 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+        <%= link_to "Ajouter la première clé", new_public_key_path, class: "mt-2 inline-block text-sm font-medium text-accent hover:text-accent" %>
       <% end %>
     </div>
   <% end %>

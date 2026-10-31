@@ -2,15 +2,15 @@
 
 <turbo-frame id="<%= dom_id(@server, :authorized_keys) %>" class="group block">
   <div class="flex items-center justify-between gap-4">
-    <p class="text-sm text-slate-500">
-      <code class="rounded bg-slate-100 px-1 font-mono text-xs"><%= @account.path %></code>
+    <p class="text-sm text-ink-3">
+      <code class="rounded bg-subtle px-1 font-mono text-xs"><%= @account.path %></code>
       <% if @result.success? %>
         · <%= pluralize(@result.keys.size, "clé", plural: "clés") %>
       <% end %>
     </p>
     <%= link_to server_authorized_keys_path(@server),
           title: "Recharger les clés", aria: { label: "Recharger les clés" },
-          class: "rounded-md border border-slate-300 bg-white p-2 text-slate-600 shadow-sm hover:bg-slate-50" do %>
+          class: "rounded-md border border-line bg-surface p-2 text-ink-2 shadow-sm hover:bg-subtle" do %>
       <%= icon :arrow_path, class: "h-4 w-4 group-aria-busy:animate-spin" %>
     <% end %>
   </div>
@@ -19,53 +19,53 @@
     <% if @authorizable_public_keys.any? %>
       <%= form_with url: server_authorizations_path(@server),
             data: { controller: "quiet-submit", turbo_frame: "_top" },
-            class: "authorize-key mt-4 flex flex-wrap items-end gap-2 rounded-md bg-slate-50 p-3" do |f| %>
+            class: "authorize-key mt-4 flex flex-wrap items-end gap-2 rounded-md bg-subtle p-3" do |f| %>
         <div class="min-w-40 flex-1">
-          <%= f.label :public_key_id, "Ajouter une clé du trousseau", for: "public_key_id", class: "block text-xs font-medium text-slate-600" %>
+          <%= f.label :public_key_id, "Ajouter une clé du trousseau", for: "public_key_id", class: "block text-xs font-medium text-ink-2" %>
           <%= f.select :public_key_id, @authorizable_public_keys.map { |public_key| [ public_key.name, public_key.id ] }, {}, id: "public_key_id",
-                class: "mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" %>
+                class: "mt-1 block w-full rounded-md border border-line bg-surface px-3 py-2 text-sm shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent" %>
         </div>
         <div>
-          <%= f.label :duration, "Durée", for: "duration", class: "block text-xs font-medium text-slate-600" %>
+          <%= f.label :duration, "Durée", for: "duration", class: "block text-xs font-medium text-ink-2" %>
           <%= f.select :duration, [ [ "Permanent", "" ], *TemporaryAccess::DURATIONS.map { |value, (label, _)| [ label, value ] } ], {}, id: "duration",
-                class: "mt-1 block rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" %>
+                class: "mt-1 block rounded-md border border-line bg-surface px-3 py-2 text-sm shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent" %>
         </div>
         <%= f.button type: "submit",
-              class: "group inline-flex cursor-pointer items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-wait disabled:opacity-60" do %>
+              class: "group inline-flex cursor-pointer items-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-accent-hover disabled:cursor-wait disabled:opacity-60" do %>
           <%= icon :arrow_path, class: "hidden h-4 w-4 animate-spin group-disabled:block" %>
           Ajouter
         <% end %>
       <% end %>
     <% elsif PublicKey.none? %>
-      <p class="mt-4 text-xs text-slate-500">
-        <%= link_to "Ajoutez une clé au trousseau", new_public_key_path, data: { turbo_frame: "_top" }, class: "font-medium text-indigo-600 hover:text-indigo-500" %> pour pouvoir l'autoriser sur ce serveur.
+      <p class="mt-4 text-xs text-ink-3">
+        <%= link_to "Ajoutez une clé au trousseau", new_public_key_path, data: { turbo_frame: "_top" }, class: "font-medium text-accent hover:text-accent" %> pour pouvoir l'autoriser sur ce serveur.
       </p>
     <% else %>
-      <p class="all-keys-authorized mt-4 text-xs text-slate-500">Toutes les clés du trousseau sont déjà sur ce serveur.</p>
+      <p class="all-keys-authorized mt-4 text-xs text-ink-3">Toutes les clés du trousseau sont déjà sur ce serveur.</p>
     <% end %>
   <% end %>
 
   <div class="mt-4 group-aria-busy:opacity-50">
     <% if !@result.success? %>
-      <div class="authorized-keys-error flex gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+      <div class="authorized-keys-error flex gap-3 rounded-md border border-crit/40 bg-crit-soft px-4 py-3 text-sm text-crit-ink">
         <%= icon :x_mark, class: "mt-0.5 h-4 w-4 shrink-0" %>
         <div>
           <p class="font-medium"><%= @result.error_title %></p>
-          <p class="mt-1 break-all font-mono text-xs text-red-700"><%= @result.error_details %></p>
+          <p class="mt-1 break-all font-mono text-xs text-crit-ink"><%= @result.error_details %></p>
         </div>
       </div>
       <% if @result.reason %>
         <%= render "ssh_keys/setup_hint", server: @server, reason: @result.reason %>
       <% end %>
       <%= link_to "Réessayer", server_authorized_keys_path(@server),
-            class: "retry-authorized-keys mt-3 inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" %>
+            class: "retry-authorized-keys mt-3 inline-flex items-center gap-1.5 rounded-md border border-line bg-surface px-3 py-1.5 text-sm font-medium text-ink-2 shadow-sm hover:bg-subtle" %>
     <% elsif @result.keys.empty? %>
-      <p class="rounded-md border border-dashed border-slate-300 px-4 py-6 text-center text-sm text-slate-500">Aucune clé autorisée sur ce serveur.</p>
+      <p class="rounded-md border border-dashed border-line px-4 py-6 text-center text-sm text-ink-3">Aucune clé autorisée sur ce serveur.</p>
     <% else %>
       <% if @orphan_keys.any? %>
         <% one = @orphan_keys.one? %>
-        <div class="orphan-warning mb-3 flex gap-3 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-amber-500"></span>
+        <div class="orphan-warning mb-3 flex gap-3 rounded-md border border-warn/40 bg-warn-soft px-4 py-3 text-sm text-warn-ink">
+          <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-warn"></span>
           <p>
             <strong><%= pluralize(@orphan_keys.size, "clé n'est pas", plural: "clés ne sont pas") %> dans le trousseau.</strong>
             Si vous <%= one ? "la" : "les" %> reconnaissez, <%= one ? "ajoutez-la" : "ajoutez-les" %> avec le bouton
@@ -73,41 +73,41 @@
           </p>
         </div>
       <% end %>
-      <ul class="authorized-keys divide-y divide-slate-100 rounded-md border border-slate-200">
+      <ul class="authorized-keys divide-y divide-line rounded-md border border-line">
         <% @result.keys.each do |key| %>
           <% orphan = @orphan_keys.include?(key) %>
           <% public_key = @public_keys_by_fingerprint[key.fingerprint] %>
-          <li class="authorized-key flex items-center gap-3 px-4 py-3 <%= "is-orphan border-l-4 border-l-amber-400 bg-amber-50/40" if orphan %>">
-            <%= icon :key, class: "h-4 w-4 shrink-0 text-slate-400" %>
+          <li class="authorized-key flex items-center gap-3 px-4 py-3 <%= "is-orphan border-l-4 border-l-warn bg-warn-soft/40" if orphan %>">
+            <%= icon :key, class: "h-4 w-4 shrink-0 text-ink-3" %>
             <div class="min-w-0 flex-1">
               <div class="flex flex-wrap items-center gap-2">
                 <% if public_key %>
                   <%= link_to public_key.name, public_key_path(public_key), data: { turbo_frame: "_top" },
-                        class: "key-name key-keyring truncate text-sm font-medium text-slate-900 hover:text-indigo-600 hover:underline" %>
-                  <span class="key-kind rounded-full bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-700 ring-1 ring-inset ring-sky-600/20"><%= public_key.kind_label %></span>
+                        class: "key-name key-keyring truncate text-sm font-medium text-ink hover:text-accent hover:underline" %>
+                  <span class="key-kind rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent ring-1 ring-inset ring-accent/20"><%= public_key.kind_label %></span>
                   <% if key.named? && key.name != public_key.name %>
-                    <span class="key-comment truncate text-xs text-slate-500"><%= key.name %></span>
+                    <span class="key-comment truncate text-xs text-ink-3"><%= key.name %></span>
                   <% end %>
                 <% else %>
-                  <span class="key-name truncate text-sm font-medium <%= key.named? ? "text-slate-900" : "italic text-slate-500" %>">
+                  <span class="key-name truncate text-sm font-medium <%= key.named? ? "text-ink" : "italic text-ink-3" %>">
                     <%= key.named? ? key.name : "Sans nom" %>
                   </span>
                   <% if orphan %>
-                    <span class="key-badge key-unknown rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20">Hors trousseau</span>
+                    <span class="key-badge key-unknown rounded-full bg-warn-soft px-2 py-0.5 text-xs font-medium text-warn-ink ring-1 ring-inset ring-warn/20">Hors trousseau</span>
                   <% end %>
                 <% end %>
                 <% if (access = @temporary_accesses[key.fingerprint]) %>
                   <%= relative_time_tag access.expires_at, prefix: "Expire ", expired: "Expiré, suppression en cours",
-                        class: "key-expiry inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20" %>
+                        class: "key-expiry inline-flex items-center rounded-full bg-warn-soft px-2 py-0.5 text-xs font-medium text-warn-ink ring-1 ring-inset ring-warn/20" %>
                 <% end %>
                 <% if key.matches?(@app_key) %>
-                  <span class="key-badge key-master rounded-full bg-indigo-600 px-2 py-0.5 text-xs font-semibold text-white" title="Clé SSH de l'application Elio">Master</span>
+                  <span class="key-badge key-master rounded-full bg-accent px-2 py-0.5 text-xs font-semibold text-white" title="Clé SSH de l'application Elio">Master</span>
                 <% end %>
               </div>
             </div>
             <div data-controller="modal" class="shrink-0">
               <button type="button" data-action="modal#open" title="Détails de la clé" aria-label="Détails de la clé <%= key.name || "sans nom" %>"
-                      class="key-details-button cursor-pointer rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+                      class="key-details-button cursor-pointer rounded-md p-1.5 text-ink-3 hover:bg-subtle hover:text-ink-2">
                 <%= icon :information_circle %>
               </button>
               <%= render "server_authorized_keys/key_details", key: key, account: @account, public_key: public_key,
@@ -118,7 +118,7 @@
                 <%= link_to new_public_key_path(content: [ key.type, key.key, key.comment ].compact.join(" "), name: suggested_public_key_name(key),
                                              return_to: server_path(@server, tab: "keys")),
                       data: { turbo_frame: "_top" },
-                      class: "add-to-keyring inline-flex shrink-0 items-center gap-1.5 rounded-md border border-indigo-200 bg-white px-2.5 py-1 text-xs font-medium text-indigo-700 shadow-sm hover:bg-indigo-50" do %>
+                      class: "add-to-keyring inline-flex shrink-0 items-center gap-1.5 rounded-md border border-accent/40 bg-surface px-2.5 py-1 text-xs font-medium text-accent shadow-sm hover:bg-accent-soft" do %>
                   <%= icon :user_plus, class: "h-4 w-4" %> Ajouter au trousseau
                 <% end %>
               <% end %>
@@ -131,7 +131,7 @@
                       form: { class: "shrink-0", data: { controller: "quiet-submit", turbo_frame: "_top",
                                                          turbo_confirm: "La clé « #{key.name || "sans nom"} » sera supprimée de « #{@server.name} ». Elle ne pourra plus s'y connecter.",
                                                          confirm_label: "Supprimer la clé", confirm_variant: "danger" } },
-                      class: "cursor-pointer rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:cursor-wait disabled:opacity-50" do %>
+                      class: "cursor-pointer rounded-md p-1.5 text-ink-3 hover:bg-crit-soft hover:text-crit-ink disabled:cursor-wait disabled:opacity-50" do %>
                   <%= icon :trash %>
                 <% end %>
               <% end %>

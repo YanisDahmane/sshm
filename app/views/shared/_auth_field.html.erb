@@ -1,7 +1,7 @@
 <div>
-  <%= f.label attribute, label, class: "block text-sm font-medium text-slate-700" %>
+  <%= f.label attribute, label, class: "block text-sm font-medium text-ink-2" %>
   <%= f.public_send(type, attribute, required: true, autocomplete: local_assigns[:autocomplete], autofocus: local_assigns[:autofocus],
         readonly: local_assigns[:readonly],
-        class: "mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm read-only:bg-slate-50 read-only:text-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500") %>
-  <% if local_assigns[:hint] %><p class="mt-1 text-xs text-slate-500"><%= hint %></p><% end %>
+        class: "mt-1 block w-full rounded-md border border-line px-3 py-2 text-sm shadow-sm read-only:bg-subtle read-only:text-ink-3 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent") %>
+  <% if local_assigns[:hint] %><p class="mt-1 text-xs text-ink-3"><%= hint %></p><% end %>
 </div>

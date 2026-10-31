@@ -3,12 +3,12 @@
 <% groups = ServerGroup.joins(:memberships).distinct.order(:name) %>
 <fieldset data-controller="check-all">
   <div class="flex items-center justify-between">
-    <legend class="text-sm font-medium text-slate-700">Serveurs</legend>
-    <button type="button" data-action="check-all#toggle" class="cursor-pointer text-xs font-medium text-indigo-600 hover:text-indigo-500">Tout cocher / décocher</button>
+    <legend class="text-sm font-medium text-ink-2">Serveurs</legend>
+    <button type="button" data-action="check-all#toggle" class="cursor-pointer text-xs font-medium text-accent hover:text-accent">Tout cocher / décocher</button>
   </div>
   <% if groups.any? %>
     <div class="bulk-groups mt-2 flex flex-wrap items-center gap-2">
-      <span class="text-xs text-slate-500">Tout le groupe :</span>
+      <span class="text-xs text-ink-3">Tout le groupe :</span>
       <% groups.each do |group| %>
         <button type="button" data-action="check-all#toggleGroup" data-check-all-group-param="<%= group.id %>"
                 class="cursor-pointer rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset hover:opacity-80 <%= group.badge_classes %>"><%= group.name %></button>
@@ -17,13 +17,13 @@
   <% end %>
   <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
     <% servers.each do |server| %>
-      <label class="flex cursor-pointer items-center gap-3 rounded-md border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50 has-[:checked]:border-indigo-300 has-[:checked]:bg-indigo-50/50">
+      <label class="flex cursor-pointer items-center gap-3 rounded-md border border-line px-3 py-2 text-sm hover:bg-subtle has-[:checked]:border-accent/40 has-[:checked]:bg-accent-soft/50">
         <%= check_box_tag "server_ids[]", server.id, false, id: "server_ids_#{server.id}",
               data: { check_all_target: "checkbox", groups: server.server_group_ids.join(" ") },
-              class: "h-4 w-4 rounded border-slate-300 text-indigo-600" %>
+              class: "h-4 w-4 rounded border-line text-accent" %>
         <span class="min-w-0">
           <span class="block truncate font-medium"><%= server.name %></span>
-          <span class="block truncate font-mono text-xs text-slate-500"><%= server.username %>@<%= server.host %></span>
+          <span class="block truncate font-mono text-xs text-ink-3"><%= server.username %>@<%= server.host %></span>
         </span>
       </label>
     <% end %>

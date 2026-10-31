@@ -69,7 +69,7 @@ export default class extends Controller {
       if (item.group !== group) {
         group = item.group
         const heading = document.createElement("li")
-        heading.className = "px-2 pb-1 pt-3 text-xs font-semibold uppercase tracking-wide text-slate-400"
+        heading.className = "px-2 pb-1 pt-3 text-xs font-semibold uppercase tracking-wide text-ink-3"
         heading.textContent = group
         this.resultsTarget.append(heading)
       }
@@ -77,7 +77,7 @@ export default class extends Controller {
       const option = document.createElement("li")
       option.setAttribute("role", "option")
       option.setAttribute("aria-selected", index === this.selected)
-      option.className = "command-palette-item flex cursor-pointer items-center justify-between gap-3 rounded-md px-3 py-2 text-sm aria-selected:bg-indigo-600 aria-selected:text-white"
+      option.className = "command-palette-item flex cursor-pointer items-center justify-between gap-3 rounded-md px-3 py-2 text-sm aria-selected:bg-accent aria-selected:text-white"
       const label = document.createElement("span")
       label.className = "truncate font-medium"
       label.textContent = item.label

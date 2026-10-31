@@ -1,5 +1,5 @@
-<% input_class = "mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" %>
-<% label_class = "block text-sm font-medium text-slate-700" %>
+<% input_class = "mt-1 block w-full rounded-md border border-line px-3 py-2 text-sm shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent" %>
+<% label_class = "block text-sm font-medium text-ink-2" %>
 
 <%= form_with model: public_key, class: "space-y-5" do |f| %>
   <%= render "shared/form_errors", record: public_key %>
@@ -14,10 +14,10 @@
     <legend class="<%= label_class %>">Type</legend>
     <div class="mt-2 flex flex-wrap gap-4">
       <% PublicKey::KINDS.each do |value, label| %>
-        <label class="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
-          <%= f.radio_button :kind, value, class: "h-4 w-4 border-slate-300 text-indigo-600" %>
+        <label class="flex cursor-pointer items-center gap-2 text-sm text-ink-2">
+          <%= f.radio_button :kind, value, class: "h-4 w-4 border-line text-accent" %>
           <%= label %>
-          <span class="text-xs text-slate-500"><%= value == "person" ? "un membre de l'équipe" : "une machine qui se connecte aux autres (CI, sauvegarde…)" %></span>
+          <span class="text-xs text-ink-3"><%= value == "person" ? "un membre de l'équipe" : "une machine qui se connecte aux autres (CI, sauvegarde…)" %></span>
         </label>
       <% end %>
     </div>
@@ -28,18 +28,18 @@
     <%= f.text_area :content, required: true, rows: 4, spellcheck: false, autocomplete: "off",
           placeholder: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA… alice@laptop",
           class: "#{input_class} font-mono text-xs" %>
-    <p class="mt-1 text-xs text-slate-500">
+    <p class="mt-1 text-xs text-ink-3">
       Contenu du fichier <code class="font-mono">.pub</code>, par exemple <code class="font-mono">cat ~/.ssh/id_ed25519.pub</code>. Jamais la clé privée.
     </p>
   </div>
 
   <div>
-    <%= f.label :description, class: label_class do %>Description <span class="font-normal text-slate-500">(facultative)</span><% end %>
+    <%= f.label :description, class: label_class do %>Description <span class="font-normal text-ink-3">(facultative)</span><% end %>
     <%= f.text_field :description, placeholder: "Portable de travail, runner GitHub Actions…", class: input_class %>
   </div>
 
   <div class="flex items-center justify-end gap-3 pt-2">
-    <%= link_to "Annuler", local_assigns[:return_to] || (public_key.persisted? ? public_key_path(public_key) : public_keys_path), class: "rounded-md px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" %>
-    <%= f.submit public_key.persisted? ? "Enregistrer" : "Ajouter au trousseau", class: "cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+    <%= link_to "Annuler", local_assigns[:return_to] || (public_key.persisted? ? public_key_path(public_key) : public_keys_path), class: "rounded-md px-4 py-2 text-sm font-medium text-ink-2 hover:bg-subtle" %>
+    <%= f.submit public_key.persisted? ? "Enregistrer" : "Ajouter au trousseau", class: "cursor-pointer rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-accent-hover" %>
   </div>
 <% end %>

@@ -1,12 +1,12 @@
 <%# Number of keys outside the keyring on the server, from the last key read. %>
 <% orphans = insights.orphans_by_server_id[server.id] %>
 <% if orphans.nil? %>
-  <span class="orphan-keys text-xs text-slate-400" title="Clés jamais lues : ouvrez le serveur ou lancez un scan">—</span>
+  <span class="orphan-keys text-xs text-ink-3" title="Clés jamais lues : ouvrez le serveur ou lancez un scan">—</span>
 <% elsif orphans.empty? %>
-  <span class="orphan-keys text-xs text-slate-500">Aucune</span>
+  <span class="orphan-keys text-xs text-ink-3">Aucune</span>
 <% else %>
   <%= link_to server_path(server, tab: "keys"), title: orphans.map { |key| key.name || "sans nom" }.join(", "),
-        class: "orphan-keys inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20 hover:bg-amber-100" do %>
+        class: "orphan-keys inline-flex items-center rounded-full bg-warn-soft px-2 py-0.5 text-xs font-medium text-warn-ink ring-1 ring-inset ring-warn/20 hover:bg-warn-soft" do %>
     <%= pluralize(orphans.size, "clé inconnue", plural: "clés inconnues") %>
   <% end %>
 <% end %>
