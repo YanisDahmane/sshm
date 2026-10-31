@@ -237,7 +237,7 @@ class ServersControllerTest < ActionDispatch::IntegrationTest
     Activity.record!(:key_added, server: servers(:db), public_key: public_keys(:alice), unix_user: "admin")
     sign_in users(:one)
 
-    get server_path(servers(:web))
+    get server_path(servers(:web), tab: "history")
 
     assert_select "#server-activity li.activity", 1
     assert_select "#server-activity a[href=?]", activities_path(server_id: servers(:web).id), text: "Tout voir"
@@ -302,5 +302,26 @@ class ServersControllerTest < ActionDispatch::IntegrationTest
 
     get edit_server_path(servers(:web))
     assert_select "#danger-zone form[action=?] button", server_path(servers(:web)), text: /Supprimer le serveur/
+  end
+
+  test "the server page has one tab per section, the overview by default" do
+    servers(:web).inventory_snapshots.create!(category: "packages", status: "ok", data: { "total" => 412 }, collected_at: Time.current, checked_at: Time.current)
+    sign_in users(:viewer)
+
+    get server_path(servers(:web))
+    assert_select "nav.server-tabs a", 6
+    assert_select "nav.server-tabs a[aria-current=page][data-tab=overview][href=?]", server_path(servers(:web))
+    assert_select "nav.server-tabs a[data-tab=packages][href=?]", server_path(servers(:web), tab: "packages"), text: /Paquets\s*412/
+    assert_select "#server-health-details"
+    assert_select "#server-system"
+    assert_select "#server-packages", 0
+
+    get server_path(servers(:web), tab: "ports")
+    assert_select "nav.server-tabs a[aria-current=page][data-tab=ports]"
+    assert_select "#server-ports"
+    assert_select "#server-health-details", 0
+
+    get server_path(servers(:web), tab: "nope")
+    assert_select "nav.server-tabs a[aria-current=page][data-tab=overview]"
   end
 end

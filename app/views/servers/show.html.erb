@@ -1,26 +1,37 @@
 <% content_for :title, "#{@server.name} · Elio" %>
+<% os = @server.inventory("os")&.data || {} %>
+<% packages = @server.inventory("packages")&.data || {} %>
+<% services = @server.inventory("services")&.data || {} %>
+<% ports = @server.inventory("ports") %>
+<% snapshot = @server.account_snapshots.find { |candidate| candidate.unix_user == @server.username } %>
 
-<div class="mx-auto max-w-5xl">
-  <%= link_to "← Parc", servers_path, class: "text-sm text-slate-500 hover:text-slate-700" %>
+<div class="mx-auto max-w-6xl">
+  <p class="text-xs text-ink-3">
+    <%= link_to "Parc", servers_path, class: "hover:text-ink" %>
+    <% if (group = @server.server_groups.first) %><span class="mx-1">/</span><%= link_to group.name, servers_path(group: group.id), class: "hover:text-ink" %><% end %>
+    <span class="mx-1">/</span><span class="text-ink-2"><%= @server.name %></span>
+  </p>
 
-  <div class="mt-2 flex items-start justify-between gap-4">
-    <div>
-      <h1 class="text-2xl font-bold tracking-tight"><%= @server.name %></h1>
-      <p class="mt-1 font-mono text-sm text-slate-500"><%= @server.username %>@<%= @server.host %>:<%= @server.port %></p>
-      <% if @server.server_groups.any? %>
-        <div class="server-groups mt-2 flex flex-wrap gap-1.5">
-          <%= render partial: "server_groups/badge", collection: @server.server_groups, as: :group %>
-        </div>
-      <% end %>
+  <div class="mt-2 flex flex-wrap items-start justify-between gap-4">
+    <div class="min-w-0">
+      <div class="flex flex-wrap items-center gap-2">
+        <h1 class="text-xl font-semibold"><%= @server.name %></h1>
+        <%= render "servers/status", server: @server, health: true %>
+        <% if @server.server_groups.any? %>
+          <span class="server-groups flex flex-wrap gap-1.5"><%= render partial: "server_groups/badge", collection: @server.server_groups, as: :group %></span>
+        <% end %>
+      </div>
+      <p class="server-summary mt-1 font-mono text-xs text-ink-3">
+        <%= [ "#{@server.username}@#{@server.host}:#{@server.port}", os["name"],
+              (pluralize_fr(os["cpus"], "processeur", "processeurs") if os["cpus"]), (human_bytes(os["memory_bytes"]) if os["memory_bytes"]) ].compact.join(" · ") %>
+      </p>
     </div>
-    <div class="flex shrink-0 items-center gap-2">
+    <div class="flex shrink-0 flex-wrap items-center gap-2">
       <% if can?(:operate) %>
-        <%= button_to server_inventory_path(@server), form: { class: "refresh-inventory" },
-              class: "inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" do %>
+        <%= button_to server_inventory_path(@server), form: { class: "refresh-inventory" }, class: "btn btn-secondary" do %>
           <%= icon :arrow_path %> Actualiser l'inventaire
         <% end %>
-        <%= link_to edit_server_path(@server),
-              class: "inline-flex shrink-0 items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" do %>
+        <%= link_to edit_server_path(@server), class: "btn btn-secondary" do %>
           <%= icon :pencil_square %> Modifier
         <% end %>
         <%= render "servers/delete_button", server: @server %>
@@ -29,38 +40,55 @@
   </div>
 
   <%= render "servers/health_bar", server: @server %>
-  <%= render "servers/health_card", server: @server %>
-  <%= render "servers/system_card", server: @server %>
-  <%= render "servers/services_card", server: @server %>
-  <%= render "servers/ports_card", server: @server %>
 
-  <section id="server-packages" class="card mt-6">
-    <div class="card-header">
-      <h2 class="flex items-center gap-2 font-semibold"><%= icon :cube, class: "h-4 w-4 text-ink-3" %> Paquets</h2>
-      <%= link_to "Chercher sur tout le parc", packages_path, class: "text-xs font-medium text-accent hover:underline" %>
-    </div>
-    <%= render "server_packages/frame", server: @server %>
-  </section>
-
-  <section id="server-authorized-keys" class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-    <h2 class="text-lg font-semibold">Clés autorisées</h2>
-    <p class="mt-1 text-sm text-slate-500">Clés publiques qui peuvent se connecter à ce serveur avec le compte de connexion d'Elio.</p>
-    <div class="mt-4">
-      <%= render "server_authorized_keys/frame", server: @server %>
-    </div>
-  </section>
-
-  <section id="server-activity" class="mt-6 rounded-xl border border-slate-200 bg-white px-6 pt-5 pb-2 shadow-sm">
-    <div class="flex items-center justify-between">
-      <h2 class="text-lg font-semibold">Historique</h2>
-      <%= link_to "Tout voir", activities_path(server_id: @server.id), class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
-    </div>
-    <% if @activities.any? %>
-      <ul class="mt-2 divide-y divide-slate-100">
-        <%= render partial: "activities/activity", collection: @activities, locals: { show_server: false } %>
-      </ul>
-    <% else %>
-      <p class="py-6 text-sm text-slate-500">Aucune activité sur ce serveur pour le moment.</p>
+  <nav class="server-tabs mt-5 flex gap-5 overflow-x-auto border-b border-line text-sm" aria-label="Sections du serveur">
+    <% [ [ "overview", "Vue d'ensemble", nil ], [ "packages", "Paquets", packages["total"] ], [ "services", "Services", (Array(services["units"]).count { |unit| unit["active"] == "active" } if services["units"]) ],
+         [ "ports", "Ports", (Inventory::PortAnalysis.new(@server).public_ports.size if ports&.collected?) ], [ "keys", "Clés SSH", snapshot&.keys&.size ], [ "history", "Historique", nil ] ].each do |tab, label, count| %>
+      <% current = tab == @tab %>
+      <%= link_to server_path(@server, tab: (tab unless tab == "overview")), aria: { current: (current ? "page" : nil) }, data: { tab: tab },
+            class: "flex shrink-0 items-center gap-1.5 border-b-2 px-1 pb-2.5 #{current ? "border-accent font-medium text-ink" : "border-transparent text-ink-3 hover:text-ink"}" do %>
+        <%= label %><% if count %><span class="rounded-full bg-subtle px-1.5 text-[11px] text-ink-2"><%= count %></span><% end %>
+      <% end %>
     <% end %>
-  </section>
+  </nav>
+
+  <% case @tab %>
+  <% when "overview" %>
+    <%= render "servers/health_card", server: @server %>
+    <%= render "servers/system_card", server: @server %>
+  <% when "packages" %>
+    <section id="server-packages" class="card mt-6">
+      <div class="card-header">
+        <h2 class="flex items-center gap-2 font-semibold"><%= icon :cube, class: "h-4 w-4 text-ink-3" %> Paquets</h2>
+        <%= link_to "Chercher sur tout le parc", packages_path, class: "text-xs font-medium text-accent hover:underline" %>
+      </div>
+      <%= render "server_packages/frame", server: @server %>
+    </section>
+  <% when "services" %>
+    <%= render "servers/services_card", server: @server %>
+  <% when "ports" %>
+    <%= render "servers/ports_card", server: @server %>
+  <% when "keys" %>
+    <section id="server-authorized-keys" class="card mt-6 p-5">
+      <h2 class="flex items-center gap-2 font-semibold"><%= icon :key, class: "h-4 w-4 text-ink-3" %> Clés SSH autorisées</h2>
+      <p class="mt-1 text-xs text-ink-3">Clés publiques qui peuvent se connecter à ce serveur avec le compte de connexion d'Elio.</p>
+      <div class="mt-4">
+        <%= render "server_authorized_keys/frame", server: @server %>
+      </div>
+    </section>
+  <% when "history" %>
+    <section id="server-activity" class="card mt-6 px-5 pt-4 pb-2">
+      <div class="flex items-center justify-between">
+        <h2 class="flex items-center gap-2 font-semibold"><%= icon :clock, class: "h-4 w-4 text-ink-3" %> Historique</h2>
+        <%= link_to "Tout voir", activities_path(server_id: @server.id), class: "text-xs font-medium text-accent hover:underline" %>
+      </div>
+      <% if @activities.any? %>
+        <ul class="mt-2 divide-y divide-line">
+          <%= render partial: "activities/activity", collection: @activities, locals: { show_server: false } %>
+        </ul>
+      <% else %>
+        <p class="py-6 text-sm text-ink-3">Aucune activité sur ce serveur pour le moment.</p>
+      <% end %>
+    </section>
+  <% end %>
 </div>

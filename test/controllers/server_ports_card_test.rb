@@ -11,7 +11,7 @@ class ServerPortsCardTest < ActionDispatch::IntegrationTest
     record_containers(servers(:db), [ { "name" => "pgbouncer", "state" => "running", "ports" => "0.0.0.0:6432->6432/tcp" } ])
     sign_in users(:viewer)
 
-    get server_path(servers(:db))
+    get server_path(servers(:db), tab: "ports")
 
     assert_select "#server-ports" do
       assert_select ".ports-summary", text: /3 publics sur 8 en écoute/
@@ -29,7 +29,7 @@ class ServerPortsCardTest < ActionDispatch::IntegrationTest
 
   test "before any inventory" do
     sign_in users(:viewer)
-    get server_path(servers(:web))
+    get server_path(servers(:web), tab: "ports")
     assert_select "#server-ports .ports-empty", "Pas encore d'inventaire des ports."
   end
 end

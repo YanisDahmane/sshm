@@ -177,7 +177,7 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_select "#attention-#{ActionView::RecordIdentifier.dom_id(servers(:web))}" do
       assert_select ".orphan-keys", text: "4 clés inconnues"
       assert_select ".attention-orphans", text: /alice2@laptop, bob@desktop, sans nom et 1 autre\(s\)/
-      assert_select ".attention-orphans a[href=?]", server_path(servers(:web), anchor: "server-authorized-keys"), text: "ajouter au trousseau"
+      assert_select ".attention-orphans a[href=?]", server_path(servers(:web), tab: "keys"), text: "ajouter au trousseau"
     end
   end
 

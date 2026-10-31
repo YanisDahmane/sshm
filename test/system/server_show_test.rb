@@ -38,8 +38,10 @@ class ServerShowTest < ApplicationSystemTestCase
   end
 
 
-  test "authorized keys load lazily and can be reloaded" do
+  test "authorized keys load lazily in their tab and can be reloaded" do
     visit server_path(servers(:web))
+    within("nav.server-tabs") { click_on "Clés SSH" }
+    assert_selector "nav.server-tabs a[aria-current=page]", text: "Clés SSH"
 
     within("#server-authorized-keys") do
       assert_selector ".authorized-keys-error", text: "Connexion impossible"
@@ -67,7 +69,7 @@ class ServerShowTest < ApplicationSystemTestCase
 
   test "opening and closing the details of a key" do
     stub_method_until_teardown(AuthorizedKeysReader, :call, AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(public_keys(:alice).content), error_title: nil, error_details: nil))
-    visit server_path(servers(:web))
+    visit server_path(servers(:web), tab: "keys")
 
     within("#server-authorized-keys") do
       assert_selector "li.authorized-key", text: "alice@laptop"

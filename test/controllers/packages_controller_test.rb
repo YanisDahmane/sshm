@@ -23,7 +23,7 @@ class PackagesControllerTest < ActionDispatch::IntegrationTest
     assert_select ".security-updates tr.security-update", 1 do
       assert_select "a[href=?]", packages_path(q: "openssl"), text: "openssl"
       assert_select "td", text: "3.0.15"
-      assert_select "a[href=?]", server_path(servers(:web), anchor: "server-packages"), text: "Web"
+      assert_select "a[href=?]", server_path(servers(:web), tab: "packages"), text: "Web"
     end
     assert_select "p", text: "1 serveur n'a pas encore d'inventaire des paquets."
     assert_select "nav.main-nav a[aria-current=page][href=?]", packages_path

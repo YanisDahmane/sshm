@@ -81,7 +81,7 @@
             <% if orphans.any? %>
               <p class="attention-orphans mt-1 truncate text-xs text-slate-500">
                 <%= orphans.first(3).map { |key| key.name || "sans nom" }.join(", ") %><%= " et #{orphans.size - 3} autre(s)" if orphans.size > 3 %>
-                — <%= link_to "ajouter au trousseau", server_path(server, anchor: "server-authorized-keys"), class: "font-medium text-indigo-600 hover:text-indigo-500" %>
+                — <%= link_to "ajouter au trousseau", server_path(server, tab: "keys"), class: "font-medium text-indigo-600 hover:text-indigo-500" %>
               </p>
             <% end %>
           </li>

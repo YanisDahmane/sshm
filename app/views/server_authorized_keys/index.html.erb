@@ -116,7 +116,7 @@
             <% if orphan %>
               <% if can?(:operate) %>
                 <%= link_to new_public_key_path(content: [ key.type, key.key, key.comment ].compact.join(" "), name: suggested_public_key_name(key),
-                                             return_to: server_path(@server, anchor: "server-authorized-keys")),
+                                             return_to: server_path(@server, tab: "keys")),
                       data: { turbo_frame: "_top" },
                       class: "add-to-keyring inline-flex shrink-0 items-center gap-1.5 rounded-md border border-indigo-200 bg-white px-2.5 py-1 text-xs font-medium text-indigo-700 shadow-sm hover:bg-indigo-50" do %>
                   <%= icon :user_plus, class: "h-4 w-4" %> Ajouter au trousseau

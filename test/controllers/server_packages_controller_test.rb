@@ -20,7 +20,7 @@ class ServerPackagesControllerTest < ActionDispatch::IntegrationTest
 
   test "the server page lazy-loads the packages" do
     sign_in users(:viewer)
-    get server_path(servers(:web))
+    get server_path(servers(:web), tab: "packages")
     assert_select "#server-packages turbo-frame[loading=lazy][src=?]", server_packages_path(servers(:web))
   end
 

@@ -92,7 +92,7 @@ class UiTest < ApplicationSystemTestCase
     reader = ->(*, **) { AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse([ ssh_keys(:main).public_key, bob ].join("\n")), error_title: nil, error_details: nil) }
 
     stub_method(AuthorizedKeysReader, :call, reader) do
-      visit server_path(servers(:web))
+      visit server_path(servers(:web), tab: "keys")
 
       within("#server-authorized-keys") do
         assert_selector ".orphan-warning", text: "1 clé n'est pas dans le trousseau"

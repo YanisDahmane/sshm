@@ -18,7 +18,7 @@ class ServerServicesCardTest < ActionDispatch::IntegrationTest
     collect(parsed)
     sign_in users(:viewer)
 
-    get server_path(servers(:web))
+    get server_path(servers(:web), tab: "services")
 
     assert_select "#server-services" do
       assert_select ".services-summary", text: /4 services actifs\s+· 1 en échec\s+· 2 inactifs\s+· 2\/3 conteneurs en cours/
@@ -41,14 +41,14 @@ class ServerServicesCardTest < ActionDispatch::IntegrationTest
     collect(parsed.merge("docker" => "unreadable", "containers" => []), status: "partial", message: "Conteneurs Docker illisibles : permission denied")
     sign_in users(:viewer)
 
-    get server_path(servers(:web))
+    get server_path(servers(:web), tab: "services")
 
     assert_select "#server-services .docker-unreadable", text: /permission denied.*groupe docker/
   end
 
   test "before any inventory" do
     sign_in users(:viewer)
-    get server_path(servers(:web))
+    get server_path(servers(:web), tab: "services")
     assert_select "#server-services .services-empty", "Pas encore d'inventaire des services."
   end
 end

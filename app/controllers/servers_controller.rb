@@ -18,9 +18,13 @@ class ServersController < ApplicationController
     @insights = KeyInsights.new
   end
 
+  TABS = %w[overview packages services ports keys history].freeze
+
+  # Tabbed page (?tab=), only the requested tab is rendered.
   def show
-    @activities = Activity.recent.where(server: @server).includes(:user, :server, :public_key).limit(10)
-    @health_history = @server.health_samples.since(24.hours.ago).pluck(:collected_at, :load_percent, :memory_percent, :disk_percent)
+    @tab = params[:tab].presence_in(TABS) || "overview"
+    @activities = Activity.recent.where(server: @server).includes(:user, :server, :public_key).limit(30) if @tab == "history"
+    @health_history = @server.health_samples.since(24.hours.ago).pluck(:collected_at, :load_percent, :memory_percent, :disk_percent) if @tab == "overview"
   end
 
   def new

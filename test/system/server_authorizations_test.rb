@@ -20,7 +20,7 @@ class ServerAuthorizationsTest < ApplicationSystemTestCase
 
     stub_method(AuthorizedKeysReader, :call, reader) do
       stub_method(PublicKeyAuthorization, :call, authorizer) do
-        visit server_path(servers(:web))
+        visit server_path(servers(:web), tab: "keys")
 
         within("#server-authorized-keys") do
           assert_selector "li.authorized-key", count: 1
@@ -44,7 +44,7 @@ class ServerAuthorizationsTest < ApplicationSystemTestCase
 
     stub_method(AuthorizedKeysReader, :call, reader) do
       stub_method(PublicKeyAuthorization, :call, authorizer) do
-        visit server_path(servers(:web))
+        visit server_path(servers(:web), tab: "keys")
 
         within("#server-authorized-keys") do
           select "CI", from: "Ajouter une clé du trousseau"

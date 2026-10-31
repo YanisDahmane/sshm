@@ -43,7 +43,7 @@
                   <td class="pr-4">
                     <div class="flex flex-wrap gap-1.5">
                       <% packages.map(&:server).uniq.sort_by(&:name).each do |server| %>
-                        <%= link_to server.name, server_path(server, anchor: "server-packages"), class: "badge bg-subtle text-ink-2 hover:text-ink" %>
+                        <%= link_to server.name, server_path(server, tab: "packages"), class: "badge bg-subtle text-ink-2 hover:text-ink" %>
                       <% end %>
                     </div>
                   </td>
@@ -74,7 +74,7 @@
               <td class="pr-4">
                 <div class="flex flex-wrap gap-1.5">
                   <% packages.map(&:server).uniq.sort_by(&:name).each do |server| %>
-                    <%= link_to server.name, server_path(server, anchor: "server-packages"), class: "badge bg-subtle text-ink-2 hover:text-ink" %>
+                    <%= link_to server.name, server_path(server, tab: "packages"), class: "badge bg-subtle text-ink-2 hover:text-ink" %>
                   <% end %>
                 </div>
               </td>

@@ -23,7 +23,7 @@ class AuthorizedKeyRemovalSystemTest < ApplicationSystemTestCase
 
     stub_method(AuthorizedKeysReader, :call, reader) do
       stub_method(AuthorizedKeyRemoval, :call, remover) do
-        visit server_path(servers(:web))
+        visit server_path(servers(:web), tab: "keys")
 
         within("#server-authorized-keys") do
           assert_selector "li.authorized-key", count: 2

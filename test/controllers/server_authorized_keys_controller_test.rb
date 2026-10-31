@@ -105,7 +105,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
   test "the server page lazy-loads the frame" do
     sign_in users(:one)
 
-    get server_path(servers(:web))
+    get server_path(servers(:web), tab: "keys")
 
     assert_select "#server-authorized-keys turbo-frame##{frame_id}[loading=lazy][src=?]", server_authorized_keys_path(servers(:web))
   end
@@ -344,7 +344,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     assert_select "li.authorized-key.is-orphan", 2
     assert_select "li.authorized-key:nth-child(1) a.add-to-keyring", 0
     assert_select "li.authorized-key:nth-child(4) a.add-to-keyring", 0
-    return_to = server_path(servers(:web), anchor: "server-authorized-keys")
+    return_to = server_path(servers(:web), tab: "keys")
     assert_select "li.authorized-key:nth-child(2) a.add-to-keyring[data-turbo-frame=_top][href=?]",
                   new_public_key_path(content: unnamed, return_to: return_to), text: /Ajouter au trousseau/
     assert_select "li.authorized-key:nth-child(3) a.add-to-keyring[href=?]",

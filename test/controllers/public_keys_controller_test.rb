@@ -195,9 +195,9 @@ class PublicKeysControllerTest < ActionDispatch::IntegrationTest
   test "create goes back to the given local path" do
     sign_in users(:one)
 
-    post public_keys_path, params: valid_params.merge(return_to: server_path(servers(:web), anchor: "server-authorized-keys"))
+    post public_keys_path, params: valid_params.merge(return_to: server_path(servers(:web), tab: "keys"))
 
-    assert_redirected_to server_path(servers(:web), anchor: "server-authorized-keys")
+    assert_redirected_to server_path(servers(:web), tab: "keys")
   end
 
   test "create ignores a return path to another site" do
