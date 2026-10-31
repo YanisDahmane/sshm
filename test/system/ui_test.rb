@@ -24,11 +24,11 @@ class UiTest < ApplicationSystemTestCase
   end
 
   test "the confirm dialog uses the action's label and colour, and Escape cancels" do
-    visit profile_path(profiles(:alice))
+    visit public_key_path(public_keys(:alice))
     click_on "Supprimer"
 
     within("#confirm-dialog[open]") do
-      assert_text "Le profil « Alice » sera supprimé."
+      assert_text "La clé « Alice » sera retirée du trousseau."
       assert_selector "button[data-confirm-accept][data-variant=danger]", text: "Supprimer"
     end
     find("#confirm-dialog[open]").send_keys(:escape)
@@ -62,32 +62,32 @@ class UiTest < ApplicationSystemTestCase
     end
   end
 
-  test "authorizing a profile on several servers at once" do
+  test "authorizing a public_key on several servers at once" do
     granted = []
-    granter = lambda do |server, _profile, account:, **|
+    granter = lambda do |server, _public_key, account:, **|
       granted << [ server.name, account.unix_user ]
-      ProfileAuthorization::Result.new(status: :added, error_title: nil, error_details: nil)
+      PublicKeyAuthorization::Result.new(status: :added, error_title: nil, error_details: nil)
     end
-    reader = ->(*, **) { AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(profiles(:alice).public_key), error_title: nil, error_details: nil) }
+    reader = ->(*, **) { AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(public_keys(:alice).content), error_title: nil, error_details: nil) }
 
     stub_method(AccessGrant, :call, granter) do
       stub_method(AuthorizedKeysReader, :call, reader) do
-        visit profile_path(profiles(:alice))
+        visit public_key_path(public_keys(:alice))
         within("#bulk-authorize") do
           click_on "Tout cocher / décocher"
           uncheck "Backup"
-          click_on "Autoriser"
+          click_on "Ajouter"
 
           assert_selector "li.bulk-result.is-success", count: 2
         end
-        assert_selector "#profile-accesses li.profile-access", count: 2
+        assert_selector "#key-accesses li.key-access", count: 2
       end
     end
 
     assert_equal [ [ "Database", "admin" ], [ "Web", "deploy" ] ], granted
   end
 
-  test "converting a key without profile into a profile from the server page" do
+  test "converting a key without public_key into a public_key from the server page" do
     bob = SshKeyGenerator.generate(comment: "bob@desktop").public_key
     reader = ->(*, **) { AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse([ ssh_keys(:main).public_key, bob ].join("\n")), error_title: nil, error_details: nil) }
 
@@ -95,20 +95,20 @@ class UiTest < ApplicationSystemTestCase
       visit server_path(servers(:web))
 
       within("#server-authorized-keys") do
-        assert_selector ".orphan-warning", text: "1 clé ne correspond à aucun profil"
-        within("li.is-orphan", text: "bob@desktop") { click_on "Créer un profil" }
+        assert_selector ".orphan-warning", text: "1 clé n'est pas dans le trousseau"
+        within("li.is-orphan", text: "bob@desktop") { click_on "Ajouter au trousseau" }
       end
 
-      assert_selector "h1", text: "Ajouter un profil"
+      assert_selector "h1", text: "Ajouter une clé"
       assert_field "Nom", with: "bob"
       assert_field "Clé SSH publique", with: bob
       fill_in "Nom", with: "Bob"
-      click_on "Ajouter le profil"
+      click_on "Ajouter au trousseau"
 
-      assert_selector "#flash", text: "Le profil « Bob » a été ajouté."
+      assert_selector "#flash", text: "La clé « Bob » a été ajoutée au trousseau."
       assert_selector "h1", text: "Web"
       within("#server-authorized-keys") do
-        assert_selector ".key-profile", text: "Profil : Bob"
+        assert_selector ".key-keyring", text: "Bob"
         assert_no_selector ".orphan-warning"
         assert_no_selector "li.is-orphan"
       end

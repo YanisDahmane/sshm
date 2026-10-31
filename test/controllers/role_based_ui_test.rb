@@ -37,21 +37,21 @@ class RoleBasedUiTest < ActionDispatch::IntegrationTest
     assert_select "button.delete-server", 0
 
     get server_authorized_keys_path(servers(:web))
-    assert_select "form.authorize-profile", 0
+    assert_select "form.authorize-key", 0
     assert_select "button[title='Supprimer la clé']", 0
-    assert_select "a.create-profile", 0
+    assert_select "a.add-to-keyring", 0
     assert_select "button.key-details-button", 2
 
-    get profiles_path
-    assert_select "a[href=?]", new_profile_path, 0
+    get public_keys_path
+    assert_select "a[href=?]", new_public_key_path, 0
     assert_select "button[title=Supprimer]", 0
 
-    get profile_path(profiles(:alice))
-    assert_select "a[href=?]", edit_profile_path(profiles(:alice)), 0
+    get public_key_path(public_keys(:alice))
+    assert_select "a[href=?]", edit_public_key_path(public_keys(:alice)), 0
     assert_select "#bulk-authorize", 0
   end
 
-  test "an operator manages servers, keys and profiles but not the settings" do
+  test "an operator manages servers, keys and public_keys but not the settings" do
     sign_in users(:operator)
 
     get root_path
@@ -62,11 +62,11 @@ class RoleBasedUiTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", new_server_path
 
     get server_authorized_keys_path(servers(:web))
-    assert_select "form.authorize-profile"
+    assert_select "form.authorize-key"
     assert_select "button[title='Supprimer la clé']", 1
-    assert_select "a.create-profile", 1
+    assert_select "a.add-to-keyring", 1
 
-    get profile_path(profiles(:alice))
+    get public_key_path(public_keys(:alice))
     assert_select "#bulk-authorize"
   end
 

@@ -39,16 +39,16 @@ class ApplicationHelperTest < ActionView::TestCase
     assert_select "time:not([data-relative-time-expired-value])", text: "il y a 3 minutes"
   end
 
-  test "command_palette_items lists pages, servers and profiles" do
+  test "command_palette_items lists pages, servers and public_keys" do
     items = command_palette_items
 
-    assert_equal %w[Pages Groupes Serveurs Profils], items.map { |item| item[:group] }.uniq
+    assert_equal %w[Pages Groupes Serveurs Trousseau], items.map { |item| item[:group] }.uniq
     assert_includes items, { group: "Pages", label: "Serveurs", url: servers_path }
     assert_includes items, { group: "Groupes", label: "Production", hint: "serveurs du groupe", url: servers_path(group: server_groups(:production).id) }
     assert_includes items, { group: "Serveurs", label: "Web", hint: "deploy@192.168.1.10 · Production", url: server_path(servers(:web)) }
     assert_includes items, { group: "Serveurs", label: "Backup", hint: "root@10.0.0.5", url: server_path(servers(:backup)) }
-    assert_includes items, { group: "Profils", label: "Alice", hint: "alice@laptop", url: profile_path(profiles(:alice)) }
-    assert_includes items, { group: "Profils", label: "CI", hint: nil, url: profile_path(profiles(:ci)) }
+    assert_includes items, { group: "Trousseau", label: "Alice", hint: "Personne", url: public_key_path(public_keys(:alice)) }
+    assert_includes items, { group: "Trousseau", label: "CI", hint: "Serveur", url: public_key_path(public_keys(:ci)) }
   end
 
   test "ssh_key_install_command appends the public key with strict permissions" do
@@ -61,17 +61,17 @@ class ApplicationHelperTest < ActionView::TestCase
   end
 
   test "nav_link_to marks the active link" do
-    render html: nav_link_to("Serveurs", "/servers", active: true) + nav_link_to("Profils", "/profiles", active: false)
+    render html: nav_link_to("Serveurs", "/servers", active: true) + nav_link_to("Trousseau", "/public_keys", active: false)
 
     assert_select "a[href='/servers'][aria-current=page].bg-indigo-50", "Serveurs"
-    assert_select "a[href='/profiles']:not([aria-current])", "Profils"
+    assert_select "a[href='/public_keys']:not([aria-current])", "Trousseau"
   end
 
-  test "suggested_profile_name drops the host part of the comment" do
-    assert_equal "alice", suggested_profile_name(AuthorizedKey.new(type: "ssh-ed25519", key: "AAAA", comment: "alice@laptop"))
-    assert_equal "Deploy key", suggested_profile_name(AuthorizedKey.new(type: "ssh-ed25519", key: "AAAA", comment: "Deploy key"))
-    assert_nil suggested_profile_name(AuthorizedKey.new(type: "ssh-ed25519", key: "AAAA"))
-    assert_nil suggested_profile_name(AuthorizedKey.new(type: "ssh-ed25519", key: "AAAA", comment: "@host"))
+  test "suggested_public_key_name drops the host part of the comment" do
+    assert_equal "alice", suggested_public_key_name(AuthorizedKey.new(type: "ssh-ed25519", key: "AAAA", comment: "alice@laptop"))
+    assert_equal "Deploy key", suggested_public_key_name(AuthorizedKey.new(type: "ssh-ed25519", key: "AAAA", comment: "Deploy key"))
+    assert_nil suggested_public_key_name(AuthorizedKey.new(type: "ssh-ed25519", key: "AAAA"))
+    assert_nil suggested_public_key_name(AuthorizedKey.new(type: "ssh-ed25519", key: "AAAA", comment: "@host"))
   end
 
   test "command_palette_items hides the pages the role cannot use" do

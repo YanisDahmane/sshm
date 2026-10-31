@@ -6,7 +6,7 @@ class Automation < ApplicationRecord
 
   KINDS = [
     Definition.new(:keys_scan, "Scan des clés",
-                   "Lit les clés de tous les serveurs et signale les clés sans profil ou disparues.", 360),
+                   "Lit les clés de tous les serveurs et signale les clés inconnues ou disparues.", 360),
     Definition.new(:servers_ping, "Vérification des serveurs",
                    "Vérifie que chaque serveur répond sur son port SSH et signale ceux qui ne répondent plus.", 15)
   ].index_by(&:key).freeze
@@ -47,7 +47,7 @@ class Automation < ApplicationRecord
     scanned = servers.count { |server| ServerScan.call(server).success? }
     detected = Activity.of_kind(:unknown_key_detected).count - detected_before
 
-    "#{scanned}/#{servers.size} serveur(s) scanné(s), #{detected} nouvelle(s) clé(s) sans profil"
+    "#{scanned}/#{servers.size} serveur(s) scanné(s), #{detected} nouvelle(s) clé(s) inconnue(s)"
   end
 
   def run_servers_ping

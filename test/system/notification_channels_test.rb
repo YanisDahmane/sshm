@@ -27,7 +27,7 @@ class NotificationChannelsTest < ApplicationSystemTestCase
     within("section.notification-channel") do
       assert_selector ".channel-mention", text: "@channel"
       assert_selector ".channel-kind", text: "Clé ajoutée"
-      assert_selector ".channel-kind", text: "Clé sans profil détectée"
+      assert_selector ".channel-kind", text: "Clé inconnue détectée"
     end
 
     click_on "Envoyer un test"

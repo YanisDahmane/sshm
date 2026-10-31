@@ -11,7 +11,7 @@ class ServersController < ApplicationController
   end
 
   def show
-    @activities = Activity.recent.where(server: @server).includes(:user, :server, :profile).limit(10)
+    @activities = Activity.recent.where(server: @server).includes(:user, :server, :public_key).limit(10)
   end
 
   def new

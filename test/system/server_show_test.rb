@@ -66,17 +66,17 @@ class ServerShowTest < ApplicationSystemTestCase
   end
 
   test "opening and closing the details of a key" do
-    stub_method_until_teardown(AuthorizedKeysReader, :call, AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(profiles(:alice).public_key), error_title: nil, error_details: nil))
+    stub_method_until_teardown(AuthorizedKeysReader, :call, AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(public_keys(:alice).content), error_title: nil, error_details: nil))
     visit server_path(servers(:web))
 
     within("#server-authorized-keys") do
       assert_selector "li.authorized-key", text: "alice@laptop"
-      assert_no_text profiles(:alice).fingerprint
+      assert_no_text public_keys(:alice).fingerprint
       find("button[title='Détails de la clé']").click
     end
 
     within("dialog.key-details[open]") do
-      assert_text profiles(:alice).fingerprint
+      assert_text public_keys(:alice).fingerprint
       find("button[aria-label=Fermer]").click
     end
     assert_no_selector "dialog.key-details[open]"

@@ -5,8 +5,8 @@ class ExpireTemporaryAccessesJobTest < ActiveJob::TestCase
 
   test "enqueues the expiry of every expired active access" do
     expired = create_temporary_access(expires_at: 1.minute.ago)
-    create_temporary_access(profile: profiles(:alice), expires_at: 1.minute.from_now)
-    create_temporary_access(profile: profiles(:alice), unix_user: "root", expires_at: 1.minute.ago).end!
+    create_temporary_access(public_key: public_keys(:alice), expires_at: 1.minute.from_now)
+    create_temporary_access(public_key: public_keys(:alice), unix_user: "root", expires_at: 1.minute.ago).end!
 
     ExpireTemporaryAccessesJob.perform_now
 

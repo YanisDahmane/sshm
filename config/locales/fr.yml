@@ -3,7 +3,7 @@ fr:
     models:
       server: Serveur
       server_group: Groupe de serveurs
-      profile: Profil
+      public_key: Clé du trousseau
       user: Utilisateur
       notification_channel: Canal de notification
       automation: Automatisation
@@ -16,9 +16,11 @@ fr:
       server_group:
         name: Nom
         color: Couleur
-      profile:
+      public_key:
         name: Nom
-        public_key: Clé SSH publique
+        kind: Type
+        content: Clé SSH publique
+        description: Description
         fingerprint: Cette clé
       notification_channel:
         name: Nom
@@ -36,14 +38,14 @@ fr:
         password_confirmation: Confirmation du mot de passe
     errors:
       models:
-        profile:
+        public_key:
           attributes:
-            public_key:
+            content:
               invalid: 'doit être une seule clé publique, par exemple « ssh-ed25519 AAAA… alice@laptop »'
               private_key: "ressemble à une clé privée : collez la clé publique (fichier .pub)"
-              app_key: "est la clé d'Elio et ne peut pas être utilisée par un profil"
+              app_key: "est la clé d'Elio et ne peut pas être ajoutée au trousseau"
             fingerprint:
-              taken: "est déjà utilisée par un autre profil"
+              taken: "est déjà dans le trousseau"
         user:
           attributes:
             base:

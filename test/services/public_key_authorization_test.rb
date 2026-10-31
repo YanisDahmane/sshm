@@ -1,13 +1,13 @@
 require "test_helper"
 
-class ProfileAuthorizationTest < ActiveSupport::TestCase
+class PublicKeyAuthorizationTest < ActiveSupport::TestCase
   include LocalShellHelpers
 
   setup do
     @known_hosts = Rails.root.join("tmp", "test", "ssh-#{SecureRandom.hex(4)}", "known_hosts")
     setup_temp_home
-    @profile = profiles(:alice)
-    @type, @blob = @profile.public_key.split(" ")
+    @public_key = public_keys(:alice)
+    @type, @blob = @public_key.content.split(" ")
   end
 
   teardown do
@@ -18,11 +18,11 @@ class ProfileAuthorizationTest < ActiveSupport::TestCase
   def authorized_keys = authorized_keys_file
 
   def run_script(line: "#{@type} #{@blob} Alice", blob: @blob)
-    run_local_script(ProfileAuthorization.append_script(line, blob))
+    run_local_script(PublicKeyAuthorization.append_script(line, blob))
   end
 
-  def authorize(fake, profile: @profile)
-    ProfileAuthorization.call(servers(:web), profile, transport: fake, known_hosts_file: @known_hosts)
+  def authorize(fake, public_key: @public_key)
+    PublicKeyAuthorization.call(servers(:web), public_key, transport: fake, known_hosts_file: @known_hosts)
   end
 
   test "script creates ~/.ssh and authorized_keys with private permissions" do
@@ -67,7 +67,7 @@ class ProfileAuthorizationTest < ActiveSupport::TestCase
     assert_not @home.join("pwned").exist?
   end
 
-  test "authorizes the profile with its name as comment" do
+  test "authorizes the public_key with its name as comment" do
     fake = FakeSsh.new(handler: local_shell)
 
     result = authorize(fake)
@@ -78,7 +78,7 @@ class ProfileAuthorizationTest < ActiveSupport::TestCase
     assert fake.commands.sole.start_with?("sh -c ")
   end
 
-  test "reports a profile that is already authorized" do
+  test "reports a public_key that is already authorized" do
     fake = FakeSsh.new(handler: local_shell)
     authorize(fake)
 
@@ -88,11 +88,11 @@ class ProfileAuthorizationTest < ActiveSupport::TestCase
     assert_equal 1, authorized_keys.read.lines.size
   end
 
-  test "the written line is parsed back as the profile's key" do
+  test "the written line is parsed back as the public_key's key" do
     authorize(FakeSsh.new(handler: local_shell))
 
     key = AuthorizedKey.parse(authorized_keys.read).sole
-    assert_equal @profile.fingerprint, key.fingerprint
+    assert_equal @public_key.fingerprint, key.fingerprint
     assert_equal "Alice", key.name
   end
 
@@ -117,7 +117,7 @@ class ProfileAuthorizationTest < ActiveSupport::TestCase
     custom = @home.join("other")
     custom.mkpath
 
-    run_local_script(ProfileAuthorization.append_script("#{@type} #{@blob} Alice", @blob, home: Shellwords.escape(custom.to_s)))
+    run_local_script(PublicKeyAuthorization.append_script("#{@type} #{@blob} Alice", @blob, home: Shellwords.escape(custom.to_s)))
 
     assert custom.join(".ssh", "authorized_keys").exist?
     assert_not authorized_keys.exist?
@@ -126,16 +126,16 @@ class ProfileAuthorizationTest < ActiveSupport::TestCase
   test "an expiring line carries an OpenSSH expiry-time option in UTC" do
     expires_at = Time.zone.parse("2026-10-03 16:42:18 +02:00")
 
-    assert_equal %(expiry-time="20261003144218Z" #{@type} #{@blob} Alice), ProfileAuthorization.line_for(@profile, expires_at)
-    assert_equal "#{@type} #{@blob} Alice", ProfileAuthorization.line_for(@profile)
+    assert_equal %(expiry-time="20261003144218Z" #{@type} #{@blob} Alice), PublicKeyAuthorization.line_for(@public_key, expires_at)
+    assert_equal "#{@type} #{@blob} Alice", PublicKeyAuthorization.line_for(@public_key)
   end
 
   test "the expiring line is parsed back with its option" do
-    run_script(line: ProfileAuthorization.line_for(@profile, 10.minutes.from_now))
+    run_script(line: PublicKeyAuthorization.line_for(@public_key, 10.minutes.from_now))
 
     key = AuthorizedKey.parse(authorized_keys.read).sole
     assert_match(/\Aexpiry-time="\d{14}Z"\z/, key.options)
-    assert_equal @profile.fingerprint, key.fingerprint
+    assert_equal @public_key.fingerprint, key.fingerprint
   end
 
   test "the script replaces an existing line when asked, keeping the other lines" do
@@ -143,7 +143,7 @@ class ProfileAuthorizationTest < ActiveSupport::TestCase
     authorized_keys.dirname.mkpath
     authorized_keys.write(%(# team\nexpiry-time="20261003144218Z" #{@type} #{@blob} Alice\n#{other}\n))
 
-    output = run_local_script(ProfileAuthorization.append_script("#{@type} #{@blob} Alice", @blob, replace: true))
+    output = run_local_script(PublicKeyAuthorization.append_script("#{@type} #{@blob} Alice", @blob, replace: true))
 
     assert_equal "added", output
     assert_equal "# team\n#{other}\n#{@type} #{@blob} Alice\n", authorized_keys.read
@@ -162,7 +162,7 @@ class ProfileAuthorizationTest < ActiveSupport::TestCase
     authorized_keys.dirname.mkpath
     authorized_keys.write(%(expiry-time="20261003144218Z" #{@type} #{@blob} Alice\n))
 
-    result = ProfileAuthorization.call(servers(:web), @profile, expires_at: Time.utc(2030, 1, 1), replace: true,
+    result = PublicKeyAuthorization.call(servers(:web), @public_key, expires_at: Time.utc(2030, 1, 1), replace: true,
                                        transport: fake, known_hosts_file: @known_hosts)
 
     assert result.added?

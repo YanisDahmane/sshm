@@ -24,8 +24,8 @@ class ServerGroupsTest < ApplicationSystemTestCase
     assert_selector "#servers tbody tr", count: Server.count
   end
 
-  test "checking a whole group in the profile's bulk form" do
-    visit profile_path(profiles(:alice))
+  test "checking a whole group in the public_key's bulk form" do
+    visit public_key_path(public_keys(:alice))
 
     within("#bulk-authorize") do
       click_on "Production"

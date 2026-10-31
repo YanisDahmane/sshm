@@ -42,7 +42,7 @@ class AutomationTest < ActiveSupport::TestCase
     end
   end
 
-  test "the keys scan scans every server and counts the new keys without profile" do
+  test "the keys scan scans every server and counts the new keys without public_key" do
     automation = Automation.all_kinds.find { |a| a.kind == "keys_scan" }
     scan = lambda do |server, **|
       Activity.record!(:unknown_key_detected, server: server) if server.name == "Web"
@@ -51,7 +51,7 @@ class AutomationTest < ActiveSupport::TestCase
 
     result = stub_method(ServerScan, :call, scan) { automation.run! }
 
-    assert_equal "2/3 serveur(s) scanné(s), 1 nouvelle(s) clé(s) sans profil", result
+    assert_equal "2/3 serveur(s) scanné(s), 1 nouvelle(s) clé(s) inconnue(s)", result
     assert_equal result, automation.reload.last_result
     assert_not_nil automation.last_run_at
     activity = Activity.of_kind(:automation_run).sole
@@ -67,8 +67,8 @@ class AutomationTest < ActiveSupport::TestCase
     assert_equal "2/3 serveur(s) joignable(s)", result
   end
 
-  def snapshot(server, unix_user, *profiles)
+  def snapshot(server, unix_user, *public_keys)
     AccountSnapshot.create!(server: server, unix_user: unix_user, read_at: 1.minute.ago,
-                            content: profiles.map { |profile| profile.public_key }.join("\n"))
+                            content: public_keys.map { |public_key| public_key.content }.join("\n"))
   end
 end

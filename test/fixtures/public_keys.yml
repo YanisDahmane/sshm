@@ -2,10 +2,13 @@
 <% ci = SshKeyGenerator.generate(comment: "") %>
 alice:
   name: Alice
-  public_key: <%= alice.public_key %>
+  kind: person
+  content: <%= alice.public_key %>
   fingerprint: <%= alice.fingerprint %>
 
 ci:
   name: CI
-  public_key: <%= ci.public_key.strip %>
+  kind: server
+  description: Runner GitHub Actions
+  content: <%= ci.public_key.strip %>
   fingerprint: <%= ci.fingerprint %>

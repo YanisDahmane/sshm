@@ -13,13 +13,13 @@ class ServerScanTest < ActiveSupport::TestCase
 
   test "reads the login account and records its snapshot" do
     accounts = []
-    reader = ->(_server, account:, **) { accounts << account.unix_user; read_result(keys: profiles(:alice).public_key) }
+    reader = ->(_server, account:, **) { accounts << account.unix_user; read_result(keys: public_keys(:alice).content) }
 
     result = stub_method(AuthorizedKeysReader, :call, reader) { ServerScan.call(@server) }
 
     assert result.success?
     assert_equal %w[deploy], accounts
-    assert_equal [ profiles(:alice).fingerprint ], AccountSnapshot.find_by!(server: @server, unix_user: "deploy").fingerprints
+    assert_equal [ public_keys(:alice).fingerprint ], AccountSnapshot.find_by!(server: @server, unix_user: "deploy").fingerprints
     assert @server.reload.ssh_ok
   end
 

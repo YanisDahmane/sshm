@@ -6,7 +6,7 @@ class ActivitiesController < ApplicationController
     @server = Server.find_by(id: params[:server_id])
     @page = [ params[:page].to_i, 1 ].max
 
-    scope = Activity.recent.includes(:user, :server, :profile)
+    scope = Activity.recent.includes(:user, :server, :public_key)
     scope = scope.in_category(@category) if @category
     scope = scope.where(server: @server) if @server
     @activities = scope.offset((@page - 1) * PER_PAGE).limit(PER_PAGE + 1).to_a

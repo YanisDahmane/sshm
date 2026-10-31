@@ -1,50 +1,50 @@
 require "test_helper"
 
-class ProfileAccessesControllerTest < ActionDispatch::IntegrationTest
+class PublicKeyAccessesControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
   include StubHelpers
   include TemporaryAccessHelpers
 
   setup do
-    @profile = profiles(:alice)
+    @public_key = public_keys(:alice)
     @grants = []
     # After a grant, the controller re-reads the account to refresh its snapshot.
-    stub_method_until_teardown(AuthorizedKeysReader, :call, ->(*, **) { AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(@profile.public_key), error_title: nil, error_details: nil) })
+    stub_method_until_teardown(AuthorizedKeysReader, :call, ->(*, **) { AuthorizedKeysReader::Result.new(keys: AuthorizedKey.parse(@public_key.content), error_title: nil, error_details: nil) })
   end
 
   def granter(status_for = ->(_server) { :added })
-    lambda do |server, profile, account:, duration:, **|
-      @grants << [ server.name, profile.name, account.unix_user, duration ]
+    lambda do |server, public_key, account:, duration:, **|
+      @grants << [ server.name, public_key.name, account.unix_user, duration ]
       status = status_for.call(server)
-      ProfileAuthorization::Result.new(status: status, error_title: (status == :error ? "Connexion impossible" : nil), error_details: (status == :error ? "refused" : nil))
+      PublicKeyAuthorization::Result.new(status: status, error_title: (status == :error ? "Connexion impossible" : nil), error_details: (status == :error ? "refused" : nil))
     end
   end
 
   test "requires authentication" do
-    post profile_accesses_path(@profile), params: { server_ids: [ servers(:web).id ] }
+    post public_key_accesses_path(@public_key), params: { server_ids: [ servers(:web).id ] }
     assert_redirected_to new_user_session_path
 
-    delete profile_access_path(@profile), params: { server_id: servers(:web).id }
+    delete public_key_access_path(@public_key), params: { server_id: servers(:web).id }
     assert_redirected_to new_user_session_path
   end
 
-  test "grants the profile on each selected server's login user" do
+  test "grants the public_key on each selected server's login user" do
     sign_in users(:one)
 
     stub_method(AccessGrant, :call, granter) do
-      post profile_accesses_path(@profile), params: { server_ids: [ servers(:web).id, servers(:db).id ] }, as: :turbo_stream
+      post public_key_accesses_path(@public_key), params: { server_ids: [ servers(:web).id, servers(:db).id ] }, as: :turbo_stream
     end
 
     assert_equal [ [ "Database", "Alice", "admin", nil ], [ "Web", "Alice", "deploy", nil ] ], @grants
     assert_turbo_stream action: :update, target: "bulk-results" do
       assert_select "li.bulk-result.is-success", 2
-      assert_select "li.bulk-result", text: "Web · deploy : autorisé"
+      assert_select "li.bulk-result", text: "Web · deploy : ajoutée"
     end
-    assert_turbo_stream action: :replace, target: "profile-accesses" do
-      assert_select "li.profile-access", 2
+    assert_turbo_stream action: :replace, target: "key-accesses" do
+      assert_select "li.key-access", 2
     end
     assert_turbo_stream action: :update, target: "flash" do
-      assert_select ".toast-notice", text: /Autorisations terminées : 2\/2 serveur\(s\)\./
+      assert_select ".toast-notice", text: /Ajouts terminés : 2\/2 serveur\(s\)\./
     end
     assert_equal 2, AccountSnapshot.count
   end
@@ -53,12 +53,12 @@ class ProfileAccessesControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:one)
 
     stub_method(AccessGrant, :call, granter) do
-      post profile_accesses_path(@profile), params: { server_ids: [ servers(:web).id ], duration: "60" }, as: :turbo_stream
+      post public_key_accesses_path(@public_key), params: { server_ids: [ servers(:web).id ], duration: "60" }, as: :turbo_stream
     end
 
     assert_equal [ [ "Web", "Alice", "deploy", 1.hour ] ], @grants
     assert_turbo_stream action: :update, target: "bulk-results" do
-      assert_select "li.bulk-result", text: "Web · deploy : autorisé pendant 1 heure"
+      assert_select "li.bulk-result", text: "Web · deploy : ajoutée pendant 1 heure"
     end
   end
 
@@ -67,11 +67,11 @@ class ProfileAccessesControllerTest < ActionDispatch::IntegrationTest
     statuses = { "Web" => :already_present, "Database" => :error }
 
     stub_method(AccessGrant, :call, granter(->(server) { statuses.fetch(server.name) })) do
-      post profile_accesses_path(@profile), params: { server_ids: [ servers(:web).id, servers(:db).id ] }, as: :turbo_stream
+      post public_key_accesses_path(@public_key), params: { server_ids: [ servers(:web).id, servers(:db).id ] }, as: :turbo_stream
     end
 
     assert_turbo_stream action: :update, target: "bulk-results" do
-      assert_select "li.bulk-result.is-success", text: "Web · deploy : déjà autorisé"
+      assert_select "li.bulk-result.is-success", text: "Web · deploy : déjà présente"
       assert_select "li.bulk-result.is-error", text: "Database · admin : Connexion impossible — refused"
     end
     assert_turbo_stream action: :update, target: "flash" do
@@ -83,23 +83,23 @@ class ProfileAccessesControllerTest < ActionDispatch::IntegrationTest
   test "asks to choose a server" do
     sign_in users(:one)
 
-    post profile_accesses_path(@profile), params: {}
+    post public_key_accesses_path(@public_key), params: {}
 
-    assert_redirected_to profile_path(@profile)
+    assert_redirected_to public_key_path(@public_key)
     assert_equal "Choisissez au moins un serveur.", flash[:alert]
   end
 
   test "rejects a duration that is not offered" do
     sign_in users(:one)
-    post profile_accesses_path(@profile), params: { server_ids: [ servers(:web).id ], duration: "3" }
+    post public_key_accesses_path(@public_key), params: { server_ids: [ servers(:web).id ], duration: "3" }
     assert_response :bad_request
   end
 
   test "revokes one access and updates the snapshot and temporary access" do
     sign_in users(:one)
-    profile = profiles(:ci)
-    AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse(profile.public_key))
-    access = create_temporary_access(profile: profile)
+    public_key = public_keys(:ci)
+    AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse(public_key.content))
+    access = create_temporary_access(public_key: public_key)
     calls = []
     remover = lambda do |server, blob, account:, **|
       calls << [ server, blob, account.unix_user ]
@@ -107,14 +107,14 @@ class ProfileAccessesControllerTest < ActionDispatch::IntegrationTest
     end
 
     stub_method(AuthorizedKeyRemoval, :call, remover) do
-      delete profile_access_path(profile), params: { server_id: servers(:web).id }, as: :turbo_stream
+      delete public_key_access_path(public_key), params: { server_id: servers(:web).id }, as: :turbo_stream
     end
 
-    assert_equal [ [ servers(:web), profile.authorized_key.key, "deploy" ] ], calls
+    assert_equal [ [ servers(:web), public_key.authorized_key.key, "deploy" ] ], calls
     assert_not access.reload.active?
     assert_empty AccountSnapshot.sole.fingerprints
-    assert_turbo_stream action: :replace, target: "profile-accesses" do
-      assert_select "li.profile-access", 0
+    assert_turbo_stream action: :replace, target: "key-accesses" do
+      assert_select "li.key-access", 0
     end
     assert_turbo_stream action: :update, target: "flash" do
       assert_select ".toast-notice", text: "L'accès de « CI » à « Web » a été retiré."
@@ -123,31 +123,31 @@ class ProfileAccessesControllerTest < ActionDispatch::IntegrationTest
 
   test "keeps everything when the revocation fails" do
     sign_in users(:one)
-    AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse(@profile.public_key))
+    AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse(@public_key.content))
     failed = AuthorizedKeyRemoval::Result.new(status: :error, error_title: "Connexion impossible", error_details: "refused")
 
     stub_method(AuthorizedKeyRemoval, :call, failed) do
-      delete profile_access_path(@profile), params: { server_id: servers(:web).id }, as: :turbo_stream
+      delete public_key_access_path(@public_key), params: { server_id: servers(:web).id }, as: :turbo_stream
     end
 
-    assert_equal [ @profile.fingerprint ], AccountSnapshot.sole.fingerprints
+    assert_equal [ @public_key.fingerprint ], AccountSnapshot.sole.fingerprints
     assert_turbo_stream action: :update, target: "flash" do
       assert_select ".toast-alert", text: /Impossible de retirer l'accès : Connexion impossible/
     end
   end
 
-  test "the profile page shows its accesses and the bulk form" do
-    AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse(@profile.public_key))
+  test "the public_key page shows its accesses and the bulk form" do
+    AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse(@public_key.content))
     sign_in users(:one)
 
-    get profile_path(@profile)
+    get public_key_path(@public_key)
 
-    assert_select "#profile-accesses li.profile-access", 1 do
+    assert_select "#key-accesses li.key-access", 1 do
       assert_select "a[href=?]", server_path(servers(:web)), text: "Web"
       assert_select "span", text: "Permanent"
-      assert_select "form[action=?][data-turbo-confirm][data-confirm-variant=danger]", profile_access_path(@profile)
+      assert_select "form[action=?][data-turbo-confirm][data-confirm-variant=danger]", public_key_access_path(@public_key)
     end
-    assert_select "#bulk-authorize form[action=?]", profile_accesses_path(@profile) do
+    assert_select "#bulk-authorize form[action=?]", public_key_accesses_path(@public_key) do
       assert_select "input[type=checkbox][name='server_ids[]']", 3
       assert_select "input[name=account]", 0
       assert_select "select[name=duration] option[value='60']", "1 heure"
@@ -158,7 +158,7 @@ class ProfileAccessesControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:one)
     production = server_groups(:production)
 
-    get profile_path(@profile)
+    get public_key_path(@public_key)
 
     assert_select "#bulk-authorize .bulk-groups" do
       assert_select "button[data-action='check-all#toggleGroup'][data-check-all-group-param=?]", production.id.to_s, text: "Production"

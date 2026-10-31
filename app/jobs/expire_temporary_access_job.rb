@@ -18,7 +18,7 @@ class ExpireTemporaryAccessJob < ApplicationJob
 
     access.end!
     AccountSnapshot.find_by(server: access.server, unix_user: access.unix_user)&.forget!(access.key_blob)
-    Activity.record!(:key_expired, server: access.server, profile: access.profile, unix_user: access.unix_user, user: nil,
+    Activity.record!(:key_expired, server: access.server, public_key: access.public_key, unix_user: access.unix_user, user: nil,
                                    fingerprint: access.fingerprint) if result.removed?
   end
 end

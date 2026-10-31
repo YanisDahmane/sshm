@@ -1,10 +1,10 @@
-<%# Quick search (⌘K / Ctrl+K) over pages, servers and profiles; see command_palette_controller.js. %>
+<%# Quick search (⌘K / Ctrl+K) over pages, servers and keyring keys; see command_palette_controller.js. %>
 <dialog id="command-palette" data-command-palette-target="dialog" aria-label="Recherche rapide"
         class="mx-auto mt-24 w-full max-w-lg rounded-xl border border-slate-200 bg-white p-0 shadow-2xl backdrop:bg-slate-900/40 backdrop:backdrop-blur-sm">
   <div class="flex items-center gap-3 border-b border-slate-200 px-4">
     <%= icon :magnifying_glass, class: "h-5 w-5 text-slate-400" %>
     <input type="search" data-command-palette-target="input" data-action="input->command-palette#filter keydown->command-palette#navigate"
-           placeholder="Rechercher un serveur, un profil, une page…" autocomplete="off" spellcheck="false"
+           placeholder="Rechercher un serveur, une clé, une page…" autocomplete="off" spellcheck="false"
            role="combobox" aria-expanded="true" aria-controls="command-palette-results"
            class="w-full border-0 py-4 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0">
   </div>

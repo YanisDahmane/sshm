@@ -1,4 +1,4 @@
-# Grants a profile access to a server account, permanently or for a limited
+# Grants a keyring key access to a server account, permanently or for a limited
 # time (see TemporaryAccess), and keeps the temporary accesses in sync:
 #
 # - a temporary grant records a TemporaryAccess and schedules its expiry;
@@ -6,31 +6,31 @@
 #   authorized_keys line (to change or drop the expiry) and ends the old access;
 # - a key already authorized permanently stays as it is.
 class AccessGrant
-  def self.call(server, profile, account:, duration: nil, **connection_options)
-    active = TemporaryAccess.active.find_by(server: server, unix_user: account.unix_user, fingerprint: profile.fingerprint)
+  def self.call(server, public_key, account:, duration: nil, **connection_options)
+    active = TemporaryAccess.active.find_by(server: server, unix_user: account.unix_user, fingerprint: public_key.fingerprint)
     expires_at = duration && Time.current + duration
 
-    result = ProfileAuthorization.call(server, profile, account: account, expires_at: expires_at, replace: active.present?, **connection_options)
+    result = PublicKeyAuthorization.call(server, public_key, account: account, expires_at: expires_at, replace: active.present?, **connection_options)
     return result unless result.success?
 
     TemporaryAccess.transaction do
       active&.end!
-      schedule_expiry(server, profile, account, expires_at) if expires_at && result.added?
+      schedule_expiry(server, public_key, account, expires_at) if expires_at && result.added?
     end
-    log(server, profile, account, duration, expires_at) if result.added?
+    log(server, public_key, account, duration, expires_at) if result.added?
     result
   end
 
-  def self.log(server, profile, account, duration, expires_at)
-    Activity.record!(:key_added, server: server, profile: profile, unix_user: account.unix_user,
-                                 key_name: profile.authorized_key.comment || profile.name, fingerprint: profile.fingerprint,
+  def self.log(server, public_key, account, duration, expires_at)
+    Activity.record!(:key_added, server: server, public_key: public_key, unix_user: account.unix_user,
+                                 key_name: public_key.authorized_key.comment || public_key.name, fingerprint: public_key.fingerprint,
                                  duration_label: duration && TemporaryAccess.label_for(duration), expires_at: expires_at&.iso8601)
   end
   private_class_method :log
 
-  def self.schedule_expiry(server, profile, account, expires_at)
-    access = TemporaryAccess.create!(server: server, profile: profile, unix_user: account.unix_user,
-                                     key_blob: profile.authorized_key.key, fingerprint: profile.fingerprint, expires_at: expires_at)
+  def self.schedule_expiry(server, public_key, account, expires_at)
+    access = TemporaryAccess.create!(server: server, public_key: public_key, unix_user: account.unix_user,
+                                     key_blob: public_key.authorized_key.key, fingerprint: public_key.fingerprint, expires_at: expires_at)
     ExpireTemporaryAccessJob.set(wait_until: expires_at).perform_later(access)
   end
   private_class_method :schedule_expiry

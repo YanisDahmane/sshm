@@ -10,14 +10,14 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
 
   test "lists activities, most recent first, with author and server" do
     travel_to(1.hour.ago) { Activity.record!(:server_created, server: servers(:web)) }
-    Activity.record!(:key_added, server: servers(:web), profile: profiles(:alice), unix_user: "deploy", user: users(:one))
+    Activity.record!(:key_added, server: servers(:web), public_key: public_keys(:alice), unix_user: "deploy", user: users(:one))
     sign_in users(:one)
 
     get activities_path
 
     assert_select "#activities li.activity", 2
     assert_select "#activities li.activity:first-child[data-kind=key_added]" do
-      assert_select "p", text: "« Alice » autorisé sur « Web » pour deploy"
+      assert_select "p", text: "« Alice » ajoutée sur « Web »"
       assert_select "p", text: /Clé ajoutée\s+· one@example.com/
       assert_select "a[href=?]", server_path(servers(:web))
       assert_select ".severity-info"

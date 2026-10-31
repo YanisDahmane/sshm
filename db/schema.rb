@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_31_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_31_110000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -29,14 +29,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_100000) do
     t.string "kind", null: false
     t.bigint "user_id"
     t.bigint "server_id"
-    t.bigint "profile_id"
+    t.bigint "public_key_id"
     t.string "unix_user"
     t.jsonb "data", default: {}, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["created_at"], name: "index_activities_on_created_at"
     t.index ["kind"], name: "index_activities_on_kind"
-    t.index ["profile_id"], name: "index_activities_on_profile_id"
+    t.index ["public_key_id"], name: "index_activities_on_public_key_id"
     t.index ["server_id"], name: "index_activities_on_server_id"
     t.index ["user_id"], name: "index_activities_on_user_id"
   end
@@ -118,14 +118,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_100000) do
     t.index ["name"], name: "index_notification_channels_on_name", unique: true
   end
 
-  create_table "profiles", force: :cascade do |t|
+  create_table "public_keys", force: :cascade do |t|
     t.string "name", null: false
-    t.text "public_key", null: false
+    t.text "content", null: false
     t.string "fingerprint", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["fingerprint"], name: "index_profiles_on_fingerprint", unique: true
-    t.index ["name"], name: "index_profiles_on_name", unique: true
+    t.string "kind", default: "person", null: false
+    t.text "description"
+    t.index ["fingerprint"], name: "index_public_keys_on_fingerprint", unique: true
+    t.index ["name"], name: "index_public_keys_on_name", unique: true
   end
 
   create_table "server_group_memberships", force: :cascade do |t|
@@ -171,7 +173,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_100000) do
 
   create_table "temporary_accesses", force: :cascade do |t|
     t.bigint "server_id", null: false
-    t.bigint "profile_id"
+    t.bigint "public_key_id"
     t.string "unix_user", null: false
     t.text "key_blob", null: false
     t.string "fingerprint", null: false
@@ -180,7 +182,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_100000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["expires_at"], name: "index_temporary_accesses_active_expiry", where: "(ended_at IS NULL)"
-    t.index ["profile_id"], name: "index_temporary_accesses_on_profile_id"
+    t.index ["public_key_id"], name: "index_temporary_accesses_on_public_key_id"
     t.index ["server_id", "unix_user", "fingerprint"], name: "index_temporary_accesses_active_key", unique: true, where: "(ended_at IS NULL)"
     t.index ["server_id"], name: "index_temporary_accesses_on_server_id"
   end
@@ -213,7 +215,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_100000) do
   end
 
   add_foreign_key "account_snapshots", "servers", on_delete: :cascade
-  add_foreign_key "activities", "profiles", on_delete: :nullify
+  add_foreign_key "activities", "public_keys", on_delete: :nullify
   add_foreign_key "activities", "servers", on_delete: :nullify
   add_foreign_key "activities", "users", on_delete: :nullify
   add_foreign_key "invitations", "users", column: "invited_by_id"
@@ -225,6 +227,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_100000) do
   add_foreign_key "key_rotations", "users", column: "started_by_id", on_delete: :nullify
   add_foreign_key "server_group_memberships", "server_groups", on_delete: :cascade
   add_foreign_key "server_group_memberships", "servers", on_delete: :cascade
-  add_foreign_key "temporary_accesses", "profiles", on_delete: :nullify
+  add_foreign_key "temporary_accesses", "public_keys", on_delete: :nullify
   add_foreign_key "temporary_accesses", "servers", on_delete: :cascade
 end

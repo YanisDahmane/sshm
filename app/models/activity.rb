@@ -9,10 +9,10 @@ class Activity < ApplicationRecord
   SEVERITIES = %i[info warning critical].freeze
 
   KINDS = [
-    Kind.new(:key_added, "Clé ajoutée", :keys, :info, "Un profil a été autorisé sur un compte d'un serveur."),
+    Kind.new(:key_added, "Clé ajoutée", :keys, :info, "Une clé du trousseau a été ajoutée sur un serveur."),
     Kind.new(:key_removed, "Clé supprimée", :keys, :info, "Une clé a été supprimée d'un compte depuis Elio."),
     Kind.new(:key_expired, "Accès temporaire expiré", :keys, :info, "Un accès temporaire a expiré et sa clé a été retirée."),
-    Kind.new(:unknown_key_detected, "Clé sans profil détectée", :security, :warning, "Une clé qui ne correspond à aucun profil a été trouvée sur un serveur."),
+    Kind.new(:unknown_key_detected, "Clé inconnue détectée", :security, :warning, "Une clé absente du trousseau a été trouvée sur un serveur."),
     Kind.new(:key_disappeared, "Clé retirée hors d'Elio", :security, :warning, "Une clé a disparu d'un serveur sans passer par Elio."),
     Kind.new(:ssh_access_lost, "Accès SSH perdu", :security, :critical, "Le serveur refuse désormais la clé d'Elio."),
     Kind.new(:host_key_changed, "Empreinte serveur remplacée", :security, :critical, "Un administrateur a accepté la nouvelle empreinte d'un serveur (réinstallation…)."),
@@ -34,8 +34,8 @@ class Activity < ApplicationRecord
     Kind.new(:two_factor_enabled, "2FA activée", :security, :info, "Un utilisateur a activé la double authentification."),
     Kind.new(:two_factor_disabled, "2FA désactivée", :security, :critical, "La double authentification d'un utilisateur a été désactivée ou réinitialisée."),
     Kind.new(:two_factor_backup_code_used, "Code de secours utilisé", :security, :warning, "Un utilisateur s'est connecté avec un code de secours."),
-    Kind.new(:profile_created, "Profil créé", :configuration, :info, "Un profil a été créé."),
-    Kind.new(:profile_deleted, "Profil supprimé", :configuration, :info, "Un profil a été supprimé."),
+    Kind.new(:public_key_created, "Clé ajoutée au trousseau", :configuration, :info, "Une clé a été ajoutée au trousseau."),
+    Kind.new(:public_key_deleted, "Clé retirée du trousseau", :configuration, :info, "Une clé a été retirée du trousseau (elle reste sur les serveurs)."),
     Kind.new(:ssh_key_generated, "Clé Elio générée", :security, :critical, "La clé SSH d'Elio a été générée ou régénérée."),
     Kind.new(:ssh_key_rotation_started, "Rotation de la clé Elio lancée", :security, :warning, "Une nouvelle clé Elio est en cours d'installation sur les serveurs."),
     Kind.new(:ssh_key_rotated, "Clé Elio remplacée", :security, :critical, "La rotation est terminée : la nouvelle clé Elio est active, l'ancienne supprimée."),
@@ -44,7 +44,7 @@ class Activity < ApplicationRecord
 
   belongs_to :user, optional: true
   belongs_to :server, optional: true
-  belongs_to :profile, optional: true
+  belongs_to :public_key, optional: true
 
   validates :kind, inclusion: { in: KINDS.keys.map(&:to_s) }
 
@@ -55,10 +55,10 @@ class Activity < ApplicationRecord
   scope :in_category, ->(category) { where(kind: KINDS.values.select { |kind| kind.category == category.to_sym }.map { |kind| kind.key.to_s }) }
 
   # Records an activity; the author defaults to the signed-in user (Current.user).
-  def self.record!(kind, server: nil, profile: nil, unix_user: nil, user: Current.user, **data)
+  def self.record!(kind, server: nil, public_key: nil, unix_user: nil, user: Current.user, **data)
     data[:server_name] ||= server&.name
-    data[:profile_name] ||= profile&.name
-    create!(kind: kind.to_s, server: server, profile: profile, unix_user: unix_user, user: user, data: data.compact)
+    data[:public_key_name] ||= public_key&.name
+    create!(kind: kind.to_s, server: server, public_key: public_key, unix_user: unix_user, user: user, data: data.compact)
   end
 
   def definition = KINDS.fetch(kind.to_sym)
@@ -69,21 +69,21 @@ class Activity < ApplicationRecord
 
   def server_name = server&.name || data["server_name"]
 
-  def profile_name = profile&.name || data["profile_name"]
+  def public_key_name = public_key&.name || data["public_key_name"]
 
   def key_name = data["key_name"] || "sans nom"
 
-  def target = [ server_name && "« #{server_name} »", unix_user && "pour #{unix_user}" ].compact.join(" ")
+  def target = server_name && "« #{server_name} »"
 
   # One-line French description of what happened.
   def summary
     case kind.to_sym
     when :key_added
       duration = data["duration_label"] ? " pendant #{data["duration_label"]}" : ""
-      "« #{profile_name} » autorisé sur #{target}#{duration}"
+      "« #{public_key_name} » ajoutée sur #{target}#{duration}"
     when :key_removed then "Clé « #{key_name} » supprimée de #{target}"
-    when :key_expired then "Accès temporaire de « #{profile_name || key_name} » retiré de #{target}"
-    when :unknown_key_detected then "Clé « #{key_name} » sans profil trouvée sur #{target}"
+    when :key_expired then "Accès temporaire de « #{public_key_name || key_name} » retiré de #{target}"
+    when :unknown_key_detected then "Clé inconnue « #{key_name} » trouvée sur #{target}"
     when :key_disappeared then "Clé « #{key_name} » disparue de #{target}"
     when :ssh_access_lost then "« #{server_name} » refuse la clé d'Elio"
     when :host_key_changed then "Nouvelle empreinte acceptée pour « #{server_name} » : #{data["new_fingerprint"]}"
@@ -108,8 +108,8 @@ class Activity < ApplicationRecord
     when :two_factor_enabled then "2FA activée pour #{data["email"]}"
     when :two_factor_disabled then data["reset_by"] ? "2FA de #{data["email"]} réinitialisée par #{data["reset_by"]}" : "2FA désactivée pour #{data["email"]}"
     when :two_factor_backup_code_used then "#{data["email"]} s'est connecté avec un code de secours (#{data["left"]} restant(s))"
-    when :profile_created then "Profil « #{profile_name} » créé"
-    when :profile_deleted then "Profil « #{profile_name} » supprimé"
+    when :public_key_created then "Clé « #{public_key_name} » ajoutée au trousseau"
+    when :public_key_deleted then "Clé « #{public_key_name} » retirée du trousseau"
     when :ssh_key_generated then data["regenerated"] ? "Clé Elio régénérée" : "Clé Elio générée"
     when :ssh_key_rotation_started then "Rotation de la clé Elio lancée sur #{data["servers"]} serveur(s)"
     when :ssh_key_rotated

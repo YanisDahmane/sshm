@@ -15,7 +15,7 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
     stub_method_until_teardown(AuthorizedKeysReader, :call, ok_keys)
     stub_method_until_teardown(SshCheck, :call, SshCheck::Result.new(success: true, message: "ok", details: "ok"))
     stub_method_until_teardown(ServerPing, :reachable?, true)
-    stub_method_until_teardown(AccessGrant, :call, ProfileAuthorization::Result.new(status: :added, error_title: nil, error_details: nil))
+    stub_method_until_teardown(AccessGrant, :call, PublicKeyAuthorization::Result.new(status: :added, error_title: nil, error_details: nil))
     stub_method_until_teardown(KeyRevocation, :call, AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil))
     stub_method_until_teardown(SlackNotifier, :post, nil)
   end
@@ -31,9 +31,9 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
       "server keys" => -> { get server_authorized_keys_path(servers(:web)) },
       "ping one server" => -> { post server_ping_path(servers(:web)) },
       "ping all servers" => -> { post server_pings_path },
-      "profiles index" => -> { get profiles_path },
+      "public_keys index" => -> { get public_keys_path },
       "server groups" => -> { get server_groups_path },
-      "profile page" => -> { get profile_path(profiles(:alice)) },
+      "public_key page" => -> { get public_key_path(public_keys(:alice)) },
       "activities" => -> { get activities_path },
       "own account" => -> { get account_path },
       "set up 2FA" => -> { get new_two_factor_path }
@@ -53,15 +53,15 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
       "update server group" => -> { patch server_group_path(server_groups(:production)), params: { server_group: { name: "Renamed" } } },
       "delete server group" => -> { delete server_group_path(server_groups(:production)) },
       "scan keys" => -> { post server_scans_path },
-      "authorize a profile" => -> { post server_authorizations_path(servers(:web)), params: { profile_id: profiles(:alice).id } },
+      "authorize a public_key" => -> { post server_authorizations_path(servers(:web)), params: { public_key_id: public_keys(:alice).id } },
       "remove a key" => -> { delete server_authorized_key_path(servers(:web)), params: { key: "AAAA" } },
-      "new profile" => -> { get new_profile_path },
-      "create profile" => -> { post profiles_path, params: { profile: { name: "New", public_key: SshKeyGenerator.generate.public_key } } },
-      "edit profile" => -> { get edit_profile_path(profiles(:alice)) },
-      "update profile" => -> { patch profile_path(profiles(:alice)), params: { profile: { name: "Renamed" } } },
-      "delete profile" => -> { delete profile_path(profiles(:alice)) },
-      "grant a profile on servers" => -> { post profile_accesses_path(profiles(:alice)), params: { server_ids: [ servers(:web).id ] } },
-      "revoke a profile access" => -> { delete profile_access_path(profiles(:alice)), params: { server_id: servers(:web).id } }
+      "new public_key" => -> { get new_public_key_path },
+      "create public_key" => -> { post public_keys_path, params: { public_key: { name: "New", content: SshKeyGenerator.generate.public_key } } },
+      "edit public_key" => -> { get edit_public_key_path(public_keys(:alice)) },
+      "update public_key" => -> { patch public_key_path(public_keys(:alice)), params: { public_key: { name: "Renamed" } } },
+      "delete public_key" => -> { delete public_key_path(public_keys(:alice)) },
+      "grant a public_key on servers" => -> { post public_key_accesses_path(public_keys(:alice)), params: { server_ids: [ servers(:web).id ] } },
+      "revoke a public_key access" => -> { delete public_key_access_path(public_keys(:alice)), params: { server_id: servers(:web).id } }
     },
     administer: {
       "general settings" => -> { get settings_path },
@@ -79,7 +79,7 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
       "users" => -> { get settings_users_path },
       "invite a user" => -> { post settings_invitations_path, params: { invitation: { email: "new@example.com", role: "viewer" } } },
       "revoke an invitation" => -> { delete settings_invitation_path(Invitation.create!(email: "x@example.com", invited_by: users(:one))) },
-      "change a user's role" => -> { patch settings_user_path(users(:viewer)), params: { user: { role: "operator", profile_id: "" } } },
+      "change a user's role" => -> { patch settings_user_path(users(:viewer)), params: { user: { role: "operator", public_key_id: "" } } },
       "deactivate a user" => -> { post deactivate_settings_user_path(users(:viewer)) },
       "reactivate a user" => -> { post reactivate_settings_user_path(users(:viewer)) },
       "reset a user's 2FA" => -> { post reset_two_factor_settings_user_path(users(:viewer)) },
@@ -126,7 +126,7 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
 
   test "a forbidden Turbo Stream request shows a toast" do
     sign_in users(:viewer)
-    post server_authorizations_path(servers(:web)), params: { profile_id: profiles(:alice).id }, as: :turbo_stream
+    post server_authorizations_path(servers(:web)), params: { public_key_id: public_keys(:alice).id }, as: :turbo_stream
 
     assert_turbo_stream action: :update, target: "flash", status: :forbidden do
       assert_select ".toast-alert", text: /Votre rôle \(Lecture\) ne permet pas cette action/

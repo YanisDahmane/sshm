@@ -18,7 +18,7 @@ class ExpireTemporaryAccessJobTest < ActiveJob::TestCase
 
     stub_method(AuthorizedKeyRemoval, :call, remover) { ExpireTemporaryAccessJob.perform_now(access) }
 
-    assert_equal [ [ servers(:web), profiles(:ci).authorized_key.key, AuthorizedKeysAccount.login(servers(:web)) ] ], calls
+    assert_equal [ [ servers(:web), public_keys(:ci).authorized_key.key, AuthorizedKeysAccount.login(servers(:web)) ] ], calls
     assert_not access.reload.active?
   end
 
@@ -65,11 +65,11 @@ class ExpireTemporaryAccessJobTest < ActiveJob::TestCase
 
   test "removes the expired key from the account snapshot" do
     access = create_temporary_access(expires_at: 1.minute.ago)
-    AccountSnapshot.record!(servers(:web), access.account, AuthorizedKey.parse([ profiles(:ci).public_key, profiles(:alice).public_key ].join("\n")))
+    AccountSnapshot.record!(servers(:web), access.account, AuthorizedKey.parse([ public_keys(:ci).content, public_keys(:alice).content ].join("\n")))
 
     stub_method(AuthorizedKeyRemoval, :call, removal(:removed)) { ExpireTemporaryAccessJob.perform_now(access) }
 
-    assert_equal [ profiles(:alice).fingerprint ], AccountSnapshot.sole.fingerprints
+    assert_equal [ public_keys(:alice).fingerprint ], AccountSnapshot.sole.fingerprints
   end
 
   test "logs the expiry as a system activity" do
@@ -78,6 +78,6 @@ class ExpireTemporaryAccessJobTest < ActiveJob::TestCase
     stub_method(AuthorizedKeyRemoval, :call, removal(:removed)) { ExpireTemporaryAccessJob.perform_now(access) }
 
     activity = Activity.of_kind(:key_expired).sole
-    assert_equal [ servers(:web), profiles(:ci), "deploy", "Système" ], [ activity.server, activity.profile, activity.unix_user, activity.author_name ]
+    assert_equal [ servers(:web), public_keys(:ci), "deploy", "Système" ], [ activity.server, activity.public_key, activity.unix_user, activity.author_name ]
   end
 end

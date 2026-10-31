@@ -1,10 +1,10 @@
 # Figures computed from the AccountSnapshots (last known keys of each server
-# account): keys that match no profile ("orphans"), per server and in total.
+# account): keys outside the keyring ("orphans"), per server and in total.
 class KeyInsights
   def initialize(snapshots: AccountSnapshot.includes(:server).to_a, app_key: SshKey.app_keys)
     @snapshots = snapshots
     @app_key = app_key
-    @profile_fingerprints = Profile.pluck(:fingerprint).to_set
+    @public_key_fingerprints = PublicKey.pluck(:fingerprint).to_set
   end
 
   def scanned? = @snapshots.any?
@@ -16,7 +16,7 @@ class KeyInsights
   # { server_id => orphan keys (one per fingerprint, whatever the account) }, only for scanned servers.
   def orphans_by_server_id
     @orphans_by_server_id ||= @snapshots.group_by(&:server_id).transform_values do |snapshots|
-      snapshots.flat_map { |snapshot| snapshot.keys_without_profile(profile_fingerprints: @profile_fingerprints, app_key: @app_key) }
+      snapshots.flat_map { |snapshot| snapshot.unknown_keys(known_fingerprints: @public_key_fingerprints, app_key: @app_key) }
                .uniq(&:fingerprint)
     end
   end

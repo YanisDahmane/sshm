@@ -14,7 +14,7 @@ class TemporaryAccess < ApplicationRecord
   }.freeze
 
   belongs_to :server
-  belongs_to :profile, optional: true
+  belongs_to :public_key, optional: true
 
   validates :unix_user, :key_blob, :fingerprint, :expires_at, presence: true
 

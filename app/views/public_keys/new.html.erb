@@ -1,0 +1,13 @@
+<% content_for :title, "Ajouter une clé · Elio" %>
+
+<div class="mx-auto max-w-xl">
+  <%= link_to (@return_to ? "← Retour au serveur" : "← Trousseau"), @return_to || public_keys_path, class: "text-sm text-slate-500 hover:text-slate-700" %>
+  <h1 class="mt-2 text-2xl font-bold tracking-tight">Ajouter une clé au trousseau</h1>
+  <% if @return_to && @public_key.content.present? %>
+    <p class="prefilled-hint mt-2 text-sm text-slate-500">La clé trouvée sur le serveur est déjà remplie : choisissez simplement un nom.</p>
+  <% end %>
+
+  <div class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <%= render "form", public_key: @public_key, return_to: @return_to %>
+  </div>
+</div>

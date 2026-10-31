@@ -15,8 +15,8 @@ class TemporaryAccessTest < ActiveSupport::TestCase
 
   test "active and expired scopes" do
     valid = create_temporary_access
-    expired = create_temporary_access(profile: profiles(:alice), expires_at: 1.minute.ago)
-    ended = create_temporary_access(profile: profiles(:alice), unix_user: "root", expires_at: 1.minute.ago).tap(&:end!)
+    expired = create_temporary_access(public_key: public_keys(:alice), expires_at: 1.minute.ago)
+    ended = create_temporary_access(public_key: public_keys(:alice), unix_user: "root", expires_at: 1.minute.ago).tap(&:end!)
 
     assert_equal [ valid, expired ].sort, TemporaryAccess.active.sort
     assert_equal [ expired ], TemporaryAccess.expired.to_a
@@ -44,11 +44,11 @@ class TemporaryAccessTest < ActiveSupport::TestCase
     assert_equal AuthorizedKeysAccount.login(servers(:web)), create_temporary_access.account
   end
 
-  test "keeps the access when the profile is deleted" do
+  test "keeps the access when the public_key is deleted" do
     access = create_temporary_access
-    profiles(:ci).destroy!
+    public_keys(:ci).destroy!
 
-    assert_nil access.reload.profile
+    assert_nil access.reload.public_key
     assert access.active?
   end
 

@@ -20,11 +20,11 @@ class ActivityTest < ActiveSupport::TestCase
   test "record! copies names and defaults the author to the current user" do
     Current.user = users(:one)
 
-    activity = Activity.record!(:key_added, server: servers(:web), profile: profiles(:alice), unix_user: "deploy", key_name: "alice@laptop")
+    activity = Activity.record!(:key_added, server: servers(:web), public_key: public_keys(:alice), unix_user: "deploy", key_name: "alice@laptop")
 
     assert_equal users(:one), activity.user
     assert_equal "one@example.com", activity.author_name
-    assert_equal({ "key_name" => "alice@laptop", "server_name" => "Web", "profile_name" => "Alice" }, activity.data)
+    assert_equal({ "key_name" => "alice@laptop", "server_name" => "Web", "public_key_name" => "Alice" }, activity.data)
     assert_equal "Clé ajoutée", activity.label
     assert_equal :keys, activity.category
     assert_equal :info, activity.severity
@@ -34,24 +34,24 @@ class ActivityTest < ActiveSupport::TestCase
     assert_equal "Système", Activity.record!(:server_unreachable, server: servers(:web)).author_name
   end
 
-  test "stays readable once the server and the profile are deleted" do
-    activity = Activity.record!(:key_added, server: servers(:web), profile: profiles(:alice), unix_user: "deploy")
-    profiles(:alice).destroy!
+  test "stays readable once the server and the public_key are deleted" do
+    activity = Activity.record!(:key_added, server: servers(:web), public_key: public_keys(:alice), unix_user: "deploy")
+    public_keys(:alice).destroy!
     servers(:web).destroy!
 
     activity.reload
     assert_nil activity.server
-    assert_equal "« Alice » autorisé sur « Web » pour deploy", activity.summary
+    assert_equal "« Alice » ajoutée sur « Web »", activity.summary
   end
 
   test "summaries" do
     web = servers(:web)
     {
-      [ :key_added, { profile: profiles(:alice), unix_user: "deploy", duration_label: "10 minutes" } ] => "« Alice » autorisé sur « Web » pour deploy pendant 10 minutes",
-      [ :key_removed, { unix_user: "root", key_name: "bob" } ] => "Clé « bob » supprimée de « Web » pour root",
-      [ :key_expired, { profile: profiles(:ci), unix_user: "deploy" } ] => "Accès temporaire de « CI » retiré de « Web » pour deploy",
-      [ :unknown_key_detected, { unix_user: "root" } ] => "Clé « sans nom » sans profil trouvée sur « Web » pour root",
-      [ :key_disappeared, { unix_user: "root", key_name: "bob" } ] => "Clé « bob » disparue de « Web » pour root",
+      [ :key_added, { public_key: public_keys(:alice), unix_user: "deploy", duration_label: "10 minutes" } ] => "« Alice » ajoutée sur « Web » pendant 10 minutes",
+      [ :key_removed, { unix_user: "root", key_name: "bob" } ] => "Clé « bob » supprimée de « Web »",
+      [ :key_expired, { public_key: public_keys(:ci), unix_user: "deploy" } ] => "Accès temporaire de « CI » retiré de « Web »",
+      [ :unknown_key_detected, { unix_user: "root" } ] => "Clé inconnue « sans nom » trouvée sur « Web »",
+      [ :key_disappeared, { unix_user: "root", key_name: "bob" } ] => "Clé « bob » disparue de « Web »",
       [ :ssh_access_lost, {} ] => "« Web » refuse la clé d'Elio",
       [ :servers_imported, { count: 12, format: "CSV", names: %w[A B] } ] => "12 serveur(s) importé(s) (CSV) : A, B…",
       [ :server_group_created, { group_name: "Prod", servers: 2 } ] => "Groupe « Prod » créé (2 serveur(s))",
@@ -65,8 +65,8 @@ class ActivityTest < ActiveSupport::TestCase
       assert_equal summary, Activity.record!(kind, server: web, **options).summary, kind
     end
 
-    assert_equal "Profil « Alice » créé", Activity.record!(:profile_created, profile: profiles(:alice)).summary
-    assert_equal "Profil « Bob » supprimé", Activity.record!(:profile_deleted, profile_name: "Bob").summary
+    assert_equal "Clé « Alice » ajoutée au trousseau", Activity.record!(:public_key_created, public_key: public_keys(:alice)).summary
+    assert_equal "Clé « Bob » retirée du trousseau", Activity.record!(:public_key_deleted, public_key_name: "Bob").summary
     assert_equal "Clé Elio générée", Activity.record!(:ssh_key_generated, regenerated: false).summary
     assert_equal "Clé Elio régénérée", Activity.record!(:ssh_key_generated, regenerated: true).summary
     assert_equal "Scan des clés : 2/2", Activity.record!(:automation_run, automation_label: "Scan des clés", result: "2/2").summary

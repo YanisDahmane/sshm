@@ -16,11 +16,11 @@ class KeyInsightsTest < ActiveSupport::TestCase
     assert_equal({}, insights.orphans_by_server_id)
   end
 
-  test "lists the keys without profile per server" do
+  test "lists the keys without public_key per server" do
     unnamed = unnamed_key
     bob = SshKeyGenerator.generate(comment: "bob@desktop").public_key
-    record(servers(:web), unnamed, bob, profiles(:alice).public_key, ssh_keys(:main).public_key)
-    travel_to(1.day.ago) { record(servers(:db), profiles(:ci).public_key) }
+    record(servers(:web), unnamed, bob, public_keys(:alice).content, ssh_keys(:main).public_key)
+    travel_to(1.day.ago) { record(servers(:db), public_keys(:ci).content) }
 
     insights = KeyInsights.new
 

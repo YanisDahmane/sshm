@@ -1,0 +1,10 @@
+<% content_for :title, "Modifier #{@public_key.name_was} · Elio" %>
+
+<div class="mx-auto max-w-xl">
+  <%= link_to "← Retour à la clé", public_key_path(@public_key), class: "text-sm text-slate-500 hover:text-slate-700" %>
+  <h1 class="mt-2 text-2xl font-bold tracking-tight">Modifier « <%= @public_key.name_was %> »</h1>
+
+  <div class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <%= render "form", public_key: @public_key %>
+  </div>
+</div>

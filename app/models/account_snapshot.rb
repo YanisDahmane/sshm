@@ -1,5 +1,5 @@
 # Last known authorized keys of a server account, as read over SSH. Keeps the
-# dashboard figures and "where does this profile have access?" answerable
+# dashboard figures and "where is this key installed?" answerable
 # without connecting to every server. Refreshed on each successful read
 # (key list, ServerScan) and when an expired key is removed.
 class AccountSnapshot < ApplicationRecord
@@ -8,7 +8,7 @@ class AccountSnapshot < ApplicationRecord
   validates :unix_user, :read_at, presence: true
 
   # Saves the keys read on an account and logs what changed since the last
-  # read: keys without profile that appeared (unknown_key_detected, also on the
+  # read: keys outside the keyring that appeared (unknown_key_detected, also on the
   # first read) and keys that vanished (key_disappeared). Keys removed through
   # Elio are forgotten beforehand, so they are not reported as vanished.
   def self.record!(server, account, keys)
@@ -32,14 +32,14 @@ class AccountSnapshot < ApplicationRecord
 
   def fingerprints = keys.map(&:fingerprint)
 
-  # Keys that match no profile (named or not), except Elio's own key.
-  def keys_without_profile(profile_fingerprints:, app_key:)
-    keys.reject { |key| key.matches?(app_key) || profile_fingerprints.include?(key.fingerprint) }
+  # Keys that match no public_key (named or not), except Elio's own key.
+  def unknown_keys(known_fingerprints:, app_key:)
+    keys.reject { |key| key.matches?(app_key) || known_fingerprints.include?(key.fingerprint) }
   end
 
   def log_changes(previous_keys)
     known = previous_keys.to_a.map(&:fingerprint).to_set
-    orphans = keys_without_profile(profile_fingerprints: Profile.pluck(:fingerprint).to_set, app_key: SshKey.app_keys)
+    orphans = unknown_keys(known_fingerprints: PublicKey.pluck(:fingerprint).to_set, app_key: SshKey.app_keys)
 
     orphans.reject { |key| known.include?(key.fingerprint) }.uniq(&:fingerprint).each do |key|
       Activity.record!(:unknown_key_detected, server: server, unix_user: unix_user, key_name: key.name, fingerprint: key.fingerprint)

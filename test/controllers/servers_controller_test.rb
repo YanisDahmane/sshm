@@ -233,8 +233,8 @@ class ServersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "the server page shows its history" do
-    Activity.record!(:key_added, server: servers(:web), profile: profiles(:alice), unix_user: "deploy")
-    Activity.record!(:key_added, server: servers(:db), profile: profiles(:alice), unix_user: "admin")
+    Activity.record!(:key_added, server: servers(:web), public_key: public_keys(:alice), unix_user: "deploy")
+    Activity.record!(:key_added, server: servers(:db), public_key: public_keys(:alice), unix_user: "admin")
     sign_in users(:one)
 
     get server_path(servers(:web))
@@ -258,9 +258,9 @@ class ServersControllerTest < ActionDispatch::IntegrationTest
   test "destroy removes the server, logs it and forgets its host key" do
     sign_in users(:one)
     server = servers(:web)
-    TemporaryAccess.create!(server: server, profile: profiles(:ci), unix_user: "deploy", key_blob: profiles(:ci).authorized_key.key,
-                            fingerprint: profiles(:ci).fingerprint, expires_at: 9.minutes.from_now)
-    previous = Activity.record!(:key_added, server: server, profile: profiles(:alice), unix_user: "deploy")
+    TemporaryAccess.create!(server: server, public_key: public_keys(:ci), unix_user: "deploy", key_blob: public_keys(:ci).authorized_key.key,
+                            fingerprint: public_keys(:ci).fingerprint, expires_at: 9.minutes.from_now)
+    previous = Activity.record!(:key_added, server: server, public_key: public_keys(:alice), unix_user: "deploy")
     forgotten = []
 
     stub_method(KnownHosts, :forget, ->(host, port, **) { forgotten << [ host, port ] }) do
@@ -276,7 +276,7 @@ class ServersControllerTest < ActionDispatch::IntegrationTest
     deleted = Activity.of_kind(:server_deleted).sole
     assert_equal [ users(:one), "Web", "deploy@192.168.1.10:22", 1 ],
                  [ deleted.user, deleted.server_name, deleted.data["address"], deleted.data["active_temporary_accesses"] ]
-    assert_equal "« Alice » autorisé sur « Web » pour deploy", previous.reload.summary
+    assert_equal "« Alice » ajoutée sur « Web »", previous.reload.summary
   end
 
   test "destroy keeps the host key when another server uses the same address" do
@@ -292,8 +292,8 @@ class ServersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "the server page and the edit page offer to delete the server, with a warning" do
-    TemporaryAccess.create!(server: servers(:web), profile: profiles(:ci), unix_user: "deploy", key_blob: profiles(:ci).authorized_key.key,
-                            fingerprint: profiles(:ci).fingerprint, expires_at: 9.minutes.from_now)
+    TemporaryAccess.create!(server: servers(:web), public_key: public_keys(:ci), unix_user: "deploy", key_blob: public_keys(:ci).authorized_key.key,
+                            fingerprint: public_keys(:ci).fingerprint, expires_at: 9.minutes.from_now)
     sign_in users(:one)
 
     get server_path(servers(:web))

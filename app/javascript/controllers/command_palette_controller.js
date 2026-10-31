@@ -1,6 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Quick search over pages, servers and profiles. Opens with ⌘K / Ctrl+K or
+// Quick search over pages, servers and public_keys. Opens with ⌘K / Ctrl+K or
 // the navbar button; arrows to move, Enter to open, Escape to close.
 export default class extends Controller {
   static targets = ["dialog", "input", "results", "empty", "items"]

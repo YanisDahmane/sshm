@@ -123,16 +123,16 @@ class ServersIndexTest < ActionDispatch::IntegrationTest
     assert_select "##{ActionView::RecordIdentifier.dom_id(servers(:backup))} .ssh-status", text: "—"
   end
 
-  test "shows the keys without profile of scanned servers" do
+  test "shows the keys without public_key of scanned servers" do
     unnamed = SshKeyGenerator.generate.public_key.split(" ").first(2).join(" ")
     bob = SshKeyGenerator.generate(comment: "bob@desktop").public_key
-    AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse([ unnamed, bob, ssh_keys(:main).public_key, profiles(:ci).public_key ].join("\n")))
-    AccountSnapshot.record!(servers(:db), AuthorizedKeysAccount.login(servers(:db)), AuthorizedKey.parse(profiles(:alice).public_key))
+    AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse([ unnamed, bob, ssh_keys(:main).public_key, public_keys(:ci).content ].join("\n")))
+    AccountSnapshot.record!(servers(:db), AuthorizedKeysAccount.login(servers(:db)), AuthorizedKey.parse(public_keys(:alice).content))
     sign_in users(:one)
 
     get servers_path
 
-    assert_select "##{ActionView::RecordIdentifier.dom_id(servers(:web))} a.orphan-keys[title=?]", "sans nom, bob@desktop", text: "2 clés sans profil"
+    assert_select "##{ActionView::RecordIdentifier.dom_id(servers(:web))} a.orphan-keys[title=?]", "sans nom, bob@desktop", text: "2 clés inconnues"
     assert_select "##{ActionView::RecordIdentifier.dom_id(servers(:db))} .orphan-keys", text: "Aucune"
     assert_select "##{ActionView::RecordIdentifier.dom_id(servers(:backup))} .orphan-keys", text: "—"
   end

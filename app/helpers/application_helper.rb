@@ -43,14 +43,14 @@ module ApplicationHelper
                          class: "rounded-md px-3 py-1.5 text-sm font-medium #{active ? "bg-indigo-50 text-indigo-700" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"}"
   end
 
-  # Entries of the ⌘K quick search: pages, then servers and profiles.
+  # Entries of the ⌘K quick search: pages, then servers and public_keys.
   def command_palette_items
     pages = [
-      { label: "Dashboard", url: root_path }, { label: "Serveurs", url: servers_path }, { label: "Profils", url: profiles_path },
+      { label: "Dashboard", url: root_path }, { label: "Serveurs", url: servers_path }, { label: "Trousseau", hint: "clés SSH", url: public_keys_path },
       { label: "Groupes de serveurs", url: server_groups_path },
       { label: "Activité", url: activities_path }
     ]
-    pages += [ { label: "Importer des serveurs", hint: "CSV, ~/.ssh/config", url: new_server_import_path }, { label: "Ajouter un serveur", url: new_server_path }, { label: "Ajouter un profil", url: new_profile_path } ] if can?(:operate)
+    pages += [ { label: "Importer des serveurs", hint: "CSV, ~/.ssh/config", url: new_server_import_path }, { label: "Ajouter un serveur", url: new_server_path }, { label: "Ajouter une clé au trousseau", url: new_public_key_path } ] if can?(:operate)
     pages += [
       { label: "Paramètres", hint: "clé SSH d'Elio", url: settings_path },
       { label: "Notifications", hint: "paramètres", url: settings_notifications_path },
@@ -62,14 +62,14 @@ module ApplicationHelper
     servers = Server.order(:name).includes(:server_groups).map do |server|
       { group: "Serveurs", label: server.name, hint: [ "#{server.username}@#{server.host}", *server.server_groups.map(&:name) ].join(" · "), url: server_path(server) }
     end
-    profiles = Profile.order(:name).map { |profile| { group: "Profils", label: profile.name, hint: profile.authorized_key&.comment, url: profile_path(profile) } }
+    public_keys = PublicKey.order(:name).map { |public_key| { group: "Trousseau", label: public_key.name, hint: public_key.kind_label, url: public_key_path(public_key) } }
 
-    pages + groups + servers + profiles
+    pages + groups + servers + public_keys
   end
 
-  # Profile name proposed for an authorized key: its comment without the host
+  # PublicKey name proposed for an authorized key: its comment without the host
   # part ("alice@laptop" → "alice"), or nothing for an unnamed key.
-  def suggested_profile_name(key)
+  def suggested_public_key_name(key)
     key.comment&.split("@")&.first.presence
   end
 end

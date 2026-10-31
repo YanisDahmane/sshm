@@ -32,7 +32,7 @@
             <div class="main-nav hidden items-center gap-1 sm:flex">
               <%= nav_link_to "Dashboard", root_path, active: controller_name == "dashboard" %>
               <%= nav_link_to "Serveurs", servers_path, active: controller_name.start_with?("server") %>
-              <%= nav_link_to "Profils", profiles_path, active: controller_name == "profiles" %>
+              <%= nav_link_to "Trousseau", public_keys_path, active: controller_name == "public_keys" %>
               <%= nav_link_to "Activité", activities_path, active: controller_name == "activities" %>
             </div>
           <% end %>
@@ -60,7 +60,7 @@
         <div class="main-nav flex gap-1 border-t border-slate-100 px-4 py-2 sm:hidden">
           <%= nav_link_to "Dashboard", root_path, active: controller_name == "dashboard" %>
           <%= nav_link_to "Serveurs", servers_path, active: controller_name.start_with?("server") %>
-          <%= nav_link_to "Profils", profiles_path, active: controller_name == "profiles" %>
+          <%= nav_link_to "Trousseau", public_keys_path, active: controller_name == "public_keys" %>
           <%= nav_link_to "Activité", activities_path, active: controller_name == "activities" %>
         </div>
       <% end %>

@@ -129,10 +129,10 @@ class ServerTest < ActiveSupport::TestCase
 
   test "destroying a server deletes its snapshots and temporary accesses, and keeps its activities" do
     server = servers(:web)
-    AccountSnapshot.record!(server, AuthorizedKeysAccount.login(server), AuthorizedKey.parse(profiles(:alice).public_key))
-    TemporaryAccess.create!(server: server, profile: profiles(:ci), unix_user: "deploy", key_blob: profiles(:ci).authorized_key.key,
-                            fingerprint: profiles(:ci).fingerprint, expires_at: 9.minutes.from_now)
-    activity = Activity.record!(:key_added, server: server, profile: profiles(:alice), unix_user: "deploy")
+    AccountSnapshot.record!(server, AuthorizedKeysAccount.login(server), AuthorizedKey.parse(public_keys(:alice).content))
+    TemporaryAccess.create!(server: server, public_key: public_keys(:ci), unix_user: "deploy", key_blob: public_keys(:ci).authorized_key.key,
+                            fingerprint: public_keys(:ci).fingerprint, expires_at: 9.minutes.from_now)
+    activity = Activity.record!(:key_added, server: server, public_key: public_keys(:alice), unix_user: "deploy")
 
     server.destroy!
 
@@ -140,6 +140,6 @@ class ServerTest < ActiveSupport::TestCase
     assert_equal 0, TemporaryAccess.where(server_id: server.id).count
     activity.reload
     assert_nil activity.server_id
-    assert_equal "« Alice » autorisé sur « Web » pour deploy", activity.summary
+    assert_equal "« Alice » ajoutée sur « Web »", activity.summary
   end
 end

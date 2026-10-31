@@ -11,8 +11,8 @@ class User < ApplicationRecord
   ROLE_LABELS = { "admin" => "Admin", "operator" => "Opérateur", "viewer" => "Lecture" }.freeze
 
   # What each permission level allows (see Authorization):
-  # - view: see everything (dashboard, servers, keys, profiles, activity)
-  # - operate: + manage servers and profiles, grant / revoke keys, scan
+  # - view: see everything (dashboard, servers, keys, public_keys, activity)
+  # - operate: + manage servers and public_keys, grant / revoke keys, scan
   # - administer: + settings (Elio key, notifications, automations, users)
   PERMISSIONS = {
     view: %w[admin operator viewer],

@@ -30,8 +30,8 @@
                 <%= render "ssh_keys/setup_hint", server: Server.order(:name).first, reason: :key_refused %>
                 <%= link_to "Ouvrir #{Server.order(:name).first.name} pour tester", server_path(Server.order(:name).first),
                       class: "mt-3 inline-flex rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500" %>
-              <% when :profile %>
-                <%= link_to "Créer un profil", new_profile_path, class: "inline-flex rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500" %>
+              <% when :public_key %>
+                <%= link_to "Ajouter une clé", new_public_key_path, class: "inline-flex rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500" %>
               <% when :authorize %>
                 <%= link_to "Choisir un serveur", servers_path, class: "inline-flex rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500" %>
               <% end %>

@@ -56,7 +56,7 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
 
   test "hides the checklist once everything is done" do
     servers(:web).record_ssh_status!(true)
-    AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse(profiles(:alice).public_key))
+    AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse(public_keys(:alice).content))
     sign_in users(:one)
 
     get root_path
@@ -67,8 +67,8 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
   test "shows the key figures" do
     unnamed = SshKeyGenerator.generate.public_key.split(" ").first(2).join(" ")
     AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse(unnamed))
-    TemporaryAccess.create!(server: servers(:web), profile: profiles(:ci), unix_user: "deploy", key_blob: profiles(:ci).authorized_key.key,
-                            fingerprint: profiles(:ci).fingerprint, expires_at: 9.minutes.from_now)
+    TemporaryAccess.create!(server: servers(:web), public_key: public_keys(:ci), unix_user: "deploy", key_blob: public_keys(:ci).authorized_key.key,
+                            fingerprint: public_keys(:ci).fingerprint, expires_at: 9.minutes.from_now)
     sign_in users(:one)
 
     get root_path
@@ -76,10 +76,10 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_select "a#stat-online[href=?] .stat-value", servers_path, "1/3"
     assert_select "a#stat-orphans[href='#attention'] .stat-value", "1"
     assert_select "#stat-temporary .stat-value", "1"
-    assert_select "a#stat-profiles[href=?] .stat-value", profiles_path, "2"
+    assert_select "a#stat-keyring[href=?] .stat-value", public_keys_path, "2"
   end
 
-  test "the keys without profile figure asks for a scan before any read" do
+  test "the keys without public_key figure asks for a scan before any read" do
     sign_in users(:one)
     get root_path
 
@@ -89,8 +89,8 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "lists the temporary accesses in progress" do
-    access = TemporaryAccess.create!(server: servers(:web), profile: profiles(:ci), unix_user: "deploy", key_blob: profiles(:ci).authorized_key.key,
-                                     fingerprint: profiles(:ci).fingerprint, expires_at: 9.minutes.from_now + 30.seconds)
+    access = TemporaryAccess.create!(server: servers(:web), public_key: public_keys(:ci), unix_user: "deploy", key_blob: public_keys(:ci).authorized_key.key,
+                                     fingerprint: public_keys(:ci).fingerprint, expires_at: 9.minutes.from_now + 30.seconds)
     sign_in users(:one)
 
     get root_path
@@ -121,13 +121,13 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     get root_path
     assert_select "nav .main-nav a[aria-current=page]", text: "Dashboard"
     assert_select "nav .main-nav a[href=?]", servers_path, text: "Serveurs"
-    assert_select "nav .main-nav a[href=?]", profiles_path, text: "Profils"
+    assert_select "nav .main-nav a[href=?]", public_keys_path, text: "Trousseau"
 
     get server_path(servers(:web))
     assert_select "nav .main-nav a[aria-current=page]", text: "Serveurs"
 
-    get profiles_path
-    assert_select "nav .main-nav a[aria-current=page]", text: "Profils"
+    get public_keys_path
+    assert_select "nav .main-nav a[aria-current=page]", text: "Trousseau"
   end
 
   test "includes the quick search, its button and the confirm dialog when signed in" do
@@ -158,7 +158,7 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "warns about keys without profile in the attention list, with their names" do
+  test "warns about keys without public_key in the attention list, with their names" do
     keys = [ "alice2@laptop", "bob@desktop", nil, "dave@ci" ].map { |comment| SshKeyGenerator.generate(comment: comment.to_s).public_key.strip }
     AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse(keys.join("\n")))
     sign_in users(:one)
@@ -166,13 +166,13 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     get root_path
 
     assert_select "#attention-#{ActionView::RecordIdentifier.dom_id(servers(:web))}" do
-      assert_select ".orphan-keys", text: "4 clés sans profil"
+      assert_select ".orphan-keys", text: "4 clés inconnues"
       assert_select ".attention-orphans", text: /alice2@laptop, bob@desktop, sans nom et 1 autre\(s\)/
-      assert_select ".attention-orphans a[href=?]", server_path(servers(:web), anchor: "server-authorized-keys"), text: "convertir en profil"
+      assert_select ".attention-orphans a[href=?]", server_path(servers(:web), anchor: "server-authorized-keys"), text: "ajouter au trousseau"
     end
   end
 
-  test "a named key without profile is to watch too" do
+  test "a named key without public_key is to watch too" do
     AccountSnapshot.record!(servers(:web), AuthorizedKeysAccount.login(servers(:web)), AuthorizedKey.parse(SshKeyGenerator.generate(comment: "bob@desktop").public_key))
     sign_in users(:one)
 

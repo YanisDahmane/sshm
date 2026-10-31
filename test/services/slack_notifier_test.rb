@@ -11,7 +11,7 @@ class SlackNotifierTest < ActiveSupport::TestCase
   test "builds a message with the severity, the label, the summary and the context" do
     payload = SlackNotifier.activity_payload(@activity)
 
-    assert_equal ":warning: *Clé sans profil détectée*\nClé « bob@desktop » sans profil trouvée sur « Web » pour root", payload[:text]
+    assert_equal ":warning: *Clé inconnue détectée*\nClé inconnue « bob@desktop » trouvée sur « Web »", payload[:text]
     assert_equal "Par Système · Serveur : Web · Compte : root", payload[:blocks].last[:elements].first[:text]
   end
 

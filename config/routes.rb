@@ -27,9 +27,9 @@ Rails.application.routes.draw do
   resource :server_pings, only: :create, path: "servers/pings"
   resource :server_scans, only: :create, path: "servers/scans"
 
-  resources :profiles do
-    resources :accesses, only: :create, controller: "profile_accesses"
-    resource :access, only: :destroy, controller: "profile_accesses"
+  resources :public_keys, path: "keys" do
+    resources :accesses, only: :create, controller: "public_key_accesses"
+    resource :access, only: :destroy, controller: "public_key_accesses"
   end
 
   resource :settings, only: :show

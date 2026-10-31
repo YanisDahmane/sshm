@@ -24,13 +24,12 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
-  test "lists keys with known, unknown and master badges" do
+  test "lists keys with keyring, unknown and master badges" do
     sign_in users(:one)
     other = SshKeyGenerator.generate
     unnamed = other.public_key.split(" ").first(2).join(" ")
-    named = SshKeyGenerator.generate(comment: "alice@laptop").public_key
 
-    stub_method(AuthorizedKeysReader, :call, keys_result(ssh_keys(:main).public_key, unnamed, named)) do
+    stub_method(AuthorizedKeysReader, :call, keys_result(ssh_keys(:main).public_key, unnamed, public_keys(:alice).content)) do
       get server_authorized_keys_path(servers(:web))
     end
 
@@ -40,18 +39,20 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
       assert_select "li.authorized-key", 3
       assert_select "li.authorized-key:nth-child(1)" do
         assert_select ".key-name", "elio-fixture"
-        assert_select ".key-badge", text: "Connue"
+        assert_select ".key-unknown", 0
         assert_select ".key-master", text: "Master"
       end
       assert_select "li.authorized-key:nth-child(2)" do
         assert_select ".key-name", "Sans nom"
-        assert_select ".key-badge", text: "Inconnue"
+        assert_select ".key-unknown", text: "Hors trousseau"
         assert_select ".key-master", 0
         assert_select "dialog.key-details .key-fingerprint", other.fingerprint
       end
       assert_select "li.authorized-key:nth-child(3)" do
-        assert_select ".key-name", "alice@laptop"
-        assert_select ".key-badge", text: "Connue"
+        assert_select "a.key-name.key-keyring", "Alice"
+        assert_select ".key-kind", "Personne"
+        assert_select ".key-comment", "alice@laptop"
+        assert_select ".key-unknown", 0
         assert_select ".key-master", 0
       end
       assert_select "a[href=?][title=?]", server_authorized_keys_path(servers(:web)), "Recharger les clés"
@@ -66,7 +67,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
       get server_authorized_keys_path(servers(:web))
     end
 
-    assert_select ".key-badge", text: "Inconnue"
+    assert_select ".key-unknown", 0
     assert_select ".key-master", text: "Master"
   end
 
@@ -109,52 +110,53 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     assert_select "#server-authorized-keys turbo-frame##{frame_id}[loading=lazy][src=?]", server_authorized_keys_path(servers(:web))
   end
 
-  test "offers to authorize the profiles that are not on the server yet" do
+  test "offers to authorize the public_keys that are not on the server yet" do
     sign_in users(:one)
 
-    stub_method(AuthorizedKeysReader, :call, keys_result(profiles(:ci).public_key)) do
+    stub_method(AuthorizedKeysReader, :call, keys_result(public_keys(:ci).content)) do
       get server_authorized_keys_path(servers(:web))
     end
 
-    assert_select "form.authorize-profile[action=?][data-controller=quiet-submit]", server_authorizations_path(servers(:web)) do
-      assert_select "select[name=profile_id] option", 1
-      assert_select "option[value=?]", profiles(:alice).id.to_s, text: "Alice"
-      assert_select "button[type=submit]", text: /Autoriser/
+    assert_select "form.authorize-key[action=?][data-controller=quiet-submit]", server_authorizations_path(servers(:web)) do
+      assert_select "select[name=public_key_id] option", 1
+      assert_select "option[value=?]", public_keys(:alice).id.to_s, text: "Alice"
+      assert_select "button[type=submit]", text: /Ajouter/
     end
   end
 
-  test "tags keys that belong to a profile, whatever their comment" do
+  test "names the keys of the keyring, whatever their comment" do
     sign_in users(:one)
-    type, blob = profiles(:alice).public_key.split(" ")
+    type, blob = public_keys(:alice).content.split(" ")
 
     stub_method(AuthorizedKeysReader, :call, keys_result("#{type} #{blob} renamed")) do
       get server_authorized_keys_path(servers(:web))
     end
 
-    assert_select "li.authorized-key a.key-profile[href=?][data-turbo-frame=_top]", profile_path(profiles(:alice)), text: /Profil : Alice/
+    assert_select "li.authorized-key a.key-keyring[href=?][data-turbo-frame=_top]", public_key_path(public_keys(:alice)), text: "Alice"
+    assert_select "li.authorized-key .key-comment", "renamed"
   end
 
-  test "says when every profile is already authorized" do
+  test "says when every public_key is already authorized" do
     sign_in users(:one)
 
-    stub_method(AuthorizedKeysReader, :call, keys_result(profiles(:alice).public_key, profiles(:ci).public_key)) do
+    stub_method(AuthorizedKeysReader, :call, keys_result(public_keys(:alice).content, public_keys(:ci).content)) do
       get server_authorized_keys_path(servers(:web))
     end
 
-    assert_select "form.authorize-profile", 0
-    assert_select ".all-profiles-authorized"
+    assert_select "form.authorize-key", 0
+    assert_select ".all-keys-authorized"
   end
 
-  test "invites to create a profile when there is none" do
-    Profile.delete_all
+  test "invites to create a public_key when there is none" do
+    PublicKey.delete_all
     sign_in users(:one)
 
     stub_method(AuthorizedKeysReader, :call, keys_result) do
       get server_authorized_keys_path(servers(:web))
     end
 
-    assert_select "form.authorize-profile", 0
-    assert_select "a[href=?][data-turbo-frame=_top]", new_profile_path
+    assert_select "form.authorize-key", 0
+    assert_select "a[href=?][data-turbo-frame=_top]", new_public_key_path
   end
 
   test "does not offer to authorize when the keys cannot be read" do
@@ -163,7 +165,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
 
     get server_authorized_keys_path(servers(:web))
 
-    assert_select "form.authorize-profile", 0
+    assert_select "form.authorize-key", 0
   end
 
   test "offers to delete every key except the Elio key" do
@@ -270,7 +272,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
       get server_authorized_keys_path(servers(:web))
     end
 
-    assert_select "form.authorize-profile select[name=duration]" do
+    assert_select "form.authorize-key select[name=duration]" do
       assert_select "option[selected]", 1
       assert_select "option:first-child[value=''][selected]", "Permanent"
       assert_select "option[value='10']", "10 minutes"
@@ -281,9 +283,9 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
   test "shows when a temporary access expires" do
     sign_in users(:one)
     access = create_temporary_access(expires_at: 9.minutes.from_now + 30.seconds)
-    type, blob = profiles(:ci).public_key.split(" ")
+    type, blob = public_keys(:ci).content.split(" ")
 
-    stub_method(AuthorizedKeysReader, :call, keys_result(%(expiry-time="20300101000000Z" #{type} #{blob} CI), profiles(:alice).public_key)) do
+    stub_method(AuthorizedKeysReader, :call, keys_result(%(expiry-time="20300101000000Z" #{type} #{blob} CI), public_keys(:alice).content)) do
       get server_authorized_keys_path(servers(:web))
     end
 
@@ -295,7 +297,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:one)
     create_temporary_access(expires_at: 1.minute.ago)
 
-    stub_method(AuthorizedKeysReader, :call, keys_result(profiles(:ci).public_key)) do
+    stub_method(AuthorizedKeysReader, :call, keys_result(public_keys(:ci).content)) do
       get server_authorized_keys_path(servers(:web))
     end
 
@@ -309,7 +311,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     removed = AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil)
 
     stub_method(AuthorizedKeyRemoval, :call, removed) do
-      delete server_authorized_key_path(servers(:web)), params: { key: profiles(:ci).authorized_key.key }, as: :turbo_stream
+      delete server_authorized_key_path(servers(:web)), params: { key: public_keys(:ci).authorized_key.key }, as: :turbo_stream
     end
 
     assert_not access.reload.active?
@@ -322,54 +324,54 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
     failed = AuthorizedKeyRemoval::Result.new(status: :error, error_title: "Connexion impossible", error_details: "")
 
     stub_method(AuthorizedKeyRemoval, :call, failed) do
-      delete server_authorized_key_path(servers(:web)), params: { key: profiles(:ci).authorized_key.key }, as: :turbo_stream
+      delete server_authorized_key_path(servers(:web)), params: { key: public_keys(:ci).authorized_key.key }, as: :turbo_stream
     end
 
     assert access.reload.active?
   end
 
-  test "highlights the keys without profile and offers to convert them" do
+  test "highlights the unknown keys and offers to add them to the keyring" do
     sign_in users(:one)
     unnamed = SshKeyGenerator.generate.public_key.split(" ").first(2).join(" ")
     bob = SshKeyGenerator.generate(comment: "bob@desktop").public_key
-    ci_unnamed = profiles(:ci).public_key.split(" ").first(2).join(" ")
+    ci_unnamed = public_keys(:ci).content.split(" ").first(2).join(" ")
 
     stub_method(AuthorizedKeysReader, :call, keys_result(ssh_keys(:main).public_key, unnamed, %(no-pty #{bob}), ci_unnamed)) do
       get server_authorized_keys_path(servers(:web))
     end
 
-    assert_select ".orphan-warning", text: /2 clés ne correspondent à aucun profil/
+    assert_select ".orphan-warning", text: /2 clés ne sont pas dans le trousseau/
     assert_select "li.authorized-key.is-orphan", 2
-    assert_select "li.authorized-key:nth-child(1) a.create-profile", 0
-    assert_select "li.authorized-key:nth-child(4) a.create-profile", 0
+    assert_select "li.authorized-key:nth-child(1) a.add-to-keyring", 0
+    assert_select "li.authorized-key:nth-child(4) a.add-to-keyring", 0
     return_to = server_path(servers(:web), anchor: "server-authorized-keys")
-    assert_select "li.authorized-key:nth-child(2) a.create-profile[data-turbo-frame=_top][href=?]",
-                  new_profile_path(public_key: unnamed, return_to: return_to), text: /Créer un profil/
-    assert_select "li.authorized-key:nth-child(3) a.create-profile[href=?]",
-                  new_profile_path(public_key: bob, name: "bob", return_to: return_to)
+    assert_select "li.authorized-key:nth-child(2) a.add-to-keyring[data-turbo-frame=_top][href=?]",
+                  new_public_key_path(content: unnamed, return_to: return_to), text: /Ajouter au trousseau/
+    assert_select "li.authorized-key:nth-child(3) a.add-to-keyring[href=?]",
+                  new_public_key_path(content: bob, name: "bob", return_to: return_to)
   end
 
   test "no warning when every key is identified" do
     sign_in users(:one)
 
-    stub_method(AuthorizedKeysReader, :call, keys_result(ssh_keys(:main).public_key, profiles(:alice).public_key)) do
+    stub_method(AuthorizedKeysReader, :call, keys_result(ssh_keys(:main).public_key, public_keys(:alice).content)) do
       get server_authorized_keys_path(servers(:web))
     end
 
     assert_select ".orphan-warning", 0
     assert_select "li.is-orphan", 0
-    assert_select "a.create-profile", 0
+    assert_select "a.add-to-keyring", 0
   end
 
   test "records the snapshot and the SSH status on a successful read" do
     sign_in users(:one)
 
-    stub_method(AuthorizedKeysReader, :call, keys_result(profiles(:alice).public_key)) do
+    stub_method(AuthorizedKeysReader, :call, keys_result(public_keys(:alice).content)) do
       get server_authorized_keys_path(servers(:web))
     end
 
     snapshot = AccountSnapshot.find_by!(server: servers(:web), unix_user: "deploy")
-    assert_equal [ profiles(:alice).fingerprint ], snapshot.fingerprints
+    assert_equal [ public_keys(:alice).fingerprint ], snapshot.fingerprints
     assert servers(:web).reload.ssh_ok
   end
 
@@ -413,7 +415,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
 
   test "keeps the type, fingerprint and options out of the rows, in a details modal" do
     sign_in users(:one)
-    line = %(no-pty #{profiles(:alice).public_key})
+    line = %(no-pty #{public_keys(:alice).content})
 
     stub_method(AuthorizedKeysReader, :call, keys_result(line)) do
       get server_authorized_keys_path(servers(:web))
@@ -427,7 +429,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
         assert_select "p", "~deploy/.ssh/authorized_keys"
         assert_select ".key-fingerprint", key.fingerprint
         assert_select ".key-options", "no-pty"
-        assert_select "dd a[href=?][data-turbo-frame=_top]", profile_path(profiles(:alice)), text: "Alice"
+        assert_select "dd a[href=?][data-turbo-frame=_top]", public_key_path(public_keys(:alice)), text: "Alice"
         assert_select "dd", text: "n° 1 du fichier"
         assert_select "[data-controller=clipboard] textarea", line
         assert_select "button[data-action='modal#close'][aria-label=Fermer]"
@@ -439,7 +441,7 @@ class ServerAuthorizedKeysControllerTest < ActionDispatch::IntegrationTest
   test "each key gets its own dialog ids" do
     sign_in users(:one)
 
-    stub_method(AuthorizedKeysReader, :call, keys_result(profiles(:alice).public_key, profiles(:ci).public_key)) do
+    stub_method(AuthorizedKeysReader, :call, keys_result(public_keys(:alice).content, public_keys(:ci).content)) do
       get server_authorized_keys_path(servers(:web))
     end
 

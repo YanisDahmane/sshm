@@ -23,9 +23,9 @@
         <dt class="text-slate-500">Options</dt>
         <dd class="key-options break-all font-mono text-amber-700"><%= key.options %></dd>
       <% end %>
-      <% if profile %>
-        <dt class="text-slate-500">Profil</dt>
-        <dd><%= link_to profile.name, profile_path(profile), data: { turbo_frame: "_top" }, class: "font-medium text-indigo-600 hover:text-indigo-500" %></dd>
+      <% if public_key %>
+        <dt class="text-slate-500">Trousseau</dt>
+        <dd><%= link_to public_key.name, public_key_path(public_key), data: { turbo_frame: "_top" }, class: "font-medium text-indigo-600 hover:text-indigo-500" %></dd>
       <% end %>
       <% if key.line_number %>
         <dt class="text-slate-500">Ligne</dt>

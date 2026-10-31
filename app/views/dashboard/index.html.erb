@@ -30,12 +30,12 @@
 <div id="stats" class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
   <%= render "dashboard/stat", id: "stat-online", label: "Serveurs en ligne", path: servers_path,
         value: "#{online}/#{@servers.size}", tone: (online < @servers.size ? :warning : :ok) %>
-  <%= render "dashboard/stat", id: "stat-orphans", label: "Clés sans profil", path: "#attention",
+  <%= render "dashboard/stat", id: "stat-orphans", label: "Clés inconnues", path: "#attention",
         value: (@insights.scanned? ? orphans : "—"), tone: (orphans.positive? ? :warning : :ok),
         hint: (@insights.scanned? ? nil : "Lancez un scan") %>
   <%= render "dashboard/stat", id: "stat-temporary", label: "Accès temporaires en cours", path: "#temporary-accesses",
         value: @temporary_accesses.size, tone: :neutral %>
-  <%= render "dashboard/stat", id: "stat-profiles", label: "Profils", path: profiles_path, value: @profiles_count, tone: :neutral %>
+  <%= render "dashboard/stat", id: "stat-keyring", label: "Clés du trousseau", path: public_keys_path, value: @public_keys_count, tone: :neutral %>
 </div>
 
 <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -46,7 +46,7 @@
         <% @temporary_accesses.each do |access| %>
           <li id="<%= dom_id(access) %>" class="flex items-center justify-between gap-3 py-3 text-sm">
             <div class="min-w-0">
-              <p class="truncate font-medium"><%= access.profile&.name || "Profil supprimé" %></p>
+              <p class="truncate font-medium"><%= access.public_key&.name || "Clé supprimée" %></p>
               <p class="truncate text-xs text-slate-500">
                 <%= link_to access.server.name, server_path(access.server), class: "hover:text-indigo-600 hover:underline" %>
                 · <span class="font-mono"><%= access.unix_user %></span>
@@ -58,7 +58,7 @@
         <% end %>
       </ul>
     <% else %>
-      <p class="mt-4 text-sm text-slate-500">Aucun accès temporaire. Choisissez une durée en autorisant un profil sur un serveur.</p>
+      <p class="mt-4 text-sm text-slate-500">Aucun accès temporaire. Choisissez une durée en ajoutant une clé sur un serveur.</p>
     <% end %>
   </section>
 
@@ -81,14 +81,14 @@
             <% if orphans.any? %>
               <p class="attention-orphans mt-1 truncate text-xs text-slate-500">
                 <%= orphans.first(3).map { |key| key.name || "sans nom" }.join(", ") %><%= " et #{orphans.size - 3} autre(s)" if orphans.size > 3 %>
-                — <%= link_to "convertir en profil", server_path(server, anchor: "server-authorized-keys"), class: "font-medium text-indigo-600 hover:text-indigo-500" %>
+                — <%= link_to "ajouter au trousseau", server_path(server, anchor: "server-authorized-keys"), class: "font-medium text-indigo-600 hover:text-indigo-500" %>
               </p>
             <% end %>
           </li>
         <% end %>
       </ul>
     <% elsif @servers.any? %>
-      <p class="mt-4 text-sm text-slate-500">Rien à signaler : serveurs joignables, connexion SSH OK et toutes les clés correspondent à un profil.</p>
+      <p class="mt-4 text-sm text-slate-500">Rien à signaler : serveurs joignables, connexion SSH OK et toutes les clés sont dans le trousseau.</p>
     <% else %>
       <p class="mt-4 text-sm text-slate-500">Ajoutez un serveur pour commencer.</p>
     <% end %>
