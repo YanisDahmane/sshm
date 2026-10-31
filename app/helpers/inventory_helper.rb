@@ -37,4 +37,7 @@ module InventoryHelper
     when "unsupported" then status_badge(:neutral, "Non disponible", title: snapshot.message, class: "inventory-status")
     end
   end
+
+  # "Debian GNU/Linux 12 (bookworm)" → "Debian 12", for dense lists (full name in a title).
+  def short_os_name(name) = name.to_s.sub("GNU/Linux ", "").sub(/\s*\([^)]*\)\z/, "").squish
 end

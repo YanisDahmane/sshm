@@ -149,7 +149,7 @@ class ServersIndexTest < ActionDispatch::IntegrationTest
 
     get servers_path
 
-    assert_select "##{ActionView::RecordIdentifier.dom_id(servers(:web))} .server-os", text: "Debian GNU/Linux 12 (bookworm)"
+    assert_select "##{ActionView::RecordIdentifier.dom_id(servers(:web))} .server-os span[title^='Debian GNU/Linux 12 (bookworm)']", text: "Debian 12"
     assert_select "##{ActionView::RecordIdentifier.dom_id(servers(:db))}" do
       assert_select ".server-os .badge", text: "plus supporté"
       assert_select ".server-address", "admin@db.example.com:2222"

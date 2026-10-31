@@ -39,4 +39,10 @@ class InventoryHelperTest < ActionView::TestCase
     assert_nil inventory_status_badge(Inventory::Snapshot.new(status: "ok"))
     assert_nil inventory_status_badge(nil)
   end
+
+  test "short_os_name keeps the distribution and its version" do
+    assert_equal "Debian 12", short_os_name("Debian GNU/Linux 12 (bookworm)")
+    assert_equal "Ubuntu 24.04.1 LTS", short_os_name("Ubuntu 24.04.1 LTS")
+    assert_equal "", short_os_name(nil)
+  end
 end

@@ -2,7 +2,7 @@
 <% if server.os_name %>
   <% eol = Inventory::EndOfLife.status(server.os_id, server.os_version) %>
   <span class="<%= eol.ended? ? "text-crit-ink" : eol.soon? ? "text-warn-ink" : "text-ink-2" %>"
-        title="<%= "Fin de support : #{l(eol.date, format: :long)}" if eol.known? %>"><%= server.os_name %></span>
+        title="<%= [ server.os_name, ("fin de support : #{l(eol.date, format: :long)}" if eol.known?) ].compact.join(" — ") %>"><%= short_os_name(server.os_name) %></span>
   <% if eol.ended? %>
     <%= status_badge :crit, "plus supporté", class: "ml-1" %>
   <% elsif eol.soon? %>

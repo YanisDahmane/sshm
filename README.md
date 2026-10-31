@@ -2,352 +2,193 @@
 
 # Elio
 
-**Le gestionnaire de votre parc de serveurs** (anciennement SSHM).
+**Le gestionnaire de votre parc de serveurs Linux, sans agent.**
 
-Pour l'instant : les clés SSH de tous vos serveurs depuis une interface web. Bientôt : santé, système, paquets, services et ports de chaque serveur.
+Santé, système, paquets, services, ports et firewall de chaque serveur, et les clés SSH de votre équipe, depuis une seule interface web. Elio se connecte à vos serveurs avec sa propre clé SSH et n'y exécute que des commandes de lecture (et l'ajout / le retrait de clés quand vous le demandez).
 
 ![Ruby](https://img.shields.io/badge/Ruby-3.4-CC342D?logo=ruby&logoColor=white)
 ![Rails](https://img.shields.io/badge/Rails-8.1-D30001?logo=rubyonrails&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14%2B-4169E1?logo=postgresql&logoColor=white)
 ![Hotwire](https://img.shields.io/badge/Hotwire-Turbo%20%2B%20Stimulus-5CD8E5)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06B6D4?logo=tailwindcss&logoColor=white)
 ![Self-hosted](https://img.shields.io/badge/self--hosted-yes-2ea44f)
 
-![Dashboard](readme/dashboard.png)
+![Le parc](readme/elio/parc.png)
 
 </div>
 
----
+> Elio s'appelait auparavant **SSHM** (gestionnaire de clés SSH). Voir [Mise à jour depuis SSHM](#mise-à-jour-depuis-sshm).
 
 ## Sommaire
 
-- [Pourquoi Elio ?](#pourquoi-elio-)
 - [Fonctionnalités](#fonctionnalités)
 - [Installation](#installation)
 - [Configuration](#configuration)
-- [Les fonctionnalités en détail](#les-fonctionnalités-en-détail)
+- [Préparer les serveurs](#préparer-les-serveurs)
+- [Ce qu'Elio exécute sur vos serveurs](#ce-quelio-exécute-sur-vos-serveurs)
 - [Sécurité et limites](#sécurité-et-limites)
-- [Tests](#tests)
-- [Architecture](#architecture)
+- [Mise à jour depuis SSHM](#mise-à-jour-depuis-sshm)
+- [Développement et tests](#développement-et-tests)
 
 ---
-
-## Pourquoi Elio ?
-
-Ajouter la clé d'un collègue sur dix serveurs, penser à la retirer à son départ, donner un accès « juste le temps d'une intervention »… À la main, on finit toujours par oublier une clé quelque part.
-
-Elio se connecte à vos serveurs avec **sa propre clé SSH** et gère pour vous les fichiers `~/.ssh/authorized_keys` : il les lit, y ajoute des clés et en supprime, pour n'importe quel compte du serveur. Il n'y a pas de console web : Elio exécute uniquement les commandes dont il a besoin.
 
 ## Fonctionnalités
 
 | | |
 |---|---|
-| 🖥️ **Parc de serveurs** | Ajout, modification, statut en ligne / injoignable actualisable en direct |
-| 🔑 **Clé SSH de l'application** | Générée en un clic, clé privée chiffrée en base, commande d'installation prête à copier |
-| ✅ **Test de connexion** | Vérifie qu'Elio peut se connecter et exécuter une commande sur le serveur |
-| 👀 **Clés autorisées** | Liste des clés de chaque compte (root, debian, deploy…) avec badges *Connue*, *Inconnue*, *Master* et *Profil* |
-| 👤 **Profils** | Une personne ou une machine = un nom + une clé publique |
-| ➕ **Autoriser un profil** | Sur le compte de son choix, de façon permanente ou temporaire (10 min → 7 jours) |
-| ⏱️ **Expiration automatique** | La clé est refusée par `sshd` à l'heure prévue, puis supprimée du serveur |
-| 🗑️ **Révocation** | Suppression de n'importe quelle clé, sauf celle d'Elio |
+| **Vue d'ensemble** | Serveurs en ligne, à surveiller, critiques, clés inconnues, et une liste **« À traiter »** triée par gravité, avec un bouton pour agir sur chaque point. |
+| **Parc** | Tous les serveurs : état de santé, système, courbe de charge sur 24 h, mémoire, disque, mises à jour (dont sécurité), ce qui mérite attention. Filtres par groupe, système et état. |
+| **Santé** | Charge, mémoire, swap, disques (espace et inodes), redémarrage requis, services en échec, horloge, mises à jour en attente. 30 jours d'historique, seuils réglables. |
+| **Système** | Distribution, noyau, machine (virtualisation, processeurs, mémoire), démarrage, avec la **date de fin de support** Debian / Ubuntu. |
+| **Paquets** | Paquets Debian, snaps et images Docker de chaque serveur, mises à jour disponibles (sécurité en évidence). Recherche sur tout le parc : « quels serveurs ont openssl, et en quelle version ? » |
+| **Services** | Services systemd et conteneurs Docker, regroupés par projet Docker Compose (avec le chemin des fichiers compose). |
+| **Ports et firewall** | Ports en écoute avec le processus, le service ou le conteneur derrière, exposition (public, privé, local), état du firewall (ufw, nftables, iptables), **règles ufw suggérées à copier**, ports inattendus par groupe. |
+| **Trousseau** | Les clés SSH de l'équipe et des machines (CI, sauvegardes…), à ajouter ou retirer sur chaque serveur, pour toujours ou pour une durée limitée. Les clés inconnues trouvées sur les serveurs sont signalées. |
+| **Automatisations** | Suivi de la santé, inventaires (système, paquets, services, ports), vérification des serveurs et scan des clés, à la fréquence de votre choix, sur tout le parc ou par groupe. |
+| **Activité et notifications** | Journal de tout ce qui se passe (ajouts de clés, serveurs qui tombent, ports qui s'ouvrent, services en échec…), envoyé sur **Slack, Discord, un webhook signé ou par email**, avec un résumé chaque matin. |
+| **Accès à Elio** | Rôles (admin, opérateur, lecture), invitations, double authentification (TOTP + codes de secours), verrouillage après échecs, expiration de session. |
+| **Interface** | Mode clair et sombre, recherche rapide (⌘K), en français. |
+
+| | |
+|---|---|
+| ![Vue d'ensemble](readme/elio/vue-ensemble.png) | ![Fiche d'un serveur](readme/elio/serveur.png) |
+| ![Ports et règles ufw](readme/elio/serveur-ports.png) | ![Services et conteneurs](readme/elio/serveur-services.png) |
+| ![Paquets du parc](readme/elio/paquets.png) | ![Mode sombre](readme/elio/parc-sombre.png) |
 
 ---
 
 ## Installation
 
-### Prérequis
-
 | | Version | Remarque |
 |---|---|---|
 | Ruby | 3.4.2 | voir `.ruby-version` |
-| PostgreSQL | 14+ | |
-| Google Chrome | récent | uniquement pour les tests système |
-| **Serveurs gérés** | OpenSSH **8.2+** | requis pour les accès temporaires (Debian 11+, Ubuntu 20.04+) |
+| PostgreSQL | 14+ | 4 bases en production (application, cache, files d'attente, websockets) |
+| **Serveurs gérés** | Linux avec OpenSSH | inventaire complet sur **Debian / Ubuntu** (dpkg, apt, systemd) ; OpenSSH 8.2+ pour les accès temporaires |
 
 ### En local
 
 ```bash
-git clone git@github.com:YanisDahmane/sshm.git
-cd sshm
+git clone git@github.com:YanisDahmane/sshm.git elio
+cd elio
 
 bundle install
-bin/rails db:prepare   # crée la base et lance les migrations
-bin/dev                # serveur Rails + compilation Tailwind
+bin/rails db:prepare   # crée les bases et lance les migrations
+bin/dev                # serveur Rails, Tailwind et jobs (Solid Queue)
 ```
 
-L'application est disponible sur **http://localhost:3000**. Créez votre compte via « Créer un compte ».
-
-![Connexion](readme/login.png)
-
-> [!NOTE]
-> En développement, les jobs (expiration des accès temporaires) tournent **en mémoire** : ils s'exécutent tant que `bin/dev` reste lancé et sont perdus au redémarrage. En production, Solid Queue les stocke en base.
+Ouvrez **http://localhost:3000** : au premier lancement, Elio vous demande de créer le compte administrateur.
 
 ### En production (Kamal)
 
-Le projet est prêt pour [Kamal](https://kamal-deploy.org) (`config/deploy.yml`) : image Docker, proxy avec SSL, jobs Solid Queue intégrés à Puma (`SOLID_QUEUE_IN_PUMA`).
+Le projet est prêt pour [Kamal](https://kamal-deploy.org) (`config/deploy.yml`, service `elio`) : image Docker, proxy avec SSL, jobs Solid Queue intégrés à Puma.
 
-1. Renseignez dans `config/deploy.yml` votre serveur, votre registry, votre domaine (`proxy.host`) et l'accès à PostgreSQL :
-
-   ```yaml
-   env:
-     secret:
-       - RAILS_MASTER_KEY
-       - ELIO_DATABASE_PASSWORD
-     clear:
-       SOLID_QUEUE_IN_PUMA: true
-       PGHOST: votre-serveur-postgres   # utilisé par les 4 bases (primary, cache, queue, cable)
-   ```
-
-2. Ajoutez `ELIO_DATABASE_PASSWORD` dans `.kamal/secrets`. L'utilisateur PostgreSQL attendu est `elio`, avec les bases `elio_production`, `elio_production_cache`, `elio_production_queue` et `elio_production_cable`.
-
-3. Déployez :
-
-   ```bash
-   bin/kamal setup    # première fois
-   bin/kamal deploy   # les fois suivantes
-   ```
+1. Renseignez dans `config/deploy.yml` votre serveur, votre registry, votre domaine (`proxy.host`), `PGHOST` et les variables d'environnement ci-dessous.
+2. Ajoutez les secrets dans `.kamal/secrets` : `RAILS_MASTER_KEY`, `ELIO_DATABASE_PASSWORD` (utilisateur PostgreSQL `elio`, bases `elio_production`, `elio_production_cache`, `elio_production_queue`, `elio_production_cable`), et si besoin `SMTP_PASSWORD`.
+3. `bin/kamal setup` la première fois, puis `bin/kamal deploy`.
 
 > [!IMPORTANT]
-> Le volume `elio_storage` (monté sur `/rails/storage`) contient `storage/ssh/known_hosts`, les empreintes des serveurs mémorisées par Elio. Ne le supprimez pas : Elio refuserait de se reconnecter à un serveur dont l'empreinte aurait « changé ».
+> Le volume `elio_storage` (monté sur `/rails/storage`) contient `storage/ssh/known_hosts`, les empreintes des serveurs mémorisées par Elio. Ne le supprimez pas.
 
 ---
 
 ## Configuration
 
-### 1. Credentials et clés de chiffrement
+### Variables d'environnement
 
-La clé privée SSH de l'application est chiffrée en base avec [Active Record Encryption](https://guides.rubyonrails.org/active_record_encryption.html). Les clés de chiffrement se trouvent dans `config/credentials.yml.enc`, lui-même déchiffré par `config/master.key` (jamais versionné).
+| Variable | Rôle |
+|---|---|
+| `RAILS_MASTER_KEY` | Déchiffre `config/credentials.yml.enc` (clés de chiffrement de la base). |
+| `ELIO_DATABASE_PASSWORD` | Mot de passe PostgreSQL de l'utilisateur `elio` (production). |
+| `SMTP_ADDRESS`, `SMTP_PORT` (587), `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_AUTHENTICATION` (plain) | Envoi d'emails : mot de passe oublié, invitations, canaux de notification email. Sans `SMTP_ADDRESS`, rien n'est envoyé et le lien « Mot de passe oublié » n'apparaît pas. |
+| `ELIO_HOST` | Adresse d'Elio utilisée dans les liens des emails (ex. `elio.acme.fr`). |
+| `ELIO_MAIL_FROM` | Expéditeur des emails (ex. `elio@acme.fr`). |
+| `ELIO_PARALLEL_LIMIT` | Nombre de serveurs traités en même temps par les inventaires et scans (4 par défaut). |
 
-**Vous avez déjà le `master.key` du projet** : placez-le dans `config/master.key` (ou dans la variable `RAILS_MASTER_KEY`), il n'y a rien d'autre à faire.
+### Clés de chiffrement
 
-**Vous installez votre propre instance** : générez vos propres credentials.
+La clé privée SSH d'Elio, les webhooks et les secrets 2FA sont chiffrés en base avec [Active Record Encryption](https://guides.rubyonrails.org/active_record_encryption.html). Pour votre propre instance :
 
 ```bash
 rm config/credentials.yml.enc
 bin/rails db:encryption:init      # affiche un bloc active_record_encryption: ...
-bin/rails credentials:edit        # collez-y ce bloc, enregistrez
+bin/rails credentials:edit        # collez-y ce bloc
 ```
 
-> [!CAUTION]
-> Si vous perdez le `master.key`, la clé privée SSH stockée en base devient illisible : il faudra en régénérer une et la redéployer sur tous les serveurs. Sauvegardez-le.
+Gardez `config/master.key` (ou `RAILS_MASTER_KEY`) en lieu sûr : sans lui, les données chiffrées sont perdues.
 
-### 2. Générer la clé SSH d'Elio
+### Premiers pas
 
-Ouvrez **Paramètres** (icône ⚙️ en haut à droite), puis cliquez sur **Générer une clé SSH**. Elio crée une paire de clés Ed25519 et affiche :
-
-- l'**empreinte** (`SHA256:…`) ;
-- la **clé publique**, à copier ;
-- une **commande prête à l'emploi** à lancer sur chaque serveur.
-
-![Clé SSH de l'application](readme/settings-ssh-key.png)
-
-La clé privée n'est jamais affichée. **Régénérer la clé** supprime l'ancienne : Elio perd l'accès à tous les serveurs tant que la nouvelle clé publique n'y a pas été installée.
-
-### 3. Installer la clé sur vos serveurs
-
-Sur chaque serveur, avec le compte qu'Elio utilisera pour se connecter (par exemple `root`) :
-
-```bash
-mkdir -p ~/.ssh && chmod 700 ~/.ssh \
-  && echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA… elio' >> ~/.ssh/authorized_keys \
-  && chmod 600 ~/.ssh/authorized_keys
-```
-
-(c'est la commande que la page Paramètres vous donne déjà, avec votre clé)
-
-### 4. Se connecter avec un utilisateur non root (optionnel)
-
-Elio peut gérer les clés de **n'importe quel compte** du serveur :
-
-- **Si Elio se connecte en `root`**, il lit et modifie directement les fichiers des autres comptes, puis leur en redonne la propriété (`chown`).
-- **S'il se connecte avec un autre utilisateur** (par exemple `deploy`), il gère les fichiers de `deploy` directement, et ceux des autres comptes via `sudo -n` (sans mot de passe). Il faut donc autoriser `deploy` dans sudoers :
-
-  ```bash
-  # /etc/sudoers.d/elio — à éditer avec : visudo -f /etc/sudoers.d/elio
-  deploy ALL=(root) NOPASSWD: /bin/sh, /usr/bin/sh
-  ```
-
-> [!WARNING]
-> Autoriser `sh` en root revient à donner un accès root complet à ce compte. C'est nécessaire pour gérer les clés des autres utilisateurs. Sans cette règle, Elio affiche « Accès root impossible » pour ces comptes, et seules les clés de `deploy` restent gérables.
+1. **Paramètres → Général → Générer une clé SSH** : Elio crée sa paire de clés Ed25519 ; la clé privée ne quitte jamais la base.
+2. **Parc → Ajouter un serveur** (ou **Importer** depuis un CSV ou votre `~/.ssh/config`).
+3. Installez la clé publique d'Elio sur le serveur (la commande est proposée à l'écran), puis **Lancer l'inventaire**.
+4. **Trousseau → Ajouter une clé** pour chaque membre de l'équipe, puis ajoutez-les sur les serveurs.
+5. **Paramètres → Notifications** pour recevoir les alertes, **Automatisations** pour planifier les inventaires (seul le suivi de la santé est activé par défaut).
 
 ---
 
-## Les fonctionnalités en détail
+## Préparer les serveurs
 
-### 🖥️ Gérer son parc de serveurs
+Sur chaque serveur, avec le compte qu'Elio utilisera :
 
-Depuis le dashboard, **Ajouter un serveur** demande :
-
-| Champ | Exemple |
-|---|---|
-| Nom | `Debian test` |
-| Hôte (IP ou nom de domaine) | `192.168.1.16` ou `srv-01.example.com` |
-| Port | `22` |
-| Utilisateur | `root` |
-
-![Ajouter un serveur](readme/server-form.png)
-
-Il n'y a **pas de mot de passe** : toutes les connexions passent par la clé d'Elio.
-
-### 🟢 Statut en ligne / injoignable
-
-Chaque serveur affiche un badge **En ligne**, **Injoignable** ou **Inconnu** (jamais vérifié). Le test est une connexion TCP sur le port SSH (3 s maximum) : pas besoin de droits root, et il fonctionne même si le ping ICMP est bloqué.
-
-- **Actualiser les statuts** vérifie tous les serveurs en parallèle.
-- L'icône 🔄 d'une ligne vérifie un seul serveur.
-
-Les badges passent sur « Vérification… » puis se mettent à jour **sans recharger la page** (Turbo Streams).
-
-![Actualisation des statuts](readme/status-refresh.png)
-
-### 🔍 La page d'un serveur
-
-Cliquez sur le nom d'un serveur pour ouvrir sa page : statut, test de connexion SSH et clés autorisées.
-
-![Page d'un serveur](readme/server-page.png)
-
-**Tester la connexion SSH** se connecte avec la clé d'Elio, lance `echo elio-check-<aléatoire>` et vérifie la réponse. En cas d'échec, la cause est expliquée : *Aucune clé SSH configurée*, *Clé SSH refusée par le serveur*, *L'empreinte du serveur a changé*, *Connexion impossible*…
-
-![Test SSH réussi](readme/ssh-check.png)
-
-### 👀 Les clés autorisées, compte par compte
-
-La section **Clés autorisées** affiche un **onglet par compte du serveur** : `root`, puis les utilisateurs humains découverts dans `/etc/passwd` (`debian`, `alice`…). Pour chaque clé :
-
-| Badge | Signification |
-|---|---|
-| ![](https://img.shields.io/badge/-Connue-ecfdf5?style=flat-square) | La clé a un commentaire (son « nom ») |
-| ![](https://img.shields.io/badge/-Inconnue-f1f5f9?style=flat-square) | Pas de commentaire : à qui est-elle ? |
-| ![](https://img.shields.io/badge/-Master-4f46e5?style=flat-square) | C'est la clé d'Elio (impossible à supprimer) |
-| ![](https://img.shields.io/badge/-Profil%20%3A%20Alice-f0f9ff?style=flat-square) | La clé appartient à un profil Elio (reconnue par son empreinte, même renommée) |
-| ![](https://img.shields.io/badge/-Expire%20dans%209%20minutes-fffbeb?style=flat-square) | Accès temporaire en cours |
-
-![Clés autorisées](readme/authorized-keys.png)
-
-Le type, l'empreinte et les éventuelles options (`from=…`, `no-pty`, `expiry-time=…`) sont aussi affichés.
-
-### 👤 Les profils
-
-Un profil, c'est **un nom et une clé publique**, par exemple `Alice` et `ssh-ed25519 AAAA… alice@laptop`. On les gère depuis le dashboard : ajout, modification, suppression, et une page de détail avec la clé copiable.
-
-![Profil](readme/profiles.png)
-
-Elio refuse :
-- une **clé privée** collée par erreur (avec un message explicite) ;
-- plusieurs clés d'un coup, ou une clé avec des options ;
-- une clé déjà utilisée par un autre profil ;
-- la clé d'Elio elle-même.
-
-### ➕ Autoriser un profil, pour toujours ou pour 10 minutes
-
-Sur la page d'un serveur, choisissez l'onglet du compte, puis **Autoriser un profil pour …**, et éventuellement une **Durée**.
-
-![Autoriser un profil temporairement](readme/authorize-temporary.png)
-
-#### Exemple : donner 10 minutes d'accès à « Profil 1 » sur `debian@Debian test`
-
-1. Ouvrez **Debian test**, puis l'onglet **debian**.
-2. Choisissez **Profil 1** et la durée **10 minutes**, puis cliquez sur **Autoriser**.
-3. Elio ajoute cette ligne dans `/home/debian/.ssh/authorized_keys` :
-
-   ```
-   expiry-time="20261003145200Z" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA… Profil 1
-   ```
-
-4. La personne peut se connecter : `ssh debian@192.168.1.16`.
-5. **À 14:52 UTC**, `sshd` refuse la clé, puis Elio supprime la ligne du fichier.
-
-![Accès temporaire](readme/temporary-badge.png)
-
-Quelques règles :
-
-| Situation | Résultat |
-|---|---|
-| Ré-autoriser en **permanent** un profil qui a un accès temporaire | L'expiration est retirée, la clé reste |
-| Donner un **nouvel** accès temporaire | Il remplace le précédent (nouvelle échéance) |
-| Accès temporaire sur une clé **déjà permanente** | Rien ne change, la clé reste permanente |
-| Supprimer la clé à la main | L'accès temporaire est terminé |
-
-#### Comment l'expiration est garantie
-
-```mermaid
-sequenceDiagram
-    participant U as Vous
-    participant S as Elio
-    participant J as Job d'expiration
-    participant D as sshd (serveur)
-    U->>S: Autoriser Profil 1 · 10 min
-    S->>D: ajoute la ligne avec expiry-time="…Z"
-    S->>J: planifie la suppression à l'échéance
-    Note over D: à l'échéance, sshd refuse la clé<br/>même si Elio est arrêté
-    J->>D: supprime la ligne de authorized_keys
-    Note over J: serveur injoignable ? nouvel essai chaque minute
+```bash
+mkdir -p ~/.ssh && chmod 700 ~/.ssh
+echo 'ssh-ed25519 AAAA… elio' >> ~/.ssh/authorized_keys   # la clé publique affichée dans Paramètres
+chmod 600 ~/.ssh/authorized_keys
 ```
 
-1. **`sshd` refuse la clé à l'heure prévue** grâce à l'option OpenSSH `expiry-time`, qu'Elio soit en marche ou non.
-2. **Un job supprime ensuite la ligne.** En production, une tâche récurrente rattrape chaque minute les expirations manquées.
+**`sudo` sans mot de passe est facultatif mais recommandé** si Elio ne se connecte pas en `root`. Sans lui, l'inventaire est **partiel** : processus des autres utilisateurs inconnus derrière les ports, firewall illisible, conteneurs Docker illisibles (sauf si le compte est dans le groupe `docker`).
 
-### 🗑️ Supprimer une clé
+```bash
+# /etc/sudoers.d/elio — à éditer avec : visudo -f /etc/sudoers.d/elio
+deploy ALL=(ALL) NOPASSWD: ALL
+```
 
-L'icône 🗑️ d'une clé la supprime du compte, après confirmation. Toutes les lignes contenant cette clé sont retirées, le reste du fichier (commentaires, autres clés) est conservé à l'identique, ainsi que ses droits et son propriétaire. La clé **Master** d'Elio ne peut pas être supprimée : l'application perdrait l'accès au serveur.
+Elio vérifie l'accès avec `sudo -n true` à chaque inventaire et l'indique sur la fiche du serveur.
 
-![Supprimer une clé](readme/delete-key.png)
+---
+
+## Ce qu'Elio exécute sur vos serveurs
+
+Tout passe par SSH, avec la clé d'Elio uniquement (jamais votre agent ni vos clés). Chaque commande a un délai maximum (60 s), et un serveur qui ne répond plus ne bloque pas les autres.
+
+| Pour | Commandes (lecture seule) |
+|---|---|
+| Système | `cat /etc/os-release`, `uname -srm`, `hostname -f`, `systemd-detect-virt`, `/proc/uptime`, `nproc`, `/proc/meminfo`, `timedatectl` |
+| Santé | `/proc/loadavg`, `/proc/meminfo`, `df -P -T` (espace et inodes), `/var/run/reboot-required`, `systemctl --failed`, `apt-get -s dist-upgrade` (simulation), `timedatectl` |
+| Paquets | `dpkg-query -W`, `apt list --upgradable`, `snap list`, `docker image ls` |
+| Services | `systemctl list-units`, `systemctl list-unit-files`, `docker ps -a` |
+| Ports | `ss -tulpn`, `/proc/<pid>/cgroup`, `ufw status verbose`, `nft list ruleset`, `iptables -S INPUT` |
+| Clés SSH | lecture de `~/.ssh/authorized_keys` ; **écriture seulement** quand vous ajoutez ou retirez une clé |
+
+Elio **ne modifie jamais le firewall** : les règles ufw sont des suggestions à relire et appliquer vous-même.
 
 ---
 
 ## Sécurité et limites
 
-> [!WARNING]
-> **L'inscription est ouverte.** Toute personne qui peut atteindre l'application peut se créer un compte et gérer les clés de vos serveurs. Placez Elio derrière un VPN ou un réseau privé, ou désactivez l'inscription une fois votre compte créé (retirez `:registerable` dans `app/models/user.rb`).
-
-**Ce qu'Elio protège :**
-- La clé privée d'Elio est chiffrée en base et n'est jamais affichée.
-- Les empreintes des serveurs sont mémorisées à la première connexion ; une empreinte qui change bloque la connexion.
-- Elio n'utilise que sa propre clé : jamais vos clés `~/.ssh` ni votre ssh-agent.
-- Toutes les valeurs envoyées dans les commandes shell sont échappées, et les noms d'utilisateur sont validés strictement.
-- Les fichiers écrits ont des droits stricts (`700` pour `~/.ssh`, `600` pour `authorized_keys`).
-
-**Limites des accès temporaires :**
-- Une session **déjà ouverte** n'est pas coupée à l'échéance : `sshd` ne vérifie l'expiration qu'à la connexion.
-- L'échéance dépend de **l'horloge du serveur** (gardez NTP actif).
-- Pendant son accès, une personne avec un shell peut **ajouter sa propre clé permanente** dans `authorized_keys`. Elle apparaîtra alors comme « Inconnue » dans Elio. Pour l'empêcher, utilisez un fichier de clés non modifiable par l'utilisateur, par exemple `AuthorizedKeysFile /etc/ssh/authorized_keys/%u` (fichiers appartenant à root).
+- Pas d'inscription publique : premier compte au premier lancement, puis invitations. Double authentification obligatoire pour les administrateurs (réglable).
+- Rôles : **lecture** (tout voir), **opérateur** (serveurs, clés, inventaires), **admin** (paramètres, utilisateurs, notifications, automatisations, rotation de la clé d'Elio).
+- La clé d'Elio peut être **remplacée sans coupure** (rotation serveur par serveur) ou régénérée en urgence.
+- Les empreintes des serveurs sont mémorisées à la première connexion ; un changement bloque la connexion jusqu'à ce qu'un admin l'accepte.
+- Les accès temporaires utilisent l'option OpenSSH `expiry-time` **et** un job de suppression : la clé est refusée à l'heure prévue même si Elio est arrêté. Une session déjà ouverte n'est pas coupée.
+- L'inventaire complet vise **Debian et Ubuntu**. Sur d'autres distributions, Elio relève la santé et le système ; les paquets apparaissent « non disponibles ».
 
 ---
 
-## Tests
+## Mise à jour depuis SSHM
+
+- Les bases s'appellent désormais `elio_*` (et l'utilisateur PostgreSQL `elio`). Pour garder vos données en local : arrêtez `bin/dev`, supprimez les bases `elio_development*` éventuellement créées, puis `ALTER DATABASE sshm_development RENAME TO elio_development` (idem pour `_queue`) et `bin/rails db:migrate`.
+- Kamal : le service s'appelle `elio` et le volume `elio_storage` ; copiez le contenu de l'ancien volume `sshm_storage` (`ssh/known_hosts`).
+- Variable `SSHM_DATABASE_PASSWORD` → `ELIO_DATABASE_PASSWORD`.
+- Les « profils » sont devenus le **trousseau** ; les règles d'accès, équipes, demandes d'accès et la gestion de comptes Unix multiples ont été retirées (Elio gère le compte de connexion de chaque serveur).
+
+---
+
+## Développement et tests
 
 ```bash
-bin/rails test          # tests unitaires, d'intégration, services et jobs
-bin/rails test:system   # tests navigateur (Chrome headless)
-bin/rubocop             # style
-bin/brakeman            # analyse de sécurité
+bin/rails test          # tests unitaires et d'intégration
+bin/rails test:system   # tests système (Chrome)
+bin/ci                  # tout : style, sécurité, tests
 ```
 
-- Les tests **ne contactent jamais de vrais serveurs** : SSH est simulé (`test/support/fake_ssh.rb`) et les tests réseau utilisent des sockets locaux.
-- Les **scripts shell** envoyés aux serveurs sont exécutés pour de vrai avec `sh` dans un dossier personnel temporaire (`test/support/local_shell_helpers.rb`).
-
-> [!TIP]
-> Si `bin/rails test:system` échoue avec *This version of ChromeDriver only supports Chrome version …*, mettez ChromeDriver à jour (`brew upgrade --cask chromedriver`) ou désinstallez-le pour laisser Selenium télécharger la bonne version.
-
----
-
-## Architecture
-
-```mermaid
-flowchart LR
-    UI["Interface web<br/>Rails · Turbo · Stimulus"] --> C[Controllers]
-    C --> S["Services<br/>ServerPing · SshCheck<br/>AuthorizedKeysReader<br/>AccessGrant · AuthorizedKeyRemoval"]
-    S --> SSH["SshConnection<br/>(net-ssh, clé de l'app)"]
-    SSH --> SRV[("Serveurs<br/>~/.ssh/authorized_keys")]
-    C --> DB[("PostgreSQL<br/>Server · Profile · SshKey<br/>TemporaryAccess")]
-    J["Jobs Solid Queue<br/>expiration des accès"] --> S
-```
-
-| Dossier | Contenu |
-|---|---|
-| `app/models` | `Server`, `Profile`, `SshKey`, `TemporaryAccess`, et `AuthorizedKey` / `AuthorizedKeysAccount` (objets Ruby simples) |
-| `app/services` | Connexion SSH, ping, lecture et écriture des `authorized_keys`, génération de clés |
-| `app/jobs` | Expiration des accès temporaires |
-| `app/javascript/controllers` | Stimulus : badges de vérification, copie dans le presse-papiers, masquage de la barre Turbo |
-
-**Stack :** Rails 8 · PostgreSQL · Hotwire (Turbo + Stimulus) · Tailwind CSS 4 · Devise · net-ssh · Solid Queue · Kamal.
+Les collecteurs d'inventaire sont testés sur des sorties enregistrées (`test/fixtures/files/inventory/`). La page `/design` (hors production) montre les composants de l'interface ; les maquettes et règles de l'interface sont dans [`docs/design/`](docs/design/README.md).
