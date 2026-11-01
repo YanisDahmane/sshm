@@ -31,8 +31,8 @@ module Settings
 
     def check
       automation = Automation.all_kinds.find { |candidate| candidate.kind == "docker_image_updates" }
-      task = automation.enqueue!(user: current_user, tracked: true)
-      redirect_to task_path(task), notice: "Vérification des registres lancée."
+      task, started = automation.start_now!(user: current_user)
+      redirect_to task_path(task), notice: started ? "Vérification des registres lancée." : "Déjà en cours : voici la tâche en cours."
     end
 
     private

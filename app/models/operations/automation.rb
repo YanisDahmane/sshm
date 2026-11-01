@@ -62,6 +62,8 @@ class Automation < ApplicationRecord
     end
   end
 
+  ALREADY_RUNNING = "Déjà en cours : ce passage est ignoré."
+
   def definition = KINDS.fetch(kind.to_sym)
 
   # Runs an automation now because something needs it (a release new to the
@@ -104,13 +106,27 @@ class Automation < ApplicationRecord
     task
   end
 
+  # "Lancer maintenant": the task already waiting or running if there is one
+  # (a second run would only wait for the first), else a new one.
+  # Returns [task, started].
+  def start_now!(user:)
+    running = BackgroundTask.unfinished.where(automation: self).order(:id).last
+    running ? [ running, false ] : [ enqueue!(user: user, tracked: true), true ]
+  end
+
   # With a BackgroundTask (see RunAutomationJob), one item per server is followed.
+  # Never twice at the same time (two workers, a run started by hand while the
+  # scheduled one runs): the second run is skipped and says so.
   def run!(task: nil)
     @task = task
-    result = if inventory? then run_inventory
-    elsif definition.integration then run_integration_sync
-    else send("run_#{kind}")
+    result = AdvisoryLock.try("automation:#{kind}") do
+      if inventory? then run_inventory
+      elsif definition.integration then run_integration_sync
+      else send("run_#{kind}")
+      end
     end
+    return ALREADY_RUNNING if result.equal?(AdvisoryLock::HELD)
+
     update!(last_run_at: Time.current, last_result: result)
     Activity.record!(:automation_run, user: nil, automation: kind, automation_label: label, result: result) unless definition.quiet
     result

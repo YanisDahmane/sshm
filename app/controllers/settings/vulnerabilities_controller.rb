@@ -22,8 +22,8 @@ module Settings
     # Asks the score providers now (the automation, run once).
     def scores
       automation = Automation.all_kinds.find { |candidate| candidate.kind == "cve_scores_update" }
-      task = automation.enqueue!(user: current_user, tracked: true)
-      redirect_to task_path(task), notice: "Mise à jour des notes lancée."
+      task, started = automation.start_now!(user: current_user)
+      redirect_to task_path(task), notice: started ? "Mise à jour des notes lancée." : "Déjà en cours : voici la tâche en cours."
     end
 
     def update
@@ -41,8 +41,8 @@ module Settings
     # Downloads the feeds now (the daily automation, run once).
     def refresh
       automation = Automation.all_kinds.find { |candidate| candidate.kind == "vulnerabilities_update" }
-      task = automation.enqueue!(user: current_user, tracked: true)
-      redirect_to task_path(task), notice: "Mise à jour des bases de vulnérabilités lancée."
+      task, started = automation.start_now!(user: current_user)
+      redirect_to task_path(task), notice: started ? "Mise à jour des bases de vulnérabilités lancée." : "Déjà en cours : voici la tâche en cours."
     end
 
     # A Debian Security Tracker JSON or an Ubuntu OSV zip, recognized by its content.

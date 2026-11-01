@@ -9,8 +9,13 @@ module Vulnerabilities::Update
   READERS = { "debian" => Vulnerabilities::DebianTracker, "ubuntu" => Vulnerabilities::UbuntuOsv }.freeze
   BATCH = 5_000
 
+  # One update of a feed at a time (a download and an import by hand): the
+  # second waits for the first, then replaces its entries.
   def self.call(source, path: nil, origin: path ? "import" : "download")
-    source = source.to_s
+    AdvisoryLock.hold("vulnerability_feed:#{source}") { update(source.to_s, path, origin) }
+  end
+
+  def self.update(source, path, origin)
     reader = READERS.fetch(source)
     releases = Vulnerabilities.releases.fetch(source)
     feed = VulnerabilityFeed.for(source)

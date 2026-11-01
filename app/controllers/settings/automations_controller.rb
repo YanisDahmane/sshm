@@ -19,8 +19,8 @@ module Settings
     end
 
     def run
-      task = @automation.enqueue!(user: current_user, tracked: true)
-      redirect_to task_path(task), notice: "« #{@automation.label} » lancée."
+      task, started = @automation.start_now!(user: current_user)
+      redirect_to task_path(task), notice: started ? "« #{@automation.label} » lancée." : "Déjà en cours : voici la tâche en cours."
     end
 
     private
