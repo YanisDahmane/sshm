@@ -17,7 +17,10 @@ module ActiveSupport
     fixtures :all
 
     # Rate limits of the public pages are kept in memory across tests: start fresh.
-    setup { Throttled::STORE.clear }
+    setup do
+      Throttled::STORE.clear
+      ApplicationController.setup_done = false # some tests delete every user
+    end
 
     # Add more helper methods to be used by all tests here...
   end

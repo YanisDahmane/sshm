@@ -1,8 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
 
 // Quick search over pages, groups, servers (also by host name and IP, the
-// `keywords`), keyring keys and server tabs
-// (the items marked `typed` only once something is typed), plus a fleet
+// `keywords`), keyring keys and the tabs of the servers (built here, listed
+// once something is typed), plus a fleet
 // package search and, for a number, the servers exposing that port.
 // Opens with ⌘K / Ctrl+K or the sidebar button; arrows to move, Enter to
 // open, Escape to close.
@@ -39,14 +39,23 @@ export default class extends Controller {
   filter() {
     const query = this.inputTarget.value.trim()
     const words = normalize(query).split(/\s+/).filter(Boolean)
-    this.matches = this.items.filter((item) => {
-      if (item.typed && words.length === 0) return false
-      const haystack = normalize(`${item.label} ${item.hint || ""} ${item.group} ${item.keywords || ""}`)
-      return words.every((word) => haystack.includes(word))
-    })
+    const matches = (item) => words.every((word) => normalize(`${item.label} ${item.hint || ""} ${item.group} ${item.keywords || ""}`).includes(word))
+    this.matches = this.items.filter(matches)
+    if (words.length) this.matches.push(...this.serverTabs().filter(matches))
     this.matches.push(...this.searches(query))
     this.selected = 0
     this.render()
+  }
+
+  // "Web › Paquets"…: the tabs of every server, built here (only listed once
+  // something is typed) rather than sent for each server in every page.
+  serverTabs() {
+    if (!this.tabItems) {
+      const tabs = Object.entries(JSON.parse(this.dialogTarget.dataset.serverTabs || "{}"))
+      this.tabItems = this.items.filter((item) => item.server).flatMap((server) =>
+        tabs.map(([tab, label]) => ({ group: "Onglets des serveurs", label: `${server.label} › ${label}`, url: `${server.url}?tab=${tab}` })))
+    }
+    return this.tabItems
   }
 
   // "Chercher le paquet « … »" and, for a port number, "Qui expose le port … ?".

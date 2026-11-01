@@ -185,6 +185,7 @@ Les rattachements utilisent toutes les adresses relevées par l'inventaire du sy
 
 ## Sécurité et limites
 
+- Double authentification (TOTP + codes de secours) obligatoire par défaut pour les administrateurs **et les opérateurs** (réglable) ; « se souvenir de moi » limité à 7 jours.
 - Mots de passe de 12 caractères minimum ; connexion, mot de passe oublié, invitations et premier lancement limités en débit par adresse IP, en plus du verrouillage du compte après 10 échecs.
 - Content Security Policy stricte (scripts d'Elio seulement, avec nonce), HTTPS forcé en production, secrets (clé SSH, webhooks, clés d'API, secret 2FA) chiffrés en base et masqués dans les journaux.
 - Webhooks signés : `X-Elio-Signature: sha256=` HMAC SHA-256 de `"<X-Elio-Timestamp>.<corps>"` avec le secret du canal ; refusez les messages trop anciens.

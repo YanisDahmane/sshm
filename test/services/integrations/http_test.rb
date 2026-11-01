@@ -52,6 +52,17 @@ class Integrations::HttpTest < ActiveSupport::TestCase
     assert_match "Adresse invalide", error.message
   end
 
+  test "stops reading an answer larger than the limit (AUDIT.md S23)" do
+    stub_const_limit = Integrations::Http::MAX_BODY
+    Integrations::Http.send(:remove_const, :MAX_BODY)
+    Integrations::Http.const_set(:MAX_BODY, 1_000)
+    error = assert_raises(Integrations::Error) { with_http_server(body: "x" * 5_000) { |url| Integrations::Http.get(url, service: "Uptime Kuma") } }
+    assert_match "trop volumineuse", error.message
+  ensure
+    Integrations::Http.send(:remove_const, :MAX_BODY)
+    Integrations::Http.const_set(:MAX_BODY, stub_const_limit)
+  end
+
   test "read-only by construction: no other method than GET" do
     assert_equal [ :get ], Integrations::Http.singleton_methods.sort
   end

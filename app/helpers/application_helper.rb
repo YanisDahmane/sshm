@@ -58,8 +58,9 @@ module ApplicationHelper
 
   SERVER_TAB_LABELS = { "packages" => "Paquets", "services" => "Services", "ports" => "Ports", "keys" => "Clés SSH", "history" => "Historique" }.freeze
 
-  # Entries of the ⌘K quick search: pages, groups, servers, keyring keys, and
-  # the tabs of each server (`typed: true`: only listed once something is typed).
+  # Entries of the ⌘K quick search: pages, groups, servers (`server: true`:
+  # the browser derives their tabs from SERVER_TAB_LABELS once something is
+  # typed, so a big fleet does not weigh on every page) and keyring keys.
   def command_palette_items
     pages = [
       { label: "Vue d'ensemble", url: root_path }, { label: "Parc", hint: "serveurs", url: servers_path }, { label: "Paquets", hint: "recherche sur tout le parc", url: packages_path }, { label: "Ports", hint: "ports publics du parc", url: ports_path }, { label: "Trousseau", hint: "clés SSH", url: public_keys_path },
@@ -80,14 +81,10 @@ module ApplicationHelper
     groups = ServerGroup.order(:name).map { |group| { group: "Groupes", label: group.name, hint: "serveurs du groupe", url: servers_path(group: group.id) } }
     servers = Server.order(:name).includes(:server_groups, :inventory_snapshots).map do |server|
       { group: "Serveurs", label: server.name, hint: [ "#{server.username}@#{server.host}", server.distinct_hostname, *server.server_groups.map(&:name) ].compact.join(" · "),
-        url: server_path(server), keywords: ([ server.hostname ] + server.addresses).compact.uniq.join(" ").presence }.compact
+        url: server_path(server), keywords: ([ server.hostname ] + server.addresses).compact.uniq.join(" ").presence, server: true }.compact
     end
     public_keys = PublicKey.order(:name).map { |public_key| { group: "Trousseau", label: public_key.name, hint: public_key.kind_label, url: public_key_path(public_key) } }
-    tabs = Server.order(:name).flat_map do |server|
-      SERVER_TAB_LABELS.map { |tab, label| { group: "Onglets des serveurs", label: "#{server.name} › #{label}", url: server_path(server, tab: tab), typed: true } }
-    end
-
-    pages + groups + servers + public_keys + tabs
+    pages + groups + servers + public_keys
   end
 
   # PublicKey name proposed for an authorized key: its comment without the host

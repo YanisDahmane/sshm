@@ -1,4 +1,6 @@
 class ApplicationController < ActionController::Base
+  # Set once a first account exists (see require_setup); reset by the tests.
+  class_attribute :setup_done, default: false, instance_accessor: false
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
 
@@ -31,9 +33,17 @@ class ApplicationController < ActionController::Base
     redirect_to main_app.account_path, alert: "La double authentification est obligatoire pour votre rôle : activez-la pour continuer."
   end
 
-  # Until the first admin exists, every page leads to the setup page.
+  # Until the first admin exists, every page leads to the setup page. Once
+  # there is a user there always will be (accounts are deactivated, never
+  # deleted), so the check stops querying the database (AUDIT.md D13).
   def require_setup
-    redirect_to main_app.new_setup_path if User.none?
+    return if ApplicationController.setup_done
+
+    if User.exists?
+      ApplicationController.setup_done = true
+    else
+      redirect_to main_app.new_setup_path
+    end
   end
 
   def layout_by_resource

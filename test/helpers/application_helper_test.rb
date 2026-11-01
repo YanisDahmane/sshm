@@ -42,15 +42,14 @@ class ApplicationHelperTest < ActionView::TestCase
   test "command_palette_items lists pages, servers and public_keys" do
     items = command_palette_items
 
-    assert_equal [ "Pages", "Groupes", "Serveurs", "Trousseau", "Onglets des serveurs" ], items.map { |item| item[:group] }.uniq
+    assert_equal [ "Pages", "Groupes", "Serveurs", "Trousseau" ], items.map { |item| item[:group] }.uniq
     assert_includes items, { group: "Pages", label: "Parc", hint: "serveurs", url: servers_path }
     assert_includes items, { group: "Groupes", label: "Production", hint: "serveurs du groupe", url: servers_path(group: server_groups(:production).id) }
-    assert_includes items, { group: "Serveurs", label: "Web", hint: "deploy@192.168.1.10 · Production", url: server_path(servers(:web)), keywords: "192.168.1.10" }
-    assert_includes items, { group: "Serveurs", label: "Backup", hint: "root@10.0.0.5", url: server_path(servers(:backup)), keywords: "10.0.0.5" }
+    assert_includes items, { group: "Serveurs", label: "Web", hint: "deploy@192.168.1.10 · Production", url: server_path(servers(:web)), keywords: "192.168.1.10", server: true }
+    assert_includes items, { group: "Serveurs", label: "Backup", hint: "root@10.0.0.5", url: server_path(servers(:backup)), keywords: "10.0.0.5", server: true }
     assert_includes items, { group: "Trousseau", label: "Alice", hint: "Personne", url: public_key_path(public_keys(:alice)) }
     assert_includes items, { group: "Trousseau", label: "CI", hint: "Serveur", url: public_key_path(public_keys(:ci)) }
-    assert_includes items, { group: "Onglets des serveurs", label: "Web › Ports", url: server_path(servers(:web), tab: "ports"), typed: true }
-    assert_equal 5 * Server.count, items.count { |item| item[:typed] }
+    assert(items.select { |item| item[:group] == "Serveurs" }.all? { |item| item[:server] }, "the browser builds their tabs")
   end
 
   test "command_palette_items finds a server by host name and every address" do

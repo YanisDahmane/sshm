@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_01_130000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_01_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -37,7 +37,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_130000) do
     t.index ["created_at"], name: "index_activities_on_created_at"
     t.index ["kind"], name: "index_activities_on_kind"
     t.index ["public_key_id"], name: "index_activities_on_public_key_id"
-    t.index ["server_id"], name: "index_activities_on_server_id"
+    t.index ["server_id", "created_at"], name: "index_activities_on_server_id_and_created_at"
     t.index ["user_id"], name: "index_activities_on_user_id"
   end
 
