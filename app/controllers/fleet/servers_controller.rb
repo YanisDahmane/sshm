@@ -1,5 +1,8 @@
 class ServersController < ApplicationController
   PER_PAGE = 100
+  VIEWS = %w[list grid].freeze
+  # Grid: the problems first.
+  STATE_ORDER = { "crit" => 0, "off" => 0, "warn" => 1, "unknown" => 2, "ok" => 3 }.freeze
   HISTORY_PER_PAGE = 30
 
   require_permission :operate, only: %i[new create edit update destroy]
@@ -19,6 +22,8 @@ class ServersController < ApplicationController
     servers = servers.to_a if @state || @q.present?
     servers = servers.select { |server| server.health_state == @state } if @state
     servers = servers.select { |server| server.matches_search?(@q) } if @q.present?
+    @view = fleet_view
+    servers = servers.to_a.sort_by { |server| [ STATE_ORDER.fetch(server.health_state, 2), server.name.downcase ] } if @view == "grid"
     @pager = paginate(servers, per_page: PER_PAGE)
     @servers = @pager.records
     @load_history = Inventory::HealthSample.where(server_id: @servers.map(&:id)).since(24.hours.ago)
@@ -85,6 +90,13 @@ class ServersController < ApplicationController
   end
 
   private
+
+  # List (dense table) or grid (cards): ?view=, remembered in a cookie.
+  def fleet_view
+    view = params[:view].presence_in(VIEWS)
+    cookies.permanent[:elio_fleet_view] = { value: view, same_site: :lax, httponly: true } if view
+    view || cookies[:elio_fleet_view].presence_in(VIEWS) || "list"
+  end
 
   def set_server
     @server = Server.find(params[:id])
