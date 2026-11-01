@@ -10,7 +10,7 @@ class RunAutomationJob < ApplicationJob
     result = automation.run!(task: task)
     task&.refresh!(result: result)
   rescue StandardError => e
-    task&.fail!("Erreur interne (#{e.class})")
+    task&.fail!(I18n.t("run_automation_job.internal_error", class: e.class))
     raise
   end
 end

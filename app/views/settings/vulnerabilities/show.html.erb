@@ -31,7 +31,7 @@
     <% end %>
   </ul>
   <p class="border-t border-line px-4 py-2.5 text-xs text-ink-3">
-    Automatisation « <%= @automation.label %> » : <%= @automation.enabled? ? "active, #{Automation::INTERVALS.fetch(@automation.interval_minutes).downcase}" : "désactivée" %>
+    Automatisation « <%= @automation.label %> » : <%= @automation.enabled? ? "active, #{Automation.interval_label(@automation.interval_minutes).downcase}" : "désactivée" %>
     — <%= link_to "Automatisations", settings_automations_path, class: "text-accent hover:underline" %>.
     Sources : <span class="font-mono"><%= Vulnerabilities::DebianTracker::URL %></span>, <span class="font-mono"><%= Vulnerabilities::UbuntuOsv::URL %></span>.
   </p>
@@ -44,7 +44,7 @@
       <p class="mt-0.5 text-xs text-ink-3">
         La note affichée est la <strong>moyenne</strong> des notes CVSS des fournisseurs actifs ; elle donne la gravité des vulnérabilités que Debian ou Ubuntu n'évaluent pas.
         EPSS et KEV disent si une vulnérabilité est exploitée. <%= @fleet_cves %> CVE sur le parc.
-        Automatisation « <%= @scores_automation.label %> » : <%= @scores_automation.enabled? ? Automation::INTERVALS.fetch(@scores_automation.interval_minutes).downcase : "désactivée" %>.
+        Automatisation « <%= @scores_automation.label %> » : <%= @scores_automation.enabled? ? Automation.interval_label(@scores_automation.interval_minutes).downcase : "désactivée" %>.
       </p>
     </div>
     <div class="flex shrink-0 gap-2">

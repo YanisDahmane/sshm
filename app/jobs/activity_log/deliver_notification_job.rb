@@ -9,7 +9,7 @@ class DeliverNotificationJob < ApplicationJob
   def perform(channel, activity)
     return unless channel.enabled? && channel.subscribed_to?(activity.kind)
 
-    channel.notifier.deliver(channel, activity)
+    channel.in_language { channel.notifier.deliver(channel, activity) }
     channel.record_delivery!
   rescue Notifications::DeliveryError => e
     channel.record_delivery!(error: e.message)

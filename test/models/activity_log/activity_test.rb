@@ -11,7 +11,7 @@ class ActivityTest < ActiveSupport::TestCase
     Activity::KINDS.each_value do |kind|
       assert kind.label.present?, kind.key
       assert kind.description.present?, kind.key
-      assert_includes Activity::CATEGORIES.keys, kind.category, kind.key
+      assert_includes Activity::CATEGORIES, kind.category, kind.key
       assert_includes Activity::SEVERITIES, kind.severity, kind.key
     end
   end
@@ -57,8 +57,8 @@ class ActivityTest < ActiveSupport::TestCase
       [ :unknown_key_detected, { unix_user: "root" } ] => "Clé inconnue « sans nom » trouvée sur « Web »",
       [ :key_disappeared, { unix_user: "root", key_name: "bob" } ] => "Clé « bob » disparue de « Web »",
       [ :ssh_access_lost, {} ] => "« Web » refuse la clé d'Elio",
-      [ :servers_imported, { count: 12, format: "CSV", names: %w[A B] } ] => "12 serveur(s) importé(s) (CSV) : A, B…",
-      [ :server_group_created, { group_name: "Prod", servers: 2 } ] => "Groupe « Prod » créé (2 serveur(s))",
+      [ :servers_imported, { count: 12, format: "CSV", names: %w[A B] } ] => "12 serveurs importés (CSV) : A, B…",
+      [ :server_group_created, { group_name: "Prod", servers: 2 } ] => "Groupe « Prod » créé (2 serveurs)",
       [ :server_group_deleted, { group_name: "Prod" } ] => "Groupe « Prod » supprimé",
       [ :host_key_changed, { new_fingerprint: "SHA256:new" } ] => "Nouvelle empreinte acceptée pour « Web » : SHA256:new",
       [ :server_unreachable, {} ] => "« Web » ne répond plus",
@@ -68,7 +68,7 @@ class ActivityTest < ActiveSupport::TestCase
       [ :health_warning, { reasons: [ "Redémarrage requis", "Mémoire à 92 %" ] } ] => "« Web » est à surveiller : Redémarrage requis, Mémoire à 92 %",
       [ :health_recovered, {} ] => "« Web » est de nouveau sain",
       [ :packages_changed, { installed: 2, upgraded: 1, removed: 0, examples: [ "curl" ] } ] => "Paquets de « Web » : 2 installés, 1 mis à jour (curl)",
-      [ :security_updates_available, { count: 3 } ] => "3 mise(s) à jour de sécurité disponible(s) sur « Web »",
+      [ :security_updates_available, { count: 3 } ] => "3 mises à jour de sécurité disponibles sur « Web »",
       [ :service_failed, { service: "nginx.service" } ] => "nginx.service est en échec sur « Web »",
       [ :container_stopped, { container: "pgbouncer" } ] => "Le conteneur pgbouncer s'est arrêté sur « Web »",
       [ :port_opened, { port: "3306/tcp", process: "mariadbd" } ] => "Port 3306/tcp ouvert publiquement sur « Web » (mariadbd)",

@@ -83,7 +83,7 @@ class TwoFactorSignInTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to root_path
     activity = Activity.of_kind(:two_factor_backup_code_used).sole
-    assert_equal "operator@example.com s'est connecté avec un code de secours (9 restant(s))", activity.summary
+    assert_equal "operator@example.com s'est connecté avec un code de secours (9 restants)", activity.summary
   end
 
   test "the second step expires after 5 minutes" do

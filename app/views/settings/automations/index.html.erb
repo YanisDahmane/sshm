@@ -1,10 +1,8 @@
-<% content_for :title, "Automatisations · Elio" %>
+<% content_for :title, t("title", page: t("nav.automations")) %>
 <h1 class="text-2xl font-bold tracking-tight">Automatisations</h1>
 
 <p class="mt-2 text-sm text-ink-3">
-  Collectes et vérifications lancées automatiquement, sur tout le parc ou sur certains groupes. Ce qu'elles détectent apparaît dans
-  <%= link_to "l'activité", activities_path, class: "font-medium text-accent hover:underline" %> et peut être notifié ; chaque passage est suivi dans
-  <%= link_to "les tâches", tasks_path, class: "font-medium text-accent hover:underline" %> (sauf les vérifications discrètes toutes les 15 minutes).
+  <%= t(".intro_html", activity: link_to(t(".activity"), activities_path, class: "font-medium text-accent hover:underline"), tasks: link_to(t(".tasks"), tasks_path, class: "font-medium text-accent hover:underline")) %>
 </p>
 
 <div class="card mt-5 divide-y divide-line">
@@ -15,25 +13,25 @@
           <h2 class="flex flex-wrap items-center gap-2 font-semibold">
             <%= automation.label %>
             <% if automation.enabled? %>
-              <%= status_badge :good, "Activée", class: "automation-state" %>
+              <%= status_badge :good, t(".text"), class: "automation-state" %>
             <% else %>
-              <%= status_badge :neutral, "Désactivée", class: "automation-state" %>
+              <%= status_badge :neutral, t(".off"), class: "automation-state" %>
             <% end %>
             <span class="automation-scope badge bg-subtle font-normal text-ink-2"><%= automation.scope_label %></span>
           </h2>
           <p class="mt-1 text-xs text-ink-3"><%= automation.description %></p>
           <dl class="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-ink-3">
-            <div><dt class="inline">Dernière exécution :</dt> <dd class="inline"><%= automation.last_run_at ? relative_time_tag(automation.last_run_at) : "jamais" %></dd></div>
+            <div><dt class="inline"><%= t(".last_run") %></dt> <dd class="inline"><%= automation.last_run_at ? relative_time_tag(automation.last_run_at) : "jamais" %></dd></div>
             <% if automation.last_result %>
-              <div><dt class="inline">Résultat :</dt> <dd class="automation-result inline text-ink-2"><%= automation.last_result %></dd></div>
+              <div><dt class="inline"><%= t(".result") %></dt> <dd class="automation-result inline text-ink-2"><%= automation.last_result %></dd></div>
             <% end %>
             <% if (next_run = automation.next_run_at) %>
-              <div><dt class="inline">Prochaine :</dt> <dd class="inline"><%= relative_time_tag next_run, expired: "à la prochaine minute" %></dd></div>
+              <div><dt class="inline"><%= t(".next") %></dt> <dd class="inline"><%= relative_time_tag next_run, expired: t(".next_minute") %></dd></div>
             <% end %>
           </dl>
         </div>
         <%= button_to run_settings_automation_path(automation), class: "btn btn-secondary" do %>
-          <%= icon :bolt %> Lancer maintenant
+          <%= icon :bolt %> <%= t(".run_now") %>
         <% end %>
       </div>
 
@@ -42,13 +40,13 @@
           <%= f.check_box :enabled, class: "h-4 w-4 rounded border-line text-accent" %>
           Activer
         </label>
-        <%= f.select :interval_minutes, Automation::INTERVALS.invert, {}, aria: { label: "Fréquence" }, class: "input w-auto py-1 text-xs" %>
+        <%= f.select :interval_minutes, Automation.interval_options, {}, aria: { label: t(".frequency") }, class: "input w-auto py-1 text-xs" %>
         <% if @groups.any? %>
           <details class="automation-groups relative">
-            <summary class="input cursor-pointer py-1 text-xs"><%= automation.server_group_ids.any? ? "Groupes : #{automation.scope_label}" : "Sur tout le parc" %></summary>
+            <summary class="input cursor-pointer py-1 text-xs"><%= automation.server_group_ids.any? ? t(".groups", scope_label: automation.scope_label) : t(".whole_fleet") %></summary>
             <div class="absolute right-0 z-10 mt-1 w-56 space-y-1 rounded-lg border border-line bg-surface p-2 shadow-lg sm:right-auto">
               <%= hidden_field_tag "automation[server_group_ids][]", "", id: nil %>
-              <p class="px-1 text-[11px] text-ink-3">Aucun groupe coché : tout le parc.</p>
+              <p class="px-1 text-[11px] text-ink-3"><%= t(".group_checked_whole_fleet") %></p>
               <% @groups.each do |group| %>
                 <label class="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-xs text-ink-2 hover:bg-subtle">
                   <%= check_box_tag "automation[server_group_ids][]", group.id, automation.server_group_ids.include?(group.id), id: "#{dom_id(automation)}_group_#{group.id}",
@@ -59,7 +57,7 @@
             </div>
           </details>
         <% end %>
-        <%= f.submit "Enregistrer", class: "btn btn-primary py-1 text-xs" %>
+        <%= f.submit t(".save"), class: "btn btn-primary py-1 text-xs" %>
       <% end %>
     </section>
   <% end %>

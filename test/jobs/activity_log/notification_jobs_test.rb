@@ -23,6 +23,23 @@ class NotificationJobsTest < ActiveJob::TestCase
     assert_enqueued_with(job: DeliverNotificationJob, args: [ security, activity ])
   end
 
+  test "a channel's messages are written in its language, else the instance's" do
+    english = create_channel(locale: "en", activity_kinds: %w[server_unreachable])
+    french = create_channel(name: "#fr", activity_kinds: %w[server_unreachable])
+    activity = Activity.record!(:server_unreachable, server: servers(:web))
+    texts = []
+
+    stub_method(Notifications::Slack, :post, ->(_channel, payload) { texts << payload.to_json }) do
+      DeliverNotificationJob.perform_now(english, activity)
+      DeliverNotificationJob.perform_now(french, activity)
+    end
+
+    assert_match "Server unreachable", texts.first
+    assert_match "“Web” no longer answers", texts.first
+    assert_match "Serveur injoignable", texts.last
+    assert_match "« Web » ne répond plus", texts.last
+  end
+
   test "DeliverNotificationJob sends the activity and records the delivery" do
     channel = create_channel
     activity = Activity.record!(:ssh_access_lost, server: servers(:web))

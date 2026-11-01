@@ -39,7 +39,7 @@ registry.example.com:5000 elio jeton</pre>
     <div>
       <h2 class="font-semibold">Vérification des images</h2>
       <p class="mt-0.5 text-xs text-ink-3">
-        Automatisation « <%= @automation.label %> » : <%= @automation.enabled? ? "active, #{Automation::INTERVALS.fetch(@automation.interval_minutes).downcase}" : "désactivée" %>
+        Automatisation « <%= @automation.label %> » : <%= @automation.enabled? ? "active, #{Automation.interval_label(@automation.interval_minutes).downcase}" : "désactivée" %>
         <% if @automation.last_result %>— dernier passage : <%= @automation.last_result %><% end %>.
       </p>
     </div>

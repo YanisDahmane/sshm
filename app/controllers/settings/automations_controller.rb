@@ -11,8 +11,8 @@ module Settings
 
     def update
       if @automation.update(automation_params)
-        state = @automation.enabled? ? "activée (#{Automation::INTERVALS.fetch(@automation.interval_minutes).downcase}, #{@automation.scope_label.downcase_first})" : "désactivée"
-        redirect_to settings_automations_path, notice: "« #{@automation.label} » #{state}."
+        state = @automation.enabled? ? t("automations_controller.enabled", interval_label: (Automation.interval_label(@automation.interval_minutes).downcase), downcase_first: @automation.scope_label.downcase_first) : t("automations_controller.disabled")
+        redirect_to settings_automations_path, notice: t("automations_controller.saved", label: @automation.label, state: state)
       else
         redirect_to settings_automations_path, alert: @automation.errors.full_messages.to_sentence
       end
@@ -20,7 +20,7 @@ module Settings
 
     def run
       task, started = @automation.start_now!(user: current_user)
-      redirect_to task_path(task), notice: started ? "« #{@automation.label} » lancée." : "Déjà en cours : voici la tâche en cours."
+      redirect_to task_path(task), notice: started ? t("automations_controller.started", label: @automation.label) : t("flash.already_running")
     end
 
     private

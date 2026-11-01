@@ -2,8 +2,8 @@
   <div class="workers-warning mt-6 flex items-start gap-3 rounded-xl border border-crit/40 bg-crit-soft px-4 py-3 text-sm text-crit-ink" role="alert">
     <%= icon :exclamation_triangle, class: "mt-0.5 h-5 w-5 shrink-0" %>
     <div>
-      <p class="font-semibold">Aucun worker ne traite les tâches</p>
-      <p class="mt-0.5">Les tâches restent « à venir » tant qu'aucun processus Solid Queue ne tourne. Lancez l'application avec <code class="font-mono">bin/dev</code> ou démarrez <code class="font-mono">bin/jobs</code> (en production, vérifiez le conteneur des jobs).</p>
+      <p class="font-semibold"><%= t(".worker_processing_tasks") %></p>
+      <p class="mt-0.5"><%= t(".text_html", dev: tag.code("bin/dev", class: "font-mono"), jobs: tag.code("bin/jobs", class: "font-mono")) %></p>
     </div>
   </div>
 <% end %>

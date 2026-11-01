@@ -6,14 +6,21 @@
   <%= render "shared/form_errors", record: channel %>
 
   <div>
-    <%= f.label :name, "Nom", class: label_class %>
+    <%= f.label :name, t(".name"), class: label_class %>
     <%= f.text_field :name, required: true, autofocus: true, placeholder: "#ops-alertes", class: input_class %>
   </div>
 
+  <div>
+    <%= f.label :locale, t(".language"), class: label_class %>
+    <%= f.select :locale, locale_options(blank: t(".instance_language", language: Elio::Locales.names.fetch(app_settings.default_locale.to_sym))), {}, class: "#{input_class} w-auto" %>
+    <p class="mt-1 text-xs text-ink-3"><%= t(".language_hint") %></p>
+  </div>
+
   <fieldset>
-    <legend class="<%= label_class %>">Type</legend>
+    <legend class="<%= label_class %>"><%= t(".type") %></legend>
     <div class="mt-2 flex flex-wrap gap-4">
-      <% NotificationChannel::KINDS.each do |value, label| %>
+      <% NotificationChannel::KINDS.each do |value| %>
+        <% label = NotificationChannel.kind_label(value) %>
         <label class="flex cursor-pointer items-center gap-2 text-sm text-ink-2">
           <%= f.radio_button :kind, value, disabled: channel.persisted? && channel.kind != value,
                 data: { kind_fields_target: "kind", action: "kind-fields#update" }, class: "h-4 w-4 border-line text-accent" %>
@@ -24,34 +31,33 @@
   </fieldset>
 
   <div data-kind-fields-target="field" data-kinds="slack discord webhook">
-    <%= f.label :webhook_url, "URL du webhook", class: label_class %>
+    <%= f.label :webhook_url, t(".webhook_url"), class: label_class %>
     <%= f.password_field :webhook_url, value: nil, autocomplete: "off",
-          placeholder: (channel.persisted? && channel.webhook_url ? "#{channel.masked_destination} (laisser vide pour la conserver)" : "https://…"),
+          placeholder: (channel.persisted? && channel.webhook_url ? t(".leave_empty_keep", masked_destination: channel.masked_destination) : "https://…"),
           class: "#{input_class} font-mono text-xs" %>
     <p class="mt-1 text-xs text-ink-3">
-      Slack : <em>Apps → Incoming Webhooks</em> · Discord : <em>Paramètres du salon → Intégrations → Webhooks</em> ·
-      Webhook : toute URL HTTPS qui reçoit du JSON signé (en-têtes <code class="font-mono">X-Elio-Timestamp</code> et <code class="font-mono">X-Elio-Signature</code>). Stockée chiffrée.
+      <%= t(".webhook_help_html", slack: tag.em("Apps → Incoming Webhooks"), discord: tag.em(t(".discord_path")), timestamp: tag.code("X-Elio-Timestamp", class: "font-mono"), signature: tag.code("X-Elio-Signature", class: "font-mono")) %>   
     </p>
   </div>
 
   <div data-kind-fields-target="field" data-kinds="email">
-    <%= f.label :recipients, "Destinataires", class: label_class %>
+    <%= f.label :recipients, t(".recipients"), class: label_class %>
     <%= f.text_field :recipients, placeholder: "ops@acme.fr, alice@acme.fr", autocomplete: "off", class: input_class %>
     <p class="mt-1 text-xs text-ink-3">
-      Jusqu'à <%= NotificationChannel::MAX_RECIPIENTS %> adresses séparées par des virgules.
-      <% unless Rails.configuration.x.mail_enabled %><span class="text-warn-ink">L'envoi d'emails n'est pas configuré (variables SMTP_*) : rien ne partira.</span><% end %>
+      <%= t(".up_addresses_separated_commas_html", _: (NotificationChannel::MAX_RECIPIENTS)) %>
+      <% unless Rails.configuration.x.mail_enabled %><span class="text-warn-ink"><%= t(".sending_emails_not_configured") %></span><% end %>
     </p>
   </div>
 
   <fieldset>
-    <legend class="text-sm font-medium text-ink-2">Activités à notifier</legend>
+    <legend class="text-sm font-medium text-ink-2"><%= t(".activities_notify") %></legend>
     <%= hidden_field_tag "notification_channel[activity_kinds][]", "" %>
     <div class="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
       <% Activity::KINDS.values.group_by(&:category).each do |category, kinds| %>
         <div class="activity-kind-group rounded-md border border-line p-3" data-controller="check-all">
           <div class="flex items-center justify-between">
-            <p class="text-sm font-semibold text-ink"><%= Activity::CATEGORIES.fetch(category) %></p>
-            <button type="button" data-action="check-all#toggle" class="cursor-pointer text-xs font-medium text-accent hover:text-accent">Tout / rien</button>
+            <p class="text-sm font-semibold text-ink"><%= Activity.category_label(category) %></p>
+            <button type="button" data-action="check-all#toggle" class="cursor-pointer text-xs font-medium text-accent hover:text-accent"><%= t(".all_none") %></button>
           </div>
           <div class="mt-2 space-y-1.5">
             <% kinds.each do |kind| %>
@@ -70,20 +76,20 @@
   <div class="space-y-3">
     <label class="flex cursor-pointer items-start gap-2 text-sm text-ink-2" data-kind-fields-target="field" data-kinds="slack discord">
       <%= f.check_box :mention_channel, class: "mt-0.5 h-4 w-4 rounded border-line text-accent" %>
-      <span>Mentionner tout le monde <span class="text-ink-3">— <code class="font-mono text-xs">@channel</code> sur Slack, <code class="font-mono text-xs">@everyone</code> sur Discord.</span></span>
+      <span><%= t(".mention_html", channel: tag.code("@channel", class: "font-mono text-xs"), everyone: tag.code("@everyone", class: "font-mono text-xs")) %></span>
     </label>
     <label class="flex cursor-pointer items-start gap-2 text-sm text-ink-2">
       <%= f.check_box :daily_digest, class: "mt-0.5 h-4 w-4 rounded border-line text-accent" %>
-      <span>Résumé quotidien <span class="text-ink-3">— chaque matin à 8 h : état du parc et activité de la veille.</span></span>
+      <span><%= t(".daily_digest") %> <span class="text-ink-3"><%= t(".every_morning_8_00") %></span></span>
     </label>
     <label class="flex cursor-pointer items-start gap-2 text-sm text-ink-2">
       <%= f.check_box :enabled, class: "mt-0.5 h-4 w-4 rounded border-line text-accent" %>
-      <span>Actif <span class="text-ink-3">— décochez pour mettre le canal en pause.</span></span>
+      <span>Actif <span class="text-ink-3"><%= t(".uncheck_pause_channel") %></span></span>
     </label>
   </div>
 
   <div class="flex items-center justify-end gap-3 border-t border-line pt-4">
-    <%= link_to "Annuler", settings_notifications_path, class: "btn btn-ghost" %>
-    <%= f.submit channel.persisted? ? "Enregistrer" : "Ajouter le canal", class: "btn btn-primary" %>
+    <%= link_to t(".cancel"), settings_notifications_path, class: "btn btn-ghost" %>
+    <%= f.submit channel.persisted? ? t(".save") : t(".add_channel"), class: "btn btn-primary" %>
   </div>
 <% end %>

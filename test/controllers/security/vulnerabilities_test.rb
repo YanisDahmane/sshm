@@ -78,7 +78,7 @@ class VulnerabilitiesTest < ActionDispatch::IntegrationTest
     assert_select "#attention li.attention-item[data-tone=crit]", text: /2 serveurs.*1 vulnérabilité grave corrigeable/m
     assert_select "#attention a[href=?]", vulnerabilities_path(fixable: 1, severity: "high")
 
-    assert_includes NotificationDigest.new.lines, "Vulnérabilités : 5 connue(s), 3 corrigeable(s) dont 1 grave(s), sur 2 serveur(s)."
+    assert_includes NotificationDigest.new.lines, "Vulnérabilités : 5 connue(s), 3 corrigeable(s) dont 1 grave(s), sur 2 serveurs."
   end
 
   test "the fleet list shows the CVE as the first health reason" do

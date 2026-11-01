@@ -1,0 +1,429 @@
+fr:
+  activity:
+    kinds:
+      key_added:
+        label: Clé ajoutée
+        description: Une clé du trousseau a été ajoutée sur un serveur.
+      key_removed:
+        label: Clé supprimée
+        description: Une clé a été supprimée d'un compte depuis Elio.
+      key_expired:
+        label: Accès temporaire expiré
+        description: Un accès temporaire a expiré et sa clé a été retirée.
+      unknown_key_detected:
+        label: Clé inconnue détectée
+        description: Une clé absente du trousseau a été trouvée sur un serveur.
+      key_disappeared:
+        label: Clé retirée hors d'Elio
+        description: Une clé a disparu d'un serveur sans passer par Elio.
+      ssh_access_lost:
+        label: Accès SSH perdu
+        description: Le serveur refuse désormais la clé d'Elio.
+      host_key_changed:
+        label: Empreinte serveur remplacée
+        description: Un administrateur a accepté la nouvelle empreinte d'un serveur (réinstallation…).
+      server_unreachable:
+        label: Serveur injoignable
+        description: Un serveur ne répond plus sur son port SSH.
+      server_back_online:
+        label: Serveur de nouveau joignable
+        description: Un serveur injoignable répond à nouveau.
+      os_upgraded:
+        label: Système mis à niveau
+        description: La version du système d'un serveur a changé (inventaire).
+      server_rebooted:
+        label: Serveur redémarré
+        description: Un serveur a redémarré depuis le dernier inventaire.
+      health_warning:
+        label: Serveur à surveiller
+        description: La santé d'un serveur se dégrade (disque, mémoire, charge, redémarrage requis…).
+      health_critical:
+        label: Serveur en état critique
+        description: Un seuil critique est dépassé sur un serveur (disque ou mémoire presque pleins…).
+      health_recovered:
+        label: Serveur de nouveau sain
+        description: Un serveur à surveiller ou critique est revenu à la normale.
+      packages_changed:
+        label: Paquets modifiés
+        description: Des paquets ont été installés, mis à jour ou supprimés sur un serveur (inventaire).
+      service_failed:
+        label: Service en échec
+        description: Un service systemd est passé en échec (inventaire).
+      service_recovered:
+        label: Service rétabli
+        description: Un service systemd en échec fonctionne à nouveau.
+      container_stopped:
+        label: Conteneur arrêté
+        description: Un conteneur Docker qui tournait s'est arrêté.
+      container_started:
+        label: Conteneur redémarré
+        description: Un conteneur Docker arrêté tourne à nouveau.
+      scheduled_task_failed:
+        label: Tâche planifiée en échec
+        description: Le dernier passage d'un timer systemd a échoué (inventaire).
+      scheduled_task_late:
+        label: Tâche planifiée en retard
+        description: Un timer systemd n'a pas tourné depuis plus de deux fois sa période.
+      vulnerability_found:
+        label: Vulnérabilité corrigeable
+        description: Une vulnérabilité (CVE) grave et corrigeable touche un serveur ou une de ses images Docker (gravité choisie dans les paramètres).
+      vulnerability_feed_failed:
+        label: Base de vulnérabilités non mise à jour
+        description: Le téléchargement ou l'import d'une base de vulnérabilités a échoué (signalé une fois, jusqu'au retour à la normale).
+      container_unhealthy:
+        label: Conteneur en mauvaise santé
+        description: Le healthcheck d'un conteneur Docker échoue (alerte au choix dans Paramètres → Docker).
+      container_restarting:
+        label: Conteneur qui redémarre en boucle
+        description: Un conteneur Docker redémarre sans cesse (alerte au choix dans Paramètres → Docker).
+      image_update_available:
+        label: Nouvelle version d'image
+        description: Le registre publie une nouvelle version d'une image Docker utilisée (alerte au choix dans Paramètres → Docker).
+      port_opened:
+        label: Port public ouvert
+        description: Un nouveau port écoute sur une adresse publique d'un serveur.
+      port_closed:
+        label: Port public fermé
+        description: Un port public n'écoute plus sur un serveur.
+      ip_address_added:
+        label: Nouvelle adresse IP publique
+        description: Une adresse IP publique apparaît sur une interface d'un serveur.
+      ip_address_removed:
+        label: Adresse IP publique retirée
+        description: Une adresse IP publique n'est plus configurée sur un serveur.
+      security_updates_available:
+        label: Mises à jour de sécurité
+        description: Des mises à jour de sécurité sont disponibles sur un serveur qui n'en avait pas.
+      server_created:
+        label: Serveur ajouté
+        description: Un serveur a été ajouté à Elio.
+      server_updated:
+        label: Serveur modifié
+        description: Les informations de connexion d'un serveur ont changé.
+      servers_imported:
+        label: Serveurs importés
+        description: Des serveurs ont été importés depuis un fichier CSV ou un ~/.ssh/config.
+      server_deleted:
+        label: Serveur supprimé
+        description: Un serveur a été retiré d'Elio (ses clés restent installées dessus).
+      server_group_created:
+        label: Groupe de serveurs créé
+        description: Un groupe de serveurs a été créé.
+      server_group_deleted:
+        label: Groupe de serveurs supprimé
+        description: Un groupe de serveurs a été supprimé (ses serveurs restent).
+      user_invited:
+        label: Utilisateur invité
+        description: Une invitation à rejoindre Elio a été créée.
+      invitation_accepted:
+        label: Invitation acceptée
+        description: Un nouvel utilisateur a rejoint Elio.
+      invitation_revoked:
+        label: Invitation révoquée
+        description: Une invitation en attente a été annulée.
+      user_role_changed:
+        label: Rôle modifié
+        description: Le rôle d'un utilisateur a changé.
+      user_deactivated:
+        label: Utilisateur désactivé
+        description: 'Un compte a été désactivé : il ne peut plus se connecter.'
+      user_reactivated:
+        label: Utilisateur réactivé
+        description: Un compte désactivé peut de nouveau se connecter.
+      user_locked:
+        label: Compte verrouillé
+        description: 'Trop d''essais de connexion ratés : le compte est bloqué 15 minutes.'
+      two_factor_enabled:
+        label: 2FA activée
+        description: Un utilisateur a activé la double authentification.
+      two_factor_disabled:
+        label: 2FA désactivée
+        description: La double authentification d'un utilisateur a été désactivée ou réinitialisée.
+      two_factor_backup_code_used:
+        label: Code de secours utilisé
+        description: Un utilisateur s'est connecté avec un code de secours.
+      public_key_created:
+        label: Clé ajoutée au trousseau
+        description: Une clé a été ajoutée au trousseau.
+      public_key_deleted:
+        label: Clé retirée du trousseau
+        description: Une clé a été retirée du trousseau (elle reste sur les serveurs).
+      ssh_key_generated:
+        label: Clé Elio générée
+        description: La clé SSH d'Elio a été générée ou régénérée.
+      ssh_key_rotation_started:
+        label: Rotation de la clé Elio lancée
+        description: Une nouvelle clé Elio est en cours d'installation sur les serveurs.
+      ssh_key_rotated:
+        label: Clé Elio remplacée
+        description: 'La rotation est terminée : la nouvelle clé Elio est active, l''ancienne supprimée.'
+      automation_run:
+        label: Automatisation exécutée
+        description: Une automatisation s'est exécutée.
+      monitor_down:
+        label: Sonde hors ligne
+        description: Une sonde Uptime Kuma rattachée à un serveur est hors ligne (option de l'extension).
+      monitor_up:
+        label: Sonde de retour
+        description: Une sonde Uptime Kuma hors ligne répond de nouveau.
+      monitor_cert_expiring:
+        label: Certificat bientôt expiré
+        description: Le certificat vérifié par une sonde Uptime Kuma expire bientôt.
+      server_without_monitor:
+        label: Serveur sans sonde
+        description: Un serveur n'est surveillé par aucune sonde Uptime Kuma.
+      ovh_service_expiring:
+        label: Service OVH bientôt expiré
+        description: Un service OVHcloud (dédié, VPS) arrive à expiration.
+      dns_record_outside_fleet:
+        label: DNS vers une IP hors du parc
+        description: Un enregistrement DNS OVH pointe vers une IP qui n'est à aucun serveur du parc.
+      ovh_service_unmanaged:
+        label: Service OVH non suivi
+        description: Un service OVHcloud n'est rattaché à aucun serveur du parc.
+      integration_enabled:
+        label: Extension activée
+        description: Un administrateur a activé une extension.
+      integration_disabled:
+        label: Extension désactivée
+        description: Un administrateur a désactivé une extension.
+      integration_sync_failed:
+        label: Échec de synchronisation d'une extension
+        description: Une extension n'arrive plus à lire son service (signalé une fois, jusqu'au retour à la normale).
+    categories:
+      keys: Clés SSH
+      servers: Serveurs
+      security: Sécurité
+      configuration: Configuration
+    system: Système
+    unnamed: sans nom
+    target: "« %{server_name} »"
+    summaries:
+      key_added: "« %{name} » ajoutée sur %{target}"
+      key_added_for: "« %{name} » ajoutée sur %{target} pendant %{duration}"
+      key_removed: Clé « %{name} » supprimée de %{target}
+      key_expired: Accès temporaire de « %{name} » retiré de %{target}
+      unknown_key_detected: Clé inconnue « %{name} » trouvée sur %{target}
+      key_disappeared: Clé « %{name} » disparue de %{target}
+      ssh_access_lost: "« %{server} » refuse la clé d'Elio"
+      host_key_changed: 'Nouvelle empreinte acceptée pour « %{server} » : %{fingerprint}'
+      server_unreachable: "« %{server} » ne répond plus"
+      server_back_online: "« %{server} » répond à nouveau"
+      os_upgraded: "« %{server} » est passé de %{from} à %{to}"
+      server_rebooted: "« %{server} » a redémarré"
+      health_warning: "« %{server} » est à surveiller : %{reasons}"
+      health_critical: "« %{server} » est en état critique : %{reasons}"
+      health_recovered: "« %{server} » est de nouveau sain"
+      packages_changed: 'Paquets de « %{server} » : %{counts}'
+      packages:
+        installed:
+          one: "%{count} installé"
+          other: "%{count} installés"
+        upgraded:
+          one: "%{count} mis à jour"
+          other: "%{count} mis à jour"
+        removed:
+          one: "%{count} supprimé"
+          other: "%{count} supprimés"
+      service_failed: "%{service} est en échec sur « %{server} »"
+      service_recovered: "%{service} fonctionne à nouveau sur « %{server} »"
+      container_stopped: Le conteneur %{container} s'est arrêté sur « %{server} »
+      container_started: Le conteneur %{container} tourne à nouveau sur « %{server} »
+      scheduled_task_failed: La tâche planifiée %{task} a échoué sur « %{server} »
+      scheduled_task_late: La tâche planifiée %{task} n'a pas tourné à temps sur « %{server} »
+      in_image: l'image %{image} de « %{server} »
+      vulnerability_found:
+        one: "%{count} vulnérabilité corrigeable sur %{where} : %{cves}"
+        other: "%{count} vulnérabilités corrigeables sur %{where} : %{cves}"
+      vulnerability_feed_failed: 'Base de vulnérabilités %{feed} non mise à jour : %{error}'
+      container_unhealthy: Le conteneur %{container} est en mauvaise santé sur « %{server} »
+      container_restarting: Le conteneur %{container} redémarre en boucle sur « %{server} »
+      image_update_available: Nouvelle version de l'image %{image} pour « %{server} »
+      port_opened: Port %{port} ouvert publiquement sur « %{server} »
+      port_closed: Port %{port} fermé sur « %{server} »
+      ip_address_added: Nouvelle adresse publique %{address} sur « %{server} »
+      ip_address_removed: Adresse publique %{address} retirée de « %{server} »
+      security_updates_available:
+        one: "%{count} mise à jour de sécurité disponible sur « %{server} »"
+        other: "%{count} mises à jour de sécurité disponibles sur « %{server} »"
+      server_created: Serveur « %{server} » ajouté
+      server_updated: Serveur « %{server} » modifié
+      servers_imported:
+        one: "%{count} serveur importé (%{source}) : %{names}"
+        other: "%{count} serveurs importés (%{source}) : %{names}"
+      server_deleted: Serveur « %{server} » supprimé d'Elio
+      server_group_created:
+        one: Groupe « %{group} » créé (%{count} serveur)
+        other: Groupe « %{group} » créé (%{count} serveurs)
+      server_group_deleted: Groupe « %{group} » supprimé
+      user_invited: "%{email} invité (%{role})"
+      invitation_accepted: "%{email} a rejoint Elio (%{role})"
+      invitation_revoked: Invitation de %{email} révoquée
+      user_role_changed: 'Rôle de %{email} : %{from} → %{to}'
+      user_deactivated: "%{email} désactivé"
+      user_reactivated: "%{email} réactivé"
+      user_locked:
+        one: "%{email} verrouillé après %{count} essai raté"
+        other: "%{email} verrouillé après %{count} essais ratés"
+      two_factor_enabled: 2FA activée pour %{email}
+      two_factor_disabled: 2FA désactivée pour %{email}
+      two_factor_reset: 2FA de %{email} réinitialisée par %{by}
+      two_factor_backup_code_used:
+        one: "%{email} s'est connecté avec un code de secours (%{count} restant)"
+        other: "%{email} s'est connecté avec un code de secours (%{count} restants)"
+      public_key_created: Clé « %{name} » ajoutée au trousseau
+      public_key_deleted: Clé « %{name} » retirée du trousseau
+      ssh_key_generated: Clé Elio générée
+      ssh_key_regenerated: Clé Elio régénérée
+      ssh_key_rotation_started:
+        one: Rotation de la clé Elio lancée sur %{count} serveur
+        other: Rotation de la clé Elio lancée sur %{count} serveurs
+      ssh_key_rotated:
+        one: Clé Elio remplacée sur %{count} serveur
+        other: Clé Elio remplacée sur %{count} serveurs
+      rotation_forced:
+        one: "(finalisée malgré %{count} échec)"
+        other: "(finalisée malgré %{count} échecs)"
+      monitor_down: Sonde « %{monitor} » hors ligne
+      monitor_up: Sonde « %{monitor} » de retour
+      monitor_cert_expiring:
+        one: 'Certificat de « %{monitor} » : expire dans %{count} jour'
+        other: 'Certificat de « %{monitor} » : expire dans %{count} jours'
+      server_without_monitor: "« %{server} » n'est surveillé par aucune sonde Uptime Kuma"
+      ovh_service_expiring:
+        one: 'Service OVH « %{service} » : expire dans %{count} jour'
+        other: 'Service OVH « %{service} » : expire dans %{count} jours'
+      dns_record_outside_fleet: "%{record} pointe vers %{target}, hors du parc"
+      ovh_service_unmanaged: "%{kind} OVH « %{service} » rattaché à aucun serveur"
+      integration_enabled: Extension %{integration} activée
+      integration_disabled: Extension %{integration} désactivée
+      integration_sync_failed: 'Synchronisation %{integration} impossible : %{error}'
+  automation:
+    whole_fleet: Tout le parc
+    extension_off: 'Extension désactivée : rien à faire'
+    failed: 'Échec : %{message}'
+    feed_failed: "%{label} : échec (%{message})"
+    results:
+      inventoried:
+        one: "%{done}/%{count} serveur inventorié"
+        other: "%{done}/%{count} serveurs inventoriés"
+      scanned:
+        one: "%{done}/%{count} serveur scanné, %{keys}"
+        other: "%{done}/%{count} serveurs scannés, %{keys}"
+      new_unknown_keys:
+        one: "%{count} nouvelle clé inconnue"
+        other: "%{count} nouvelles clés inconnues"
+      reachable:
+        one: "%{done}/%{count} serveur joignable"
+        other: "%{done}/%{count} serveurs joignables"
+  background_task:
+    system: Système
+    interrupted: Interrompu
+    kinds:
+      inventory: Inventaire
+      keys_scan: Scan des clés
+      automation: Automatisation
+      integration: Extension
+      vulnerabilities: Vulnérabilités
+  background_task_item:
+    server_deleted: Serveur supprimé
+  run_automation_job:
+    internal_error: Erreur interne (%{class})
+  notification_digest:
+    title: Résumé Elio du %{date}
+    nothing: Rien à signaler.
+    fleet: 'Parc : %{online}/%{total} en ligne, %{to_watch} à surveiller, %{critical} critique(s), %{updates}.'
+    security_updates:
+      one: "%{count} mise à jour de sécurité en attente"
+      other: "%{count} mises à jour de sécurité en attente"
+    activity: 'Activité : %{events} dont %{critical} critique(s) et %{warning} avertissement(s).'
+    events:
+      one: "%{count} événement"
+      other: "%{count} événements"
+    vulnerabilities: 'Vulnérabilités : %{cves} connue(s), %{fixable} corrigeable(s) dont %{serious} grave(s), sur %{servers}.'
+  notifications:
+    discord:
+      by: Par %{author_name}
+      server: 'Serveur : %{server_name}'
+      test_title: Test Elio
+      test_text: Le canal « %{escape} » reçoit bien les notifications.
+    email:
+      not_configured: L'envoi d'emails n'est pas configuré (variables SMTP_*)
+      failed: 'Envoi de l''email impossible (%{class}: %{message})'
+    http:
+      answered: "%{service} a répondu %{code} : %{truncate}"
+      unreachable: 'Impossible de joindre %{service} (%{class}: %{message})'
+    slack:
+      test: "%{mention_channel}:white_check_mark: Test Elio : le canal « %{escape} » reçoit bien les notifications."
+      by: Par %{escape}
+      server: 'Serveur : %{escape}'
+      account: 'Compte : %{escape}'
+    webhook:
+      test: Le canal « %{channel_name} » reçoit bien les notifications.
+      service: Le webhook
+  notification_mailer:
+    test_subject: "[Elio] Test du canal « %{channel_name} »"
+    activity:
+      by: Par %{author_name}
+      server: 'Serveur : %{server_name}'
+    test:
+      text_html: 'Test Elio : le canal « %{channel_name} » reçoit bien les notifications.'
+    activity_subject: "[Elio] %{label} : %{summary}"
+  settings:
+    notifications:
+      show:
+        send_test: Envoyer un test
+        edit: Modifier
+        edit_2: Modifier %{channel_name}
+        delete: Supprimer
+        delete_2: Supprimer %{channel_name}
+        channel_will_longer_receive: Le canal « %{channel_name} » ne recevra plus aucune notification.
+        add_your_first_channel: Ajouter votre premier canal Slack
+        receive_elio_s_activities: Recevez les activités d'Elio sur Slack, Discord, un webhook signé ou par email. Chaque canal choisit les activités qu'il reçoit, et peut recevoir un résumé chaque matin.
+        add_channel: Ajouter un canal
+        paused: En pause
+        daily_digest: résumé quotidien
+        signing_secret: Secret de signature
+        last_delivery_failed_html: 'Dernier envoi en échec : %{last_error}'
+        last_delivery_html: Dernier envoi %{last_delivered_at}.
+        notification_channel_yet: Aucun canal de notification pour le moment.
+        secret_html: Secret de signature (HMAC SHA-256 de « %{body} », en-têtes %{timestamp} et %{signature} ; refusez les messages trop anciens)
+    notification_channels:
+      form:
+        name: Nom
+        webhook_url: URL du webhook
+        leave_empty_keep: "%{masked_destination} (laisser vide pour la conserver)"
+        recipients: Destinataires
+        cancel: Annuler
+        save: Enregistrer
+        add_channel: Ajouter le canal
+        up_addresses_separated_commas_html: Jusqu'à %{_} adresses séparées par des virgules.
+        sending_emails_not_configured: 'L''envoi d''emails n''est pas configuré (variables SMTP_*) : rien ne partira.'
+        activities_notify: Activités à notifier
+        all_none: Tout / rien
+        daily_digest: Résumé quotidien
+        every_morning_8_00: "— chaque matin à 8 h : état du parc et activité de la veille."
+        uncheck_pause_channel: "— décochez pour mettre le canal en pause."
+        webhook_help_html: 'Slack : %{slack} · Discord : %{discord} · Webhook : toute URL HTTPS qui reçoit du JSON signé (en-têtes %{timestamp} et %{signature}). Stockée chiffrée.'
+        discord_path: Paramètres du salon → Intégrations → Webhooks
+        mention_html: Mentionner tout le monde <span class="text-ink-3">— %{channel} sur Slack, %{everyone} sur Discord.</span>
+        type: Type
+        language: Langue
+        instance_language: Langue de cet Elio (%{language})
+        language_hint: La langue des messages, des tests et du résumé quotidien de ce canal.
+      edit:
+        edit_html: Modifier « %{name_was} »
+      new:
+        title: Ajouter un canal de notification
+  notification_channels_controller:
+    created: Le canal « %{channel_name} » a été ajouté. Envoyez un test pour vérifier.
+    updated: Le canal « %{channel_name} » a été modifié.
+    deleted: Le canal « %{channel_name} » a été supprimé.
+    test_sent: Message de test envoyé à « %{channel_name} ».
+    test_failed: 'Échec de l''envoi à « %{channel_name} » : %{message}'
+  notification_channel:
+    kinds:
+      slack: Slack
+      discord: Discord
+      webhook: Webhook (JSON signé)
+      email: Email

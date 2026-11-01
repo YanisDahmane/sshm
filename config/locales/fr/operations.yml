@@ -1,0 +1,134 @@
+fr:
+  automation:
+    kinds:
+      health_check:
+        label: Suivi de la santé
+        description: Relève la charge, la mémoire, les disques, les mises à jour en attente et les services en échec ; garde 30 jours d'historique.
+      servers_ping:
+        label: Vérification des serveurs
+        description: Vérifie que chaque serveur répond sur son port SSH et signale ceux qui ne répondent plus.
+      inventory_os:
+        label: Inventaire du système
+        description: Relit la distribution, le noyau, la machine et ses adresses IP ; signale les mises à niveau, les redémarrages et les adresses publiques qui changent.
+      inventory_packages:
+        label: Inventaire des paquets
+        description: Relit les paquets installés et les mises à jour disponibles ; signale les nouvelles mises à jour de sécurité.
+      inventory_services:
+        label: Inventaire des services
+        description: Relit les services systemd, Docker (conteneurs, images et leurs vulnérabilités) et les tâches planifiées (cron, timers) ; signale ceux qui tombent ou échouent.
+      inventory_ports:
+        label: Inventaire des ports
+        description: Relit les ports en écoute et le firewall ; signale les ports publics qui s'ouvrent.
+      vulnerabilities_update:
+        label: Mise à jour des vulnérabilités
+        description: Télécharge les bases de vulnérabilités (Debian Security Tracker, Ubuntu) pour les versions du parc et les rapproche des paquets installés.
+      cve_scores_update:
+        label: Notes de gravité des CVE
+        description: Demande aux fournisseurs de notes (NVD, Red Hat, CVE.org, EPSS, CISA KEV…) la note des CVE du parc pas encore notées, et en déduit la gravité de celles que la distribution n'évalue pas.
+      docker_image_updates:
+        label: Mises à jour des images Docker
+        description: Demande aux registres (Docker Hub, GHCR…) la dernière version de chaque image utilisée sur le parc, en lecture seule.
+      keys_scan:
+        label: Scan des clés
+        description: Lit les clés de tous les serveurs et signale les clés inconnues ou disparues.
+      uptime_kuma_sync:
+        label: Synchronisation Uptime Kuma
+        description: Relit les sondes d'Uptime Kuma, les rattache aux serveurs et lève les alertes choisies dans l'extension.
+      ovh_sync:
+        label: Synchronisation OVHcloud
+        description: Relit les ressources OVHcloud (IP, firewall, DNS, services), les rattache aux serveurs et lève les alertes choisies.
+    intervals:
+      i5: Toutes les 5 minutes
+      i15: Toutes les 15 minutes
+      i60: Toutes les heures
+      i360: Toutes les 6 heures
+      i1440: Tous les jours
+  activities:
+    severity:
+      information: Information
+      warning: Avertissement
+      critical: Critique
+    index:
+      see_all: Tout voir
+      all: Tout
+      activities: activités
+      categories: Catégories
+      activity_yet: Aucune activité pour le moment.
+      history: Historique de ce qui s'est passé
+      history_on: Historique de ce qui s'est passé sur « %{server_name} »
+  tasks:
+    progress:
+      progress: Progression
+    workers_warning:
+      worker_processing_tasks: Aucun worker ne traite les tâches
+      text_html: Les tâches restent « à venir » tant qu'aucun processus Solid Queue ne tourne. Lancez l'application avec %{dev} ou démarrez %{jobs} (en production, vérifiez le conteneur des jobs).
+    index:
+      all: Toutes
+      queued: À venir
+      running: En cours
+      done: Terminées
+      failed: En échec
+      tasks: tâches
+      manage: Gérer
+      next_minute: à la prochaine minute
+      inventories_key_scans_automations_html: Inventaires, scans des clés et automatisations lancés en arrière-plan, conservés %{in_days_to_i} jours.
+      status: Statut
+      task: Tâche
+      started: Lancée par
+      started_2: Lancée
+      duration: Durée
+      next_automations: Prochaines automatisations
+      quiet_not_listed_tasks: "· discrète (non listée dans les tâches)"
+      automation_turned: Aucune automatisation activée.
+      none: Aucune tâche
+      none_in_category: Aucune tâche dans cette catégorie
+    show:
+      manage: Gérer
+      not_started_yet: pas encore commencée
+      not_available: non disponible
+      failed: échec
+      started_prefix: 'commencé '
+      server_concerned: Aucun serveur concerné.
+      list_servers_will_appear: La liste des serveurs apparaîtra au démarrage.
+      breadcrumb: Fil d'Ariane
+      started: Lancée par
+      started_2: Lancée
+      duration: Durée
+      servers: Serveurs
+      server: Serveur
+      details: Détails
+      deleted: "(supprimé)"
+  settings:
+    automations:
+      index:
+        activity: l'activité
+        tasks: les tâches
+        text: Activée
+        'off': Désactivée
+        next_minute: à la prochaine minute
+        frequency: Fréquence
+        groups: 'Groupes : %{scope_label}'
+        whole_fleet: Sur tout le parc
+        save: Enregistrer
+        last_run: 'Dernière exécution :'
+        result: 'Résultat :'
+        next: 'Prochaine :'
+        run_now: Lancer maintenant
+        group_checked_whole_fleet: 'Aucun groupe coché : tout le parc.'
+        intro_html: Collectes et vérifications lancées automatiquement, sur tout le parc ou sur certains groupes. Ce qu'elles détectent apparaît dans %{activity} et peut être notifié ; chaque passage est suivi dans %{tasks} (sauf les vérifications discrètes toutes les 15 minutes).
+  automations_controller:
+    enabled: activée (%{interval_label}, %{downcase_first})
+    disabled: désactivée
+    saved: "« %{label} » %{state}."
+    started: "« %{label} » lancée."
+  jobs_dashboard_controller:
+    forbidden: Votre rôle (%{role_label}) ne permet pas d'ouvrir le suivi technique des jobs.
+  flash:
+    already_running: 'Déjà en cours : voici la tâche en cours.'
+  tasks_helper:
+    statuses:
+      queued: À venir
+      running: En cours
+      succeeded: Terminée
+      partial: Terminée avec erreurs
+      failed: En échec

@@ -2,7 +2,7 @@ class ActivitiesController < ApplicationController
   PER_PAGE = 50
 
   def index
-    @category = params[:category].presence_in(Activity::CATEGORIES.keys.map(&:to_s))
+    @category = params[:category].presence_in(Activity::CATEGORIES.map(&:to_s))
     @server = Server.find_by(id: params[:server_id])
 
     scope = Activity.recent.includes(:user, :server, :public_key)

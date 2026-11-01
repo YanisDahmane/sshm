@@ -38,7 +38,7 @@ class BackgroundTaskItem < ApplicationRecord
 
   # The server is deleted while its item waits (the job will be discarded).
   def self.cancel_for_server!(server)
-    where(server: server).unfinished.includes(:task).find_each { |item| item.finish!(:failed, "Serveur supprimé") }
+    where(server: server).unfinished.includes(:task).find_each { |item| item.finish!(:failed, I18n.t("background_task_item.server_deleted")) }
   end
 
   def duration = started_at && finished_at && finished_at - started_at

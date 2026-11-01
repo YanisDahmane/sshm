@@ -1,3 +1,3 @@
 <% colors = { info: "bg-ink-3", warning: "bg-warn", critical: "bg-crit" } %>
 <span class="severity severity-<%= severity %> inline-block h-2 w-2 shrink-0 rounded-full <%= colors.fetch(severity) %>"
-      title="<%= { info: "Information", warning: "Avertissement", critical: "Critique" }.fetch(severity) %>"></span>
+      title="<%= { info: t(".information"), warning: t(".warning"), critical: t(".critical") }.fetch(severity) %>"></span>

@@ -1,14 +1,14 @@
 # Display of the background tasks (see BackgroundTask).
 module TasksHelper
+  # Tone and icon of each status (labels: tasks_helper.statuses.*).
   TASK_STATUSES = {
-    "queued" => [ :neutral, "À venir", :clock ], "running" => [ :accent, "En cours", :arrow_path ],
-    "succeeded" => [ :good, "Terminée", :check ], "partial" => [ :warn, "Terminée avec erreurs", :exclamation_triangle ],
-    "failed" => [ :crit, "En échec", :x_mark ]
+    "queued" => [ :neutral, :clock ], "running" => [ :accent, :arrow_path ], "succeeded" => [ :good, :check ],
+    "partial" => [ :warn, :exclamation_triangle ], "failed" => [ :crit, :x_mark ]
   }.freeze
 
   def task_status_badge(status, **options)
-    tone, label, icon = TASK_STATUSES.fetch(status.to_s)
-    status_badge(tone, label, icon: icon, data: { status: status }, **options)
+    tone, icon = TASK_STATUSES.fetch(status.to_s)
+    status_badge(tone, t("tasks_helper.statuses.#{status}"), icon: icon, data: { status: status }, **options)
   end
 
   # 72 s → "1 min 12 s", 4 s → "4 s".

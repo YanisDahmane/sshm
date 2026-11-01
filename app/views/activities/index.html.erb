@@ -1,17 +1,17 @@
-<% content_for :title, "Activité · Elio" %>
+<% content_for :title, t("title", page: t("nav.activity")) %>
 
 <div class="flex flex-wrap items-end justify-between gap-4">
   <div>
-    <h1 class="text-2xl font-bold tracking-tight">Activité</h1>
+    <h1 class="text-2xl font-bold tracking-tight"><%= t("nav.activity") %></h1>
     <p class="mt-1 text-sm text-ink-3">
-      Historique de ce qui s'est passé<%= " sur « #{@server.name} »" if @server %>.
-      <% if @server %><%= link_to "Tout voir", activities_path(category: @category), class: "font-medium text-accent hover:text-accent" %><% end %>
+      <%= (@server ? t(".history_on", server_name: @server.name) : t(".history")) %>.
+      <% if @server %><%= link_to t(".see_all"), activities_path(category: @category), class: "font-medium text-accent hover:text-accent" %><% end %>
     </p>
   </div>
 </div>
 
-<nav class="activity-filters mt-6 flex flex-wrap gap-2" aria-label="Catégories">
-  <% [ [ "Tout", nil ], *Activity::CATEGORIES.map { |key, label| [ label, key.to_s ] } ].each do |label, category| %>
+<nav class="activity-filters mt-6 flex flex-wrap gap-2" aria-label="<%= t(".categories") %>">
+  <% [ [ t(".all"), nil ], *Activity::CATEGORIES.map { |key| [ Activity.category_label(key), key.to_s ] } ].each do |label, category| %>
     <%= filter_pill label, activities_path(category: category, server_id: @server&.id), active: @category == category %>
   <% end %>
 </nav>
@@ -22,8 +22,8 @@
       <%= render partial: "activities/activity", collection: @activities %>
     </ul>
   <% else %>
-    <p class="py-10 text-center text-sm text-ink-3">Aucune activité pour le moment.</p>
+    <p class="py-10 text-center text-sm text-ink-3"><%= t(".activity_yet") %></p>
   <% end %>
 </section>
 
-<%= render "shared/pagination", pager: @pager, noun: "activités" %>
+<%= render "shared/pagination", pager: @pager, noun: t(".activities") %>

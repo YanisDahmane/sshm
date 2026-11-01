@@ -1,0 +1,134 @@
+en:
+  automation:
+    kinds:
+      health_check:
+        label: Health check
+        description: Reads the load, memory, disks, pending updates and failed services; keeps 30 days of history.
+      servers_ping:
+        label: Servers check
+        description: Checks that each server answers on its SSH port and reports those that no longer answer.
+      inventory_os:
+        label: System inventory
+        description: Reads again the distribution, kernel, machine and its IP addresses; reports upgrades, reboots and public addresses that change.
+      inventory_packages:
+        label: Packages inventory
+        description: Reads again the installed packages and available updates; reports new security updates.
+      inventory_services:
+        label: Services inventory
+        description: Reads again the systemd services, Docker (containers, images and their vulnerabilities) and scheduled tasks (cron, timers); reports those that go down or fail.
+      inventory_ports:
+        label: Ports inventory
+        description: Reads again the listening ports and the firewall; reports public ports that open.
+      vulnerabilities_update:
+        label: Vulnerabilities update
+        description: Downloads the vulnerability feeds (Debian Security Tracker, Ubuntu) for the releases of the fleet and matches them with the installed packages.
+      cve_scores_update:
+        label: CVE severity scores
+        description: Asks the score providers (NVD, Red Hat, CVE.org, EPSS, CISA KEV…) for the score of the fleet's CVEs not scored yet, and derives the severity of those the distribution does not rate.
+      docker_image_updates:
+        label: Docker image updates
+        description: Asks the registries (Docker Hub, GHCR…) for the latest version of each image used on the fleet, read-only.
+      keys_scan:
+        label: Key scan
+        description: Reads the keys of every server and reports unknown or missing keys.
+      uptime_kuma_sync:
+        label: Uptime Kuma sync
+        description: Reads again the Uptime Kuma monitors, attaches them to the servers and raises the alerts chosen in the extension.
+      ovh_sync:
+        label: OVHcloud sync
+        description: Reads again the OVHcloud resources (IPs, firewall, DNS, services), attaches them to the servers and raises the chosen alerts.
+    intervals:
+      i5: Every 5 minutes
+      i15: Every 15 minutes
+      i60: Every hour
+      i360: Every 6 hours
+      i1440: Every day
+  activities:
+    severity:
+      information: Information
+      warning: Warning
+      critical: Critical
+    index:
+      see_all: See all
+      all: All
+      activities: activities
+      categories: Categories
+      activity_yet: No activity yet.
+      history: History of what happened
+      history_on: History of what happened on “%{server_name}”
+  tasks:
+    progress:
+      progress: Progress
+    workers_warning:
+      worker_processing_tasks: No worker is processing the tasks
+      text_html: Tasks stay “queued” as long as no Solid Queue process runs. Start the application with %{dev} or start %{jobs} (in production, check the jobs container).
+    index:
+      all: All
+      queued: Queued
+      running: Running
+      done: Done
+      failed: Failed
+      tasks: tasks
+      manage: Manage
+      next_minute: at the next minute
+      inventories_key_scans_automations_html: Inventories, key scans and automations run in the background, kept %{in_days_to_i} days.
+      status: Status
+      task: Task
+      started: Started by
+      started_2: Started
+      duration: Duration
+      next_automations: Next automations
+      quiet_not_listed_tasks: "· quiet (not listed in the tasks)"
+      automation_turned: No automation turned on.
+      none: No task
+      none_in_category: No task in this category
+    show:
+      manage: Manage
+      not_started_yet: not started yet
+      not_available: not available
+      failed: failed
+      started_prefix: 'started '
+      server_concerned: No server concerned.
+      list_servers_will_appear: The list of servers will appear when it starts.
+      breadcrumb: Breadcrumb
+      started: Started by
+      started_2: Started
+      duration: Duration
+      servers: Servers
+      server: Server
+      details: Details
+      deleted: "(deleted)"
+  settings:
+    automations:
+      index:
+        activity: the activity
+        tasks: the tasks
+        text: 'On'
+        'off': 'Off'
+        next_minute: at the next minute
+        frequency: Frequency
+        groups: 'Groups: %{scope_label}'
+        whole_fleet: On the whole fleet
+        save: Save
+        last_run: 'Last run:'
+        result: 'Result:'
+        next: 'Next:'
+        run_now: Run now
+        group_checked_whole_fleet: 'No group checked: the whole fleet.'
+        intro_html: Collections and checks run automatically, on the whole fleet or on some groups. What they find appears in %{activity} and can be notified; each run is followed in %{tasks} (except the quiet checks every 15 minutes).
+  automations_controller:
+    enabled: on (%{interval_label}, %{downcase_first})
+    disabled: 'off'
+    saved: "“%{label}” %{state}."
+    started: "“%{label}” started."
+  jobs_dashboard_controller:
+    forbidden: Your role (%{role_label}) does not allow opening the technical job monitoring.
+  flash:
+    already_running: 'Already running: here is the running task.'
+  tasks_helper:
+    statuses:
+      queued: Queued
+      running: Running
+      succeeded: Done
+      partial: Done with errors
+      failed: Failed

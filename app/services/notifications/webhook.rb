@@ -14,7 +14,7 @@ class Notifications::Webhook
   end
 
   def self.deliver_test(channel)
-    post(channel, "test", { message: "Le canal « #{channel.name} » reçoit bien les notifications." })
+    post(channel, "test", { message: I18n.t("notifications.webhook.test", channel_name: channel.name) })
   end
 
   def self.deliver_digest(channel, digest)
@@ -25,7 +25,7 @@ class Notifications::Webhook
     now = Time.current
     body = { event: event, sent_at: now.iso8601, data: data }.to_json
     timestamp = now.to_i.to_s
-    Notifications::Http.post(channel.webhook_url, body, service: "Le webhook",
+    Notifications::Http.post(channel.webhook_url, body, service: I18n.t("notifications.webhook.service"),
                              headers: { "X-Elio-Event" => event, "X-Elio-Delivery" => SecureRandom.uuid, "X-Elio-Timestamp" => timestamp,
                                         "X-Elio-Signature" => "sha256=#{signature(channel, timestamp, body)}" })
   end

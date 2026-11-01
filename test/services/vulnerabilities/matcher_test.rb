@@ -37,7 +37,7 @@ class Vulnerabilities::MatcherTest < ActiveSupport::TestCase
     packages(dpkg("openssh-server", "1:9.2p1-2+deb12u3", source: "openssh"))
     packages(dpkg("openssh-server", "1:9.2p1-2+deb12u2", source: "openssh"))
     activity = Activity.of_kind(:vulnerability_found).sole
-    assert_equal "1 vulnérabilité(s) corrigeable(s) sur « Web » : CVE-2024-6387 (openssh)", activity.summary
+    assert_equal "1 vulnérabilité corrigeable sur « Web » : CVE-2024-6387 (openssh)", activity.summary
 
     packages(dpkg("openssh-server", "1:9.2p1-2+deb12u2", source: "openssh"))
     assert_equal 1, Activity.of_kind(:vulnerability_found).count, "already known"

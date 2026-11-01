@@ -2,4 +2,4 @@
 
 <%= @activity.summary %>
 
-Par <%= @activity.author_name %><% if @activity.server_name %> · Serveur : <%= @activity.server_name %><% end %> · <%= l(@activity.created_at, format: :long) %>
+<%= t(".by", author_name: @activity.author_name) %><% if @activity.server_name %> · <%= t(".server", server_name: @activity.server_name) %><% end %> · <%= l(@activity.created_at, format: :long) %>

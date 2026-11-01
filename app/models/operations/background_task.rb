@@ -3,8 +3,7 @@
 # server, updated by the jobs; the task's status is derived from its items.
 # The technical view of the queue itself is Mission Control (/jobs, admins).
 class BackgroundTask < ApplicationRecord
-  KINDS = { "inventory" => "Inventaire", "keys_scan" => "Scan des clés", "automation" => "Automatisation", "integration" => "Extension",
-            "vulnerabilities" => "Vulnérabilités" }.freeze
+  KINDS = %w[inventory keys_scan automation integration vulnerabilities].freeze
   STATUSES = %w[queued running succeeded partial failed].freeze
   FINISHED = %w[succeeded partial failed].freeze
   # Status filters of the page: "à venir", "en cours", "terminées", "en échec".
@@ -15,7 +14,7 @@ class BackgroundTask < ApplicationRecord
   belongs_to :automation, optional: true
   has_many :items, -> { order(:server_name, :id) }, class_name: "BackgroundTaskItem", inverse_of: :task, dependent: :delete_all
 
-  validates :kind, inclusion: { in: KINDS.keys }
+  validates :kind, inclusion: { in: KINDS }
   validates :status, inclusion: { in: STATUSES }
   validates :label, presence: true
 
@@ -42,8 +41,8 @@ class BackgroundTask < ApplicationRecord
     items.reset
   end
 
-  def kind_label = KINDS.fetch(kind)
-  def author_name = user&.email || "Système"
+  def kind_label = I18n.t("background_task.kinds.#{kind}")
+  def author_name = user&.email || I18n.t("background_task.system")
   def finished? = FINISHED.include?(status)
   def unfinished? = !finished?
 
@@ -68,7 +67,7 @@ class BackgroundTask < ApplicationRecord
   # A crash of the job itself (not of one server).
   def fail!(message)
     with_lock do
-      items.where(status: %w[queued running]).update_all(status: "failed", message: "Interrompu", finished_at: Time.current, updated_at: Time.current)
+      items.where(status: %w[queued running]).update_all(status: "failed", message: I18n.t("background_task.interrupted"), finished_at: Time.current, updated_at: Time.current)
       update!(status: "failed", result: message, started_at: started_at || Time.current, finished_at: Time.current)
     end
   end

@@ -7,15 +7,15 @@ class Notifications::Slack
   end
 
   def self.deliver_test(channel)
-    text = "#{"<!channel> " if channel.mention_channel}:white_check_mark: Test Elio : le canal « #{escape(channel.name)} » reçoit bien les notifications."
+    text = I18n.t("notifications.slack.test", mention_channel: ("<!channel> " if channel.mention_channel), escape: (escape(channel.name)))
     post(channel.webhook_url, { text: text })
   end
 
   def self.activity_payload(activity, mention: false)
     emoji = SEVERITY_EMOJIS.fetch(activity.severity)
     title = "#{"<!channel> " if mention}#{emoji} *#{escape(activity.label)}*"
-    context = [ "Par #{escape(activity.author_name)}", activity.server_name && "Serveur : #{escape(activity.server_name)}",
-                activity.unix_user && "Compte : #{escape(activity.unix_user)}" ].compact.join(" · ")
+    context = [ I18n.t("notifications.slack.by", escape: (escape(activity.author_name))), activity.server_name && I18n.t("notifications.slack.server", escape: (escape(activity.server_name))),
+                activity.unix_user && I18n.t("notifications.slack.account", escape: (escape(activity.unix_user))) ].compact.join(" · ")
 
     {
       text: "#{title}\n#{escape(activity.summary)}",

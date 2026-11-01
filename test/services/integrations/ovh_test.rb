@@ -102,7 +102,7 @@ class Integrations::OvhTest < ActiveSupport::TestCase
     @integration.sync!
     fake_ovh(ovh_account(expiration: 20.days.from_now.to_date))
     @integration.reload.sync!
-    assert_equal [ "Service OVH « web.example.com » : expire dans 20 jour(s)" ], Activity.of_kind(:ovh_service_expiring).map(&:summary)
+    assert_equal [ "Service OVH « web.example.com » : expire dans 20 jours" ], Activity.of_kind(:ovh_service_expiring).map(&:summary)
   end
 
   test "health reasons, each alert enabled in the settings" do

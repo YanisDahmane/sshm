@@ -10,7 +10,7 @@ class NotificationDigest
     @to = to
   end
 
-  def title = "Résumé Elio du #{I18n.l(from.to_date, format: :long)}"
+  def title = I18n.t("notification_digest.title", date: (I18n.l(from.to_date, format: :long)))
 
   def activities = @activities ||= Activity.recent.where(created_at: from..to).includes(:user, :server).to_a
 
@@ -19,17 +19,16 @@ class NotificationDigest
   def summary = @summary ||= FleetSummary.new(Server.includes(:inventory_snapshots))
 
   def lines
-    lines = [ "Parc : #{summary.online}/#{summary.total} en ligne, #{summary.to_watch} à surveiller, #{summary.critical} critique(s), " \
-              "#{summary.security_updates} mise(s) à jour de sécurité en attente.",
-              "Activité : #{activities.size} événement(s) dont #{counts[:critical]} critique(s) et #{counts[:warning]} avertissement(s)." ]
+    lines = [ I18n.t("notification_digest.fleet", online: summary.online, total: summary.total, to_watch: summary.to_watch, critical: summary.critical, updates: I18n.t("notification_digest.security_updates", count: summary.security_updates)),
+              I18n.t("notification_digest.activity", events: I18n.t("notification_digest.events", count: activities.size), critical: counts[:critical], warning: counts[:warning]) ]
     if (cves = ServerVulnerability.distinct.count(:cve)).positive?
       fixable = ServerVulnerability.fixable.distinct.count(:cve)
       serious = ServerVulnerability.fixable.at_least("high").distinct.count(:cve)
-      lines << "Vulnérabilités : #{cves} connue(s), #{fixable} corrigeable(s) dont #{serious} grave(s), sur #{ServerVulnerability.distinct.count(:server_id)} serveur(s)."
+      lines << I18n.t("notification_digest.vulnerabilities", cves: cves, fixable: fixable, serious: serious, servers: I18n.t("count.servers", count: ServerVulnerability.distinct.count(:server_id)))
     end
     highlights = activities.reject { |activity| activity.severity == :info }.first(HIGHLIGHTS)
     lines += highlights.map { |activity| "- #{activity.label} : #{activity.summary}" }
-    lines << "Rien à signaler." if activities.empty?
+    lines << I18n.t("notification_digest.nothing") if activities.empty?
     lines
   end
 end

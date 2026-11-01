@@ -8,46 +8,43 @@ class Automation < ApplicationRecord
   # frequent tasks whose runs are not logged (what they find still is).
   # `integration`: synchronization of an extension (Integration), only
   # available while the extension is enabled.
-  Definition = Data.define(:key, :label, :description, :default_interval, :categories, :default_enabled, :quiet, :integration) do
-    def initialize(key:, label:, description:, default_interval:, categories: nil, default_enabled: false, quiet: false, integration: nil) = super
+  # Labels and descriptions: automation.kinds.<key>.label|description.
+  Definition = Data.define(:key, :default_interval, :categories, :default_enabled, :quiet, :integration) do
+    def initialize(key:, default_interval:, categories: nil, default_enabled: false, quiet: false, integration: nil) = super
+    def label = I18n.t("automation.kinds.#{key}.label")
+    def description = I18n.t("automation.kinds.#{key}.description")
     def inventory? = categories.present?
     def available? = integration.nil? || Integration.enabled?(integration)
   end
 
   KINDS = [
-    Definition.new(key: :health_check, label: "Suivi de la santé", default_interval: 15, categories: %w[health], default_enabled: true, quiet: true,
-                   description: "Relève la charge, la mémoire, les disques, les mises à jour en attente et les services en échec ; garde 30 jours d'historique."),
-    Definition.new(key: :servers_ping, label: "Vérification des serveurs", default_interval: 15, quiet: true,
-                   description: "Vérifie que chaque serveur répond sur son port SSH et signale ceux qui ne répondent plus."),
-    Definition.new(key: :inventory_os, label: "Inventaire du système", default_interval: 1440, categories: %w[os network],
-                   description: "Relit la distribution, le noyau, la machine et ses adresses IP ; signale les mises à niveau, les redémarrages et les adresses publiques qui changent."),
-    Definition.new(key: :inventory_packages, label: "Inventaire des paquets", default_interval: 360, categories: %w[packages],
-                   description: "Relit les paquets installés et les mises à jour disponibles ; signale les nouvelles mises à jour de sécurité."),
-    Definition.new(key: :inventory_services, label: "Inventaire des services", default_interval: 60, categories: %w[services scheduled_tasks docker],
-                   description: "Relit les services systemd, Docker (conteneurs, images et leurs vulnérabilités) et les tâches planifiées (cron, timers) ; signale ceux qui tombent ou échouent."),
-    Definition.new(key: :inventory_ports, label: "Inventaire des ports", default_interval: 60, categories: %w[ports],
-                   description: "Relit les ports en écoute et le firewall ; signale les ports publics qui s'ouvrent."),
-    Definition.new(key: :vulnerabilities_update, label: "Mise à jour des vulnérabilités", default_interval: 1440, default_enabled: true,
-                   description: "Télécharge les bases de vulnérabilités (Debian Security Tracker, Ubuntu) pour les versions du parc et les rapproche des paquets installés."),
-    Definition.new(key: :cve_scores_update, label: "Notes de gravité des CVE", default_interval: 360, default_enabled: true,
-                   description: "Demande aux fournisseurs de notes (NVD, Red Hat, CVE.org, EPSS, CISA KEV…) la note des CVE du parc pas encore notées, et en déduit la gravité de celles que la distribution n'évalue pas."),
-    Definition.new(key: :docker_image_updates, label: "Mises à jour des images Docker", default_interval: 360, default_enabled: true,
-                   description: "Demande aux registres (Docker Hub, GHCR…) la dernière version de chaque image utilisée sur le parc, en lecture seule."),
-    Definition.new(key: :keys_scan, label: "Scan des clés", default_interval: 360,
-                   description: "Lit les clés de tous les serveurs et signale les clés inconnues ou disparues."),
-    Definition.new(key: :uptime_kuma_sync, label: "Synchronisation Uptime Kuma", default_interval: 15, default_enabled: true, quiet: true, integration: "uptime_kuma",
-                   description: "Relit les sondes d'Uptime Kuma, les rattache aux serveurs et lève les alertes choisies dans l'extension."),
-    Definition.new(key: :ovh_sync, label: "Synchronisation OVHcloud", default_interval: 360, default_enabled: true, integration: "ovh",
-                   description: "Relit les ressources OVHcloud (IP, firewall, DNS, services), les rattache aux serveurs et lève les alertes choisies.")
+    Definition.new(key: :health_check, default_interval: 15, categories: %w[health], default_enabled: true, quiet: true),
+    Definition.new(key: :servers_ping, default_interval: 15, quiet: true),
+    Definition.new(key: :inventory_os, default_interval: 1440, categories: %w[os network]),
+    Definition.new(key: :inventory_packages, default_interval: 360, categories: %w[packages]),
+    Definition.new(key: :inventory_services, default_interval: 60, categories: %w[services scheduled_tasks docker]),
+    Definition.new(key: :inventory_ports, default_interval: 60, categories: %w[ports]),
+    Definition.new(key: :vulnerabilities_update, default_interval: 1440, default_enabled: true),
+    Definition.new(key: :cve_scores_update, default_interval: 360, default_enabled: true),
+    Definition.new(key: :docker_image_updates, default_interval: 360, default_enabled: true),
+    Definition.new(key: :keys_scan, default_interval: 360),
+    Definition.new(key: :uptime_kuma_sync, default_interval: 15, default_enabled: true, quiet: true, integration: "uptime_kuma"),
+    Definition.new(key: :ovh_sync, default_interval: 360, default_enabled: true, integration: "ovh")
   ].index_by(&:key).freeze
 
-  INTERVALS = { 5 => "Toutes les 5 minutes", 15 => "Toutes les 15 minutes", 60 => "Toutes les heures", 360 => "Toutes les 6 heures",
-                1440 => "Tous les jours" }.freeze
+  INTERVALS = [ 5, 15, 60, 360, 1440 ].freeze
+
+  def self.interval_label(minutes) = I18n.t("automation.intervals.i#{minutes}")
+
+  def self.interval_options = INTERVALS.map { |minutes| [ interval_label(minutes), minutes ] }
+
+  # The label of a kind, also for a kind no longer defined (old activities).
+  def self.label_for(kind) = KINDS.key?(kind.to_sym) ? KINDS.fetch(kind.to_sym).label : kind.to_s.humanize
 
   normalizes :server_group_ids, with: ->(ids) { Array(ids).compact_blank.map(&:to_i).uniq.sort }
 
   validates :kind, inclusion: { in: KINDS.keys.map(&:to_s) }, uniqueness: true
-  validates :interval_minutes, inclusion: { in: INTERVALS.keys }
+  validates :interval_minutes, inclusion: { in: INTERVALS }
 
   # Every automation, in KINDS order, created with its default interval and state.
   # Automations offered in the interface (those of a disabled extension aside).
@@ -88,7 +85,7 @@ class Automation < ApplicationRecord
     scope.order(:name)
   end
 
-  def scope_label = server_group_ids.any? ? server_groups.map(&:name).join(", ") : "Tout le parc"
+  def scope_label = server_group_ids.any? ? server_groups.map(&:name).join(", ") : I18n.t("automation.whole_fleet")
 
   def interval = interval_minutes.minutes
 
@@ -142,7 +139,7 @@ class Automation < ApplicationRecord
       item&.finish_inventory!(outcomes)
       outcomes.values.none? { |outcome| outcome.status == "error" }
     end
-    "#{collected.count(true)}/#{servers.size} serveur(s) inventorié(s)"
+    I18n.t("automation.results.inventoried", done: collected.count(true), count: servers.size)
   end
 
   def run_keys_scan
@@ -155,7 +152,7 @@ class Automation < ApplicationRecord
     end.count(true)
     detected = Activity.of_kind(:unknown_key_detected).count - detected_before
 
-    "#{scanned}/#{servers.size} serveur(s) scanné(s), #{detected} nouvelle(s) clé(s) inconnue(s)"
+    I18n.t("automation.results.scanned", done: scanned, count: servers.size, keys: I18n.t("automation.results.new_unknown_keys", count: detected))
   end
 
   # Runs the block on each server, a few at a time, with its task item (if any).
@@ -172,11 +169,11 @@ class Automation < ApplicationRecord
   # Synchronization of an extension (does nothing once it is disabled).
   def run_integration_sync
     integration = Integration.find_enabled(definition.integration)
-    return "Extension désactivée : rien à faire" unless integration
+    return I18n.t("automation.extension_off") unless integration
 
     integration.sync!
   rescue Integrations::Error => e
-    "Échec : #{e.message}"
+    I18n.t("automation.failed", message: e.message)
   end
 
   # Downloads the feeds of the releases used on the fleet. A failure is
@@ -188,7 +185,7 @@ class Automation < ApplicationRecord
       Vulnerabilities::Update.call(source)
     rescue Vulnerabilities::Error => e
       Activity.record!(:vulnerability_feed_failed, user: nil, feed: feed.label, error: e.message) unless failing
-      "#{feed.label} : échec (#{e.message})"
+      I18n.t("automation.feed_failed", label: feed.label, message: e.message)
     end.join(" · ").tap do
       # CVEs never asked to the score providers (the first download, a new
       # release): their scores now, not at the next run in a few hours.
@@ -202,6 +199,6 @@ class Automation < ApplicationRecord
 
   def run_servers_ping
     results = Servers::Ping.check_all!(servers)
-    "#{results.values.count(true)}/#{results.size} serveur(s) joignable(s)"
+    I18n.t("automation.results.reachable", done: results.values.count(true), count: results.size)
   end
 end

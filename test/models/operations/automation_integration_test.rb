@@ -3,11 +3,14 @@ require "test_helper"
 class AutomationIntegrationTest < ActiveSupport::TestCase
   include IntegrationHelpers
 
-  setup { Integration.registry = { "demo" => "DemoIntegration" } }
+  setup do
+    Integration.registry = { "demo" => "DemoIntegration" }
+    I18n.backend.store_translations(:fr, automation: { kinds: { demo_sync: { label: "Synchronisation Démo", description: "" } } })
+  end
   teardown { Integration.registry = nil }
 
   def demo_automation
-    definition = Automation::Definition.new(key: :demo_sync, label: "Synchronisation Démo", description: "", default_interval: 15, integration: "demo")
+    definition = Automation::Definition.new(key: :demo_sync, default_interval: 15, integration: "demo")
     Automation.new(kind: "keys_scan", enabled: true, interval_minutes: 15).tap do |automation|
       automation.define_singleton_method(:definition) { definition }
     end

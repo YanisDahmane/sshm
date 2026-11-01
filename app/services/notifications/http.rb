@@ -10,10 +10,10 @@ module Notifications::Http
     response = Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https", open_timeout: TIMEOUT, read_timeout: TIMEOUT) do |http|
       http.post(uri.request_uri, body, { "Content-Type" => "application/json", "User-Agent" => "Elio" }.merge(headers))
     end
-    raise Notifications::DeliveryError, "#{service} a répondu #{response.code} : #{response.body.to_s.truncate(200)}" unless response.is_a?(Net::HTTPSuccess)
+    raise Notifications::DeliveryError, I18n.t("notifications.http.answered", service: service, code: response.code, truncate: (response.body.to_s.truncate(200))) unless response.is_a?(Net::HTTPSuccess)
 
     response
   rescue SocketError, SystemCallError, IOError, Timeout::Error, OpenSSL::SSL::SSLError, Net::HTTPBadResponse => e
-    raise Notifications::DeliveryError, "Impossible de joindre #{service} (#{e.class}: #{e.message})"
+    raise Notifications::DeliveryError, I18n.t("notifications.http.unreachable", service: service, class: e.class, message: e.message)
   end
 end

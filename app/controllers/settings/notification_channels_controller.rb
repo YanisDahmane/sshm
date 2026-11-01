@@ -13,7 +13,7 @@ module Settings
       @channel = NotificationChannel.new(channel_params)
 
       if @channel.save
-        redirect_to settings_notifications_path, notice: "Le canal « #{@channel.name} » a été ajouté. Envoyez un test pour vérifier."
+        redirect_to settings_notifications_path, notice: t("notification_channels_controller.created", channel_name: @channel.name)
       else
         render :new, status: :unprocessable_entity
       end
@@ -28,7 +28,7 @@ module Settings
       attributes.delete(:webhook_url) if attributes[:webhook_url].blank?
 
       if @channel.update(attributes)
-        redirect_to settings_notifications_path, notice: "Le canal « #{@channel.name} » a été modifié."
+        redirect_to settings_notifications_path, notice: t("notification_channels_controller.updated", channel_name: @channel.name)
       else
         render :edit, status: :unprocessable_entity
       end
@@ -36,16 +36,16 @@ module Settings
 
     def destroy
       @channel.destroy!
-      redirect_to settings_notifications_path, notice: "Le canal « #{@channel.name} » a été supprimé.", status: :see_other
+      redirect_to settings_notifications_path, notice: t("notification_channels_controller.deleted", channel_name: @channel.name), status: :see_other
     end
 
     def test
-      @channel.notifier.deliver_test(@channel)
+      @channel.in_language { @channel.notifier.deliver_test(@channel) }
       @channel.record_delivery!
-      redirect_to settings_notifications_path, notice: "Message de test envoyé à « #{@channel.name} »."
+      redirect_to settings_notifications_path, notice: t("notification_channels_controller.test_sent", channel_name: @channel.name)
     rescue Notifications::DeliveryError => e
       @channel.record_delivery!(error: e.message)
-      redirect_to settings_notifications_path, alert: "Échec de l'envoi à « #{@channel.name} » : #{e.message}"
+      redirect_to settings_notifications_path, alert: t("notification_channels_controller.test_failed", channel_name: @channel.name, message: e.message)
     end
 
     private
@@ -55,7 +55,7 @@ module Settings
     end
 
     def channel_params
-      params.expect(notification_channel: [ :name, :kind, :webhook_url, :recipients, :mention_channel, :daily_digest, :enabled, activity_kinds: [] ])
+      params.expect(notification_channel: [ :name, :kind, :locale, :webhook_url, :recipients, :mention_channel, :daily_digest, :enabled, activity_kinds: [] ])
     end
   end
 end

@@ -6,7 +6,7 @@ class NotificationChannel < ApplicationRecord
   include Localized
   localized # nil: the instance's language
 
-  KINDS = { "slack" => "Slack", "discord" => "Discord", "webhook" => "Webhook (JSON signé)", "email" => "Email" }.freeze
+  KINDS = %w[slack discord webhook email].freeze
   NOTIFIERS = { "slack" => "Notifications::Slack", "discord" => "Notifications::Discord", "webhook" => "Notifications::Webhook", "email" => "Notifications::Email" }.freeze
 
   SLACK_WEBHOOK = %r{\Ahttps://hooks\.slack\.com/services/[A-Za-z0-9/_-]+\z}
@@ -25,7 +25,7 @@ class NotificationChannel < ApplicationRecord
   before_validation :generate_signing_secret, if: -> { kind == "webhook" && signing_secret.blank? }
 
   validates :name, presence: true, uniqueness: { case_sensitive: false }
-  validates :kind, inclusion: { in: KINDS.keys }
+  validates :kind, inclusion: { in: KINDS }
   validate :destination_must_match_kind
   validate :activity_kinds_must_be_known
 
@@ -36,7 +36,14 @@ class NotificationChannel < ApplicationRecord
     enabled.where("activity_kinds @> ?", [ kind.to_s ].to_json)
   end
 
-  def kind_label = KINDS.fetch(kind, kind)
+  def kind_label = self.class.kind_label(kind)
+
+  def self.kind_label(kind) = I18n.t("notification_channel.kinds.#{kind}", default: kind.to_s)
+
+  # Messages of the channel are written in its language, else the instance's.
+  def delivery_locale = locale || AppSetting.current.default_locale
+
+  def in_language(&) = I18n.with_locale(delivery_locale, &)
 
   def notifier = NOTIFIERS.fetch(kind).constantize
 

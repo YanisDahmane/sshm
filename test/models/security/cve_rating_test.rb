@@ -34,7 +34,7 @@ class CveRatingTest < ActiveSupport::TestCase
 
   test "a CVE that becomes serious through its score is logged and becomes a health reason" do
     CveRating.refresh!
-    assert_equal "1 vulnérabilité(s) corrigeable(s) sur « Web » : CVE-2024-6387 (openssh)", Activity.of_kind(:vulnerability_found).sole.summary
+    assert_equal "1 vulnérabilité corrigeable sur « Web » : CVE-2024-6387 (openssh)", Activity.of_kind(:vulnerability_found).sole.summary
     assert_includes servers(:web).reload.health_reason_texts, "Vulnérabilité CVE-2024-6387 corrigeable"
 
     CveRating.refresh!

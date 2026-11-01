@@ -97,6 +97,22 @@ class EnglishInterfaceTest < ActionDispatch::IntegrationTest
     assert_english settings_path, except: data
   end
 
+  test "the activity, tasks and notifications pages" do
+    data = [ ".sidebar-groups", ".account-link", "#activities li span.font-medium" ]
+    Activity.record!(:server_unreachable, server: servers(:web))
+    assert_english activities_path, except: data
+    assert_english tasks_path, except: data
+    assert_english settings_automations_path, except: data
+    assert_english settings_notifications_path, except: data
+    assert_english new_settings_notification_channel_path, except: data
+  end
+
+  test "an activity is summarized in the reader's language" do
+    activity = Activity.record!(:health_warning, server: servers(:web), user: nil, reasons: [ Inventory::HealthStatus.reason("warn", :reboot_required).to_h ])
+    assert_equal "“Web” is to watch: Reboot required", I18n.with_locale(:en) { activity.summary }
+    assert_equal "« Web » est à surveiller : Redémarrage requis", I18n.with_locale(:fr) { activity.summary }
+  end
+
   test "the check finds French" do
     app_settings(:main).update!(default_locale: "fr")
     get root_path

@@ -5,14 +5,14 @@ class Notifications::Discord
   COLORS = { info: 0x2a78d6, warning: 0xfab219, critical: 0xd03b3b }.freeze
 
   def self.deliver(channel, activity)
-    context = [ "Par #{activity.author_name}", activity.server_name && "Serveur : #{activity.server_name}" ].compact.join(" · ")
+    context = [ I18n.t("notifications.discord.by", author_name: activity.author_name), activity.server_name && I18n.t("notifications.discord.server", server_name: activity.server_name) ].compact.join(" · ")
     post(channel, embeds: [ { title: escape(activity.label).first(256), description: escape(activity.summary).first(4000),
                               color: COLORS.fetch(activity.severity), footer: { text: context.first(2048) },
                               timestamp: activity.created_at.iso8601 } ])
   end
 
   def self.deliver_test(channel)
-    post(channel, embeds: [ { title: "Test Elio", description: "Le canal « #{escape(channel.name)} » reçoit bien les notifications.", color: COLORS[:info] } ])
+    post(channel, embeds: [ { title: I18n.t("notifications.discord.test_title"), description: I18n.t("notifications.discord.test_text", escape: (escape(channel.name))), color: COLORS[:info] } ])
   end
 
   def self.deliver_digest(channel, digest)

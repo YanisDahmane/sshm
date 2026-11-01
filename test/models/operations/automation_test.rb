@@ -55,7 +55,7 @@ class AutomationTest < ActiveSupport::TestCase
 
     result = stub_method(Keys::ServerScan, :call, scan) { automation.run! }
 
-    assert_equal "2/3 serveur(s) scanné(s), 1 nouvelle(s) clé(s) inconnue(s)", result
+    assert_equal "2/3 serveurs scannés, 1 nouvelle clé inconnue", result
     assert_equal result, automation.reload.last_result
     assert_not_nil automation.last_run_at
     activity = Activity.of_kind(:automation_run).sole
@@ -68,7 +68,7 @@ class AutomationTest < ActiveSupport::TestCase
 
     result = stub_method(Servers::Ping, :check_all!, ->(servers, **) { servers.to_a.index_with { |server| server.name != "Database" } }) { automation.run! }
 
-    assert_equal "2/3 serveur(s) joignable(s)", result
+    assert_equal "2/3 serveurs joignables", result
   end
 
   def snapshot(server, unix_user, *public_keys)
@@ -88,8 +88,8 @@ class AutomationTest < ActiveSupport::TestCase
     result = stub_method(Inventory::Collection, :call, collection) { automation.run! }
 
     assert_equal [ [ "Database", %w[ports] ], [ "Web", %w[ports] ] ], calls.sort
-    assert_equal "1/2 serveur(s) inventorié(s)", result
-    assert_equal "Inventaire des ports : 1/2 serveur(s) inventorié(s)", Activity.of_kind(:automation_run).sole.summary
+    assert_equal "1/2 serveurs inventoriés", result
+    assert_equal "Inventaire des ports : 1/2 serveurs inventoriés", Activity.of_kind(:automation_run).sole.summary
     assert_equal "Production", automation.scope_label
   end
 
@@ -99,7 +99,7 @@ class AutomationTest < ActiveSupport::TestCase
     assert_no_difference("Activity.of_kind(:automation_run).count") do
       stub_method(Inventory::Collection, :call, ->(*, **) { {} }) { automation.run! }
     end
-    assert_equal "3/3 serveur(s) inventorié(s)", automation.reload.last_result
+    assert_equal "3/3 serveurs inventoriés", automation.reload.last_result
   end
 
   test "scope: the groups, or the whole fleet" do

@@ -8,10 +8,10 @@ class Notifications::Email
   def self.deliver_digest(channel, digest) = send_mail { NotificationMailer.digest(channel, digest) }
 
   def self.send_mail
-    raise Notifications::DeliveryError, "L'envoi d'emails n'est pas configuré (variables SMTP_*)" unless Rails.configuration.x.mail_enabled
+    raise Notifications::DeliveryError, I18n.t("notifications.email.not_configured") unless Rails.configuration.x.mail_enabled
 
     yield.deliver_now
   rescue Net::SMTPError, Net::OpenTimeout, Net::ReadTimeout, SocketError, SystemCallError, IOError => e
-    raise Notifications::DeliveryError, "Envoi de l'email impossible (#{e.class}: #{e.message})"
+    raise Notifications::DeliveryError, I18n.t("notifications.email.failed", class: e.class, message: e.message)
   end
 end

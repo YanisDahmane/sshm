@@ -7,6 +7,6 @@ class JobsDashboardController < ApplicationController
 
   # Inside the engine, the app's layout and route helpers are not available.
   def render_forbidden
-    redirect_to main_app.root_path, alert: "Votre rôle (#{current_user.role_label}) ne permet pas d'ouvrir le suivi technique des jobs."
+    redirect_to main_app.root_path, alert: t("jobs_dashboard_controller.forbidden", role_label: current_user.role_label)
   end
 end
