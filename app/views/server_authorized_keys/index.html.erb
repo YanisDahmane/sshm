@@ -5,7 +5,7 @@
     <p class="text-sm text-ink-3">
       <code class="rounded bg-subtle px-1 font-mono text-xs"><%= @account.path %></code>
       <% if @result.success? %>
-        · <%= pluralize(@result.keys.size, "clé", plural: "clés") %>
+        · <%= t("count.keys", count: @result.keys.size) %>
       <% end %>
     </p>
     <%= link_to server_authorized_keys_path(@server),
@@ -38,7 +38,7 @@
         <div class="orphan-warning mb-3 flex gap-3 rounded-md border border-warn/40 bg-warn-soft px-4 py-3 text-sm text-warn-ink">
           <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-warn"></span>
           <p>
-            <strong><%= pluralize(@orphan_keys.size, "clé n'est pas", plural: "clés ne sont pas") %> dans le trousseau.</strong>
+            <strong><%= t("count.keys_are_not", count: @orphan_keys.size) %> dans le trousseau.</strong>
             Si vous <%= one ? "la" : "les" %> reconnaissez, <%= one ? "ajoutez-la" : "ajoutez-les" %> avec le bouton
             « Ajouter au trousseau » ; sinon supprimez-<%= one ? "la" : "les" %>.
           </p>

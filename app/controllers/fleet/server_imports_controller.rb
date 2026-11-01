@@ -21,14 +21,14 @@ class ServerImportsController < ApplicationController
   def create
     read_params
     servers = Servers::Import.import!(Servers::Import.parse(@text, format: @format, default_username: @default_username))
-    return redirect_to(new_server_import_path, alert: "Aucun serveur valide à importer.") if servers.empty?
+    return redirect_to(new_server_import_path, alert: t("server_imports_controller.nothing")) if servers.empty?
 
     Activity.record!(:servers_imported, count: servers.size, format: Servers::Import::FORMATS.fetch(@format), names: servers.first(10).map(&:name))
-    redirect_to servers_path, notice: "#{servers.size} serveur(s) importé(s). Installez-y la clé d'Elio puis lancez un scan des clés."
+    redirect_to servers_path, notice: t("server_imports_controller.imported", count: servers.size)
   rescue Servers::Import::Error => e
     redirect_to new_server_import_path, alert: e.message
   rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique => e
-    redirect_to new_server_import_path, alert: "Import annulé, rien n'a été créé : #{e.message}"
+    redirect_to new_server_import_path, alert: t("server_imports_controller.cancelled", message: e.message)
   end
 
   private

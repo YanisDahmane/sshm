@@ -1,9 +1,9 @@
 <%# Deletes the server from Elio, after a confirmation explaining what is (not) removed. %>
 <% temporary = server.temporary_accesses.active.count %>
-<% warning = "« #{server.name} » sera retiré d'Elio, avec son historique de clés lues. Les clés installées sur la machine, dont celle d'Elio, n'en seront pas retirées." %>
-<% warning += " #{temporary} accès temporaire(s) en cours ne seront plus nettoyé(s) automatiquement (sshd les refusera quand même à l'échéance)." if temporary.positive? %>
+<% warning = t(".warning", server_name: server.name) %>
+<% warning += t(".temporary_warning", count: temporary) if temporary.positive? %>
 <%= button_to server_path(server), method: :delete,
-      form: { class: local_assigns[:form_class], data: { turbo_confirm: warning, confirm_label: "Supprimer le serveur", confirm_variant: "danger" } },
+      form: { class: local_assigns[:form_class], data: { turbo_confirm: warning, confirm_label: t(".delete_server"), confirm_variant: "danger" } },
       class: local_assigns.fetch(:class, "delete-server inline-flex cursor-pointer items-center gap-2 rounded-md border border-crit/40 bg-surface px-3 py-2 text-sm font-medium text-crit-ink shadow-sm hover:bg-crit-soft") do %>
-  <%= icon :trash %> <%= local_assigns.fetch(:label, "Supprimer") %>
+  <%= icon :trash %> <%= local_assigns.fetch(:label, t(".delete")) %>
 <% end %>

@@ -26,19 +26,19 @@ class AttentionList
     @servers.flat_map do |server|
       items = []
       if server.health_state == "off"
-        items << Item.new("crit", :signal_slash, server.name, "Ne répond plus sur son port SSH", "Voir", @routes.server_path(server))
+        items << Item.new("crit", :signal_slash, server.name, I18n.t("attention_list.unreachable"), I18n.t("attention_list.see"), @routes.server_path(server))
       elsif (reasons = Array(server.health_reasons)).any?
         first = reasons.first
         more = reasons.size > 1 ? " (+#{reasons.size - 1})" : ""
-        items << Item.new(first["tone"], first["tone"] == "crit" ? :x_mark : :exclamation_triangle, server.name, "#{first["text"]}#{more}", "Voir", @routes.server_path(server))
+        items << Item.new(first["tone"], first["tone"] == "crit" ? :x_mark : :exclamation_triangle, server.name, "#{first["text"]}#{more}", I18n.t("attention_list.see"), @routes.server_path(server))
       elsif server.ssh_ok == false
-        items << Item.new("crit", :key, server.name, "La clé d'Elio est refusée : rien ne peut être lu", "Installer la clé", @routes.server_path(server))
+        items << Item.new("crit", :key, server.name, I18n.t("attention_list.key_refused"), I18n.t("attention_list.install_key"), @routes.server_path(server))
       end
       if (orphans = @insights.orphans_by_server_id[server.id]).present?
-        items << Item.new("warn", :key, server.name, "#{orphans.size} clé#{"s" if orphans.size > 1} hors trousseau", "Voir les clés", @routes.server_path(server, tab: "keys"))
+        items << Item.new("warn", :key, server.name, I18n.t("attention_list.unknown_keys", count: orphans.size), I18n.t("attention_list.see_keys"), @routes.server_path(server, tab: "keys"))
       end
       if server.inventoried_at.nil? && server.ssh_ok
-        items << Item.new("info", :pulse, server.name, "Pas encore d'inventaire", "Voir", @routes.server_path(server))
+        items << Item.new("info", :pulse, server.name, I18n.t("attention_list.no_inventory"), I18n.t("attention_list.see"), @routes.server_path(server))
       end
       items
     end
@@ -52,8 +52,8 @@ class AttentionList
     return unless @summary.security_updates.positive?
 
     servers = @summary.servers_with_security_updates
-    Item.new("warn", :shield_check, "#{servers} serveur#{"s" if servers > 1}", "#{@summary.security_updates} mise(s) à jour de sécurité en attente",
-             "Voir les paquets", @routes.packages_path)
+    Item.new("warn", :shield_check, I18n.t("count.servers", count: servers), I18n.t("attention_list.security_updates", count: @summary.security_updates),
+             I18n.t("attention_list.see_packages"), @routes.packages_path)
   end
 
   # Fixable CVEs at the alert severity of the settings, on the whole fleet.
@@ -66,7 +66,7 @@ class AttentionList
     return if cves.zero?
 
     servers = scope.distinct.count(:server_id)
-    Item.new("crit", :shield_exclamation, "#{servers} serveur#{"s" if servers > 1}", "#{cves} vulnérabilité#{"s" if cves > 1} grave#{"s" if cves > 1} corrigeable#{"s" if cves > 1}",
-             "Voir les vulnérabilités", @routes.vulnerabilities_path(fixable: 1, severity: minimum))
+    Item.new("crit", :shield_exclamation, I18n.t("count.servers", count: servers), I18n.t("attention_list.vulnerabilities", count: cves),
+             I18n.t("attention_list.see_vulnerabilities"), @routes.vulnerabilities_path(fixable: 1, severity: minimum))
   end
 end

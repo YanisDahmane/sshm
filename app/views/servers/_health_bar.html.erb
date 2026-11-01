@@ -2,7 +2,7 @@
 <section id="server-health" class="mt-6 divide-y divide-line rounded-xl border border-line bg-surface shadow-sm">
   <div class="px-5 py-3">
     <%= turbo_frame_tag dom_id(server, :reachability), src: server_ping_path(server), loading: :lazy, class: "group block" do %>
-      <%= render "servers/health_item", label: "Port #{server.port}" do %>
+      <%= render "servers/health_item", label: t(".port", port: server.port) do %>
         <%= render "servers/status", server: server %>
         <%= render "servers/health_checking" %>
       <% end %>
@@ -10,7 +10,7 @@
   </div>
   <div class="px-5 py-3">
     <%= turbo_frame_tag dom_id(server, :ssh_check), src: server_ssh_check_path(server), loading: :lazy, class: "group block" do %>
-      <%= render "servers/health_item", label: "SSH" do %>
+      <%= render "servers/health_item", label: t(".ssh") do %>
         <%= render "servers/ssh_status", server: server %>
         <%= render "servers/health_checking" %>
       <% end %>

@@ -6,7 +6,7 @@
       <span class="block h-full rounded-full <%= progress[:failed].positive? ? "bg-crit" : "bg-ink-2" %>" style="width: <%= (progress[:done] * 100.0 / progress[:total]).round(1) %>%"></span>
     </span>
     <%= progress[:done] %>/<%= progress[:total] %>
-    <% if progress[:failed].positive? %><span class="text-crit-ink">· <%= pluralize_fr(progress[:failed], "erreur", "erreurs") %></span><% end %>
+    <% if progress[:failed].positive? %><span class="text-crit-ink">· <%= t("count.errors", count: progress[:failed]) %></span><% end %>
   </span>
 <% else %>
   <span class="text-xs text-ink-3">—</span>

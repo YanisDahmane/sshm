@@ -2,20 +2,20 @@
     By default: reachability of the SSH port. With `health: true`: the health state (fleet list). %>
 <% health = local_assigns[:health] %>
 <%
-  checked = server.last_checked_at ? "Vérifié #{relative_time_in_words(server.last_checked_at)} (#{l(server.last_checked_at, format: :short)})" : "Jamais vérifié"
+  checked = server.last_checked_at ? t(".checked_at", relative_time_in_words: (relative_time_in_words(server.last_checked_at)), date: (l(server.last_checked_at, format: :short))) : t(".never_checked")
   tone, label, title = if health
     case server.health_state
-    when "off" then [ :off, "Injoignable", checked ]
-    when "crit" then [ :crit, "Critique", server.health_reason_texts.join(" · ") ]
-    when "warn" then [ :warn, "À surveiller", server.health_reason_texts.join(" · ") ]
-    when "ok" then [ :good, "En ligne", "Aucun problème au dernier inventaire" ]
-    else server.reachable ? [ :good, "En ligne", "Pas encore d'inventaire" ] : [ :neutral, "Inconnu", checked ]
+    when "off" then [ :off, t(".unreachable"), checked ]
+    when "crit" then [ :crit, t(".critical"), server.health_reason_texts.join(" · ") ]
+    when "warn" then [ :warn, t(".watch"), server.health_reason_texts.join(" · ") ]
+    when "ok" then [ :good, t(".online"), t(".problem_last_inventory") ]
+    else server.reachable ? [ :good, t(".online"), t(".inventory_yet") ] : [ :neutral, t(".unknown"), checked ]
     end
   else
     case server.reachable
-    when true then [ :good, "En ligne", checked ]
-    when false then [ :off, "Injoignable", checked ]
-    else [ :neutral, "Inconnu", checked ]
+    when true then [ :good, t(".online"), checked ]
+    when false then [ :off, t(".unreachable"), checked ]
+    else [ :neutral, t(".unknown"), checked ]
     end
   end
 %>

@@ -93,3 +93,61 @@ en:
   ui:
     trend: Trend
     over_24_hours: "%{label} over 24 hours"
+  count:
+    servers:
+      one: "%{count} server"
+      other: "%{count} servers"
+    servers_failed:
+      one: "%{count} server failed"
+      other: "%{count} servers failed"
+    activities_notified:
+      one: "%{count} activity notified"
+      other: "%{count} activities notified"
+    errors:
+      one: "%{count} error"
+      other: "%{count} errors"
+    groups:
+      one: "%{count} group"
+      other: "%{count} groups"
+    keys:
+      one: "%{count} key"
+      other: "%{count} keys"
+    servers_have:
+      one: "%{count} server has"
+      other: "%{count} servers have"
+    versions:
+      one: "%{count} version"
+      other: "%{count} versions"
+    packages:
+      one: "%{count} package"
+      other: "%{count} packages"
+    keys_are_not:
+      one: "%{count} key is not"
+      other: "%{count} keys are not"
+    servers_to_import:
+      one: "%{count} server to import"
+      other: "%{count} servers to import"
+    duplicates_ignored:
+      one: "%{count} duplicate ignored"
+      other: "%{count} duplicates ignored"
+    lines_in_error:
+      one: "%{count} line in error"
+      other: "%{count} lines in error"
+    unreachable:
+      one: "%{count} unreachable"
+      other: "%{count} unreachable"
+    packages_installed:
+      one: "%{count} package installed"
+      other: "%{count} packages installed"
+    processors:
+      one: "%{count} processor"
+      other: "%{count} processors"
+    providers:
+      one: "%{count} provider"
+      other: "%{count} providers"
+    unknown_keys:
+      one: "%{count} unknown key"
+      other: "%{count} unknown keys"
+    updates:
+      one: "%{count} update"
+      other: "%{count} updates"

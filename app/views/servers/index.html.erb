@@ -1,4 +1,4 @@
-<% content_for :title, "Parc · Elio" %>
+<% content_for :title, t("title", page: t("nav.fleet")) %>
 
 <section data-controller="server-ping">
   <%= render "servers/checking_badge_template" %>
@@ -7,29 +7,29 @@
     <div>
       <h1 class="text-xl font-semibold">Parc</h1>
       <p class="text-xs text-ink-3">
-        <%= pluralize_fr(@summary.total, "serveur", "serveurs") %>
-        <% if @summary.last_inventory_at %> · inventaire <%= relative_time_tag @summary.last_inventory_at %><% end %>
+        <%= t("count.servers", count: @summary.total) %>
+        <% if @summary.last_inventory_at %> <%= t("dashboard.index.inventory_html", last_inventory_at: (relative_time_tag @summary.last_inventory_at)) %><% end %>
       </p>
     </div>
     <div class="flex flex-wrap items-center justify-end gap-2">
       <% if @summary.total.positive? %>
-        <%= button_to server_pings_path, params: { badge: "health" }, form: server_ping_form, title: "Vérifier que chaque serveur répond",
+        <%= button_to server_pings_path, params: { badge: "health" }, form: server_ping_form, title: t(".check_every_server_answers"),
               class: "group btn btn-secondary" do %>
-          <%= icon :arrow_path, class: "h-4 w-4 group-disabled:animate-spin" %> Actualiser les statuts
+          <%= icon :arrow_path, class: "h-4 w-4 group-disabled:animate-spin" %> <%= t(".refresh_statuses") %>
         <% end %>
         <% if can?(:operate) %>
-          <%= button_to server_inventories_path, title: "Relire le système, la santé et les services de tous les serveurs", class: "btn btn-secondary" do %>
+          <%= button_to server_inventories_path, title: t(".read_again_system_health"), class: "btn btn-secondary" do %>
             <%= icon :pulse %> Inventaire
           <% end %>
-          <%= button_to server_scans_path, title: "Lire les clés de tous les serveurs", class: "btn btn-secondary" do %>
-            <%= icon :key %> Scanner les clés
+          <%= button_to server_scans_path, title: t(".read_keys_every_server"), class: "btn btn-secondary" do %>
+            <%= icon :key %> <%= t("dashboard.index.scan_keys") %>
           <% end %>
         <% end %>
       <% end %>
       <% if can?(:operate) %>
-        <%= link_to "Importer", new_server_import_path, class: "btn btn-secondary" %>
+        <%= link_to t(".import"), new_server_import_path, class: "btn btn-secondary" %>
         <%= link_to new_server_path, class: "btn btn-primary" do %>
-          <%= icon :plus %> Ajouter un serveur
+          <%= icon :plus %> <%= t("command_palette.add_server") %>
         <% end %>
       <% end %>
     </div>
@@ -37,20 +37,20 @@
 
   <% if @summary.total.positive? %>
     <div class="fleet-summary mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
-      <%= stat_tile "En ligne", "#{@summary.online}/#{@summary.total}", "répondent sur leur port SSH", tone: (:good if @summary.online == @summary.total), icon: :check, id: "stat-online" %>
-      <%= stat_tile "À surveiller", @summary.to_watch, "redémarrage, disque, service…", tone: (:warn if @summary.to_watch.positive?), icon: :exclamation_triangle, id: "stat-to-watch" %>
-      <%= stat_tile "Critiques", @summary.critical, (@summary.unreachable.positive? ? "dont #{pluralize_fr(@summary.unreachable, "injoignable", "injoignables")}" : "seuils critiques dépassés"),
+      <%= stat_tile t("dashboard.index.online"), "#{@summary.online}/#{@summary.total}", t("dashboard.index.answer_their_ssh_port"), tone: (:good if @summary.online == @summary.total), icon: :check, id: "stat-online" %>
+      <%= stat_tile t("dashboard.index.watch"), @summary.to_watch, t("dashboard.index.reboot_disk_service"), tone: (:warn if @summary.to_watch.positive?), icon: :exclamation_triangle, id: "stat-to-watch" %>
+      <%= stat_tile t("dashboard.index.critical"), @summary.critical, (@summary.unreachable.positive? ? t("dashboard.index.including_unreachable", count: @summary.unreachable) : t("dashboard.index.critical_thresholds_exceeded")),
                     tone: (:crit if @summary.critical.positive?), icon: :x_mark, id: "stat-critical" %>
-      <%= stat_tile "Mises à jour de sécurité", @summary.security_updates,
-                    "sur #{pluralize_fr(@summary.servers_with_security_updates, "serveur", "serveurs")}", icon: :shield_check, id: "stat-security" %>
+      <%= stat_tile t(".security_updates"), @summary.security_updates,
+                    t(".on_servers", count: @summary.servers_with_security_updates), icon: :shield_check, id: "stat-security" %>
     </div>
   <% end %>
 
   <div class="mt-5 flex flex-wrap items-center gap-2">
-    <nav class="server-group-filter flex flex-wrap items-center gap-2" aria-label="Groupes">
+    <nav class="server-group-filter flex flex-wrap items-center gap-2" aria-label="<%= t(".groups") %>">
       <% chip = "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs" %>
       <% if @groups.any? %>
-        <%= link_to "Tous", servers_path(os: @os, state: @state), aria: { current: (@group ? nil : "page") },
+        <%= link_to t(".all"), servers_path(os: @os, state: @state), aria: { current: (@group ? nil : "page") },
               class: "#{chip} #{@group ? "border border-line bg-surface text-ink-2 hover:bg-subtle" : "bg-ink font-medium text-canvas"}" %>
         <% @groups.each do |group| %>
           <% current = group == @group %>
@@ -60,29 +60,29 @@
           <% end %>
         <% end %>
       <% end %>
-      <%= link_to (@groups.any? ? "Gérer les groupes" : "Organiser les serveurs en groupes"), server_groups_path, class: "text-xs font-medium text-accent hover:underline" %>
+      <%= link_to (@groups.any? ? t(".manage_groups") : t(".organize_servers_groups")), server_groups_path, class: "text-xs font-medium text-accent hover:underline" %>
     </nav>
 
     <%= form_with url: servers_path, method: :get, data: { controller: "auto-submit", turbo_action: "advance" }, class: "fleet-filters ml-auto flex flex-wrap items-center gap-2" do |f| %>
       <%= hidden_field_tag :group, @group.id if @group %>
-      <%= f.search_field :q, value: @q, placeholder: "Nom, hostname, IP…", aria: { label: "Rechercher un serveur" },
+      <%= f.search_field :q, value: @q, placeholder: t(".name_hostname_ip"), aria: { label: t(".search_server") },
             data: { action: "input->auto-submit#submitLater" }, class: "fleet-search input w-44 py-1 text-xs" %>
       <% if @os_names.any? %>
         <span class="os-filter">
-          <%= f.select :os, [ [ "Tous les systèmes", "" ], *@os_names.map { |name| [ name, name ] } ], { selected: @os },
-                aria: { label: "Système" }, data: { action: "change->auto-submit#submit" }, class: "input w-auto py-1 text-xs" %>
+          <%= f.select :os, [ [ t(".all_systems"), "" ], *@os_names.map { |name| [ name, name ] } ], { selected: @os },
+                aria: { label: t(".system") }, data: { action: "change->auto-submit#submit" }, class: "input w-auto py-1 text-xs" %>
         </span>
       <% end %>
       <span class="state-filter">
-        <%= f.select :state, [ [ "Tous les états", "" ], [ "À surveiller", "warn" ], [ "Critiques", "crit" ], [ "Injoignables", "off" ], [ "En ligne", "ok" ], [ "Sans inventaire", "unknown" ] ],
-              { selected: @state }, aria: { label: "État" }, data: { action: "change->auto-submit#submit" }, class: "input w-auto py-1 text-xs" %>
+        <%= f.select :state, [ [ t(".all_states"), "" ], [ t("dashboard.index.watch"), "warn" ], [ t("dashboard.index.critical"), "crit" ], [ t(".unreachable"), "off" ], [ t("dashboard.index.online"), "ok" ], [ t(".without_inventory"), "unknown" ] ],
+              { selected: @state }, aria: { label: t(".state") }, data: { action: "change->auto-submit#submit" }, class: "input w-auto py-1 text-xs" %>
       </span>
-      <noscript><%= f.submit "Filtrer", class: "btn btn-secondary" %></noscript>
+      <noscript><%= f.submit t(".filter"), class: "btn btn-secondary" %></noscript>
     <% end %>
-    <div class="view-toggle flex rounded-lg border border-line bg-surface p-0.5" role="group" aria-label="Affichage">
-      <% [ [ "list", "Liste", :list_bullet ], [ "grid", "Grille", :squares_2x2 ] ].each do |view, label, icon_name| %>
-        <%= link_to servers_path(request.query_parameters.except("page").merge("view" => view)), title: "Vue #{label.downcase}", data: { view: view },
-              aria: { label: "Vue #{label.downcase}", pressed: @view == view },
+    <div class="view-toggle flex rounded-lg border border-line bg-surface p-0.5" role="group" aria-label="<%= t(".display") %>">
+      <% [ [ "list", t(".list"), :list_bullet ], [ "grid", t(".grid"), :squares_2x2 ] ].each do |view, label, icon_name| %>
+        <%= link_to servers_path(request.query_parameters.except("page").merge("view" => view)), title: t(".view_label", label_downcase: label.downcase), data: { view: view },
+              aria: { label: t(".view_label", label_downcase: label.downcase), pressed: @view == view },
               class: "inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs #{@view == view ? "bg-subtle font-medium text-ink" : "text-ink-3 hover:text-ink"}" do %>
           <%= icon icon_name, class: "h-4 w-4" %><span class="hidden sm:inline"><%= label %></span>
         <% end %>
@@ -100,15 +100,15 @@
       <table id="servers" class="table-dense">
         <thead>
           <tr>
-            <th scope="col" class="pl-4">État</th>
-            <th scope="col">Serveur</th>
-            <th scope="col">Système</th>
-            <th scope="col">Charge 24 h</th>
-            <th scope="col">Mémoire</th>
-            <th scope="col">Disque</th>
-            <th scope="col">Mises à jour</th>
+            <th scope="col" class="pl-4"><%= t(".state") %></th>
+            <th scope="col"><%= t(".server") %></th>
+            <th scope="col"><%= t(".system") %></th>
+            <th scope="col"><%= t(".load_24_h") %></th>
+            <th scope="col"><%= t(".memory") %></th>
+            <th scope="col"><%= t(".disk") %></th>
+            <th scope="col"><%= t(".updates") %></th>
             <% if @monitor_counts %><th scope="col">Sondes</th><% end %>
-            <th scope="col">À noter</th>
+            <th scope="col"><%= t(".notes") %></th>
             <th scope="col" class="pr-4"><span class="sr-only">Actions</span></th>
           </tr>
         </thead>
@@ -121,14 +121,14 @@
   <% else %>
     <div class="card mt-3 border-dashed px-6 py-12 text-center">
       <p class="text-sm text-ink-3">
-        <%= if @state || @os || @q.present? then "Aucun serveur ne correspond à ces filtres." elsif @group then "Aucun serveur dans ce groupe." else "Aucun serveur pour le moment." end %>
+        <%= if @state || @os || @q.present? then t(".server_matches_these_filters") elsif @group then t(".server_group") else t(".server_yet") end %>
       </p>
       <% if @state || @os || @q.present? %>
-        <%= link_to "Retirer les filtres", servers_path(group: @group&.id), class: "mt-2 inline-block text-sm font-medium text-accent hover:underline" %>
+        <%= link_to t(".remove_filters"), servers_path(group: @group&.id), class: "mt-2 inline-block text-sm font-medium text-accent hover:underline" %>
       <% elsif @group && can?(:operate) %>
-        <%= link_to "Ajouter des serveurs au groupe", edit_server_group_path(@group), class: "mt-2 inline-block text-sm font-medium text-accent hover:underline" %>
+        <%= link_to t(".add_servers_group"), edit_server_group_path(@group), class: "mt-2 inline-block text-sm font-medium text-accent hover:underline" %>
       <% elsif can?(:operate) %>
-        <%= link_to "Ajouter votre premier serveur", new_server_path, class: "mt-2 inline-block text-sm font-medium text-accent hover:underline" %>
+        <%= link_to t(".add_your_first_server"), new_server_path, class: "mt-2 inline-block text-sm font-medium text-accent hover:underline" %>
       <% end %>
     </div>
   <% end %>

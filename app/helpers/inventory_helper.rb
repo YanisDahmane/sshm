@@ -91,7 +91,7 @@ module InventoryHelper
     return tag.span("—", class: "cve-score text-xs text-ink-3", title: "Pas encore de note") unless rating&.score || rating&.exploited || rating&.epss
 
     parts = []
-    parts << score_pill(rating.score, title: "Moyenne de #{pluralize_fr(rating.scores_count, "fournisseur", "fournisseurs")}") if rating.score
+    parts << score_pill(rating.score, title: "Moyenne de #{t("count.providers", count: rating.scores_count)}") if rating.score
     parts << status_badge(:crit, "exploitée", class: "cve-exploited", title: "Catalogue CISA KEV#{" depuis le #{l(rating.exploited_since, format: :long)}" if rating.exploited_since}") if rating.exploited
     if rating.epss && rating.epss >= 0.01 && !compact
       parts << tag.span("EPSS #{epss_percentage(rating.epss)}", class: "text-[11px] text-ink-3", title: "Probabilité d'exploitation dans les 30 jours")

@@ -63,6 +63,18 @@ class EnglishInterfaceTest < ActionDispatch::IntegrationTest
     assert_empty self.class.french_texts(response.body)
   end
 
+  test "the fleet pages" do
+    data = [ ".sidebar-groups", ".account-link", "#servers td:nth-child(2)", ".server-card-header", ".server-group-filter", "#activities", "#recent-activity ul", "#attention ul" ]
+    assert_english root_path, except: data
+    assert_english servers_path, except: data
+    assert_english servers_path(view: "grid"), except: data
+    assert_english new_server_path, except: data
+    assert_english edit_server_path(servers(:web)), except: data
+    assert_english server_groups_path, except: data + [ "table td:first-child" ]
+    assert_english new_server_group_path, except: data
+    assert_english new_server_import_path, except: data
+  end
+
   test "the check finds French" do
     app_settings(:main).update!(default_locale: "fr")
     get root_path

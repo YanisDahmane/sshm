@@ -27,7 +27,7 @@
         </p>
       <% else %>
         <p class="rotation-status flex items-center gap-2 text-sm font-medium text-crit-ink">
-          <%= icon :x_mark, class: "h-4 w-4" %> <%= pluralize(@rotation.failed_count, "serveur en échec", plural: "serveurs en échec") %> : ils gardent l'ancienne clé, qui reste utilisable.
+          <%= icon :x_mark, class: "h-4 w-4" %> <%= t("count.servers_failed", count: @rotation.failed_count) %> : ils gardent l'ancienne clé, qui reste utilisable.
         </p>
         <div class="mt-4 flex flex-wrap gap-3">
           <%= button_to "Relancer les échecs", retry_settings_key_rotation_path(@rotation), data: { turbo_frame: "_top" },

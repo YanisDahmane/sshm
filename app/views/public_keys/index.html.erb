@@ -5,7 +5,7 @@
     <div>
       <h1 class="text-2xl font-bold tracking-tight">Trousseau</h1>
       <p class="text-sm text-ink-3">
-        <%= pluralize_fr(@pager.total, "clé", "clés") %>
+        <%= t("count.keys", count: @pager.total) %>
       </p>
     </div>
     <% if can?(:operate) %>

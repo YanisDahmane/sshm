@@ -11,7 +11,7 @@
         <% if server.os_name %>
           <span class="<%= "text-warn-ink" if Inventory::EndOfLife.status(server.os_id, server.os_version).state.in?(%i[soon ended]) %>" title="<%= server.os_name %>"><%= short_os_name(server.os_name) %></span>
         <% else %>
-          <span>Système inconnu</span>
+          <span><%= t(".unknown_system") %></span>
         <% end %>
         <% if server.server_groups.any? %> · <%= server.server_groups.map(&:name).join(", ") %><% end %>
       </p>
@@ -22,16 +22,16 @@
   <% if state == "off" %>
     <p class="mt-4 flex flex-1 items-center justify-center gap-2 rounded-lg bg-subtle px-3 py-6 text-sm text-ink-3">
       <%= icon :signal_slash, class: "h-4 w-4" %>
-      Pas de réponse<% if server.last_checked_at %> <%= relative_time_tag server.last_checked_at, prefix: "· vérifié " %><% end %>
+      <%= t(".answer") %><% if server.last_checked_at %> <%= relative_time_tag server.last_checked_at, prefix: t(".checked_prefix") %><% end %>
     </p>
   <% elsif health.any? %>
     <div class="server-card-gauges mt-4 space-y-2">
-      <%= meter health["load_percent"], warn: 80, crit: 100, width: "flex-1", label: "CPU" %>
-      <%= meter health.dig("memory", "used_percent"), warn: app_settings.health_memory_warn, crit: app_settings.health_memory_crit, width: "flex-1", label: "RAM" %>
-      <%= meter health["disk_max_percent"], warn: app_settings.health_disk_warn, crit: app_settings.health_disk_crit, width: "flex-1", label: "Disque" %>
+      <%= meter health["load_percent"], warn: 80, crit: 100, width: "flex-1", label: t(".cpu") %>
+      <%= meter health.dig("memory", "used_percent"), warn: app_settings.health_memory_warn, crit: app_settings.health_memory_crit, width: "flex-1", label: t(".ram") %>
+      <%= meter health["disk_max_percent"], warn: app_settings.health_disk_warn, crit: app_settings.health_disk_crit, width: "flex-1", label: t(".disk") %>
     </div>
   <% else %>
-    <p class="mt-4 flex-1 rounded-lg bg-subtle px-3 py-4 text-center text-xs text-ink-3">Pas encore d'inventaire</p>
+    <p class="mt-4 flex-1 rounded-lg bg-subtle px-3 py-4 text-center text-xs text-ink-3"><%= t(".inventory_yet") %></p>
   <% end %>
 
   <div class="server-card-footer mt-4 text-xs">
@@ -44,7 +44,7 @@
       <% updates = health.dig("updates", "total") %>
       <% ports = Inventory::PortAnalysis.new(server).public_ports.map { |port| port.proto == "tcp" ? port.port.to_s : "#{port.port}/#{port.proto}" }.uniq %>
       <p class="truncate text-ink-3">
-        <%= [ (updates.to_i.zero? ? "à jour" : pluralize_fr(updates, "mise à jour", "mises à jour") if updates), ("ports #{ports.join(", ")}" if ports.any?) ].compact.join(" · ").presence || "#{server.username}@#{server.host}" %>
+        <%= [ (updates.to_i.zero? ? t(".up_date") : t("count.updates", count: updates) if updates), (t(".ports", ports_join: (ports.join(", "))) if ports.any?) ].compact.join(" · ").presence || "#{server.username}@#{server.host}" %>
       </p>
     <% end %>
   </div>

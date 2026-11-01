@@ -1,21 +1,20 @@
-<% content_for :title, "Modifier #{@server.name_was} · Elio" %>
+<% content_for :title, t("title", page: t(".title", name: @server.name_was)) %>
 
 <div class="mx-auto max-w-xl">
-  <%= link_to "← Serveurs", servers_path, class: "text-sm text-ink-3 hover:text-ink-2" %>
-  <h1 class="mt-2 text-2xl font-bold tracking-tight">Modifier « <%= @server.name_was %> »</h1>
+  <%= link_to t(".servers"), servers_path, class: "text-sm text-ink-3 hover:text-ink-2" %>
+  <h1 class="mt-2 text-2xl font-bold tracking-tight"><%= t(".edit_html", name_was: @server.name_was) %></h1>
 
   <div class="mt-6 rounded-xl border border-line bg-surface p-6 shadow-sm">
     <%= render "form", server: @server %>
   </div>
 
   <section id="danger-zone" class="mt-6 rounded-xl border border-crit/40 bg-surface p-6 shadow-sm">
-    <h2 class="text-base font-semibold text-crit-ink">Supprimer ce serveur</h2>
+    <h2 class="text-base font-semibold text-crit-ink"><%= t(".delete_server_2") %></h2>
     <p class="mt-1 text-sm text-ink-2">
-      Le serveur est retiré d'Elio. Les clés installées sur la machine, dont celle d'Elio, restent en place :
-      retirez-les d'abord depuis la page du serveur si nécessaire. L'historique d'activité est conservé.
+      <%= t(".server_removed_elio_keys") %>
     </p>
     <div class="mt-4">
-      <%= render "servers/delete_button", server: @server, label: "Supprimer le serveur" %>
+      <%= render "servers/delete_button", server: @server, label: t(".delete_server") %>
     </div>
   </section>
 </div>

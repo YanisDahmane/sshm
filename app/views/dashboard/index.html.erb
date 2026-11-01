@@ -1,17 +1,17 @@
-<% content_for :title, "Vue d'ensemble · Elio" %>
+<% content_for :title, t("title", page: t("nav.overview")) %>
 
 <div class="flex flex-wrap items-start justify-between gap-4">
   <div>
-    <h1 class="text-xl font-semibold">Vue d'ensemble</h1>
+    <h1 class="text-xl font-semibold"><%= t("nav.overview") %></h1>
     <p class="text-xs text-ink-3">
-      <%= pluralize_fr(@summary.total, "serveur", "serveurs") %>
-      <% if @summary.last_inventory_at %> · inventaire <%= relative_time_tag @summary.last_inventory_at %><% end %>
+      <%= t("count.servers", count: @summary.total) %>
+      <% if @summary.last_inventory_at %> <%= t(".inventory_html", last_inventory_at: relative_time_tag(@summary.last_inventory_at)) %><% end %>
     </p>
   </div>
   <% if can?(:operate) && @servers.any? %>
     <div class="flex flex-wrap gap-2">
       <%= button_to server_inventories_path, class: "btn btn-secondary" do %><%= icon :pulse %> Inventaire<% end %>
-      <%= button_to server_scans_path, class: "btn btn-secondary" do %><%= icon :key %> Scanner les clés<% end %>
+      <%= button_to server_scans_path, class: "btn btn-secondary" do %><%= icon :key %> <%= t(".scan_keys") %><% end %>
     </div>
   <% end %>
 </div>
@@ -21,11 +21,11 @@
 <% end %>
 
 <div class="fleet-summary mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
-  <%= stat_tile "En ligne", "#{@summary.online}/#{@summary.total}", "répondent sur leur port SSH", tone: (:good if @summary.total.positive? && @summary.online == @summary.total), icon: :check, id: "stat-online" %>
-  <%= stat_tile "À surveiller", @summary.to_watch, "redémarrage, disque, service…", tone: (:warn if @summary.to_watch.positive?), icon: :exclamation_triangle, id: "stat-to-watch" %>
-  <%= stat_tile "Critiques", @summary.critical, (@summary.unreachable.positive? ? "dont #{pluralize_fr(@summary.unreachable, "injoignable", "injoignables")}" : "seuils critiques dépassés"),
+  <%= stat_tile t(".online"), "#{@summary.online}/#{@summary.total}", t(".answer_their_ssh_port"), tone: (:good if @summary.total.positive? && @summary.online == @summary.total), icon: :check, id: "stat-online" %>
+  <%= stat_tile t(".watch"), @summary.to_watch, t(".reboot_disk_service"), tone: (:warn if @summary.to_watch.positive?), icon: :exclamation_triangle, id: "stat-to-watch" %>
+  <%= stat_tile t(".critical"), @summary.critical, (@summary.unreachable.positive? ? t(".including_unreachable", count: @summary.unreachable) : t(".critical_thresholds_exceeded")),
                 tone: (:crit if @summary.critical.positive?), icon: :x_mark, id: "stat-critical" %>
-  <%= stat_tile "Clés inconnues", (@insights.scanned? ? @insights.orphan_count : "—"), (@insights.scanned? ? "hors trousseau" : "lancez un scan des clés"),
+  <%= stat_tile t(".unknown_keys"), (@insights.scanned? ? @insights.orphan_count : "—"), (@insights.scanned? ? t(".outside_keyring") : t(".run_key_scan")),
                 tone: (:warn if @insights.orphan_count.positive?), icon: :key, id: "stat-orphans" %>
 </div>
 
@@ -33,8 +33,8 @@
   <div class="min-w-0 space-y-5 lg:col-span-2">
     <section id="attention" class="card">
       <div class="card-header">
-        <h2 class="font-semibold">À traiter</h2>
-        <span class="text-xs text-ink-3"><%= @attention.any? ? "#{pluralize_fr(@attention.items.size, "élément", "éléments")} · par gravité" : "" %></span>
+        <h2 class="font-semibold"><%= t(".do") %></h2>
+        <span class="text-xs text-ink-3"><%= @attention.any? ? t(".items_by_severity", count: @attention.items.size) : "" %></span>
       </div>
       <% if @attention.any? %>
         <ul class="divide-y divide-line">
@@ -48,46 +48,46 @@
         </ul>
       <% else %>
         <p class="attention-empty flex items-center gap-2 px-4 py-4 text-sm text-good-ink"><%= icon :check_circle %>
-          <%= @servers.any? ? "Rien à signaler : serveurs joignables, santé normale, toutes les clés sont dans le trousseau." : "Ajoutez un premier serveur pour commencer." %></p>
+          <%= @servers.any? ? t(".nothing_report_servers_reachable") : t(".add_first_server_begin") %></p>
       <% end %>
     </section>
 
     <section id="recent-activity" class="card px-4 pt-3 pb-1">
       <div class="flex items-center justify-between">
-        <h2 class="font-semibold">Activité récente</h2>
-        <%= link_to "Tout voir", activities_path, class: "text-xs font-medium text-accent hover:underline" %>
+        <h2 class="font-semibold"><%= t(".recent_activity") %></h2>
+        <%= link_to t(".see_all"), activities_path, class: "text-xs font-medium text-accent hover:underline" %>
       </div>
       <% if @activities.any? %>
         <ul class="mt-1 divide-y divide-line"><%= render partial: "activities/activity", collection: @activities %></ul>
       <% else %>
-        <p class="py-4 text-sm text-ink-3">Aucune activité pour le moment.</p>
+        <p class="py-4 text-sm text-ink-3"><%= t(".activity_yet") %></p>
       <% end %>
     </section>
   </div>
 
   <div class="min-w-0 space-y-5">
     <section id="temporary-accesses" class="card">
-      <div class="card-header"><h2 class="font-semibold">Accès temporaires</h2><span class="text-xs text-ink-3"><%= @temporary_accesses.size %> en cours</span></div>
+      <div class="card-header"><h2 class="font-semibold"><%= t(".temporary_access") %></h2><span class="text-xs text-ink-3"><%= t(".ongoing_html", count: @temporary_accesses.size) %></span></div>
       <% if @temporary_accesses.any? %>
         <ul class="divide-y divide-line">
           <% @temporary_accesses.each do |access| %>
             <li class="temporary-access px-4 py-2.5 text-sm">
-              <p class="truncate font-medium"><%= access.public_key&.name || "Clé supprimée" %></p>
+              <p class="truncate font-medium"><%= access.public_key&.name || t(".key_deleted") %></p>
               <p class="text-xs text-ink-3">
                 <%= link_to access.server.name, server_path(access.server, tab: "keys"), class: "hover:underline" %> ·
                 <span class="font-mono"><%= access.unix_user %></span> ·
-                <%= relative_time_tag access.expires_at, prefix: "expire ", expired: "expiré, suppression en cours" %>
+                <%= relative_time_tag access.expires_at, prefix: "expire ", expired: t(".expired_being_removed") %>
               </p>
             </li>
           <% end %>
         </ul>
       <% else %>
-        <p class="px-4 py-3 text-xs text-ink-3">Aucun accès temporaire. Choisissez une durée en ajoutant une clé sur un serveur.</p>
+        <p class="px-4 py-3 text-xs text-ink-3"><%= t(".temporary_access_choose_duration") %></p>
       <% end %>
     </section>
 
     <section id="systems" class="card">
-      <div class="card-header"><h2 class="font-semibold">Systèmes</h2><span class="text-xs text-ink-3"><%= pluralize_fr(@systems.sum(&:last), "serveur", "serveurs") %></span></div>
+      <div class="card-header"><h2 class="font-semibold"><%= t(".systems") %></h2><span class="text-xs text-ink-3"><%= t("count.servers", count: @systems.sum(&:last)) %></span></div>
       <% if @systems.any? %>
         <ul class="divide-y divide-line px-4 text-sm">
           <% @systems.each do |name, count| %>
@@ -95,7 +95,7 @@
           <% end %>
         </ul>
       <% else %>
-        <p class="px-4 py-3 text-xs text-ink-3">Les systèmes apparaîtront après un premier inventaire.</p>
+        <p class="px-4 py-3 text-xs text-ink-3"><%= t(".systems_will_appear_after") %></p>
       <% end %>
     </section>
   </div>

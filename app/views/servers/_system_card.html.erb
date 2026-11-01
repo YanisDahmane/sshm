@@ -29,7 +29,7 @@
         <dt class="text-ink-3">Machine</dt>
         <dd class="machine text-right">
           <%= virtualization_label(os["virtualization"]) %>
-          <% if os["cpus"] %> · <%= pluralize_fr(os["cpus"], "processeur", "processeurs") %><% end %>
+          <% if os["cpus"] %> · <%= t("count.processors", count: os["cpus"]) %><% end %>
           <% if os["memory_bytes"] %> · <%= human_bytes(os["memory_bytes"]) %> de mémoire<% end %>
         </dd>
       </div>

@@ -1,8 +1,8 @@
-<% content_for :title, "Ajouter un serveur · Elio" %>
+<% content_for :title, t("title", page: t("command_palette.add_server")) %>
 
 <div class="mx-auto max-w-xl">
-  <%= link_to "← Serveurs", servers_path, class: "text-sm text-ink-3 hover:text-ink-2" %>
-  <h1 class="mt-2 text-2xl font-bold tracking-tight">Ajouter un serveur</h1>
+  <%= link_to t(".servers"), servers_path, class: "text-sm text-ink-3 hover:text-ink-2" %>
+  <h1 class="mt-2 text-2xl font-bold tracking-tight"><%= t("command_palette.add_server") %></h1>
 
   <div class="mt-6 rounded-xl border border-line bg-surface p-6 shadow-sm">
     <%= render "form", server: @server %>

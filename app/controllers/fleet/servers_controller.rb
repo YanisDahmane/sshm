@@ -61,7 +61,7 @@ class ServersController < ApplicationController
 
     if @server.save
       Activity.record!(:server_created, server: @server, address: "#{@server.username}@#{@server.host}:#{@server.port}")
-      redirect_to server_path(@server), notice: "Le serveur « #{@server.name} » a été ajouté. Installez-y la clé d'Elio puis testez la connexion."
+      redirect_to server_path(@server), notice: t("servers_controller.created", server_name: @server.name)
     else
       render :new, status: :unprocessable_entity
     end
@@ -74,7 +74,7 @@ class ServersController < ApplicationController
     if @server.update(server_params)
       changed = @server.saved_changes.keys & %w[name host port username]
       Activity.record!(:server_updated, server: @server, changed: changed) if changed.any?
-      redirect_to server_path(@server), notice: "Le serveur « #{@server.name} » a été modifié."
+      redirect_to server_path(@server), notice: t("servers_controller.updated", server_name: @server.name)
     else
       render :edit, status: :unprocessable_entity
     end
@@ -89,7 +89,7 @@ class ServersController < ApplicationController
     Activity.record!(:server_deleted, server_name: @server.name, address: "#{@server.username}@#{@server.host}:#{@server.port}",
                                       active_temporary_accesses: active_temporary_accesses)
 
-    redirect_to servers_path, notice: "Le serveur « #{@server.name} » a été supprimé d'Elio. Les clés installées dessus n'ont pas été retirées.",
+    redirect_to servers_path, notice: t("servers_controller.deleted", server_name: @server.name),
                               status: :see_other
   end
 

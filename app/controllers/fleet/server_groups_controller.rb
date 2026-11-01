@@ -18,7 +18,7 @@ class ServerGroupsController < ApplicationController
 
     if @group.save
       Activity.record!(:server_group_created, group_name: @group.name, servers: @group.servers.size)
-      redirect_to servers_path(group: @group.id), notice: "Le groupe « #{@group.name} » a été créé."
+      redirect_to servers_path(group: @group.id), notice: t("server_groups_controller.created", group_name: @group.name)
     else
       render :new, status: :unprocessable_entity
     end
@@ -29,7 +29,7 @@ class ServerGroupsController < ApplicationController
 
   def update
     if @group.update(group_params)
-      redirect_to servers_path(group: @group.id), notice: "Le groupe « #{@group.name} » a été modifié."
+      redirect_to servers_path(group: @group.id), notice: t("server_groups_controller.updated", group_name: @group.name)
     else
       render :edit, status: :unprocessable_entity
     end
@@ -38,7 +38,7 @@ class ServerGroupsController < ApplicationController
   def destroy
     @group.destroy!
     Activity.record!(:server_group_deleted, group_name: @group.name)
-    redirect_to server_groups_path, notice: "Le groupe « #{@group.name} » a été supprimé. Ses serveurs n'ont pas été touchés.", status: :see_other
+    redirect_to server_groups_path, notice: t("server_groups_controller.deleted", group_name: @group.name), status: :see_other
   end
 
   private

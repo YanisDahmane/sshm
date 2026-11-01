@@ -16,7 +16,7 @@ class ServerImportsTest < ApplicationSystemTestCase
     assert_selector ".import-counts", text: "1 serveur à importer · 1 doublon ignoré · 0 ligne en erreur"
     click_on "Importer 1 serveur"
 
-    assert_selector "#flash .toast", text: "1 serveur(s) importé(s)"
+    assert_selector "#flash .toast", text: "1 serveur importé"
     assert_selector "#servers tbody tr", text: "api"
     assert_equal [ "10.0.0.12", 22, "deploy" ], Server.find_by!(name: "api").then { |server| [ server.host, server.port, server.username ] }
   end

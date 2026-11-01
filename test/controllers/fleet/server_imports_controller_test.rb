@@ -78,7 +78,7 @@ class ServerImportsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_redirected_to servers_path
-    assert_match "1 serveur(s) importé(s)", flash[:notice]
+    assert_match "1 serveur importé", flash[:notice]
     assert_equal [ server_groups(:production) ], Server.find_by!(name: "API").server_groups.to_a
     assert_equal "1 serveur(s) importé(s) (CSV) : API", Activity.last.summary
     assert_equal users(:one), Activity.last.user

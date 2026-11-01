@@ -14,7 +14,7 @@
 <% end %>
 
 <% if @servers_without_inventory.positive? %>
-  <p class="mt-2 text-xs text-ink-3"><%= pluralize_fr(@servers_without_inventory, "serveur n'a", "serveurs n'ont") %> pas encore d'inventaire des paquets.</p>
+  <p class="mt-2 text-xs text-ink-3"><%= t("count.servers_have", count: @servers_without_inventory) %> pas encore d'inventaire des paquets.</p>
 <% end %>
 
 <% if @q.present? %>
@@ -24,7 +24,7 @@
         <section class="package-result card">
           <div class="card-header">
             <h2 class="font-semibold"><%= name %> <span class="text-xs font-normal text-ink-3"><%= rows.first.manager_label %></span></h2>
-            <span class="text-xs text-ink-3"><%= pluralize_fr(rows.map(&:server_id).uniq.size, "serveur", "serveurs") %> · <%= pluralize_fr(@versions[name].size, "version", "versions") %></span>
+            <span class="text-xs text-ink-3"><%= t("count.servers", count: rows.map(&:server_id).uniq.size) %> · <%= t("count.versions", count: @versions[name].size) %></span>
           </div>
           <table class="table-dense">
             <thead><tr><th class="pl-4">Version</th><th>Mise à jour</th><th class="pr-4">Serveurs</th></tr></thead>
@@ -62,7 +62,7 @@
   <section class="security-updates card mt-5">
     <div class="card-header">
       <h2 class="flex items-center gap-2 font-semibold"><%= icon :shield_check, class: "h-4 w-4 text-ink-3" %> Mises à jour de sécurité en attente</h2>
-      <span class="text-xs text-ink-3"><%= pluralize_fr(@pager.total, "paquet", "paquets") %></span>
+      <span class="text-xs text-ink-3"><%= t("count.packages", count: @pager.total) %></span>
     </div>
     <% if @security.any? %>
       <table class="table-dense">

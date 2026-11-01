@@ -10,3 +10,295 @@ en:
       ports: Ports
       keys: SSH keys
       history: History
+    index:
+      check_every_server_answers: Check that every server answers
+      read_again_system_health: Read again the system, health and services of every server
+      read_keys_every_server: Read the keys of every server
+      import: Import
+      security_updates: Security updates
+      all: All
+      manage_groups: Manage the groups
+      organize_servers_groups: Organize the servers in groups
+      name_hostname_ip: Name, hostname, IP…
+      search_server: Search for a server
+      all_systems: All systems
+      system: System
+      all_states: All states
+      unreachable: Unreachable
+      without_inventory: Without inventory
+      state: State
+      filter: Filter
+      list: List
+      grid: Grid
+      view_label: "%{label_downcase} view"
+      server_matches_these_filters: No server matches these filters.
+      server_group: No server in this group.
+      server_yet: No server yet.
+      remove_filters: Remove the filters
+      add_servers_group: Add servers to the group
+      add_your_first_server: Add your first server
+      refresh_statuses: Refresh the statuses
+      groups: Groups
+      display: Display
+      server: Server
+      load_24_h: Load 24 h
+      memory: Memory
+      disk: Disk
+      notes: Notes
+      on_servers:
+        one: on %{count} server
+        other: on %{count} servers
+      updates: Updates
+    show:
+      search_whole_fleet: Search the whole fleet
+      activities: activities
+      refresh_inventory: Refresh the inventory
+      edit: Edit
+      server_sections: Server sections
+      authorized_ssh_keys: Authorized SSH keys
+      public_keys_can_log: Public keys that can log in to this server with Elio's login account.
+      activity_server_yet: No activity on this server yet.
+    row:
+      load_over_24_h: Load over 24 h (in % of the processors)
+      refresh_status: Refresh the status
+      refresh_status_2: Refresh the status of %{server_name}
+      edit: Edit
+      edit_2: Edit %{server_name}
+      host_name_machine: Host name of the machine
+      security_html: "%{security} security"
+      down_html: "%{down} down"
+    card:
+      checked_prefix: "· checked "
+      cpu: CPU
+      ram: RAM
+      disk: Disk
+      up_date: up to date
+      ports: ports %{ports_join}
+      unknown_system: Unknown system
+      answer: No answer
+      inventory_yet: No inventory yet
+    form:
+      name: Name
+      web_production: Web production
+      host_ip_domain_name: Host (IP or domain name)
+      port: Port
+      user: User
+      cancel: Cancel
+      save: Save
+      add_server: Add the server
+      extra_addresses: Extra addresses
+      optional: "(optional)"
+      ip_addresses_through_which: IP addresses through which this server is reached but that it does not see itself (NAT, failover IP…). The addresses of its interfaces are read by the inventory.
+      groups: Groups
+    new:
+      servers: "← Servers"
+    edit:
+      servers: "← Servers"
+      delete_server: Delete the server
+      edit_html: Edit “%{name_was}”
+      delete_server_2: Delete this server
+      server_removed_elio_keys: 'The server is removed from Elio. The keys installed on the machine, Elio''s included, stay in place: remove them first from the server page if needed. The activity history is kept.'
+      title: Edit %{name}
+    delete_button:
+      warning: "“%{server_name}” will be removed from Elio, with its history of keys read. The keys installed on the machine, Elio's included, will not be removed from it."
+      delete_server: Delete the server
+      delete: Delete
+      temporary_warning:
+        one: " %{count} ongoing temporary access will no longer be cleaned up automatically (sshd will still refuse it when it expires)."
+        other: " %{count} ongoing temporary accesses will no longer be cleaned up automatically (sshd will still refuse them when they expire)."
+    status:
+      checked_at: Checked %{relative_time_in_words} (%{date})
+      never_checked: Never checked
+      unreachable: Unreachable
+      critical: Critical
+      watch: To watch
+      online: Online
+      problem_last_inventory: No problem at the last inventory
+      inventory_yet: No inventory yet
+      unknown: Unknown
+    checking_badge_template:
+      checking: Checking…
+    health_bar:
+      port: Port %{port}
+      ssh: SSH
+    health_checking:
+      checking: Checking…
+    os:
+      end_support: 'end of support: %{date}'
+      longer_supported: no longer supported
+      end_support_soon: end of support soon
+      inventory_yet: No inventory yet
+    orphan_keys:
+      unnamed: unnamed
+      keys_never_read_open: 'Keys never read: open the server or run a scan'
+      none: None
+    picker:
+      servers: Servers
+      check_uncheck_all: Check / uncheck all
+      whole_group: 'The whole group:'
+  dashboard:
+    index:
+      online: Online
+      answer_their_ssh_port: answer on their SSH port
+      watch: To watch
+      reboot_disk_service: reboot, disk, service…
+      critical: Critical
+      critical_thresholds_exceeded: critical thresholds exceeded
+      run_key_scan: run a key scan
+      nothing_report_servers_reachable: 'Nothing to report: servers reachable, health normal, every key is in the keyring.'
+      add_first_server_begin: Add a first server to begin.
+      see_all: See all
+      key_deleted: Key deleted
+      expired_being_removed: expired, being removed
+      inventory_html: "· inventory %{last_inventory_at}"
+      scan_keys: Scan the keys
+      do: To do
+      recent_activity: Recent activity
+      activity_yet: No activity yet.
+      temporary_access: Temporary access
+      ongoing_html: "%{count} ongoing"
+      temporary_access_choose_duration: No temporary access. Choose a duration when adding a key on a server.
+      systems: Systems
+      systems_will_appear_after: The systems will appear after a first inventory.
+      items_by_severity:
+        one: "%{count} item · by severity"
+        other: "%{count} items · by severity"
+      including_unreachable:
+        one: including %{count} unreachable
+        other: including %{count} unreachable
+      outside_keyring: outside the keyring
+      unknown_keys: Unknown keys
+    checklist:
+      generate_key: Generate the key
+      add_server: Add a server
+      open_test: Open %{order} to test
+      add_key: Add a key
+      inventory: Inventory %{server_name}
+      getting_started_elio: Getting started with Elio
+  server_pings:
+    show:
+      port: Port %{port}
+      check_port_again: Check the port again
+      checked_html: checked %{last_checked_at}
+  server_groups:
+    form:
+      name: Name
+      production: Production
+      cancel: Cancel
+      save: Save
+      create_group: Create the group
+      expected_ports: Expected ports
+      optional: "(optional)"
+      ports_servers_group_may: 'Ports that the servers of the group may expose publicly. Any other public port is reported as unexpected. Empty: no check.'
+      servers: Servers
+      check_uncheck_all: Check / uncheck all
+      server_yet_you_can: 'No server yet: you can add some to the group later.'
+    edit:
+      groups: "← Groups"
+      heading_html: Edit the group “%{group_name}”
+    index:
+      servers: "← Servers"
+      new_group: New group
+      edit: Edit
+      edit_group: Edit the group %{group_name}
+      delete: Delete
+      delete_group: Delete the group %{group_name}
+      group_will_deleted_servers: The group “%{group_name}” will be deleted. Its servers will not be touched.
+      delete_group_2: Delete the group
+      create_group: Create a group
+      server: No server
+      group_groups_filter_servers: No group. Groups filter the servers and select several at once (e.g. “Production”, “Customers”).
+    new:
+      groups: "← Groups"
+      heading: New server group
+  server_imports:
+    new:
+      servers: "← Servers"
+      import: Import %{t}
+      content: Content
+      file: "… or file"
+      default_user: Default user
+      see_preview: See the preview
+      preview: Preview
+      groups: Groups
+      state: State
+      import_2: To import
+      duplicate_html: Duplicate of “%{duplicate_of}”
+      groups_do_not_exist: Groups that do not exist yet will be created. Duplicates (same name, or same address and port) and lines in error are ignored.
+      lines_without_user: For the lines without a user.
+      csv_help_html: 'Columns: name, host, port, user, groups (separated by %{bar}). Optional header line; separator %{comma} or %{semicolon}.'
+      csv_example: |-
+        name,host,port,user,groups
+        API,10.0.0.12,22,deploy,Production|API
+      ssh_config_help_html: One server per %{host} block (without %{star}), with %{host_name}, %{port} and %{user}.
+  servers_controller:
+    created: The server “%{server_name}” has been added. Install Elio's key on it, then test the connection.
+    updated: The server “%{server_name}” has been updated.
+    deleted: The server “%{server_name}” has been deleted from Elio. The keys installed on it have not been removed.
+  server_groups_controller:
+    created: The group “%{group_name}” has been created.
+    updated: The group “%{group_name}” has been updated.
+    deleted: The group “%{group_name}” has been deleted. Its servers have not been touched.
+  server_imports_controller:
+    nothing: No valid server to import.
+    cancelled: 'Import cancelled, nothing was created: %{message}'
+    imported:
+      one: "%{count} server imported. Install Elio's key on it, then run a key scan."
+      other: "%{count} servers imported. Install Elio's key on them, then run a key scan."
+  server_inventories_controller:
+    label_one: Inventory of “%{first_name}”
+    label_fleet: Fleet inventory (%{t})
+    started: "%{label} started."
+  server_scans_controller:
+    label: Key scan (%{t})
+    started: Key scan started.
+  server_pings_controller:
+    online: "“%{server_name}” is online."
+    unreachable: "“%{server_name}” is unreachable."
+    refreshed: 'Statuses refreshed: %{online} online, %{unreachable} unreachable.'
+  onboarding_checklist:
+    generate_key: Generate Elio's SSH key
+    generate_key_text: Elio logs in to your servers with its own key.
+    add_server: Add a server
+    add_server_text: Its address, its port and the SSH user.
+    install_key: Install the key and test the connection
+    install_key_text: Add Elio's public key on the server, then run “Test the SSH connection”.
+    inventory: Run a first inventory
+    inventory_text: Elio reads the system, health, packages, services and ports of the server.
+    add_key: Add a key to the keyring
+    add_key_text: The public key of a team member or of a server.
+  attention_list:
+    unreachable: No longer answers on its SSH port
+    see: See
+    key_refused: 'Elio''s key is refused: nothing can be read'
+    install_key: Install the key
+    see_keys: See the keys
+    no_inventory: No inventory yet
+    see_packages: See the packages
+    see_vulnerabilities: See the vulnerabilities
+    unknown_keys:
+      one: "%{count} key outside the keyring"
+      other: "%{count} keys outside the keyring"
+    security_updates:
+      one: "%{count} security update pending"
+      other: "%{count} security updates pending"
+    vulnerabilities:
+      one: "%{count} serious fixable vulnerability"
+      other: "%{count} serious fixable vulnerabilities"
+  ssh_keys:
+    setup_hint:
+      generate_key_settings: Generate the key in the settings
+      elio_has_ssh_key: Elio has no SSH key yet to log in to the servers.
+      ask_administrator_generate: Ask an administrator to generate it.
+      elio_s_key_install: Elio's key install command
+      install_html: 'The server does not know Elio''s key yet. Log in to it as %{login} and run this command, then try again:'
+  server_group:
+    colors:
+      slate: Gray
+      red: Red
+      amber: Orange
+      emerald: Green
+      sky: Blue
+      indigo: Indigo
+      violet: Violet
+      pink: Pink

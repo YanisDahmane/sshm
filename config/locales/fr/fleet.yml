@@ -10,3 +10,295 @@ fr:
       ports: Ports
       keys: Clés SSH
       history: Historique
+    index:
+      check_every_server_answers: Vérifier que chaque serveur répond
+      read_again_system_health: Relire le système, la santé et les services de tous les serveurs
+      read_keys_every_server: Lire les clés de tous les serveurs
+      import: Importer
+      security_updates: Mises à jour de sécurité
+      all: Tous
+      manage_groups: Gérer les groupes
+      organize_servers_groups: Organiser les serveurs en groupes
+      name_hostname_ip: Nom, hostname, IP…
+      search_server: Rechercher un serveur
+      all_systems: Tous les systèmes
+      system: Système
+      all_states: Tous les états
+      unreachable: Injoignables
+      without_inventory: Sans inventaire
+      state: État
+      filter: Filtrer
+      list: Liste
+      grid: Grille
+      view_label: Vue %{label_downcase}
+      server_matches_these_filters: Aucun serveur ne correspond à ces filtres.
+      server_group: Aucun serveur dans ce groupe.
+      server_yet: Aucun serveur pour le moment.
+      remove_filters: Retirer les filtres
+      add_servers_group: Ajouter des serveurs au groupe
+      add_your_first_server: Ajouter votre premier serveur
+      refresh_statuses: Actualiser les statuts
+      groups: Groupes
+      display: Affichage
+      server: Serveur
+      load_24_h: Charge 24 h
+      memory: Mémoire
+      disk: Disque
+      notes: À noter
+      on_servers:
+        one: sur %{count} serveur
+        other: sur %{count} serveurs
+      updates: Mises à jour
+    show:
+      search_whole_fleet: Chercher sur tout le parc
+      activities: activités
+      refresh_inventory: Actualiser l'inventaire
+      edit: Modifier
+      server_sections: Sections du serveur
+      authorized_ssh_keys: Clés SSH autorisées
+      public_keys_can_log: Clés publiques qui peuvent se connecter à ce serveur avec le compte de connexion d'Elio.
+      activity_server_yet: Aucune activité sur ce serveur pour le moment.
+    row:
+      load_over_24_h: Charge sur 24 h (en % des processeurs)
+      refresh_status: Actualiser le statut
+      refresh_status_2: Actualiser le statut de %{server_name}
+      edit: Modifier
+      edit_2: Modifier %{server_name}
+      host_name_machine: Hostname de la machine
+      security_html: "%{security} sécu"
+      down_html: "%{down} hors ligne"
+    card:
+      checked_prefix: "· vérifié "
+      cpu: CPU
+      ram: RAM
+      disk: Disque
+      up_date: à jour
+      ports: ports %{ports_join}
+      unknown_system: Système inconnu
+      answer: Pas de réponse
+      inventory_yet: Pas encore d'inventaire
+    form:
+      name: Nom
+      web_production: Production web
+      host_ip_domain_name: Hôte (IP ou nom de domaine)
+      port: Port
+      user: Utilisateur
+      cancel: Annuler
+      save: Enregistrer
+      add_server: Ajouter le serveur
+      extra_addresses: Adresses supplémentaires
+      optional: "(facultatif)"
+      ip_addresses_through_which: Adresses IP par lesquelles ce serveur est joint mais qu'il ne voit pas lui-même (NAT, IP de basculement…). Les adresses de ses interfaces sont relevées par l'inventaire.
+      groups: Groupes
+    new:
+      servers: "← Serveurs"
+    edit:
+      servers: "← Serveurs"
+      delete_server: Supprimer le serveur
+      edit_html: Modifier « %{name_was} »
+      delete_server_2: Supprimer ce serveur
+      server_removed_elio_keys: 'Le serveur est retiré d''Elio. Les clés installées sur la machine, dont celle d''Elio, restent en place : retirez-les d''abord depuis la page du serveur si nécessaire. L''historique d''activité est conservé.'
+      title: Modifier %{name}
+    delete_button:
+      warning: "« %{server_name} » sera retiré d'Elio, avec son historique de clés lues. Les clés installées sur la machine, dont celle d'Elio, n'en seront pas retirées."
+      delete_server: Supprimer le serveur
+      delete: Supprimer
+      temporary_warning:
+        one: " %{count} accès temporaire en cours ne sera plus nettoyé automatiquement (sshd le refusera quand même à l'échéance)."
+        other: " %{count} accès temporaires en cours ne seront plus nettoyés automatiquement (sshd les refusera quand même à l'échéance)."
+    status:
+      checked_at: Vérifié %{relative_time_in_words} (%{date})
+      never_checked: Jamais vérifié
+      unreachable: Injoignable
+      critical: Critique
+      watch: À surveiller
+      online: En ligne
+      problem_last_inventory: Aucun problème au dernier inventaire
+      inventory_yet: Pas encore d'inventaire
+      unknown: Inconnu
+    checking_badge_template:
+      checking: Vérification…
+    health_bar:
+      port: Port %{port}
+      ssh: SSH
+    health_checking:
+      checking: Vérification…
+    os:
+      end_support: 'fin de support : %{date}'
+      longer_supported: plus supporté
+      end_support_soon: fin de support proche
+      inventory_yet: Pas encore d'inventaire
+    orphan_keys:
+      unnamed: sans nom
+      keys_never_read_open: 'Clés jamais lues : ouvrez le serveur ou lancez un scan'
+      none: Aucune
+    picker:
+      servers: Serveurs
+      check_uncheck_all: Tout cocher / décocher
+      whole_group: 'Tout le groupe :'
+  dashboard:
+    index:
+      online: En ligne
+      answer_their_ssh_port: répondent sur leur port SSH
+      watch: À surveiller
+      reboot_disk_service: redémarrage, disque, service…
+      critical: Critiques
+      critical_thresholds_exceeded: seuils critiques dépassés
+      run_key_scan: lancez un scan des clés
+      nothing_report_servers_reachable: 'Rien à signaler : serveurs joignables, santé normale, toutes les clés sont dans le trousseau.'
+      add_first_server_begin: Ajoutez un premier serveur pour commencer.
+      see_all: Tout voir
+      key_deleted: Clé supprimée
+      expired_being_removed: expiré, suppression en cours
+      inventory_html: "· inventaire %{last_inventory_at}"
+      scan_keys: Scanner les clés
+      do: À traiter
+      recent_activity: Activité récente
+      activity_yet: Aucune activité pour le moment.
+      temporary_access: Accès temporaires
+      ongoing_html: "%{count} en cours"
+      temporary_access_choose_duration: Aucun accès temporaire. Choisissez une durée en ajoutant une clé sur un serveur.
+      systems: Systèmes
+      systems_will_appear_after: Les systèmes apparaîtront après un premier inventaire.
+      items_by_severity:
+        one: "%{count} élément · par gravité"
+        other: "%{count} éléments · par gravité"
+      including_unreachable:
+        one: dont %{count} injoignable
+        other: dont %{count} injoignables
+      outside_keyring: hors trousseau
+      unknown_keys: Clés inconnues
+    checklist:
+      generate_key: Générer la clé
+      add_server: Ajouter un serveur
+      open_test: Ouvrir %{order} pour tester
+      add_key: Ajouter une clé
+      inventory: Inventorier %{server_name}
+      getting_started_elio: Bien démarrer avec Elio
+  server_pings:
+    show:
+      port: Port %{port}
+      check_port_again: Revérifier le port
+      checked_html: vérifié %{last_checked_at}
+  server_groups:
+    form:
+      name: Nom
+      production: Production
+      cancel: Annuler
+      save: Enregistrer
+      create_group: Créer le groupe
+      expected_ports: Ports attendus
+      optional: "(facultatif)"
+      ports_servers_group_may: 'Ports que les serveurs du groupe peuvent exposer publiquement. Tout autre port public est signalé comme inattendu. Vide : pas de vérification.'
+      servers: Serveurs
+      check_uncheck_all: Tout cocher / décocher
+      server_yet_you_can: 'Aucun serveur pour le moment : vous pourrez en ajouter au groupe plus tard.'
+    edit:
+      groups: "← Groupes"
+      heading_html: Modifier le groupe « %{group_name} »
+    index:
+      servers: "← Serveurs"
+      new_group: Nouveau groupe
+      edit: Modifier
+      edit_group: Modifier le groupe %{group_name}
+      delete: Supprimer
+      delete_group: Supprimer le groupe %{group_name}
+      group_will_deleted_servers: Le groupe « %{group_name} » sera supprimé. Ses serveurs ne seront pas touchés.
+      delete_group_2: Supprimer le groupe
+      create_group: Créer un groupe
+      server: Aucun serveur
+      group_groups_filter_servers: Aucun groupe. Les groupes servent à filtrer les serveurs et à en sélectionner plusieurs d'un coup (ex. « Production », « Clients »).
+    new:
+      groups: "← Groupes"
+      heading: Nouveau groupe de serveurs
+  server_imports:
+    new:
+      servers: "← Serveurs"
+      import: Importer %{t}
+      content: Contenu
+      file: "… ou fichier"
+      default_user: Utilisateur par défaut
+      see_preview: Voir l'aperçu
+      preview: Aperçu
+      groups: Groupes
+      state: État
+      import_2: À importer
+      duplicate_html: Doublon de « %{duplicate_of} »
+      groups_do_not_exist: Les groupes qui n'existent pas encore seront créés. Les doublons (même nom, ou même adresse et port) et les lignes en erreur sont ignorés.
+      lines_without_user: Pour les lignes sans utilisateur.
+      csv_help_html: 'Colonnes : nom, hôte, port, utilisateur, groupes (séparés par %{bar}). Ligne d''en-tête facultative ; séparateur %{comma} ou %{semicolon}.'
+      csv_example: |-
+        nom,hôte,port,utilisateur,groupes
+        API,10.0.0.12,22,deploy,Production|API
+      ssh_config_help_html: Un serveur par bloc %{host} (sans %{star}), avec %{host_name}, %{port} et %{user}.
+  servers_controller:
+    created: Le serveur « %{server_name} » a été ajouté. Installez-y la clé d'Elio puis testez la connexion.
+    updated: Le serveur « %{server_name} » a été modifié.
+    deleted: Le serveur « %{server_name} » a été supprimé d'Elio. Les clés installées dessus n'ont pas été retirées.
+  server_groups_controller:
+    created: Le groupe « %{group_name} » a été créé.
+    updated: Le groupe « %{group_name} » a été modifié.
+    deleted: Le groupe « %{group_name} » a été supprimé. Ses serveurs n'ont pas été touchés.
+  server_imports_controller:
+    nothing: Aucun serveur valide à importer.
+    cancelled: 'Import annulé, rien n''a été créé : %{message}'
+    imported:
+      one: "%{count} serveur importé. Installez-y la clé d'Elio puis lancez un scan des clés."
+      other: "%{count} serveurs importés. Installez-y la clé d'Elio puis lancez un scan des clés."
+  server_inventories_controller:
+    label_one: Inventaire de « %{first_name} »
+    label_fleet: Inventaire du parc (%{t})
+    started: "%{label} lancé."
+  server_scans_controller:
+    label: Scan des clés (%{t})
+    started: Scan des clés lancé.
+  server_pings_controller:
+    online: "« %{server_name} » est en ligne."
+    unreachable: "« %{server_name} » est injoignable."
+    refreshed: 'Statuts actualisés : %{online} en ligne, %{unreachable} injoignable(s).'
+  onboarding_checklist:
+    generate_key: Générer la clé SSH d'Elio
+    generate_key_text: Elio se connecte à vos serveurs avec sa propre clé.
+    add_server: Ajouter un serveur
+    add_server_text: Son adresse, son port et l'utilisateur SSH.
+    install_key: Installer la clé et tester la connexion
+    install_key_text: Ajoutez la clé publique d'Elio sur le serveur, puis lancez « Tester la connexion SSH ».
+    inventory: Lancer un premier inventaire
+    inventory_text: Elio relève le système, la santé, les paquets, les services et les ports du serveur.
+    add_key: Ajouter une clé au trousseau
+    add_key_text: La clé publique d'un membre de l'équipe ou d'un serveur.
+  attention_list:
+    unreachable: Ne répond plus sur son port SSH
+    see: Voir
+    key_refused: 'La clé d''Elio est refusée : rien ne peut être lu'
+    install_key: Installer la clé
+    see_keys: Voir les clés
+    no_inventory: Pas encore d'inventaire
+    see_packages: Voir les paquets
+    see_vulnerabilities: Voir les vulnérabilités
+    unknown_keys:
+      one: "%{count} clé hors trousseau"
+      other: "%{count} clés hors trousseau"
+    security_updates:
+      one: "%{count} mise à jour de sécurité en attente"
+      other: "%{count} mises à jour de sécurité en attente"
+    vulnerabilities:
+      one: "%{count} vulnérabilité grave corrigeable"
+      other: "%{count} vulnérabilités graves corrigeables"
+  ssh_keys:
+    setup_hint:
+      generate_key_settings: Générer la clé dans les paramètres
+      elio_has_ssh_key: Elio n'a pas encore de clé SSH pour se connecter aux serveurs.
+      ask_administrator_generate: Demandez à un administrateur de la générer.
+      elio_s_key_install: Commande d'installation de la clé Elio
+      install_html: 'Le serveur ne connaît pas encore la clé d''Elio. Connectez-vous-y en %{login} et lancez cette commande, puis réessayez :'
+  server_group:
+    colors:
+      slate: Gris
+      red: Rouge
+      amber: Orange
+      emerald: Vert
+      sky: Bleu
+      indigo: Indigo
+      violet: Violet
+      pink: Rose

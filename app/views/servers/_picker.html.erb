@@ -3,12 +3,12 @@
 <% groups = ServerGroup.joins(:memberships).distinct.order(:name) %>
 <fieldset data-controller="check-all">
   <div class="flex items-center justify-between">
-    <legend class="text-sm font-medium text-ink-2">Serveurs</legend>
-    <button type="button" data-action="check-all#toggle" class="cursor-pointer text-xs font-medium text-accent hover:text-accent">Tout cocher / décocher</button>
+    <legend class="text-sm font-medium text-ink-2"><%= t(".servers") %></legend>
+    <button type="button" data-action="check-all#toggle" class="cursor-pointer text-xs font-medium text-accent hover:text-accent"><%= t(".check_uncheck_all") %></button>
   </div>
   <% if groups.any? %>
     <div class="bulk-groups mt-2 flex flex-wrap items-center gap-2">
-      <span class="text-xs text-ink-3">Tout le groupe :</span>
+      <span class="text-xs text-ink-3"><%= t(".whole_group") %></span>
       <% groups.each do |group| %>
         <button type="button" data-action="check-all#toggleGroup" data-check-all-group-param="<%= group.id %>"
                 class="cursor-pointer rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset hover:opacity-80 <%= group.badge_classes %>"><%= group.name %></button>

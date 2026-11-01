@@ -1,21 +1,21 @@
-<% content_for :title, "Importer des serveurs · Elio" %>
+<% content_for :title, t("title", page: t("command_palette.import_servers")) %>
 <% input_class = "input mt-1" %>
 <% label_class = "label" %>
 
 <div class="mx-auto max-w-4xl">
-  <%= link_to "← Serveurs", servers_path, class: "text-sm text-ink-3 hover:text-ink-2" %>
-  <h1 class="mt-2 text-2xl font-bold tracking-tight">Importer des serveurs</h1>
+  <%= link_to t(".servers"), servers_path, class: "text-sm text-ink-3 hover:text-ink-2" %>
+  <h1 class="mt-2 text-2xl font-bold tracking-tight"><%= t("command_palette.import_servers") %></h1>
 
   <% if @rows %>
     <% counts = @rows.group_by(&:status).transform_values(&:size) %>
     <section id="import-preview" class="mt-6 rounded-xl border border-line bg-surface p-6 shadow-sm">
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 class="text-lg font-semibold">Aperçu</h2>
+          <h2 class="text-lg font-semibold"><%= t(".preview") %></h2>
           <p class="import-counts text-sm text-ink-3">
-            <%= pluralize_fr(counts[:valid].to_i, "serveur à importer", "serveurs à importer") %> ·
-            <%= pluralize_fr(counts[:duplicate].to_i, "doublon ignoré", "doublons ignorés") %> ·
-            <%= pluralize_fr(counts[:invalid].to_i, "ligne en erreur", "lignes en erreur") %>
+            <%= t("count.servers_to_import", count: counts[:valid].to_i) %> ·
+            <%= t("count.duplicates_ignored", count: counts[:duplicate].to_i) %> ·
+            <%= t("count.lines_in_error", count: counts[:invalid].to_i) %>
           </p>
         </div>
         <% if counts[:valid].to_i.positive? %>
@@ -24,7 +24,7 @@
             <%= text_area_tag :content, @text, id: nil, hidden: true %>
             <%= hidden_field_tag :import_format, @format, id: nil %>
             <%= hidden_field_tag :default_username, @default_username, id: nil %>
-            <%= f.submit "Importer #{pluralize(counts[:valid], "serveur", plural: "serveurs")}",
+            <%= f.submit t(".import", t: (t("count.servers", count: counts[:valid]))),
                   class: "btn btn-primary" %>
           <% end %>
         <% end %>
@@ -35,7 +35,7 @@
           <thead class="bg-subtle text-left text-xs font-medium uppercase tracking-wide text-ink-3">
             <tr>
               <th class="px-3 py-2">Ligne</th><th class="px-3 py-2">Nom</th><th class="px-3 py-2">Adresse</th>
-              <th class="px-3 py-2">Groupes</th><th class="px-3 py-2">État</th>
+              <th class="px-3 py-2"><%= t(".groups") %></th><th class="px-3 py-2"><%= t(".state") %></th>
             </tr>
           </thead>
           <tbody class="divide-y divide-line">
@@ -48,9 +48,9 @@
                 <td class="px-3 py-2 text-xs">
                   <% case row.status %>
                   <% when :valid %>
-                    <span class="font-medium text-good-ink">À importer</span>
+                    <span class="font-medium text-good-ink"><%= t(".import_2") %></span>
                   <% when :duplicate %>
-                    Doublon de « <%= row.duplicate_of %> »
+                    <%= t(".duplicate_html", duplicate_of: row.duplicate_of) %>
                   <% else %>
                     <span class="text-crit-ink"><%= row.errors.join(", ") %></span>
                   <% end %>
@@ -60,7 +60,7 @@
           </tbody>
         </table>
       </div>
-      <p class="mt-2 text-xs text-ink-3">Les groupes qui n'existent pas encore seront créés. Les doublons (même nom, ou même adresse et port) et les lignes en erreur sont ignorés.</p>
+      <p class="mt-2 text-xs text-ink-3"><%= t(".groups_do_not_exist") %></p>
     </section>
   <% end %>
 
@@ -81,13 +81,12 @@
       <div class="grid grid-cols-1 gap-3 text-xs text-ink-2 sm:grid-cols-2">
         <div class="rounded-md bg-subtle p-3">
           <p class="font-medium text-ink-2">CSV</p>
-          <p class="mt-1">Colonnes : nom, hôte, port, utilisateur, groupes (séparés par <code>|</code>). Ligne d'en-tête facultative ; séparateur <code>,</code> ou <code>;</code>.</p>
-          <pre class="mt-2 overflow-x-auto font-mono">nom,hôte,port,utilisateur,groupes
-API,10.0.0.12,22,deploy,Production|API</pre>
+          <p class="mt-1"><%= t(".csv_help_html", bar: tag.code("|"), comma: tag.code(","), semicolon: tag.code(";")) %></p>
+          <pre class="mt-2 overflow-x-auto font-mono"><%= t(".csv_example") %></pre>
         </div>
         <div class="rounded-md bg-subtle p-3">
           <p class="font-medium text-ink-2">~/.ssh/config</p>
-          <p class="mt-1">Un serveur par bloc <code>Host</code> (sans <code>*</code>), avec <code>HostName</code>, <code>Port</code> et <code>User</code>.</p>
+          <p class="mt-1"><%= t(".ssh_config_help_html", host: tag.code("Host"), star: tag.code("*"), host_name: tag.code("HostName"), port: tag.code("Port"), user: tag.code("User")) %></p>
           <pre class="mt-2 overflow-x-auto font-mono">Host api
   HostName 10.0.0.12
   User deploy</pre>
@@ -95,20 +94,20 @@ API,10.0.0.12,22,deploy,Production|API</pre>
       </div>
 
       <div>
-        <%= label_tag :content, "Contenu", class: label_class %>
+        <%= label_tag :content, t(".content"), class: label_class %>
         <%= text_area_tag :content, (@text unless params[:file].respond_to?(:read)), rows: 8, spellcheck: false, class: "#{input_class} font-mono text-xs" %>
       </div>
       <div>
-        <%= label_tag :file, "… ou fichier", class: label_class %>
+        <%= label_tag :file, t(".file"), class: label_class %>
         <%= file_field_tag :file, accept: ".csv,.txt,text/csv,text/plain", class: "mt-1 block text-sm text-ink-2" %>
       </div>
       <div class="max-w-xs">
-        <%= label_tag :default_username, "Utilisateur par défaut", class: label_class %>
+        <%= label_tag :default_username, t(".default_user"), class: label_class %>
         <%= text_field_tag :default_username, @default_username, autocomplete: "off", spellcheck: false, class: "#{input_class} font-mono" %>
-        <p class="mt-1 text-xs text-ink-3">Pour les lignes sans utilisateur.</p>
+        <p class="mt-1 text-xs text-ink-3"><%= t(".lines_without_user") %></p>
       </div>
       <div class="flex justify-end">
-        <%= f.submit "Voir l'aperçu", class: "btn btn-secondary" %>
+        <%= f.submit t(".see_preview"), class: "btn btn-secondary" %>
       </div>
     <% end %>
   </section>

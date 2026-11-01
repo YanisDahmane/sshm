@@ -6,14 +6,15 @@
   <%= render "shared/form_errors", record: group %>
 
   <div>
-    <%= f.label :name, "Nom", class: label_class %>
-    <%= f.text_field :name, autofocus: true, required: true, maxlength: 50, placeholder: "Production", class: input_class %>
+    <%= f.label :name, t(".name"), class: label_class %>
+    <%= f.text_field :name, autofocus: true, required: true, maxlength: 50, placeholder: t(".production"), class: input_class %>
   </div>
 
   <fieldset>
     <legend class="<%= label_class %>">Couleur</legend>
     <div class="mt-2 flex flex-wrap gap-2">
-      <% ServerGroup::COLORS.each do |value, (label, badge, _)| %>
+      <% ServerGroup::COLORS.each do |value, (badge, _)| %>
+        <% label = ServerGroup.color_label(value) %>
         <label class="cursor-pointer">
           <%= f.radio_button :color, value, class: "peer sr-only" %>
           <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset peer-checked:ring-2 peer-checked:ring-accent peer-focus-visible:outline-2 peer-focus-visible:outline-accent <%= badge %>"><%= label %></span>
@@ -23,16 +24,16 @@
   </fieldset>
 
   <div>
-    <%= f.label :expected_ports, class: label_class do %>Ports attendus <span class="font-normal text-ink-3">(facultatif)</span><% end %>
+    <%= f.label :expected_ports, class: label_class do %><%= t(".expected_ports") %> <span class="font-normal text-ink-3"><%= t(".optional") %></span><% end %>
     <%= f.text_field :expected_ports, placeholder: "22, 80, 443/tcp, 51820/udp", autocomplete: "off", class: "#{input_class} font-mono" %>
-    <p class="mt-1 text-xs text-ink-3">Ports que les serveurs du groupe peuvent exposer publiquement. Tout autre port public est signalé comme inattendu. Vide : pas de vérification.</p>
+    <p class="mt-1 text-xs text-ink-3"><%= t(".ports_servers_group_may") %></p>
   </div>
 
   <fieldset data-controller="check-all">
     <div class="flex items-center justify-between">
-      <legend class="<%= label_class %>">Serveurs</legend>
+      <legend class="<%= label_class %>"><%= t(".servers") %></legend>
       <% if servers.any? %>
-        <button type="button" data-action="check-all#toggle" class="cursor-pointer text-xs font-medium text-accent hover:text-accent">Tout cocher / décocher</button>
+        <button type="button" data-action="check-all#toggle" class="cursor-pointer text-xs font-medium text-accent hover:text-accent"><%= t(".check_uncheck_all") %></button>
       <% end %>
     </div>
     <%= hidden_field_tag "server_group[server_ids][]", "", id: nil %>
@@ -50,12 +51,12 @@
         <% end %>
       </div>
     <% else %>
-      <p class="mt-2 text-sm text-ink-3">Aucun serveur pour le moment : vous pourrez en ajouter au groupe plus tard.</p>
+      <p class="mt-2 text-sm text-ink-3"><%= t(".server_yet_you_can") %></p>
     <% end %>
   </fieldset>
 
   <div class="flex items-center justify-end gap-3 pt-2">
-    <%= link_to "Annuler", server_groups_path, class: "btn btn-ghost" %>
-    <%= f.submit group.persisted? ? "Enregistrer" : "Créer le groupe", class: "btn btn-primary" %>
+    <%= link_to t(".cancel"), server_groups_path, class: "btn btn-ghost" %>
+    <%= f.submit group.persisted? ? t(".save") : t(".create_group"), class: "btn btn-primary" %>
   </div>
 <% end %>

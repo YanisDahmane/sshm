@@ -16,7 +16,7 @@
       <div class="text-right">
         <% if @rating&.score %>
           <p class="detail-score"><%= score_pill(@rating.score, size: :large) %><span class="ml-1 text-sm text-ink-3">/ 10</span></p>
-          <p class="text-xs text-ink-3">moyenne de <%= pluralize_fr(@rating.scores_count, "fournisseur", "fournisseurs") %></p>
+          <p class="text-xs text-ink-3">moyenne de <%= t("count.providers", count: @rating.scores_count) %></p>
         <% else %>
           <p class="text-sm text-ink-3">Pas encore de note</p>
         <% end %>

@@ -19,7 +19,7 @@
         <p class="text-xs text-ink-3">Charge</p>
         <div class="mt-1 flex items-end justify-between gap-2">
           <p class="text-xl font-semibold tabular-nums"><%= number_with_precision(health.dig("load", 0), precision: 2, strip_insignificant_zeros: true) %>
-            <span class="text-xs font-normal text-ink-3">/ <%= pluralize_fr(health["cpus"].to_i, "processeur", "processeurs") %></span></p>
+            <span class="text-xs font-normal text-ink-3">/ <%= t("count.processors", count: health["cpus"].to_i) %></span></p>
           <%= sparkline @health_history.map { |_, load, _, _| load }, max: 100, width: 80, height: 26, title: "Charge sur 24 h" %>
         </div>
       </div>

@@ -13,11 +13,11 @@ class ServerPingsController < ApplicationController
       server = Server.find(params[:server_id])
       reachable = Servers::Ping.check!(server)
       servers = [ server ]
-      notice = "« #{server.name} » est #{reachable ? "en ligne" : "injoignable"}."
+      notice = t(reachable ? "server_pings_controller.online" : "server_pings_controller.unreachable", server_name: server.name)
     else
       results = Servers::Ping.check_all!(Server.all)
       servers = results.keys
-      notice = "Statuts actualisés : #{results.values.count(true)} en ligne, #{results.values.count(false)} injoignable(s)."
+      notice = t("server_pings_controller.refreshed", online: results.values.count(true), unreachable: results.values.count(false))
     end
 
     respond_to do |format|

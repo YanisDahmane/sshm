@@ -1,8 +1,8 @@
-<% content_for :title, "Nouveau groupe · Elio" %>
+<% content_for :title, t("title", page: t("server_groups.new.heading")) %>
 
 <div class="mx-auto max-w-2xl">
-  <%= link_to "← Groupes", server_groups_path, class: "text-sm text-ink-3 hover:text-ink-2" %>
-  <h1 class="mt-2 text-2xl font-bold tracking-tight">Nouveau groupe de serveurs</h1>
+  <%= link_to t(".groups"), server_groups_path, class: "text-sm text-ink-3 hover:text-ink-2" %>
+  <h1 class="mt-2 text-2xl font-bold tracking-tight"><%= t(".heading") %></h1>
 
   <div class="mt-6 rounded-xl border border-line bg-surface p-6 shadow-sm">
     <%= render "form", group: @group %>

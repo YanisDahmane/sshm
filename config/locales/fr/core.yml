@@ -93,3 +93,61 @@ fr:
   ui:
     trend: Tendance
     over_24_hours: "%{label} sur 24 heures"
+  count:
+    servers:
+      one: "%{count} serveur"
+      other: "%{count} serveurs"
+    servers_failed:
+      one: "%{count} serveur en échec"
+      other: "%{count} serveurs en échec"
+    activities_notified:
+      one: "%{count} activité notifiée"
+      other: "%{count} activités notifiées"
+    errors:
+      one: "%{count} erreur"
+      other: "%{count} erreurs"
+    groups:
+      one: "%{count} groupe"
+      other: "%{count} groupes"
+    keys:
+      one: "%{count} clé"
+      other: "%{count} clés"
+    servers_have:
+      one: "%{count} serveur n'a"
+      other: "%{count} serveurs n'ont"
+    versions:
+      one: "%{count} version"
+      other: "%{count} versions"
+    packages:
+      one: "%{count} paquet"
+      other: "%{count} paquets"
+    keys_are_not:
+      one: "%{count} clé n'est pas"
+      other: "%{count} clés ne sont pas"
+    servers_to_import:
+      one: "%{count} serveur à importer"
+      other: "%{count} serveurs à importer"
+    duplicates_ignored:
+      one: "%{count} doublon ignoré"
+      other: "%{count} doublons ignorés"
+    lines_in_error:
+      one: "%{count} ligne en erreur"
+      other: "%{count} lignes en erreur"
+    unreachable:
+      one: "%{count} injoignable"
+      other: "%{count} injoignables"
+    packages_installed:
+      one: "%{count} paquet installé"
+      other: "%{count} paquets installés"
+    processors:
+      one: "%{count} processeur"
+      other: "%{count} processeurs"
+    providers:
+      one: "%{count} fournisseur"
+      other: "%{count} fournisseurs"
+    unknown_keys:
+      one: "%{count} clé inconnue"
+      other: "%{count} clés inconnues"
+    updates:
+      one: "%{count} mise à jour"
+      other: "%{count} mises à jour"

@@ -6,13 +6,13 @@ class OnboardingChecklist
 
   def steps
     @steps ||= [
-      Step.new(:ssh_key, "Générer la clé SSH d'Elio", "Elio se connecte à vos serveurs avec sa propre clé.", SshKey.exists?),
-      Step.new(:server, "Ajouter un serveur", "Son adresse, son port et l'utilisateur SSH.", Server.exists?),
-      Step.new(:install_key, "Installer la clé et tester la connexion",
-               "Ajoutez la clé publique d'Elio sur le serveur, puis lancez « Tester la connexion SSH ».", Server.exists?(ssh_ok: true)),
-      Step.new(:inventory, "Lancer un premier inventaire", "Elio relève le système, la santé, les paquets, les services et les ports du serveur.",
+      Step.new(:ssh_key, I18n.t("onboarding_checklist.generate_key"), I18n.t("onboarding_checklist.generate_key_text"), SshKey.exists?),
+      Step.new(:server, I18n.t("onboarding_checklist.add_server"), I18n.t("onboarding_checklist.add_server_text"), Server.exists?),
+      Step.new(:install_key, I18n.t("onboarding_checklist.install_key"),
+               I18n.t("onboarding_checklist.install_key_text"), Server.exists?(ssh_ok: true)),
+      Step.new(:inventory, I18n.t("onboarding_checklist.inventory"), I18n.t("onboarding_checklist.inventory_text"),
                Server.where.not(inventoried_at: nil).exists?),
-      Step.new(:public_key, "Ajouter une clé au trousseau", "La clé publique d'un membre de l'équipe ou d'un serveur.", PublicKey.exists?)
+      Step.new(:public_key, I18n.t("onboarding_checklist.add_key"), I18n.t("onboarding_checklist.add_key_text"), PublicKey.exists?)
     ]
   end
 

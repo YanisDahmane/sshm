@@ -1,12 +1,12 @@
 <%# Number of keys outside the keyring on the server, from the last key read. %>
 <% orphans = insights.orphans_by_server_id[server.id] %>
 <% if orphans.nil? %>
-  <span class="orphan-keys text-xs text-ink-3" title="Clés jamais lues : ouvrez le serveur ou lancez un scan">—</span>
+  <span class="orphan-keys text-xs text-ink-3" title="<%= t(".keys_never_read_open") %>">—</span>
 <% elsif orphans.empty? %>
-  <span class="orphan-keys text-xs text-ink-3">Aucune</span>
+  <span class="orphan-keys text-xs text-ink-3"><%= t(".none") %></span>
 <% else %>
-  <%= link_to server_path(server, tab: "keys"), title: orphans.map { |key| key.name || "sans nom" }.join(", "),
+  <%= link_to server_path(server, tab: "keys"), title: orphans.map { |key| key.name || t(".unnamed") }.join(", "),
         class: "orphan-keys inline-flex items-center rounded-full bg-warn-soft px-2 py-0.5 text-xs font-medium text-warn-ink ring-1 ring-inset ring-warn/20 hover:bg-warn-soft" do %>
-    <%= pluralize(orphans.size, "clé inconnue", plural: "clés inconnues") %>
+    <%= t("count.unknown_keys", count: orphans.size) %>
   <% end %>
 <% end %>

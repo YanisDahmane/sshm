@@ -59,7 +59,7 @@
         </div>
 
         <div class="mt-4">
-          <p class="text-xs font-medium uppercase tracking-wide text-ink-3"><%= pluralize(channel.activity_kinds.size, "activité notifiée", plural: "activités notifiées") %></p>
+          <p class="text-xs font-medium uppercase tracking-wide text-ink-3"><%= t("count.activities_notified", count: channel.activity_kinds.size) %></p>
           <div class="mt-2 flex flex-wrap gap-1.5">
             <% Activity::KINDS.values.select { |kind| channel.subscribed_to?(kind.key) }.each do |kind| %>
               <span class="channel-kind inline-flex items-center gap-1.5 rounded-full bg-subtle px-2 py-0.5 text-xs text-ink-2 ring-1 ring-inset ring-line">
