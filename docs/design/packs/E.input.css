@@ -1,0 +1,40 @@
+@import "tailwindcss";
+@source "./E/*.html";
+@custom-variant dark (&:where(.dark, .dark *));
+@theme {
+  --font-sans: "Charter", "Iowan Old Style", Georgia, serif;
+  --font-mono: ui-monospace, Menlo, monospace;
+  --font-display: "Iowan Old Style", "Charter", Georgia, serif;
+  --color-canvas: #fbfaf7;
+  --color-surface: #fbfaf7;
+  --color-subtle: #f2efe8;
+  --color-line: #e2ddd2;
+  --color-ink: #1c1917;
+  --color-ink-2: #57534e;
+  --color-ink-3: #78716c;
+  --color-accent: #9a3412;
+  --color-accent-soft: #fbeee6;
+  --color-on-accent: #ffffff;
+  --color-track: #e7e2d8;
+  --color-spark: #a8a29e;
+  --color-good: #0ca30c; --color-good-soft: #e7f6e7; --color-good-ink: #006300;
+  --color-warn: #fab219; --color-warn-soft: #fff4dc; --color-warn-ink: #8a5a00;
+  --color-crit: #d03b3b; --color-crit-soft: #fde8e8; --color-crit-ink: #a12424;
+  --color-neutral-soft: var(--color-subtle); --color-neutral-ink: var(--color-ink-2);
+}
+.dark {
+  --color-canvas: #151412;
+  --color-surface: #151412;
+  --color-subtle: #1e1c19;
+  --color-line: #2f2c27;
+  --color-ink: #efebe3;
+  --color-ink-2: #c9c2b6;
+  --color-ink-3: #9a9286;
+  --color-accent: #f59e6c;
+  --color-accent-soft: #3a2418;
+  --color-on-accent: #151412;
+  --color-track: #2f2c27;
+  --color-spark: #9a9286;
+  --color-good-soft: #13301a; --color-good-ink: #4fd34f; --color-warn-soft: #3a2c0c; --color-warn-ink: #f5c056;
+  --color-crit-soft: #3a1717; --color-crit-ink: #f08a8a;
+}

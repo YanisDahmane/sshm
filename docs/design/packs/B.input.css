@@ -1,0 +1,40 @@
+@import "tailwindcss";
+@source "./B/*.html";
+@custom-variant dark (&:where(.dark, .dark *));
+@theme {
+  --font-sans: -apple-system, "SF Pro Text", system-ui, sans-serif;
+  --font-mono: "SF Mono", ui-monospace, monospace;
+  --font-display: inherit;
+  --color-canvas: #f7f7fb;
+  --color-surface: #ffffff;
+  --color-subtle: #f2f2f8;
+  --color-line: #e6e6ef;
+  --color-ink: #14142b;
+  --color-ink-2: #4e4e6a;
+  --color-ink-3: #6e6e89;
+  --color-accent: #5b5bd6;
+  --color-accent-soft: #ededfd;
+  --color-on-accent: #ffffff;
+  --color-track: #ececf3;
+  --color-spark: #8b8ba7;
+  --color-good: #0ca30c; --color-good-soft: #e7f6e7; --color-good-ink: #006300;
+  --color-warn: #fab219; --color-warn-soft: #fff4dc; --color-warn-ink: #8a5a00;
+  --color-crit: #d03b3b; --color-crit-soft: #fde8e8; --color-crit-ink: #a12424;
+  --color-neutral-soft: var(--color-subtle); --color-neutral-ink: var(--color-ink-2);
+}
+.dark {
+  --color-canvas: #0f0f17;
+  --color-surface: #181824;
+  --color-subtle: #20202e;
+  --color-line: #2a2a3a;
+  --color-ink: #eeeefa;
+  --color-ink-2: #bdbdd3;
+  --color-ink-3: #8d8da8;
+  --color-accent: #8f8ff5;
+  --color-accent-soft: #25254a;
+  --color-on-accent: #0f0f17;
+  --color-track: #2a2a3a;
+  --color-spark: #8d8da8;
+  --color-good-soft: #13301a; --color-good-ink: #4fd34f; --color-warn-soft: #3a2c0c; --color-warn-ink: #f5c056;
+  --color-crit-soft: #3a1717; --color-crit-ink: #f08a8a;
+}

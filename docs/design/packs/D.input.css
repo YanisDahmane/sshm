@@ -1,0 +1,40 @@
+@import "tailwindcss";
+@source "./D/*.html";
+@custom-variant dark (&:where(.dark, .dark *));
+@theme {
+  --font-sans: ui-monospace, "SF Mono", Menlo, monospace;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --font-display: inherit;
+  --color-canvas: #eef1f4;
+  --color-surface: #ffffff;
+  --color-subtle: #e6eaef;
+  --color-line: #d3d9e0;
+  --color-ink: #0b1220;
+  --color-ink-2: #3a4656;
+  --color-ink-3: #5b6878;
+  --color-accent: #0a7d3b;
+  --color-accent-soft: #ddf3e6;
+  --color-on-accent: #ffffff;
+  --color-track: #dfe4ea;
+  --color-spark: #5b6878;
+  --color-good: #0ca30c; --color-good-soft: #e7f6e7; --color-good-ink: #006300;
+  --color-warn: #fab219; --color-warn-soft: #fff4dc; --color-warn-ink: #8a5a00;
+  --color-crit: #d03b3b; --color-crit-soft: #fde8e8; --color-crit-ink: #a12424;
+  --color-neutral-soft: var(--color-subtle); --color-neutral-ink: var(--color-ink-2);
+}
+.dark {
+  --color-canvas: #07090c;
+  --color-surface: #0d1117;
+  --color-subtle: #131a22;
+  --color-line: #1f2933;
+  --color-ink: #d6dee8;
+  --color-ink-2: #a3b1c2;
+  --color-ink-3: #7a8899;
+  --color-accent: #3fb950;
+  --color-accent-soft: #10251a;
+  --color-on-accent: #07090c;
+  --color-track: #1f2933;
+  --color-spark: #7a8899;
+  --color-good-soft: #13301a; --color-good-ink: #4fd34f; --color-warn-soft: #3a2c0c; --color-warn-ink: #f5c056;
+  --color-crit-soft: #3a1717; --color-crit-ink: #f08a8a;
+}
