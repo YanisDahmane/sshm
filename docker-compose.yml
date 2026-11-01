@@ -36,7 +36,9 @@ services:
     volumes:
       - elio_db:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U elio"]
+      # Over TCP: during the first start, the server that creates the database
+      # only listens on its socket, then restarts.
+      test: ["CMD-SHELL", "pg_isready -U elio -h 127.0.0.1"]
       interval: 5s
       retries: 10
 

@@ -27,7 +27,13 @@ env_file="$(mktemp)"
 docker run --rm "$image" bin/elio-keys > "$env_file"
 echo "ELIO_DATABASE_PASSWORD=$password" >> "$env_file"
 
-until docker exec "$name-db" pg_isready -U elio >/dev/null 2>&1; do sleep 1; done
+# Over TCP: the server that creates the database at the first start only
+# listens on its socket, then restarts.
+for _ in $(seq 1 60); do
+  if docker exec "$name-db" pg_isready -U elio -h 127.0.0.1 >/dev/null 2>&1; then break; fi
+  sleep 1
+done
+docker exec "$name-db" pg_isready -U elio -h 127.0.0.1 >/dev/null || { echo "PostgreSQL never started"; exit 1; }
 
 docker run -d --name "$name-app" --network "$name" --env-file "$env_file" \
   -e PGHOST=db -e SOLID_QUEUE_IN_PUMA=true -e ELIO_FORCE_SSL=false -p 127.0.0.1::80 "$image" >/dev/null
