@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_01_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_01_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -303,6 +303,30 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_090000) do
     t.index ["server_id"], name: "index_temporary_accesses_on_server_id"
   end
 
+  create_table "uptime_kuma_monitors", force: :cascade do |t|
+    t.string "monitor_id", null: false
+    t.string "name", null: false
+    t.string "monitor_type"
+    t.string "url"
+    t.string "hostname"
+    t.integer "port"
+    t.jsonb "tags", default: [], null: false
+    t.integer "status"
+    t.float "response_time_ms"
+    t.jsonb "uptime", default: {}, null: false
+    t.jsonb "average_response_ms", default: {}, null: false
+    t.integer "cert_days_remaining"
+    t.boolean "cert_valid"
+    t.bigint "server_id"
+    t.string "matched_by"
+    t.string "matched_address"
+    t.datetime "status_changed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["monitor_id"], name: "index_uptime_kuma_monitors_on_monitor_id", unique: true
+    t.index ["server_id"], name: "index_uptime_kuma_monitors_on_server_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -355,4 +379,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_090000) do
   add_foreign_key "server_group_memberships", "servers", on_delete: :cascade
   add_foreign_key "temporary_accesses", "public_keys", on_delete: :nullify
   add_foreign_key "temporary_accesses", "servers", on_delete: :cascade
+  add_foreign_key "uptime_kuma_monitors", "servers", on_delete: :nullify
 end

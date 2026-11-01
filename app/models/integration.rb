@@ -4,7 +4,7 @@
 # Integrations::Base, found through REGISTRY. A disabled extension leaves no
 # trace in the interface; its data is kept for when it is enabled again.
 class Integration < ApplicationRecord
-  REGISTRY = {}.freeze
+  REGISTRY = { "uptime_kuma" => "Integrations::UptimeKuma" }.freeze
 
   class << self
     attr_writer :registry
@@ -33,6 +33,13 @@ class Integration < ApplicationRecord
     def health_reasons(server) = enabled_kinds.flat_map { |integration| integration.definition.health_reasons(integration, server) }
   end
 
+  def self.http_url?(value)
+    uri = URI.parse(value.to_s)
+    uri.is_a?(URI::HTTP) && uri.host.present?
+  rescue URI::InvalidURIError
+    false
+  end
+
   serialize :secrets, coder: JSON
   encrypts :secrets
 
@@ -41,6 +48,7 @@ class Integration < ApplicationRecord
   validates :kind, presence: true, uniqueness: true
   validate :known_kind
   validate :required_fields_when_enabled
+  validate :urls_are_http
 
   def definition = self.class.registry.fetch(kind).constantize
 
@@ -105,6 +113,17 @@ class Integration < ApplicationRecord
 
   def known_kind
     errors.add(:kind, :inclusion) unless self.class.registry.key?(kind.to_s)
+  end
+
+  def urls_are_http
+    return unless self.class.registry.key?(kind.to_s)
+
+    fields.select { |field| field.type == :url }.each do |field|
+      value = value(field.key)
+      next if value.blank? || self.class.http_url?(value)
+
+      errors.add(:base, "#{field.label} : adresse http(s) attendue (ex. https://uptime.example.com)")
+    end
   end
 
   def required_fields_when_enabled

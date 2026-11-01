@@ -1,0 +1,39 @@
+<%# One probe; `show_server`: column of the server it is attached to (fleet page). %>
+<tr id="<%= dom_id(monitor) %>" class="monitor-row" data-state="<%= monitor.state %>">
+  <td class="pl-4">
+    <%= link_to monitor.name, monitor.dashboard_url(base_url), target: "_blank", rel: "noopener", class: "font-medium hover:text-accent hover:underline" %>
+    <span class="ml-1 text-xs text-ink-3"><%= monitor.monitor_type %></span>
+    <% if monitor.tags.any? %>
+      <span class="ml-1 inline-flex flex-wrap gap-1 align-middle"><% monitor.tags.each do |tag_name| %><span class="badge bg-subtle text-ink-2"><%= tag_name %></span><% end %></span>
+    <% end %>
+  </td>
+  <% if local_assigns[:show_server] %>
+    <td class="monitor-server whitespace-nowrap">
+      <% if monitor.server %>
+        <%= link_to monitor.server.name, server_path(monitor.server, tab: "monitors"), class: "hover:text-accent hover:underline" %>
+        <span class="block text-[11px] text-ink-3" title="Rattachée <%= monitor_match_label(monitor) %>"><%= monitor_match_label(monitor) %></span>
+      <% else %>
+        <span class="text-xs text-ink-3">non rattachée</span>
+      <% end %>
+    </td>
+  <% end %>
+  <td class="monitor-target font-mono text-xs">
+    <%= monitor.target || "—" %>
+    <% if (via = monitor_via(monitor)) %><span class="block font-sans text-[11px] text-ink-3">via <%= via %></span><% end %>
+  </td>
+  <td><%= monitor_status_badge(monitor) %></td>
+  <td class="whitespace-nowrap text-xs tabular-nums"><%= monitor.response_time_ms ? "#{monitor.response_time_ms.round(1).to_s.sub(".", ",").delete_suffix(",0")} ms" : "—" %></td>
+  <td class="monitor-uptime whitespace-nowrap text-xs"><%= uptime_percent(monitor.uptime_ratio("1d")) %> · <%= uptime_percent(monitor.uptime_ratio("30d")) %></td>
+  <td class="whitespace-nowrap text-xs">
+    <% if monitor.cert_days_remaining %>
+      <span class="<%= monitor.cert_days_remaining <= 14 ? "text-warn-ink" : "text-ink-2" %>"><%= monitor.cert_days_remaining %> j</span>
+    <% else %>
+      <span class="text-ink-3">—</span>
+    <% end %>
+  </td>
+  <% if can?(:operate) %>
+    <td class="pr-4 text-right">
+      <%= render "integrations/uptime_kuma/link_form", monitor: monitor %>
+    </td>
+  <% end %>
+</tr>

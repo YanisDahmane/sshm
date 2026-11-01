@@ -1,0 +1,13 @@
+<%# Manual attachment of a probe: another server, none, or back to automatic. %>
+<% manual = monitor.matched_by == "manual" || IntegrationLink.joins(:integration).exists?(integrations: { kind: "uptime_kuma" }, external_id: monitor.monitor_id) %>
+<div class="flex items-center justify-end gap-1">
+  <%= form_with url: monitor_link_path(monitor), method: :post, class: "monitor-link-form", data: { controller: "auto-submit" } do |f| %>
+    <%= f.select :server_id, [ [ "— Aucun serveur —", "" ], *Server.order(:name).map { |server| [ server.name, server.id ] } ], { selected: monitor.server_id },
+          aria: { label: "Serveur de la sonde #{monitor.name}" }, data: { action: "change->auto-submit#submit" }, class: "input w-auto max-w-40 py-1 text-xs" %>
+    <noscript><%= f.submit "Rattacher", class: "btn btn-secondary" %></noscript>
+  <% end %>
+  <% if manual %>
+    <%= button_to monitor_link_path(monitor), method: :delete, title: "Revenir au rattachement automatique", aria: { label: "Revenir au rattachement automatique" },
+          class: "btn btn-ghost btn-icon reset-link" do %><%= icon :arrow_path, class: "h-4 w-4" %><% end %>
+  <% end %>
+</div>

@@ -24,6 +24,10 @@ class ServersController < ApplicationController
     @load_history = Inventory::HealthSample.where(server_id: @servers.map(&:id)).since(24.hours.ago)
                                            .pluck(:server_id, :load_percent).group_by(&:first).transform_values { |rows| rows.map(&:last).compact }
     @insights = KeyInsights.new
+    if Integration.enabled?(:uptime_kuma)
+      @monitor_counts = UptimeKumaMonitor.attached.group(:server_id).pluck(:server_id, Arel.sql("COUNT(*)"), Arel.sql("COUNT(*) FILTER (WHERE status = 0)"))
+                                         .to_h { |server_id, total, down| [ server_id, [ total, down ] ] }
+    end
   end
 
   TABS = %w[overview packages services ports keys history].freeze

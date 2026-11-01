@@ -6,6 +6,13 @@
       "file": "app/services/integrations/http.rb",
       "line": 15,
       "note": "Opt-in only: an admin checks \"Accepter un certificat auto-signé\" for an internal service (e.g. a self-hosted Uptime Kuma); verification stays on by default. Read-only GET requests."
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "fingerprint": "8494cac867e72507f4ec01d2e1a69930828bf2b29cf847eb0e1dc4452e05b491",
+      "file": "app/views/integrations/uptime_kuma/_monitor_row.html.erb",
+      "line": 4,
+      "note": "UptimeKumaMonitor#dashboard_url only returns an http(s) URL (Integration.http_url?, also validated on save) built from the admin-set instance address and the numeric monitor id."
     }
   ],
   "brakeman_version": "7.1.1"

@@ -21,7 +21,7 @@ class AutomationIntegrationTest < ActiveSupport::TestCase
     enable_demo
     assert automation.available?
     assert automation.due?
-    assert Automation::KINDS.values.all?(&:available?), "the built-in automations are always available"
+    assert Automation::KINDS.values.reject(&:integration).all?(&:available?), "the built-in automations are always available"
   end
 
   test "runs the synchronization, and reports a failure in its result" do

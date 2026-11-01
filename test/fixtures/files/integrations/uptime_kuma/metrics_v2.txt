@@ -1,0 +1,44 @@
+# HELP monitor_cert_days_remaining The number of days remaining until the certificate expires
+# TYPE monitor_cert_days_remaining gauge
+# HELP monitor_cert_is_valid Is the certificate still valid? (1 = Yes, 0= No)
+# TYPE monitor_cert_is_valid gauge
+# HELP monitor_uptime_ratio Uptime ratio calculated over sliding window specified by the 'window' label. (0.0 - 1.0)
+# TYPE monitor_uptime_ratio gauge
+monitor_uptime_ratio{FR="",INTRANET="",Prod="",monitor_id="58",monitor_name="[INTRANET] Reverse Proxy",monitor_type="http",monitor_url="http://rproxy.example.tech/",monitor_hostname="null",monitor_port="null",window="1d"} 1
+monitor_uptime_ratio{FR="",INTRANET="",Prod="",monitor_id="58",monitor_name="[INTRANET] Reverse Proxy",monitor_type="http",monitor_url="http://rproxy.example.tech/",monitor_hostname="null",monitor_port="null",window="30d"} 0.9962562396006656
+monitor_uptime_ratio{FR="",INTRANET="",Prod="",monitor_id="58",monitor_name="[INTRANET] Reverse Proxy",monitor_type="http",monitor_url="http://rproxy.example.tech/",monitor_hostname="null",monitor_port="null",window="365d"} 0.9962562396006656
+monitor_uptime_ratio{FR="",INTRANET="",SRV="",monitor_id="64",monitor_name="[SRV] [INTRANET] FR-UTILS-1",monitor_type="ping",monitor_url="https://",monitor_hostname="10.8.0.100",monitor_port="null",window="1d"} 1
+monitor_uptime_ratio{FR="",INTRANET="",SRV="",monitor_id="64",monitor_name="[SRV] [INTRANET] FR-UTILS-1",monitor_type="ping",monitor_url="https://",monitor_hostname="10.8.0.100",monitor_port="null",window="30d"} 1
+monitor_uptime_ratio{FR="",INTRANET="",SRV="",monitor_id="64",monitor_name="[SRV] [INTRANET] FR-UTILS-1",monitor_type="ping",monitor_url="https://",monitor_hostname="10.8.0.100",monitor_port="null",window="365d"} 1
+# HELP monitor_response_time_seconds Average response time in seconds calculated over sliding window specified by the 'window' label
+# TYPE monitor_response_time_seconds gauge
+monitor_response_time_seconds{FR="",INTRANET="",Prod="",monitor_id="58",monitor_name="[INTRANET] Reverse Proxy",monitor_type="http",monitor_url="http://rproxy.example.tech/",monitor_hostname="null",monitor_port="null",window="1d"} 0.010599027102154273
+monitor_response_time_seconds{FR="",INTRANET="",Prod="",monitor_id="58",monitor_name="[INTRANET] Reverse Proxy",monitor_type="http",monitor_url="http://rproxy.example.tech/",monitor_hostname="null",monitor_port="null",window="30d"} 0.03074023262749777
+monitor_response_time_seconds{FR="",INTRANET="",Prod="",monitor_id="58",monitor_name="[INTRANET] Reverse Proxy",monitor_type="http",monitor_url="http://rproxy.example.tech/",monitor_hostname="null",monitor_port="null",window="365d"} 0.03074023262749777
+monitor_response_time_seconds{FR="",INTRANET="",SRV="",monitor_id="64",monitor_name="[SRV] [INTRANET] FR-UTILS-1",monitor_type="ping",monitor_url="https://",monitor_hostname="10.8.0.100",monitor_port="null",window="1d"} 0.00009786527777777749
+monitor_response_time_seconds{FR="",INTRANET="",SRV="",monitor_id="64",monitor_name="[SRV] [INTRANET] FR-UTILS-1",monitor_type="ping",monitor_url="https://",monitor_hostname="10.8.0.100",monitor_port="null",window="30d"} 0.00009381081664986287
+monitor_response_time_seconds{FR="",INTRANET="",SRV="",monitor_id="64",monitor_name="[SRV] [INTRANET] FR-UTILS-1",monitor_type="ping",monitor_url="https://",monitor_hostname="10.8.0.100",monitor_port="null",window="365d"} 0.00009381081664986287
+# HELP monitor_response_time Monitor Response Time (ms)
+# TYPE monitor_response_time gauge
+monitor_response_time{FR="",INTRANET="",Prod="",monitor_id="58",monitor_name="[INTRANET] Reverse Proxy",monitor_type="http",monitor_url="http://rproxy.example.tech/",monitor_hostname="null",monitor_port="null"} 13
+monitor_response_time{FR="",INTRANET="",SRV="",monitor_id="64",monitor_name="[SRV] [INTRANET] FR-UTILS-1",monitor_type="ping",monitor_url="https://",monitor_hostname="10.8.0.100",monitor_port="null"} 0.093
+# HELP monitor_status Monitor Status (1 = UP, 0= DOWN, 2= PENDING, 3= MAINTENANCE)
+# TYPE monitor_status gauge
+monitor_status{FR="",INTRANET="",Prod="",monitor_id="58",monitor_name="[INTRANET] Reverse Proxy",monitor_type="http",monitor_url="http://rproxy.example.tech/",monitor_hostname="null",monitor_port="null"} 1
+monitor_status{FR="",INTRANET="",SRV="",monitor_id="64",monitor_name="[SRV] [INTRANET] FR-UTILS-1",monitor_type="ping",monitor_url="https://",monitor_hostname="10.8.0.100",monitor_port="null"} 1
+# HELP process_cpu_user_seconds_total Total user CPU time spent in seconds.
+# TYPE process_cpu_user_seconds_total counter
+process_cpu_user_seconds_total 1709.077633
+# HELP nodejs_version_info Node.js version info.
+# TYPE nodejs_version_info gauge
+nodejs_version_info{version="v22.22.3",major="22",minor="22",patch="3"} 1
+# HELP nodejs_gc_duration_seconds Garbage collection duration by kind, one of major, minor, incremental or weakcb.
+# TYPE nodejs_gc_duration_seconds histogram
+nodejs_gc_duration_seconds_bucket{le="0.001",kind="minor"} 1143
+nodejs_gc_duration_seconds_bucket{le="+Inf",kind="minor"} 26040
+# HELP app_version The service version by package.json
+# TYPE app_version gauge
+app_version{version="2.5.6",major="2",minor="5",patch="6"} 1
+# HELP expressjs_number_of_open_connections Number of open connections to the Express.js server
+# TYPE expressjs_number_of_open_connections gauge
+expressjs_number_of_open_connections 1

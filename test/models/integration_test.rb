@@ -40,6 +40,15 @@ class IntegrationTest < ActiveSupport::TestCase
     assert_equal [ "URL : obligatoire pour activer l'extension", "Clé API : obligatoire pour activer l'extension" ], integration.errors.full_messages
   end
 
+  test "URL fields must be http(s)" do
+    integration = enable_demo
+    integration.assign_form("url" => "javascript:alert(1)")
+    assert_not integration.valid?
+    assert_equal [ "URL : adresse http(s) attendue (ex. https://uptime.example.com)" ], integration.errors.full_messages
+    assert Integration.http_url?("https://demo.example/path")
+    assert_not Integration.http_url?("ftp://demo.example")
+  end
+
   test "unknown kind" do
     assert_not Integration.new(kind: "nope").valid?
   end

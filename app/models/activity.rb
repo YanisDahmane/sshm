@@ -55,6 +55,10 @@ class Activity < ApplicationRecord
     Kind.new(:ssh_key_rotation_started, "Rotation de la clé Elio lancée", :security, :warning, "Une nouvelle clé Elio est en cours d'installation sur les serveurs."),
     Kind.new(:ssh_key_rotated, "Clé Elio remplacée", :security, :critical, "La rotation est terminée : la nouvelle clé Elio est active, l'ancienne supprimée."),
     Kind.new(:automation_run, "Automatisation exécutée", :configuration, :info, "Une automatisation s'est exécutée."),
+    Kind.new(:monitor_down, "Sonde hors ligne", :servers, :critical, "Une sonde Uptime Kuma rattachée à un serveur est hors ligne (option de l'extension)."),
+    Kind.new(:monitor_up, "Sonde de retour", :servers, :info, "Une sonde Uptime Kuma hors ligne répond de nouveau."),
+    Kind.new(:monitor_cert_expiring, "Certificat bientôt expiré", :security, :warning, "Le certificat vérifié par une sonde Uptime Kuma expire bientôt."),
+    Kind.new(:server_without_monitor, "Serveur sans sonde", :servers, :warning, "Un serveur n'est surveillé par aucune sonde Uptime Kuma."),
     Kind.new(:integration_enabled, "Extension activée", :configuration, :info, "Un administrateur a activé une extension."),
     Kind.new(:integration_disabled, "Extension désactivée", :configuration, :info, "Un administrateur a désactivé une extension."),
     Kind.new(:integration_sync_failed, "Échec de synchronisation d'une extension", :configuration, :warning, "Une extension n'arrive plus à lire son service (signalé une fois, jusqu'au retour à la normale).")
@@ -152,6 +156,10 @@ class Activity < ApplicationRecord
       forced = data["forced"] ? " (finalisée malgré #{data["failed"]} échec(s))" : ""
       "Clé Elio remplacée sur #{data["servers"]} serveur(s)#{forced}"
     when :automation_run then "#{data["automation_label"]} : #{data["result"]}"
+    when :monitor_down then "Sonde « #{data["monitor"]} » hors ligne#{" (#{server_name})" if server_name}"
+    when :monitor_up then "Sonde « #{data["monitor"]} » de retour#{" (#{server_name})" if server_name}"
+    when :monitor_cert_expiring then "Certificat de « #{data["monitor"]} » : expire dans #{data["days"]} jour(s)"
+    when :server_without_monitor then "« #{server_name} » n'est surveillé par aucune sonde Uptime Kuma"
     when :integration_enabled then "Extension #{data["integration_label"]} activée"
     when :integration_disabled then "Extension #{data["integration_label"]} désactivée"
     when :integration_sync_failed then "Synchronisation #{data["integration_label"]} impossible : #{data["error"]}"

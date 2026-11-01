@@ -1,0 +1,47 @@
+# Manual attachment of an Uptime Kuma probe to a server (or to none), kept
+# across synchronizations (IntegrationLink); DELETE returns to the automatic one.
+class MonitorLinksController < ApplicationController
+  include RequiresIntegration
+
+  requires_integration :uptime_kuma
+  require_permission :operate
+
+  before_action :set_monitor
+
+  def create
+    server = Server.find(params[:server_id]) if params[:server_id].present?
+    @integration.links.find_or_initialize_by(external_id: @monitor.monitor_id).update!(server: server, user: current_user)
+    apply(server ? Integrations::UptimeKuma::Matcher::Match.new(server, "manual", nil) : nil)
+
+    redirect_back_or_to monitors_path, notice: server ? "Sonde « #{@monitor.name} » rattachée à « #{server.name} »." : "Sonde « #{@monitor.name} » rattachée à aucun serveur."
+  end
+
+  def destroy
+    @integration.links.where(external_id: @monitor.monitor_id).delete_all
+    apply(automatic_match)
+
+    redirect_back_or_to monitors_path, notice: "Sonde « #{@monitor.name} » : rattachement automatique#{" à « #{@monitor.server.name} »" if @monitor.server}.", status: :see_other
+  end
+
+  private
+
+  def set_monitor
+    @monitor = UptimeKumaMonitor.find(params[:monitor_id])
+  end
+
+  def apply(match)
+    previous = @monitor.server
+    @monitor.update!(server: match&.server, matched_by: match&.matched_by, matched_address: match&.address)
+    [ previous, @monitor.server ].compact.uniq.each(&:refresh_health!)
+  end
+
+  def automatic_match
+    monitor = Integrations::UptimeKuma::Metrics::Monitor.new(
+      id: @monitor.monitor_id, name: @monitor.name, monitor_type: @monitor.monitor_type, url: @monitor.url, hostname: @monitor.hostname, port: @monitor.port,
+      tags: @monitor.tags, status: @monitor.status, response_time_ms: nil, uptime: {}, average_response_ms: {}, cert_days_remaining: nil, cert_valid: nil
+    )
+    Integrations::UptimeKuma::Matcher.new(Server.includes(:inventory_snapshots).order(:name),
+                                          by_ip: @integration.value(:match_by_ip), by_host: @integration.value(:match_by_host),
+                                          resolve_dns: @integration.value(:resolve_dns), by_name: @integration.value(:match_by_name)).call(monitor)
+  end
+end

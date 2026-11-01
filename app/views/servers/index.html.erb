@@ -94,6 +94,7 @@
             <th scope="col">Mémoire</th>
             <th scope="col">Disque</th>
             <th scope="col">Mises à jour</th>
+            <% if @monitor_counts %><th scope="col">Sondes</th><% end %>
             <th scope="col">À noter</th>
             <th scope="col" class="pr-4"><span class="sr-only">Actions</span></th>
           </tr>
@@ -125,6 +126,14 @@
                   <span class="text-ink-3">—</span>
                 <% end %>
               </td>
+              <% if @monitor_counts %>
+                <td class="server-monitors whitespace-nowrap text-xs">
+                  <% total, down = @monitor_counts.fetch(server.id, [ 0, 0 ]) %>
+                  <%= link_to server_path(server, tab: "monitors"), class: "hover:underline #{total.zero? ? "text-warn-ink" : "text-ink-2"}" do %>
+                    <span class="tabular-nums"><%= total %></span><% if down.positive? %> <span class="badge bg-crit-soft text-crit-ink"><%= down %> hors ligne</span><% end %>
+                  <% end %>
+                </td>
+              <% end %>
               <td class="server-notes min-w-40 max-w-60 text-xs">
                 <div class="flex flex-wrap items-center gap-1.5">
                   <% if (reason = server.health_reason_texts.first) %>

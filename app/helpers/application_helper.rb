@@ -46,7 +46,8 @@ module ApplicationHelper
       { label: "Vue d'ensemble", url: root_path }, { label: "Parc", hint: "serveurs", url: servers_path }, { label: "Paquets", hint: "recherche sur tout le parc", url: packages_path }, { label: "Ports", hint: "ports publics du parc", url: ports_path }, { label: "Trousseau", hint: "clés SSH", url: public_keys_path },
       { label: "Groupes de serveurs", url: server_groups_path },
       { label: "Activité", url: activities_path },
-      { label: "Tâches", hint: "inventaires et scans en arrière-plan", url: tasks_path }
+      { label: "Tâches", hint: "inventaires et scans en arrière-plan", url: tasks_path },
+      *Integration.sidebar_links.map { |link| { label: link[:label], hint: "extension", url: public_send(link[:path]) } }
     ]
     pages += [ { label: "Importer des serveurs", hint: "CSV, ~/.ssh/config", url: new_server_import_path }, { label: "Ajouter un serveur", url: new_server_path }, { label: "Ajouter une clé au trousseau", url: new_public_key_path } ] if can?(:operate)
     pages += [

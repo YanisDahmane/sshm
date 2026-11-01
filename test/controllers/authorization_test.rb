@@ -39,6 +39,7 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
       "public_key page" => -> { get public_key_path(public_keys(:alice)) },
       "activities" => -> { get activities_path },
       "tasks" => -> { get tasks_path },
+      "monitors" => -> { Integration.create!(kind: "uptime_kuma", enabled: true, settings: { "url" => "https://u.test" }, secrets: { "api_key" => "k" }) && get(monitors_path) },
       "task page" => -> { get task_path(BackgroundTask.enqueue!(kind: "inventory", label: "Inventaire", servers: [], user: nil)) },
       "own account" => -> { get account_path },
       "set up 2FA" => -> { get new_two_factor_path }

@@ -28,7 +28,9 @@ class Automation < ApplicationRecord
     Definition.new(key: :inventory_ports, label: "Inventaire des ports", default_interval: 60, categories: %w[ports],
                    description: "Relit les ports en écoute et le firewall ; signale les ports publics qui s'ouvrent."),
     Definition.new(key: :keys_scan, label: "Scan des clés", default_interval: 360,
-                   description: "Lit les clés de tous les serveurs et signale les clés inconnues ou disparues.")
+                   description: "Lit les clés de tous les serveurs et signale les clés inconnues ou disparues."),
+    Definition.new(key: :uptime_kuma_sync, label: "Synchronisation Uptime Kuma", default_interval: 15, default_enabled: true, quiet: true, integration: "uptime_kuma",
+                   description: "Relit les sondes d'Uptime Kuma, les rattache aux serveurs et lève les alertes choisies dans l'extension.")
   ].index_by(&:key).freeze
 
   INTERVALS = { 5 => "Toutes les 5 minutes", 15 => "Toutes les 15 minutes", 60 => "Toutes les heures", 360 => "Toutes les 6 heures",

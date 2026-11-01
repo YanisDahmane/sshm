@@ -71,6 +71,10 @@ Rails.application.routes.draw do
   resources :tasks, only: %i[index show]
   resources :packages, only: :index
   resources :ports, only: :index
+  # Uptime Kuma extension.
+  resources :monitors, only: :index do
+    resource :link, only: %i[create destroy], controller: "monitor_links"
+  end
   scope "settings" do
     resource :ssh_key, only: :create
   end
