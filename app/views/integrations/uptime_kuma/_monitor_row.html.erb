@@ -11,9 +11,9 @@
     <td class="monitor-server whitespace-nowrap">
       <% if monitor.server %>
         <%= link_to monitor.server.name, server_path(monitor.server, tab: "monitors"), class: "hover:text-accent hover:underline" %>
-        <span class="block text-[11px] text-ink-3" title="Rattachée <%= monitor_match_label(monitor) %>"><%= monitor_match_label(monitor) %></span>
+        <span class="block text-[11px] text-ink-3" title="<%= t(".attached", how: monitor_match_label(monitor)) %>"><%= monitor_match_label(monitor) %></span>
       <% else %>
-        <span class="text-xs text-ink-3">non rattachée</span>
+        <span class="text-xs text-ink-3"><%= t(".not_attached") %></span>
       <% end %>
     </td>
   <% end %>

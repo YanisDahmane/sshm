@@ -84,6 +84,7 @@ en:
       recognize:
         one: If you recognize it, add it with the “Add to the keyring” button; otherwise delete it.
         other: If you recognize them, add them with the “Add to the keyring” button; otherwise delete them.
+      details_of: Details of the key %{name}
   servers:
     add_key_dialog:
       keyring: From the keyring
@@ -103,6 +104,7 @@ en:
       optional: "(optional)"
       add_server: Add on the server
       content_hint_html: Content of the %{extension} file. It will also be saved in the keyring.
+      already_there: "(already on the server)"
     ssh_status:
       ssh_connection_never_tested: SSH connection never tested
       key_refused: Key refused

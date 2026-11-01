@@ -1,11 +1,11 @@
-<% content_for :title, "OVHcloud · Elio" %>
+<% content_for :title, t("title", page: "OVHcloud") %>
 
 <div class="flex flex-wrap items-end justify-between gap-4">
   <div>
     <h1 class="text-xl font-semibold">OVHcloud</h1>
     <p class="text-xs text-ink-3">
-      Ressources du compte OVHcloud, rattachées aux serveurs du parc<% if @integration.last_synced_at %>, synchronisées <%= relative_time_tag @integration.last_synced_at %><% end %>.
-      <% if @integration.last_error %><span class="text-crit-ink">Dernière synchronisation impossible : <%= @integration.last_error %></span><% end %>
+      <%= t(".resources_ovhcloud_account_attached") %><% if @integration.last_synced_at %><%= t(".synchronized_html", last_synced_at: (relative_time_tag @integration.last_synced_at)) %><% end %>.
+      <% if @integration.last_error %><span class="text-crit-ink"><%= t(".last_sync_failed_html", last_error: @integration.last_error) %></span><% end %>
     </p>
   </div>
   <% if can?(:administer) %>
@@ -14,14 +14,14 @@
 </div>
 
 <div class="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
-  <%= stat_tile "Services", @counts.slice(*OvhResource::SERVICE_KINDS).values.sum, "dédiés, VPS, instances", icon: :server_stack, id: "stat-ovh-services" %>
-  <%= stat_tile "Non rattachés", @unattached_services, "services hors du parc", tone: (@unattached_services.positive? ? :warn : nil), icon: :exclamation_triangle, id: "stat-ovh-unattached" %>
-  <%= stat_tile "Expirent bientôt", @expiring, nil, tone: (@expiring.positive? ? :warn : nil), icon: :clock, id: "stat-ovh-expiring" %>
-  <%= stat_tile "DNS hors du parc", @outside_records, "enregistrements A / AAAA", tone: (@outside_records.positive? ? :warn : nil), icon: :list_bullet, id: "stat-ovh-dns-outside" %>
+  <%= stat_tile t(".services"), @counts.slice(*OvhResource::SERVICE_KINDS).values.sum, t(".dedicated_vps_instances"), icon: :server_stack, id: "stat-ovh-services" %>
+  <%= stat_tile t(".not_attached"), @unattached_services, t(".services_outside_fleet"), tone: (@unattached_services.positive? ? :warn : nil), icon: :exclamation_triangle, id: "stat-ovh-unattached" %>
+  <%= stat_tile t(".expiring_soon"), @expiring, nil, tone: (@expiring.positive? ? :warn : nil), icon: :clock, id: "stat-ovh-expiring" %>
+  <%= stat_tile t(".dns_outside_fleet"), @outside_records, "enregistrements A / AAAA", tone: (@outside_records.positive? ? :warn : nil), icon: :list_bullet, id: "stat-ovh-dns-outside" %>
 </div>
 
-<nav class="ovh-tabs mt-6 flex gap-5 border-b border-line text-sm" aria-label="Ressources">
-  <% [ [ "services", "Services", @counts.slice(*OvhResource::SERVICE_KINDS).values.sum ], [ "ips", "Adresses IP", @counts["ip"].to_i ], [ "dns", "DNS", @counts["dns_record"].to_i ] ].each do |tab, label, count| %>
+<nav class="ovh-tabs mt-6 flex gap-5 border-b border-line text-sm" aria-label="<%= t(".resources") %>">
+  <% [ [ "services", t(".services"), @counts.slice(*OvhResource::SERVICE_KINDS).values.sum ], [ "ips", t(".ip_addresses"), @counts["ip"].to_i ], [ "dns", t(".dns"), @counts["dns_record"].to_i ] ].each do |tab, label, count| %>
     <%= link_to ovh_path(tab: tab), aria: { current: (@tab == tab ? "page" : nil) }, data: { tab: tab },
           class: "flex items-center gap-1.5 border-b-2 px-1 pb-2.5 #{@tab == tab ? "border-accent font-medium text-ink" : "border-transparent text-ink-3 hover:text-ink"}" do %>
       <%= label %> <span class="rounded-full bg-subtle px-1.5 text-[11px] text-ink-2"><%= count %></span>
@@ -31,10 +31,10 @@
 
 <%= form_with url: ovh_path, method: :get, data: { controller: "auto-submit", turbo_action: "advance" }, class: "mt-3 flex flex-wrap items-center gap-3" do |f| %>
   <%= hidden_field_tag :tab, @tab %>
-  <%= f.search_field :q, value: @q, placeholder: "Nom, IP, cible…", aria: { label: "Rechercher" }, data: { action: "input->auto-submit#submitLater" }, class: "input w-56 py-1 text-xs" %>
+  <%= f.search_field :q, value: @q, placeholder: t(".name_ip_target"), aria: { label: t(".search") }, data: { action: "input->auto-submit#submitLater" }, class: "input w-56 py-1 text-xs" %>
   <label class="flex items-center gap-1.5 text-xs text-ink-2">
     <%= check_box_tag :unattached, "1", params[:unattached] == "1", data: { action: "change->auto-submit#submit" }, class: "h-4 w-4 rounded border-line text-accent" %>
-    <%= @tab == "dns" ? "Hors du parc seulement" : "Non rattachés seulement" %>
+    <%= @tab == "dns" ? t(".outside_fleet_only") : t(".not_attached_only") %>
   </label>
 <% end %>
 
@@ -44,11 +44,11 @@
       <thead>
         <tr>
           <% if @tab == "services" %><th class="pl-4">Service</th><th>Type</th><th>Offre</th><th>Datacenter</th><th>Expiration</th>
-          <% elsif @tab == "ips" %><th class="pl-4">Bloc IP</th><th>Type</th><th>Service OVH</th><th>Firewall</th>
+          <% elsif @tab == "ips" %><th class="pl-4"><%= t(".ip_block") %></th><th>Type</th><th><%= t(".ovh_service") %></th><th>Firewall</th>
           <% else %><th class="pl-4">Nom</th><th>Type</th><th>Cible</th>
           <% end %>
-          <th>Serveur</th>
-          <% if can?(:operate) && @tab != "dns" %><th class="pr-4 text-right">Rattacher à</th><% end %>
+          <th><%= t(".server") %></th>
+          <% if can?(:operate) && @tab != "dns" %><th class="pr-4 text-right"><%= t(".attach") %></th><% end %>
         </tr>
       </thead>
       <tbody>
@@ -66,7 +66,7 @@
               <td class="font-mono text-xs"><%= resource.data["service"] || "—" %></td>
               <td class="text-xs">
                 <% firewalls = Array(resource.data["firewall"]).map(&:last) %>
-                <%= resource.data.key?("firewall") ? (firewalls.any? { _1["enabled"] } ? "activé" : "désactivé") : "—" %>
+                <%= resource.data.key?("firewall") ? (firewalls.any? { _1["enabled"] } ? t(".text") : t(".off")) : "—" %>
               </td>
             <% else %>
               <td class="pl-4 font-mono text-xs"><%= resource.name %></td>
@@ -78,7 +78,7 @@
                 <%= link_to resource.server.name, server_path(resource.server, tab: "ovh"), class: "hover:text-accent hover:underline" %>
                 <span class="block text-[11px] text-ink-3"><%= ovh_match_label(resource) %></span>
               <% else %>
-                <span class="<%= resource.kind == "dns_record" && resource.data["type"] != "CNAME" ? "text-warn-ink" : "text-ink-3" %>"><%= resource.kind == "dns_record" ? "hors du parc" : "non rattaché" %></span>
+                <span class="<%= resource.kind == "dns_record" && resource.data["type"] != "CNAME" ? "text-warn-ink" : "text-ink-3" %>"><%= resource.kind == "dns_record" ? t(".outside_fleet") : t(".not_attached_2") %></span>
               <% end %>
             </td>
             <% if can?(:operate) && @tab != "dns" %>
@@ -91,5 +91,5 @@
   </div>
   <%= render "shared/pagination", pager: @pager, noun: "ressources" %>
 <% else %>
-  <p class="card mt-3 px-4 py-6 text-sm text-ink-3"><%= @integration.last_synced_at ? "Aucune ressource ne correspond." : "Pas encore synchronisé avec OVHcloud." %></p>
+  <p class="card mt-3 px-4 py-6 text-sm text-ink-3"><%= @integration.last_synced_at ? t(".resource_matches") : t(".not_synchronized_ovhcloud_yet") %></p>
 <% end %>

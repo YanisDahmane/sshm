@@ -161,3 +161,25 @@ fr:
     days:
       one: "%{count} jour"
       other: "%{count} jours"
+  servers:
+    import:
+      no_server: Aucun serveur trouvé dans le fichier.
+      group_too_long: Groupe « %{name} » trop long
+  image_registry:
+    client:
+      auth_https_only: Adresse d'authentification refusée (HTTPS seulement)
+      token_refused: Jeton du registre refusé (HTTP %{code})
+  vulnerabilities:
+    json_object_stream:
+      invalid_after: JSON invalide après « %{key} »
+  automation:
+    already_running: 'Déjà en cours : ce passage est ignoré.'
+  inventory:
+    port_analysis:
+      active_deny: "%{tool} actif (entrant : bloqué par défaut)"
+      active_allow: "%{tool} actif (entrant : autorisé par défaut)"
+      inactive: "%{tool} inactif"
+  flash:
+    two_factor:
+      mandatory: 'La double authentification est obligatoire pour votre rôle : activez-la pour continuer.'
+      mandatory_role: La double authentification est obligatoire pour votre rôle (%{role}).

@@ -88,7 +88,7 @@ class Vulnerabilities::JsonObjectStream
     key = JSON.parse(@buffer.byteslice(key_start, scanner.pos - key_start).force_encoding(Encoding::UTF_8))
     scanner.skip(/\s*/)
     return :more if scanner.eos?
-    raise Error, "JSON invalide après « #{key} »" unless scanner.skip(/:/)
+    raise Error, I18n.t("vulnerabilities.json_object_stream.invalid_after", key: key) unless scanner.skip(/:/)
 
     scanner.skip(/\s*/)
     value_start = scanner.pos

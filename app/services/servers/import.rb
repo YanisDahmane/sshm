@@ -36,7 +36,7 @@ class Servers::Import
     when "ssh_config" then ssh_config_entries(text)
     else raise Error, "Format inconnu."
     end
-    raise Error, "Aucun serveur trouvé dans le fichier." if entries.empty?
+    raise Error, I18n.t("servers.import.no_server") if entries.empty?
     raise Error, "Trop de lignes (#{MAX_ROWS} serveurs maximum par import)." if entries.size > MAX_ROWS
 
     check(entries, default_username.to_s.strip.presence || "root")
@@ -112,7 +112,7 @@ class Servers::Import
       server = Server.new(name: entry[:name].to_s, host: entry[:host].to_s, port: port, username: entry[:username].presence || default_username)
       server.validate
       errors = server.errors.reject { |error| error.type == :taken }.map(&:full_message)
-      errors += entry[:groups].select { |name| name.length > 50 }.map { |name| "Groupe « #{name.first(20)}… » trop long" }
+      errors += entry[:groups].select { |name| name.length > 50 }.map { |name| I18n.t("servers.import.group_too_long", name: "#{name.first(20)}…") }
 
       key = server.name.downcase
       duplicate = existing_names[key] || seen[key] || existing_addresses[[ server.host.downcase, server.port ]]

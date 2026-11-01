@@ -48,7 +48,7 @@ class Inventory::PortAnalysis
     case firewall["tool"]
     when "ufw", "nftables", "iptables"
       tool = { "ufw" => "ufw", "nftables" => "nftables", "iptables" => "iptables" }.fetch(firewall["tool"])
-      firewall_active? ? "#{tool} actif (entrant : #{firewall["default_incoming"] == "deny" ? "bloqué par défaut" : "autorisé par défaut"})" : "#{tool} inactif"
+      firewall_active? ? I18n.t(firewall["default_incoming"] == "deny" ? "inventory.port_analysis.active_deny" : "inventory.port_analysis.active_allow", tool: tool) : I18n.t("inventory.port_analysis.inactive", tool: tool)
     when "none" then I18n.t("inventory.port_analysis.no_firewall")
     else I18n.t("inventory.port_analysis.unknown_firewall")
     end

@@ -1,9 +1,8 @@
-<% content_for :title, "Extensions · Paramètres · Elio" %>
+<% content_for :title, t("title", page: "#{t("settings.nav.extensions")} · #{t("settings.nav.title")}") %>
 <%= render "settings/nav" %>
 
 <p class="mt-6 text-sm text-ink-3">
-  Les extensions relient Elio à vos autres outils, <strong class="font-medium text-ink-2">en lecture seule</strong> : Elio n'y crée, ne modifie et ne supprime rien.
-  Une extension désactivée n'apparaît nulle part dans l'interface.
+  <%= t(".intro_html") %>
 </p>
 
 <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -11,7 +10,7 @@
     <section id="integration-<%= integration.kind %>" class="integration card flex flex-col p-5">
       <div class="flex items-start justify-between gap-3">
         <h2 class="flex items-center gap-2 font-semibold"><%= icon integration.icon, class: "h-5 w-5 text-ink-3" %><%= integration.label %></h2>
-        <%= integration.enabled? ? status_badge(:good, "Activée", class: "integration-state") : status_badge(:neutral, "Désactivée", class: "integration-state") %>
+        <%= integration.enabled? ? status_badge(:good, t(".text"), class: "integration-state") : status_badge(:neutral, t(".off"), class: "integration-state") %>
       </div>
       <p class="mt-2 flex-1 text-sm text-ink-2"><%= integration.description %></p>
       <% if integration.enabled? %>
@@ -19,18 +18,18 @@
           <% if integration.last_error %>
             <span class="integration-error text-crit-ink"><%= integration.last_error %></span>
           <% elsif integration.last_synced_at %>
-            Synchronisée <%= relative_time_tag integration.last_synced_at %>
+            <%= t(".synchronized_html", last_synced_at: (relative_time_tag integration.last_synced_at)) %>
           <% else %>
-            Pas encore synchronisée
+            <%= t(".not_synchronized_yet") %>
           <% end %>
         </p>
       <% end %>
       <div class="mt-4">
-        <%= link_to (integration.enabled? ? "Configurer" : "Configurer et activer"), edit_settings_integration_path(integration.kind), class: "btn btn-secondary" %>
+        <%= link_to (integration.enabled? ? t(".configure") : t(".configure_turn")), edit_settings_integration_path(integration.kind), class: "btn btn-secondary" %>
       </div>
     </section>
   <% end %>
 </div>
 <% if @integrations.empty? %>
-  <p class="card mt-5 px-4 py-6 text-sm text-ink-3">Aucune extension disponible.</p>
+  <p class="card mt-5 px-4 py-6 text-sm text-ink-3"><%= t(".extension_available") %></p>
 <% end %>

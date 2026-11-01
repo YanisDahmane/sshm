@@ -59,7 +59,8 @@ class Automation < ApplicationRecord
     end
   end
 
-  ALREADY_RUNNING = "Déjà en cours : ce passage est ignoré."
+  # Returned by run! when the same automation runs elsewhere.
+  def self.already_running = I18n.t("automation.already_running")
 
   def definition = KINDS.fetch(kind.to_sym)
 
@@ -122,7 +123,7 @@ class Automation < ApplicationRecord
       else send("run_#{kind}")
       end
     end
-    return ALREADY_RUNNING if result.equal?(AdvisoryLock::HELD)
+    return self.class.already_running if result.equal?(AdvisoryLock::HELD)
 
     update!(last_run_at: Time.current, last_result: result)
     Activity.record!(:automation_run, user: nil, automation: kind, automation_label: label, result: result) unless definition.quiet

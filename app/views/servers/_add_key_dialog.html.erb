@@ -39,7 +39,7 @@
       <div data-kind-fields-target="field" data-kinds="keyring" class="add-key-keyring">
         <%= label_tag :public_key_id, t(".keyring_key"), for: "#{dom_id(server, :add_key)}_public_key_id", class: "label" %>
         <%= select_tag :public_key_id,
-              options_for_select(keys.map { |key| [ "#{key.name} — #{key.kind_label}#{" (déjà sur le serveur)" if present.include?(key.fingerprint)}", key.id,
+              options_for_select(keys.map { |key| [ "#{key.name} — #{key.kind_label}#{" #{t(".already_there")}" if present.include?(key.fingerprint)}", key.id,
                                                    { disabled: present.include?(key.fingerprint) } ] },
                                  keys.find { |key| !present.include?(key.fingerprint) }&.id),
               id: "#{dom_id(server, :add_key)}_public_key_id", class: "input mt-1 w-full" %>

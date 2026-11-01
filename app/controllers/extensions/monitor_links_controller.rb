@@ -13,14 +13,14 @@ class MonitorLinksController < ApplicationController
     @integration.links.find_or_initialize_by(external_id: @monitor.monitor_id).update!(server: server, user: current_user)
     apply(server ? Integrations::UptimeKuma::Matcher::Match.new(server, "manual", nil) : nil)
 
-    redirect_back_or_to monitors_path, notice: server ? "Sonde « #{@monitor.name} » rattachée à « #{server.name} »." : "Sonde « #{@monitor.name} » rattachée à aucun serveur."
+    redirect_back_or_to monitors_path, notice: server ? t("monitor_links_controller.attached", monitor_name: @monitor.name, server_name: server.name) : t("monitor_links_controller.detached", monitor_name: @monitor.name)
   end
 
   def destroy
     @integration.links.where(external_id: @monitor.monitor_id).delete_all
     apply(automatic_match)
 
-    redirect_back_or_to monitors_path, notice: "Sonde « #{@monitor.name} » : rattachement automatique#{" à « #{@monitor.server.name} »" if @monitor.server}.", status: :see_other
+    redirect_back_or_to monitors_path, notice: (@monitor.server ? t("monitor_links_controller.automatic_on", monitor_name: @monitor.name, server_name: @monitor.server.name) : t("monitor_links_controller.automatic", monitor_name: @monitor.name)), status: :see_other
   end
 
   private

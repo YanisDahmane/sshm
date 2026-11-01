@@ -17,7 +17,7 @@ class Integrations::OvhTest < ActiveSupport::TestCase
 
   test "fetch reads every chosen product" do
     fake_ovh
-    resources = Integrations::Ovh::Fetch.new(Integrations::Ovh.client(@integration), products: Integrations::Ovh::Fetch::PRODUCTS.map(&:first)).call
+    resources = Integrations::Ovh::Fetch.new(Integrations::Ovh.client(@integration), products: Integrations::Ovh::Fetch::PRODUCTS).call
     by_kind = resources.group_by(&:kind)
 
     assert_equal %w[dedicated dns_record instance ip vps], by_kind.keys.sort
@@ -44,7 +44,7 @@ class Integrations::OvhTest < ActiveSupport::TestCase
   test "sync attaches the resources to the servers" do
     fake_ovh
     summary = @integration.sync!
-    assert_equal "1 instance(s), 1 dédié(s), 1 VPS, 2 bloc(s) IP, 3 enregistrement(s) DNS ; 1 service(s) non rattaché(s)", summary
+    assert_equal "1 instance, 1 dédié, 1 VPS, 2 blocs IP, 3 enregistrements DNS ; 1 service non rattaché", summary
 
     find = ->(kind, name) { OvhResource.find_by!(kind: kind, name: name) }
     assert_equal [ servers(:web), "address", "203.0.113.10" ], find.("dedicated", "web.example.com").then { [ _1.server, _1.matched_by, _1.matched_address ] }

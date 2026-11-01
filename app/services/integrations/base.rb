@@ -5,6 +5,13 @@ class Integrations::Base
   Field = Integrations::Field
 
   class_attribute :key, :label, :description, :icon, :default_interval, instance_writer: false
+
+  # The description of an extension, in the reader's language
+  # (integrations.<key>.description), unless the class sets one.
+  class << self
+    alias_method :set_description, :description
+    def description = set_description || I18n.t("integrations.#{key}.description")
+  end
   self.icon = :bolt
   self.default_interval = 360
 

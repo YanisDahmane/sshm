@@ -76,7 +76,7 @@
               </div>
             </div>
             <div data-controller="modal" class="shrink-0">
-              <button type="button" data-action="modal#open" title="<%= t(".key_details") %>" aria-label="Détails de la clé <%= key.name || t(".unnamed_2") %>"
+              <button type="button" data-action="modal#open" title="<%= t(".key_details") %>" aria-label="<%= t(".details_of", name: key.name || t(".unnamed_2")) %>"
                       class="key-details-button cursor-pointer rounded-md p-1.5 text-ink-3 hover:bg-subtle hover:text-ink-2">
                 <%= icon :information_circle %>
               </button>

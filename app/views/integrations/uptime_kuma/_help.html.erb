@@ -1,11 +1,10 @@
 <div class="integration-help mt-4 rounded-lg border border-line bg-surface px-4 py-3 text-sm text-ink-2">
-  <p class="font-medium text-ink">Créer la clé API</p>
+  <p class="font-medium text-ink"><%= t(".create_api_key") %></p>
   <ol class="mt-1 list-decimal space-y-0.5 pl-5">
-    <li>Dans Uptime Kuma : <em>Paramètres → Clés API → Générer</em> (sans date d'expiration, ou en pensant à la renouveler).</li>
-    <li>Collez-la ci-dessous avec l'adresse de l'instance, puis <em>Tester la connexion</em>.</li>
+    <li><%= t(".step1_html") %></li>
+    <li><%= t(".step2_html") %></li>
   </ol>
   <p class="mt-2 text-xs text-ink-3">
-    Elio lit seulement la page <code class="font-mono">/metrics</code> (la clé ne permet rien d'autre). Les sondes sont rattachées aux serveurs par leurs adresses :
-    pensez à lancer l'inventaire du système pour relever les adresses de chaque serveur (réseau local, WireGuard…).
+    <%= t(".reads_html") %>
   </p>
 </div>

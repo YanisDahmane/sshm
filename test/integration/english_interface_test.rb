@@ -125,6 +125,11 @@ class EnglishInterfaceTest < ActionDispatch::IntegrationTest
     assert_english new_settings_score_provider_path, except: data
   end
 
+  test "the extensions pages" do
+    data = [ ".sidebar-groups", ".account-link", "pre", "code", ".font-mono" ]
+    assert_english settings_integrations_path, except: data
+  end
+
   test "the check finds French" do
     app_settings(:main).update!(default_locale: "fr")
     get root_path

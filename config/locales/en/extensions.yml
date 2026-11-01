@@ -16,6 +16,71 @@ en:
         w1d: 24 hours
         w30d: 30 days
         w365d: 1 year
+      url: Instance address
+      url_hint: 'Elio reads <address>/metrics. Preferably in https: in http, the API key travels in clear.'
+      api_key: API key
+      api_key_hint: Uptime Kuma → Settings → API Keys. It only gives access to /metrics.
+      self_signed: Accept a self-signed certificate
+      self_signed_hint: only for an internal instance whose certificate you know.
+      match_by_ip: By IP address
+      section_matching: Attaching the monitors to the servers
+      match_by_ip_hint: the target of the monitor is an address of a server (public, local network, WireGuard…).
+      match_by_host: By host name
+      match_by_host_hint: the host of the monitor or of its URL is the host name or the SSH host of a server.
+      resolve_dns: Resolve the names in DNS
+      match_by_name: By the name of the monitor
+      match_by_name_hint: the name of the server appears as a whole word in the monitor's (e.g. “[SRV] FR-UTILS-1”).
+      alert_no_monitor: Server without any monitor
+      ignored_groups: Groups exempt from monitors
+      alert_down: Monitor down / back
+      alert_down_hint: complements the notifications of Uptime Kuma without replacing them.
+      alert_cert: Certificate expiring soon
+      cert_days: Certificate threshold (days)
+      alert_uptime: Uptime under a threshold
+      uptime_threshold: Uptime threshold (%)
+      uptime_window: Over
+      alert_maintenance: Monitor in maintenance for a long time
+      maintenance_days: Maintenance threshold (days)
+      http_warning: ". ⚠ The address is in http: the API key travels in clear on the network, prefer https"
+      monitors: Monitors
+      not_metrics: The answer does not look like the /metrics page of Uptime Kuma
+      found:
+        one: "%{count} monitor found"
+        other: "%{count} monitors found"
+      description: 'The monitors of your Uptime Kuma instance, attached to the servers they watch: a “Monitors” tab on each server, servers without a monitor, monitors down and certificates. Read-only, with an API key.'
+      help:
+        create_api_key: Create the API key
+        step1_html: 'In Uptime Kuma: <em>Settings → API Keys → Generate</em> (without an expiry date, or remembering to renew it).'
+        step2_html: Paste it below with the address of the instance, then <em>Test the connection</em>.
+        reads_html: 'Elio only reads the <code class="font-mono">/metrics</code> page (the key allows nothing else). Monitors are attached to the servers by their addresses: remember to run the system inventory to read the addresses of each server (local network, WireGuard…).'
+      link_form:
+        server: "— No server —"
+        server_monitor: Server of the monitor %{monitor_name}
+        attach: Attach
+        back_automatic_attachment: Back to automatic attachment
+      monitor_row:
+        not_attached: not attached
+        attached: Attached %{how}
+      server_tab:
+        all_monitors: All the monitors
+        uptime_kuma_not_synchronized: " (Uptime Kuma not synchronized yet)"
+        attach_existing_monitor: Attach an existing monitor
+        uptime_kuma_monitors: Uptime Kuma monitors
+        synchronized_html: synchronized %{last_synced_at}
+        state: State
+        response: Response
+        uptime_24_h_30: Uptime 24 h · 30 d
+        server: Server
+        monitor_watches_server: No monitor watches this server
+      sync:
+        summary: "%{monitors}, %{attached} attached; %{without}"
+        monitors:
+          one: "%{count} monitor"
+          other: "%{count} monitors"
+        without:
+          one: "%{count} server without monitor"
+          other: "%{count} servers without monitor"
+      resolve_dns_hint: for the HTTP monitors of a site hosted on a server (e.g. https://app.example.com → its IP).
     ovh:
       health:
         expiring:
@@ -25,3 +90,238 @@ en:
         no_reverse: No reverse DNS for %{ip}
         reverse_mismatch: Reverse DNS of %{ip} (%{reverse}) ≠ host name
         no_dns: No OVH DNS record points to this server
+      endpoint: Endpoint
+      ovh_eu: OVHcloud Europe (ovh-eu)
+      ovh_ca: OVHcloud Canada (ovh-ca)
+      ovh_us: OVHcloud US (ovh-us)
+      consumer_key_hint: 'created with GET rights only: see “Rights to give to the API key”.'
+      products: Resources to read
+      zones: DNS zones
+      zones_hint: empty = every zone of the account.
+      projects: Public Cloud projects
+      projects_placeholder: project identifiers
+      projects_hint: empty = every project.
+      alert_expiring: OVH service expiring soon
+      expiring_days: Expiry threshold (days)
+      expiring_ignore_auto_renew: Ignore the services renewed automatically
+      alert_firewall_disabled: OVH network firewall disabled on an IP of a server
+      alert_reverse_mismatch: Reverse DNS missing or different from the host name
+      alert_server_without_dns: Server with an OVH IP but no DNS record
+      alert_dns_outside: DNS record to an IP outside the fleet
+      alert_unmanaged_service: OVH service attached to no server of the fleet
+      alert_unmanaged_service_hint: a machine paid for but not followed by Elio.
+      writable: ". ⚠ This key can also write (%{writes_first}): create a read-only one again"
+      valid_key: valid key (%{status})
+      validated: validated
+      description: 'Your OVHcloud resources attached to the servers: service (offer, datacenter, expiry), IPs and reverse, network firewall and anti-DDoS, DNS records that point to each server. Read-only API key.'
+      help:
+        create_key: create the key (%{value})
+        rights_give_api_key: Rights to give to the API key
+        rights_ovhcloud_api_key: Rights of the OVHcloud API key
+        close: Close
+        open_ovhcloud_key_creation: 'Open the OVHcloud key creation page, already filled in with these rights:'
+        sign_choose_validity_unlimited: Sign in, choose a validity (“Unlimited” or a date to renew), then confirm.
+        never_give_post_put: 'Never give POST, PUT or DELETE rights: the extension does not need them.'
+        intro_html: Elio only <strong class="font-medium text-ink">reads</strong> the OVHcloud API (GET requests). Create a key limited to these rights.
+        rights_html: 'Only <strong>GET</strong> rights, according to the resources checked (save after changing the resources to update the list):'
+        copy_html: 'Copy here the <em>Application Key</em>, the <em>Application Secret</em> and the <em>Consumer Key</em>, then “Test the connection”: Elio checks the rights and warns if the key can write.'
+      link_form:
+        server: "— No server —"
+        server_2: Server of %{resource_name}
+        attach: Attach
+        back_automatic_attachment: Back to automatic attachment
+      server_tab:
+        not_synchronized_yet: " (not synchronized yet)"
+        see_resources_not_attached: See the resources not attached
+        region: Region
+        datacenter: Datacenter
+        text: 'on'
+        'off': 'off'
+        ovhcloud_resource_attached_server: No OVHcloud resource is attached to this server
+        attached_html: attached %{ovh_match_label}
+        state: State
+        ovh_service: OVH service
+        ovh_ips_reverse_network: OVH IPs, reverse and network firewall
+        reverse: Reverse of
+        ovh_network_firewall_not: OVH network firewall not configured.
+        firewall: Firewall of
+        anti_ddos: Anti-DDoS of
+        dns_records_server: DNS records to this server
+        dns_record_zones_read: No DNS record of the zones read points to this server.
+      client:
+        unknown_endpoint: 'Unknown OVH endpoint: %{endpoint}'
+        unreadable: Unreadable OVHcloud answer for %{path}
+        unreadable_time: Unreadable OVHcloud time
+      sync:
+        summary: "%{parts}; %{unattached}"
+        no_resource: No resource
+        unattached:
+          one: "%{count} service not attached"
+          other: "%{count} services not attached"
+        counts:
+          instance:
+            one: "%{count} instance"
+            other: "%{count} instances"
+          dedicated:
+            one: "%{count} dedicated"
+            other: "%{count} dedicated"
+          vps:
+            one: "%{count} VPS"
+            other: "%{count} VPS"
+          ip:
+            one: "%{count} IP block"
+            other: "%{count} IP blocks"
+          dns_record:
+            one: "%{count} DNS record"
+            other: "%{count} DNS records"
+      product_labels:
+        ip: IP addresses (type
+        firewall: Network firewall of the IPs
+        mitigation: Anti-DDoS (mitigation)
+        dns: DNS zones (A
+        dedicated: Dedicated servers
+        vps: VPS
+        cloud: Public Cloud instances
+    http:
+      too_large: Answer of %{service} too large (more than %{megabyte} MB)
+      forbidden: "%{service} refuses the access (%{code}): check the API key"
+      answered: "%{service} answered %{code}: %{truncate}"
+      unreachable: 'Cannot reach %{service} (%{class}: %{message})'
+      invalid_url: 'Invalid address: %{url}'
+    sync_job:
+      turned_off: 'Extension turned off: nothing to do'
+      internal_error: Internal error (%{class})
+  integration:
+    sync_label: "%{label} sync"
+    required: "%{label}: required to turn the extension on"
+  uptime_kuma_monitor:
+    matches:
+      ip: by its IP address
+      url: by the host of its URL
+      dns: by DNS resolution
+      name: by its name
+      manual: by hand
+  ovh_resource:
+    matches:
+      address: by its IP address
+      service: by the OVH service of the IP
+      name: by its name
+      cname: by the targeted record
+      manual: by hand
+    kinds:
+      ip: IP address
+      dns_record: DNS record
+      dedicated: Dedicated server
+      vps: VPS
+      instance: Public Cloud instance
+  monitors:
+    index:
+      monitors: Monitors
+      down: Down
+      not_attached: Not attached
+      server: to no server
+      servers_without_monitor: Servers without monitor
+      all: All
+      name_host_url: Name, host, URL…
+      search_monitor: Search for a monitor
+      monitor_matches: No monitor matches.
+      not_synchronized_uptime_kuma: Not synchronized with Uptime Kuma yet.
+      uptime_kuma_monitors_attached: Uptime Kuma monitors attached to the servers of the fleet
+      synchronized_html: ", synchronized %{last_synced_at}"
+      last_sync_failed_html: 'Last sync failed: %{last_error}'
+      filters: Filters
+      server_2: Server
+      groups: Groups
+      each_server_watched_least: Each server is watched by at least one monitor.
+      state: State
+      response: Response
+      uptime_24_h_30: Uptime 24 h · 30 d
+      attach: Attach to
+  ovh:
+    index:
+      services: Services
+      dedicated_vps_instances: dedicated, VPS, instances
+      not_attached: Not attached
+      services_outside_fleet: services outside the fleet
+      expiring_soon: Expiring soon
+      dns_outside_fleet: DNS outside the fleet
+      ip_addresses: IP addresses
+      dns: DNS
+      name_ip_target: Name, IP, target…
+      search: Search
+      outside_fleet_only: Outside the fleet only
+      not_attached_only: Not attached only
+      text: 'on'
+      'off': 'off'
+      outside_fleet: outside the fleet
+      not_attached_2: not attached
+      resource_matches: No resource matches.
+      not_synchronized_ovhcloud_yet: Not synchronized with OVHcloud yet.
+      resources_ovhcloud_account_attached: Resources of the OVHcloud account, attached to the servers of the fleet
+      synchronized_html: ", synchronized %{last_synced_at}"
+      last_sync_failed_html: 'Last sync failed: %{last_error}'
+      resources: Resources
+      ip_block: IP block
+      ovh_service: OVH service
+      server: Server
+      attach: Attach to
+  settings:
+    integrations:
+      field:
+        leave_empty_keep: "•••••••• (leave empty to keep it)"
+        optional: "(optional)"
+      test_result:
+        succeeded: 'Connection succeeded: '
+        failed: 'Failed: '
+      edit:
+        save: Save
+        sync_now: Sync now
+        last_sync_failed_html: 'Last sync failed: %{last_error}'
+        synchronized_html: Synchronized %{last_synced_at}.
+        turn_extension: Turn the extension on
+        tabs_pages_alerts_appear: "— its tabs, pages and alerts appear; a sync is started."
+        test_connection: Test the connection
+      index:
+        text: 'On'
+        'off': 'Off'
+        configure: Configure
+        configure_turn: Configure and turn on
+        synchronized_html: Synchronized %{last_synced_at}
+        not_synchronized_yet: Not synchronized yet
+        extension_available: No extension available.
+        intro_html: 'Extensions connect Elio to your other tools, <strong class="font-medium text-ink-2">read-only</strong>: Elio creates, changes and deletes nothing there. A turned off extension appears nowhere in the interface.'
+  monitor_links_controller:
+    attached: Monitor “%{monitor_name}” attached to “%{server_name}”.
+    detached: Monitor “%{monitor_name}” attached to no server.
+    automatic: 'Monitor “%{monitor_name}”: automatic attachment.'
+    automatic_on: 'Monitor “%{monitor_name}”: automatic attachment to “%{server_name}”.'
+  ovh_links_controller:
+    attached: "“%{resource_name}” attached to “%{server_name}”."
+    detached: "“%{resource_name}” attached to no server."
+    automatic: "“%{resource_name}”: back to automatic attachment (sync started)."
+  integrations_controller:
+    saved_off: Extension %{label} saved (off).
+    turn_on_first: Turn the extension on before synchronizing it.
+    sync_started: "%{label} sync started."
+    saved: Extension %{label} saved.
+    saved_enabled: 'Extension %{label} saved and turned on: first sync started.'
+  ovh_helper:
+    from_source: from %{source}
+    no_firewall: 'OVH: no firewall'
+    in_days:
+      one: in %{count} day
+      other: in %{count} days
+    verdicts:
+      permit: 'OVH: allowed'
+      deny: 'OVH: blocked'
+      restricted: 'OVH: limited sources'
+    auto_renew: "(auto renewal)"
+    permit: allow
+    deny: deny
+  uptime_kuma_helper:
+    states:
+      up: Up
+      down: Down
+      pending: Pending
+      maintenance: Maintenance
+      unknown: Unknown

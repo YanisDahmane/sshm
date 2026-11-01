@@ -4,50 +4,48 @@
 class Integrations::UptimeKuma < Integrations::Base
   self.key = "uptime_kuma"
   self.label = "Uptime Kuma"
-  self.description = "Les sondes de votre instance Uptime Kuma, rattachées aux serveurs qu'elles surveillent : onglet « Sondes » sur chaque serveur, " \
-                     "serveurs sans sonde, sondes hors ligne et certificats. Lecture seule, avec une clé API."
   self.icon = :signal
   self.default_interval = 15
 
-  WINDOWS = [ [ "1d", "24 heures" ], [ "30d", "30 jours" ], [ "365d", "1 an" ] ].freeze
+  WINDOWS = %w[1d 30d 365d].freeze # labels: integrations.uptime_kuma.windows.w<window>
 
   class << self
     def fields
       [
-        Integrations::Field.new(key: :url, label: "Adresse de l'instance", type: :url, required: true, placeholder: "https://uptime.example.com",
-                  hint: "Elio lit <adresse>/metrics. En https de préférence : en http, la clé API circule en clair."),
-        Integrations::Field.new(key: :api_key, label: "Clé API", secret: true, required: true, hint: "Uptime Kuma → Paramètres → Clés API. Elle ne donne accès qu'à /metrics."),
-        Integrations::Field.new(key: :allow_self_signed, label: "Accepter un certificat auto-signé", type: :boolean, default: false,
-                  hint: "seulement pour une instance interne dont vous connaissez le certificat."),
+        Integrations::Field.new(key: :url, label: I18n.t("integrations.uptime_kuma.url"), type: :url, required: true, placeholder: "https://uptime.example.com",
+                  hint: I18n.t("integrations.uptime_kuma.url_hint")),
+        Integrations::Field.new(key: :api_key, label: I18n.t("integrations.uptime_kuma.api_key"), secret: true, required: true, hint: I18n.t("integrations.uptime_kuma.api_key_hint")),
+        Integrations::Field.new(key: :allow_self_signed, label: I18n.t("integrations.uptime_kuma.self_signed"), type: :boolean, default: false,
+                  hint: I18n.t("integrations.uptime_kuma.self_signed_hint")),
 
-        Integrations::Field.new(key: :match_by_ip, label: "Par adresse IP", type: :boolean, default: true, section: "Rattachement des sondes aux serveurs",
-                  hint: "la cible de la sonde est une adresse d'un serveur (publique, réseau local, WireGuard…)."),
-        Integrations::Field.new(key: :match_by_host, label: "Par nom d'hôte", type: :boolean, default: true, section: "Rattachement des sondes aux serveurs",
-                  hint: "l'hôte de la sonde ou de son URL est le hostname ou l'hôte SSH d'un serveur."),
-        Integrations::Field.new(key: :resolve_dns, label: "Résoudre les noms en DNS", type: :boolean, default: false, section: "Rattachement des sondes aux serveurs",
-                  hint: "pour les sondes HTTP d'un site hébergé sur un serveur (ex. https://app.example.com → son IP)."),
-        Integrations::Field.new(key: :match_by_name, label: "Par le nom de la sonde", type: :boolean, default: true, section: "Rattachement des sondes aux serveurs",
-                  hint: "le nom du serveur apparaît en mot entier dans celui de la sonde (ex. « [SRV] FR-UTILS-1 »)."),
+        Integrations::Field.new(key: :match_by_ip, label: I18n.t("integrations.uptime_kuma.match_by_ip"), type: :boolean, default: true, section: I18n.t("integrations.uptime_kuma.section_matching"),
+                  hint: I18n.t("integrations.uptime_kuma.match_by_ip_hint")),
+        Integrations::Field.new(key: :match_by_host, label: I18n.t("integrations.uptime_kuma.match_by_host"), type: :boolean, default: true, section: I18n.t("integrations.uptime_kuma.section_matching"),
+                  hint: I18n.t("integrations.uptime_kuma.match_by_host_hint")),
+        Integrations::Field.new(key: :resolve_dns, label: I18n.t("integrations.uptime_kuma.resolve_dns"), type: :boolean, default: false, section: I18n.t("integrations.uptime_kuma.section_matching"),
+                  hint: I18n.t("integrations.uptime_kuma.resolve_dns_hint")),
+        Integrations::Field.new(key: :match_by_name, label: I18n.t("integrations.uptime_kuma.match_by_name"), type: :boolean, default: true, section: I18n.t("integrations.uptime_kuma.section_matching"),
+                  hint: I18n.t("integrations.uptime_kuma.match_by_name_hint")),
 
-        Integrations::Field.new(key: :alert_no_monitor, label: "Serveur sans aucune sonde", type: :boolean, default: true, section: "Alertes"),
-        Integrations::Field.new(key: :no_monitor_ignored_groups, label: "Groupes dispensés de sonde", type: :checkboxes, default: [], section: "Alertes",
+        Integrations::Field.new(key: :alert_no_monitor, label: I18n.t("integrations.uptime_kuma.alert_no_monitor"), type: :boolean, default: true, section: "Alertes"),
+        Integrations::Field.new(key: :no_monitor_ignored_groups, label: I18n.t("integrations.uptime_kuma.ignored_groups"), type: :checkboxes, default: [], section: "Alertes",
                   options: ServerGroup.order(:name).map { |group| [ group.id.to_s, group.name ] }),
-        Integrations::Field.new(key: :alert_down, label: "Sonde hors ligne / de retour", type: :boolean, default: false, section: "Alertes",
-                  hint: "complète les notifications d'Uptime Kuma sans les remplacer."),
-        Integrations::Field.new(key: :alert_cert, label: "Certificat bientôt expiré", type: :boolean, default: false, section: "Alertes"),
-        Integrations::Field.new(key: :cert_days, label: "Seuil du certificat (jours)", type: :number, default: 14, section: "Alertes"),
-        Integrations::Field.new(key: :alert_uptime, label: "Disponibilité sous un seuil", type: :boolean, default: false, section: "Alertes"),
-        Integrations::Field.new(key: :uptime_threshold, label: "Seuil de disponibilité (%)", type: :number, default: 99, section: "Alertes"),
-        Integrations::Field.new(key: :uptime_window, label: "Sur", type: :select, options: WINDOWS.map(&:reverse), default: "30d", section: "Alertes"),
-        Integrations::Field.new(key: :alert_maintenance, label: "Sonde en maintenance depuis longtemps", type: :boolean, default: false, section: "Alertes"),
-        Integrations::Field.new(key: :maintenance_days, label: "Seuil de maintenance (jours)", type: :number, default: 7, section: "Alertes")
+        Integrations::Field.new(key: :alert_down, label: I18n.t("integrations.uptime_kuma.alert_down"), type: :boolean, default: false, section: "Alertes",
+                  hint: I18n.t("integrations.uptime_kuma.alert_down_hint")),
+        Integrations::Field.new(key: :alert_cert, label: I18n.t("integrations.uptime_kuma.alert_cert"), type: :boolean, default: false, section: "Alertes"),
+        Integrations::Field.new(key: :cert_days, label: I18n.t("integrations.uptime_kuma.cert_days"), type: :number, default: 14, section: "Alertes"),
+        Integrations::Field.new(key: :alert_uptime, label: I18n.t("integrations.uptime_kuma.alert_uptime"), type: :boolean, default: false, section: "Alertes"),
+        Integrations::Field.new(key: :uptime_threshold, label: I18n.t("integrations.uptime_kuma.uptime_threshold"), type: :number, default: 99, section: "Alertes"),
+        Integrations::Field.new(key: :uptime_window, label: I18n.t("integrations.uptime_kuma.uptime_window"), type: :select, options: WINDOWS.map { |window| [ I18n.t("integrations.uptime_kuma.windows.w#{window}"), window ] }, default: "30d", section: "Alertes"),
+        Integrations::Field.new(key: :alert_maintenance, label: I18n.t("integrations.uptime_kuma.alert_maintenance"), type: :boolean, default: false, section: "Alertes"),
+        Integrations::Field.new(key: :maintenance_days, label: I18n.t("integrations.uptime_kuma.maintenance_days"), type: :number, default: 7, section: "Alertes")
       ]
     end
 
     def test_connection(integration)
       result = fetch(integration)
-      message = "#{result.monitors.size} sonde(s) trouvée(s)#{" (Uptime Kuma #{result.version})" if result.version}"
-      message += ". ⚠ Adresse en http : la clé API circule en clair sur le réseau, préférez https" if integration.value(:url).to_s.start_with?("http://")
+      message = I18n.t("integrations.uptime_kuma.found", count: result.monitors.size) + (result.version ? " (Uptime Kuma #{result.version})" : "")
+      message += I18n.t("integrations.uptime_kuma.http_warning") if integration.value(:url).to_s.start_with?("http://")
       message
     end
 
@@ -56,9 +54,9 @@ class Integrations::UptimeKuma < Integrations::Base
       Integrations::UptimeKuma::Sync.new(integration, result).call
     end
 
-    def server_tabs = [ { key: "monitors", label: "Sondes", count: ->(server) { server.uptime_kuma_monitors.size } } ]
+    def server_tabs = [ { key: "monitors", label: I18n.t("integrations.uptime_kuma.monitors"), count: ->(server) { server.uptime_kuma_monitors.size } } ]
 
-    def sidebar_links = [ { label: "Sondes", path: :monitors_path, icon: :signal, controller: "monitors" } ]
+    def sidebar_links = [ { label: I18n.t("integrations.uptime_kuma.monitors"), path: :monitors_path, icon: :signal, controller: "monitors" } ]
 
     def help_partial = "integrations/uptime_kuma/help"
 
@@ -96,7 +94,7 @@ class Integrations::UptimeKuma < Integrations::Base
       result = Integrations::Http.get("#{integration.value(:url).to_s.chomp("/")}/metrics", service: "Uptime Kuma", basic_auth: [ "", integration.value(:api_key).to_s ],
                                       verify_ssl: !integration.value(:allow_self_signed))
       parsed = Integrations::UptimeKuma::Metrics.parse(result)
-      raise Integrations::Error, "La réponse ne ressemble pas à la page /metrics d'Uptime Kuma" if parsed.monitors.empty? && parsed.version.nil?
+      raise Integrations::Error, I18n.t("integrations.uptime_kuma.not_metrics") if parsed.monitors.empty? && parsed.version.nil?
 
       parsed
     end

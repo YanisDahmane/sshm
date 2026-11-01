@@ -19,7 +19,7 @@ class Integrations::UptimeKumaTest < ActiveSupport::TestCase
 
   test "test_connection reads /metrics with the API key" do
     uptime_kuma_metrics
-    assert_equal "2 sonde(s) trouvée(s) (Uptime Kuma 2.5.6)", Integrations::UptimeKuma.test_connection(@integration)
+    assert_equal "2 sondes trouvées (Uptime Kuma 2.5.6)", Integrations::UptimeKuma.test_connection(@integration)
     url, options = @uptime_kuma_requests.sole
     assert_equal [ "https://uptime.example.test/metrics", [ "", "uk-key" ], true, "Uptime Kuma" ], [ url, options[:basic_auth], options[:verify_ssl], options[:service] ]
 
@@ -42,7 +42,7 @@ class Integrations::UptimeKumaTest < ActiveSupport::TestCase
 
   test "sync stores the probes, attaches them and summarizes" do
     uptime_kuma_metrics
-    assert_equal "2 sonde(s), 1 rattachée(s) ; 2 serveur(s) sans sonde", @integration.sync!
+    assert_equal "2 sondes, 1 rattachée(s) ; 2 serveurs sans sonde", @integration.sync!
 
     utils = UptimeKumaMonitor.find_by!(monitor_id: "64")
     assert_equal [ servers(:web), "ip", "10.8.0.100" ], [ utils.server, utils.matched_by, utils.matched_address ]

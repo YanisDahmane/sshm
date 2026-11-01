@@ -5,37 +5,35 @@
 class Integrations::Ovh < Integrations::Base
   self.key = "ovh"
   self.label = "OVHcloud"
-  self.description = "Vos ressources OVHcloud rattachées aux serveurs : service (offre, datacenter, expiration), IP et reverse, firewall réseau et anti-DDoS, " \
-                     "enregistrements DNS qui pointent vers chaque serveur. Clé API en lecture seule."
   self.icon = :globe
   self.default_interval = 360
 
   class << self
     def fields
       [
-        Integrations::Field.new(key: :endpoint, label: "Point d'accès", type: :select, default: "ovh-eu",
-                  options: [ [ "OVHcloud Europe (ovh-eu)", "ovh-eu" ], [ "OVHcloud Canada (ovh-ca)", "ovh-ca" ], [ "OVHcloud US (ovh-us)", "ovh-us" ] ]),
+        Integrations::Field.new(key: :endpoint, label: I18n.t("integrations.ovh.endpoint"), type: :select, default: "ovh-eu",
+                  options: [ [ I18n.t("integrations.ovh.ovh_eu"), "ovh-eu" ], [ I18n.t("integrations.ovh.ovh_ca"), "ovh-ca" ], [ I18n.t("integrations.ovh.ovh_us"), "ovh-us" ] ]),
         Integrations::Field.new(key: :application_key, label: "Application Key", required: true),
         Integrations::Field.new(key: :application_secret, label: "Application Secret", secret: true, required: true),
         Integrations::Field.new(key: :consumer_key, label: "Consumer Key", secret: true, required: true,
-                  hint: "créée avec seulement des droits GET : voir « Droits à donner à la clé API »."),
+                  hint: I18n.t("integrations.ovh.consumer_key_hint")),
 
-        Integrations::Field.new(key: :products, label: "Ressources à lire", type: :checkboxes, section: "Ressources",
-                  options: Integrations::Ovh::Fetch::PRODUCTS, default: Integrations::Ovh::Fetch::PRODUCTS.map(&:first)),
-        Integrations::Field.new(key: :zones, label: "Zones DNS", type: :list, default: [], section: "Ressources", placeholder: "example.com, example.fr",
-                  hint: "vide = toutes les zones du compte."),
-        Integrations::Field.new(key: :projects, label: "Projets Public Cloud", type: :list, default: [], section: "Ressources", placeholder: "identifiants de projets",
-                  hint: "vide = tous les projets."),
+        Integrations::Field.new(key: :products, label: I18n.t("integrations.ovh.products"), type: :checkboxes, section: "Ressources",
+                  options: Integrations::Ovh::Fetch::PRODUCTS.map { |product| [ product, I18n.t("integrations.ovh.product_labels.#{product}") ] }, default: Integrations::Ovh::Fetch::PRODUCTS),
+        Integrations::Field.new(key: :zones, label: I18n.t("integrations.ovh.zones"), type: :list, default: [], section: "Ressources", placeholder: "example.com, example.fr",
+                  hint: I18n.t("integrations.ovh.zones_hint")),
+        Integrations::Field.new(key: :projects, label: I18n.t("integrations.ovh.projects"), type: :list, default: [], section: "Ressources", placeholder: I18n.t("integrations.ovh.projects_placeholder"),
+                  hint: I18n.t("integrations.ovh.projects_hint")),
 
-        Integrations::Field.new(key: :alert_expiring, label: "Service OVH bientôt expiré", type: :boolean, default: true, section: "Alertes"),
-        Integrations::Field.new(key: :expiring_days, label: "Seuil d'expiration (jours)", type: :number, default: 30, section: "Alertes"),
-        Integrations::Field.new(key: :expiring_ignore_auto_renew, label: "Ignorer les services en renouvellement automatique", type: :boolean, default: true, section: "Alertes"),
-        Integrations::Field.new(key: :alert_firewall_disabled, label: "Firewall réseau OVH désactivé sur une IP d'un serveur", type: :boolean, default: false, section: "Alertes"),
-        Integrations::Field.new(key: :alert_reverse_mismatch, label: "Reverse DNS absent ou différent du hostname", type: :boolean, default: false, section: "Alertes"),
-        Integrations::Field.new(key: :alert_server_without_dns, label: "Serveur avec une IP OVH mais aucun enregistrement DNS", type: :boolean, default: false, section: "Alertes"),
-        Integrations::Field.new(key: :alert_dns_outside, label: "Enregistrement DNS vers une IP hors du parc", type: :boolean, default: false, section: "Alertes"),
-        Integrations::Field.new(key: :alert_unmanaged_service, label: "Service OVH rattaché à aucun serveur du parc", type: :boolean, default: false, section: "Alertes",
-                  hint: "une machine payée mais pas suivie par Elio.")
+        Integrations::Field.new(key: :alert_expiring, label: I18n.t("integrations.ovh.alert_expiring"), type: :boolean, default: true, section: "Alertes"),
+        Integrations::Field.new(key: :expiring_days, label: I18n.t("integrations.ovh.expiring_days"), type: :number, default: 30, section: "Alertes"),
+        Integrations::Field.new(key: :expiring_ignore_auto_renew, label: I18n.t("integrations.ovh.expiring_ignore_auto_renew"), type: :boolean, default: true, section: "Alertes"),
+        Integrations::Field.new(key: :alert_firewall_disabled, label: I18n.t("integrations.ovh.alert_firewall_disabled"), type: :boolean, default: false, section: "Alertes"),
+        Integrations::Field.new(key: :alert_reverse_mismatch, label: I18n.t("integrations.ovh.alert_reverse_mismatch"), type: :boolean, default: false, section: "Alertes"),
+        Integrations::Field.new(key: :alert_server_without_dns, label: I18n.t("integrations.ovh.alert_server_without_dns"), type: :boolean, default: false, section: "Alertes"),
+        Integrations::Field.new(key: :alert_dns_outside, label: I18n.t("integrations.ovh.alert_dns_outside"), type: :boolean, default: false, section: "Alertes"),
+        Integrations::Field.new(key: :alert_unmanaged_service, label: I18n.t("integrations.ovh.alert_unmanaged_service"), type: :boolean, default: false, section: "Alertes",
+                  hint: I18n.t("integrations.ovh.alert_unmanaged_service_hint"))
       ]
     end
 
@@ -53,9 +51,9 @@ class Integrations::Ovh < Integrations::Base
       missing = Integrations::Ovh::Fetch.rights(products(integration)).reject do |path|
         rules.any? { |rule| rule["method"].in?(%w[GET ALL]) && File.fnmatch(rule["path"], path) }
       end
-      message = "clé valide (#{credential["status"] || "validée"})"
+      message = I18n.t("integrations.ovh.valid_key", status: credential["status"] || I18n.t("integrations.ovh.validated"))
       message += ". Droits manquants : #{missing.map { |path| "GET #{path}" }.join(", ")}" if missing.any?
-      message += ". ⚠ Cette clé permet aussi d'écrire (#{writes.first(4).join(", ")}) : refaites-en une en lecture seule" if writes.any?
+      message += I18n.t("integrations.ovh.writable", writes_first: (writes.first(4).join(", "))) if writes.any?
       message
     end
 

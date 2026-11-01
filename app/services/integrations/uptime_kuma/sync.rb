@@ -36,7 +36,7 @@ class Integrations::UptimeKuma::Sync
 
     attached = UptimeKumaMonitor.attached.count
     without = servers.count { |server| UptimeKumaMonitor.where(server: server).none? }
-    "#{@result.monitors.size} sonde(s), #{attached} rattachée(s) ; #{without} serveur(s) sans sonde"
+    I18n.t("integrations.uptime_kuma.sync.summary", monitors: I18n.t("integrations.uptime_kuma.sync.monitors", count: @result.monitors.size), attached: attached, without: I18n.t("integrations.uptime_kuma.sync.without", count: without))
   end
 
   private

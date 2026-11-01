@@ -53,13 +53,13 @@ class ImageRegistry::Client
 
     fields = params.to_s.scan(/(\w+)="([^"]*)"/).to_h
     realm = URI(fields.fetch("realm") { raise ImageRegistry::Error, "Authentification du registre illisible" })
-    raise ImageRegistry::Error, "Adresse d'authentification refusée (HTTPS seulement)" unless realm.is_a?(URI::HTTPS)
+    raise ImageRegistry::Error, I18n.t("image_registry.client.auth_https_only") unless realm.is_a?(URI::HTTPS)
 
     realm.query = URI.encode_www_form({ service: fields["service"], scope: fields["scope"] || "repository:#{reference.repository}:pull" }.compact)
     request = Net::HTTP::Get.new(realm, "User-Agent" => "Elio")
     request.basic_auth(user, password) if user
     response = http(realm) { |connection| connection.request(request) }
-    raise ImageRegistry::Error, "Jeton du registre refusé (HTTP #{response.code})" unless response.is_a?(Net::HTTPSuccess)
+    raise ImageRegistry::Error, I18n.t("image_registry.client.token_refused", code: response.code) unless response.is_a?(Net::HTTPSuccess)
 
     token = JSON.parse(response.body).then { |body| body["token"] || body["access_token"] }
     raise ImageRegistry::Error, I18n.t("image_registry.client.unreadable_token") if token.blank?

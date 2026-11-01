@@ -45,7 +45,7 @@ class ApplicationController < ActionController::Base
   def require_two_factor_setup
     return unless current_user&.two_factor_required?
 
-    redirect_to main_app.account_path, alert: "La double authentification est obligatoire pour votre rôle : activez-la pour continuer."
+    redirect_to main_app.account_path, alert: t("flash.two_factor.mandatory")
   end
 
   # Until the first admin exists, every page leads to the setup page. Once

@@ -15,7 +15,7 @@ class OvhLinksController < ApplicationController
     resource.update!(server: server, matched_by: server ? "manual" : nil, matched_address: nil)
     [ previous, server ].compact.uniq.each(&:refresh_health!)
 
-    redirect_back_or_to ovh_path, notice: server ? "« #{resource.name} » rattaché à « #{server.name} »." : "« #{resource.name} » rattaché à aucun serveur."
+    redirect_back_or_to ovh_path, notice: server ? t("ovh_links_controller.attached", resource_name: resource.name, server_name: server.name) : t("ovh_links_controller.detached", resource_name: resource.name)
   end
 
   def destroy
@@ -23,6 +23,6 @@ class OvhLinksController < ApplicationController
     @integration.links.where(external_id: resource.link_key).delete_all
     task = @integration.enqueue_sync!
 
-    redirect_back_or_to task_path(task), notice: "« #{resource.name} » : retour au rattachement automatique (synchronisation lancée).", status: :see_other
+    redirect_back_or_to task_path(task), notice: t("ovh_links_controller.automatic", resource_name: resource.name), status: :see_other
   end
 end

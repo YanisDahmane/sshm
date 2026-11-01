@@ -28,9 +28,8 @@ class Integrations::Ovh::Sync
     servers.each(&:refresh_health!)
 
     counts = OvhResource.group(:kind).count
-    parts = { "instance" => "instance(s)", "dedicated" => "dédié(s)", "vps" => "VPS", "ip" => "bloc(s) IP", "dns_record" => "enregistrement(s) DNS" }
-              .filter_map { |kind, label| "#{counts[kind]} #{label}" if counts[kind] }
-    "#{parts.join(", ").presence || "Aucune ressource"} ; #{OvhResource.services.unattached.count} service(s) non rattaché(s)"
+    parts = %w[instance dedicated vps ip dns_record].filter_map { |kind| I18n.t("integrations.ovh.sync.counts.#{kind}", count: counts[kind]) if counts[kind] }
+    I18n.t("integrations.ovh.sync.summary", parts: parts.join(", ").presence || I18n.t("integrations.ovh.sync.no_resource"), unattached: I18n.t("integrations.ovh.sync.unattached", count: OvhResource.services.unattached.count))
   end
 
   private

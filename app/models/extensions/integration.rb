@@ -101,7 +101,7 @@ class Integration < ApplicationRecord
 
   # Background synchronization, followed on the "Tâches" page.
   def enqueue_sync!(user: Current.user)
-    task = BackgroundTask.enqueue!(kind: "integration", label: "Synchronisation #{label}", servers: [], user: user)
+    task = BackgroundTask.enqueue!(kind: "integration", label: I18n.t("integration.sync_label", label: label), servers: [], user: user)
     Integrations::SyncJob.perform_later(self, task)
     task
   end
@@ -130,7 +130,7 @@ class Integration < ApplicationRecord
     return unless enabled? && self.class.registry.key?(kind.to_s)
 
     fields.select(&:required).each do |field|
-      errors.add(:base, "#{field.label} : obligatoire pour activer l'extension") if value(field.key).blank?
+      errors.add(:base, I18n.t("integration.required", label: field.label)) if value(field.key).blank?
     end
   end
 end

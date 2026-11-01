@@ -20,17 +20,17 @@ module Integrations::Http
       http.request(request) do |answer|
         answer.read_body do |chunk|
           body << chunk
-          raise Integrations::Error, "Réponse de #{service} trop volumineuse (plus de #{MAX_BODY / 1.megabyte} Mo)" if body.bytesize > MAX_BODY
+          raise Integrations::Error, I18n.t("integrations.http.too_large", service: service, megabyte: (MAX_BODY / 1.megabyte)) if body.bytesize > MAX_BODY
         end
       end
     end
     case response
-    when Net::HTTPUnauthorized, Net::HTTPForbidden then raise Integrations::Error, "#{service} refuse l'accès (#{response.code}) : vérifiez la clé API"
+    when Net::HTTPUnauthorized, Net::HTTPForbidden then raise Integrations::Error, I18n.t("integrations.http.forbidden", service: service, code: response.code)
     when Net::HTTPSuccess then body
-    else raise Integrations::Error, "#{service} a répondu #{response.code} : #{body.truncate(200)}"
+    else raise Integrations::Error, I18n.t("integrations.http.answered", service: service, code: response.code, truncate: (body.truncate(200)))
     end
   rescue SocketError, SystemCallError, IOError, Timeout::Error, OpenSSL::SSL::SSLError, Net::HTTPBadResponse, Zlib::Error => e
-    raise Integrations::Error, "Impossible de joindre #{service} (#{e.class}: #{e.message})"
+    raise Integrations::Error, I18n.t("integrations.http.unreachable", service: service, class: e.class, message: e.message)
   end
 
   def self.parse(url)
@@ -39,7 +39,7 @@ module Integrations::Http
 
     uri
   rescue URI::InvalidURIError
-    raise Integrations::Error, "Adresse invalide : #{url}"
+    raise Integrations::Error, I18n.t("integrations.http.invalid_url", url: url)
   end
   private_class_method :parse
 end

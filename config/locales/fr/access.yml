@@ -84,6 +84,7 @@ fr:
       recognize:
         one: Si vous la reconnaissez, ajoutez-la avec le bouton « Ajouter au trousseau » ; sinon supprimez-la.
         other: Si vous les reconnaissez, ajoutez-les avec le bouton « Ajouter au trousseau » ; sinon supprimez-les.
+      details_of: Détails de la clé %{name}
   servers:
     add_key_dialog:
       keyring: Depuis le trousseau
@@ -103,6 +104,7 @@ fr:
       optional: "(facultative)"
       add_server: Ajouter sur le serveur
       content_hint_html: Contenu du fichier %{extension}. Elle sera aussi enregistrée dans le trousseau.
+      already_there: "(déjà sur le serveur)"
     ssh_status:
       ssh_connection_never_tested: Connexion SSH jamais testée
       key_refused: Clé refusée

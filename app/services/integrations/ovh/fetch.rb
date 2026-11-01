@@ -4,10 +4,7 @@
 class Integrations::Ovh::Fetch
   Resource = Data.define(:kind, :external_id, :name, :data, :addresses, :expires_at)
 
-  PRODUCTS = [
-    [ "ip", "Adresses IP (type, service, reverse)" ], [ "firewall", "Firewall réseau des IP" ], [ "mitigation", "Anti-DDoS (mitigation)" ],
-    [ "dns", "Zones DNS (enregistrements A, AAAA, CNAME)" ], [ "dedicated", "Serveurs dédiés" ], [ "vps", "VPS" ], [ "cloud", "Instances Public Cloud" ]
-  ].freeze
+  PRODUCTS = %w[ip firewall mitigation dns dedicated vps cloud].freeze # labels: integrations.ovh.product_labels.*
 
   # API rights needed by each product (all read-only).
   RIGHTS = { "ip" => %w[/ip /ip/*], "firewall" => %w[/ip /ip/*], "mitigation" => %w[/ip /ip/*], "dns" => %w[/domain/zone /domain/zone/*],

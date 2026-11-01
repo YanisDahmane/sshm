@@ -23,7 +23,7 @@ module Settings
           Activity.record!(@integration.enabled? ? :integration_enabled : :integration_disabled, integration: @integration.kind, integration_label: @integration.label)
         end
         task = @integration.enqueue_sync! if @integration.enabled? && !was_enabled
-        notice = @integration.enabled? ? "Extension #{@integration.label} enregistrée#{" et activée : première synchronisation lancée" if task}." : "Extension #{@integration.label} enregistrée (désactivée)."
+        notice = @integration.enabled? ? t(task ? "integrations_controller.saved_enabled" : "integrations_controller.saved", label: @integration.label) : t("integrations_controller.saved_off", label: @integration.label)
         redirect_to edit_settings_integration_path(@integration.kind), notice: notice
       else
         render :edit, status: :unprocessable_entity
@@ -47,10 +47,10 @@ module Settings
 
     def sync
       unless @integration.enabled?
-        return redirect_to edit_settings_integration_path(@integration.kind), alert: "Activez l'extension avant de la synchroniser."
+        return redirect_to edit_settings_integration_path(@integration.kind), alert: t("integrations_controller.turn_on_first")
       end
 
-      redirect_to task_path(@integration.enqueue_sync!), notice: "Synchronisation #{@integration.label} lancée."
+      redirect_to task_path(@integration.enqueue_sync!), notice: t("integrations_controller.sync_started", label: @integration.label)
     end
 
     private

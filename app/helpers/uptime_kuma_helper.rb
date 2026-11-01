@@ -1,11 +1,10 @@
 # Display of the Uptime Kuma probes (UptimeKumaMonitor).
 module UptimeKumaHelper
-  MONITOR_STATES = { "up" => [ :good, "En ligne" ], "down" => [ :crit, "Hors ligne" ], "pending" => [ :warn, "En attente" ],
-                     "maintenance" => [ :neutral, "Maintenance" ], "unknown" => [ :neutral, "Inconnu" ] }.freeze
+  # Tone of each state (labels: uptime_kuma_helper.states.*).
+  MONITOR_STATES = { "up" => :good, "down" => :crit, "pending" => :warn, "maintenance" => :neutral, "unknown" => :neutral }.freeze
 
   def monitor_status_badge(monitor)
-    tone, label = MONITOR_STATES.fetch(monitor.state)
-    status_badge(tone, label, class: "monitor-status", data: { state: monitor.state })
+    status_badge(MONITOR_STATES.fetch(monitor.state), t("uptime_kuma_helper.states.#{monitor.state}"), class: "monitor-status", data: { state: monitor.state })
   end
 
   # 0.99625 → "99,63 %"
@@ -28,7 +27,7 @@ module UptimeKumaHelper
     [ address, (interface && "#{interface["interface"]} (#{network_kind_label(interface["kind"])})") ].compact.join(" · ")
   end
 
-  def monitor_match_label(monitor) = UptimeKumaMonitor::MATCHES[monitor.matched_by]
+  def monitor_match_label(monitor) = monitor.matched_by.presence && t("uptime_kuma_monitor.matches.#{monitor.matched_by}", default: "")
 
   # Probes attached by hand (to a server or to none), read once per page.
   def manual_monitor_ids

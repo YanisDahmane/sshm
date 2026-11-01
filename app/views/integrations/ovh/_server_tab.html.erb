@@ -7,8 +7,8 @@
 <div id="server-ovh">
   <% if resources.empty? %>
     <p class="card mt-6 px-4 py-6 text-sm text-ink-3">
-      Aucune ressource OVHcloud n'est rattachée à ce serveur<%= " (pas encore synchronisé)" unless integration.last_synced_at %>.
-      <%= link_to "Voir les ressources non rattachées", ovh_path(unattached: 1), class: "font-medium text-accent hover:underline" %>
+      <%= t(".ovhcloud_resource_attached_server") %><%= t(".not_synchronized_yet") unless integration.last_synced_at %>.
+      <%= link_to t(".see_resources_not_attached"), ovh_path(unattached: 1), class: "font-medium text-accent hover:underline" %>
     </p>
   <% end %>
 
@@ -16,24 +16,24 @@
     <section class="ovh-service card mt-6">
       <div class="card-header">
         <h2 class="flex items-center gap-2 font-semibold"><%= icon :server_stack, class: "h-4 w-4 text-ink-3" %> <%= service.kind_label %> · <%= service.name %></h2>
-        <span class="text-xs text-ink-3">rattaché <%= ovh_match_label(service) %></span>
+        <span class="text-xs text-ink-3"><%= t(".attached_html", ovh_match_label: (ovh_match_label(service))) %></span>
       </div>
       <dl class="grid grid-cols-2 gap-x-6 gap-y-2 px-4 py-3 text-sm sm:grid-cols-4">
         <div><dt class="text-xs text-ink-3">Offre</dt><dd><%= service.data["offer"] || "—" %></dd></div>
-        <div><dt class="text-xs text-ink-3"><%= service.kind == "instance" ? "Région" : "Datacenter" %></dt><dd><%= service.data["datacenter"] || service.data["region"] || "—" %></dd></div>
-        <div><dt class="text-xs text-ink-3">État</dt><dd><%= service.data["state"] || "—" %></dd></div>
+        <div><dt class="text-xs text-ink-3"><%= service.kind == "instance" ? t(".region") : t(".datacenter") %></dt><dd><%= service.data["datacenter"] || service.data["region"] || "—" %></dd></div>
+        <div><dt class="text-xs text-ink-3"><%= t(".state") %></dt><dd><%= service.data["state"] || "—" %></dd></div>
         <div><dt class="text-xs text-ink-3">Expiration</dt><dd><%= ovh_expiration(service) %></dd></div>
         <% if service.kind == "instance" %>
           <div class="col-span-2"><dt class="text-xs text-ink-3">Projet</dt><dd><%= service.data["project_name"] || service.data["project"] %></dd></div>
         <% end %>
-        <div class="col-span-2"><dt class="text-xs text-ink-3">Service OVH</dt><dd class="font-mono text-xs"><%= service.data["service"] || service.external_id %></dd></div>
+        <div class="col-span-2"><dt class="text-xs text-ink-3"><%= t(".ovh_service") %></dt><dd class="font-mono text-xs"><%= service.data["service"] || service.external_id %></dd></div>
       </dl>
     </section>
   <% end %>
 
   <% if blocks.any? %>
     <section id="server-ovh-ips" class="card mt-6">
-      <div class="card-header"><h2 class="flex items-center gap-2 font-semibold"><%= icon :globe, class: "h-4 w-4 text-ink-3" %> IP OVH, reverse et firewall réseau</h2></div>
+      <div class="card-header"><h2 class="flex items-center gap-2 font-semibold"><%= icon :globe, class: "h-4 w-4 text-ink-3" %> <%= t(".ovh_ips_reverse_network") %></h2></div>
       <% blocks.each do |block| %>
         <div class="ovh-ip border-t border-line px-4 py-3 text-sm first:border-t-0" data-block="<%= block.name %>">
           <p class="flex flex-wrap items-center gap-2">
@@ -41,18 +41,18 @@
             <span class="text-xs text-ink-3"><%= [ block.data["type"], block.data["service"] ].compact.join(" · ") %></span>
           </p>
           <% Array(block.data["reverse"]).each do |ip, reverse| %>
-            <p class="mt-1 text-xs text-ink-2">Reverse de <span class="font-mono"><%= ip %></span> : <span class="ovh-reverse font-mono"><%= reverse.presence || "aucun" %></span></p>
+            <p class="mt-1 text-xs text-ink-2"><%= t(".reverse") %> <span class="font-mono"><%= ip %></span> : <span class="ovh-reverse font-mono"><%= reverse.presence || "aucun" %></span></p>
           <% end %>
           <% if block.data.key?("firewall") %>
             <% firewalls = block.data["firewall"] %>
             <% if firewalls.empty? %>
-              <p class="mt-1 text-xs text-warn-ink">Firewall réseau OVH non configuré.</p>
+              <p class="mt-1 text-xs text-warn-ink"><%= t(".ovh_network_firewall_not") %></p>
             <% end %>
             <% firewalls.each do |ip, firewall| %>
               <div class="ovh-firewall mt-2" data-ip="<%= ip %>">
                 <p class="text-xs">
-                  Firewall de <span class="font-mono"><%= ip %></span> :
-                  <%= firewall["enabled"] ? status_badge(:good, "activé") : status_badge(:warn, "désactivé") %>
+                  <%= t(".firewall") %> <span class="font-mono"><%= ip %></span> :
+                  <%= firewall["enabled"] ? status_badge(:good, t(".text")) : status_badge(:warn, t(".off")) %>
                 </p>
                 <% if Array(firewall["rules"]).any? %>
                   <ul class="mt-1 space-y-0.5 font-mono text-[11px] text-ink-2">
@@ -70,7 +70,7 @@
             <% end %>
           <% end %>
           <% Array(block.data["mitigation"]).each do |ip, mitigation| %>
-            <p class="ovh-mitigation mt-1 text-xs text-ink-2">Anti-DDoS de <span class="font-mono"><%= ip %></span> : <%= mitigation["permanent"] ? "permanent" : "automatique" %><%= " (#{mitigation["state"]})" if mitigation["state"] %></p>
+            <p class="ovh-mitigation mt-1 text-xs text-ink-2"><%= t(".anti_ddos") %> <span class="font-mono"><%= ip %></span> : <%= mitigation["permanent"] ? "permanent" : "automatique" %><%= " (#{mitigation["state"]})" if mitigation["state"] %></p>
           <% end %>
         </div>
       <% end %>
@@ -79,7 +79,7 @@
 
   <% if records.any? || resources.any? %>
     <section id="server-ovh-dns" class="card mt-6">
-      <div class="card-header"><h2 class="flex items-center gap-2 font-semibold"><%= icon :list_bullet, class: "h-4 w-4 text-ink-3" %> Enregistrements DNS vers ce serveur</h2></div>
+      <div class="card-header"><h2 class="flex items-center gap-2 font-semibold"><%= icon :list_bullet, class: "h-4 w-4 text-ink-3" %> <%= t(".dns_records_server") %></h2></div>
       <% if records.any? %>
         <table class="table-dense">
           <thead><tr><th class="pl-4">Nom</th><th>Type</th><th>Cible</th><th class="pr-4">TTL</th></tr></thead>
@@ -91,7 +91,7 @@
           </tbody>
         </table>
       <% else %>
-        <p class="px-4 py-4 text-sm text-ink-3">Aucun enregistrement DNS des zones lues ne pointe vers ce serveur.</p>
+        <p class="px-4 py-4 text-sm text-ink-3"><%= t(".dns_record_zones_read") %></p>
       <% end %>
     </section>
   <% end %>

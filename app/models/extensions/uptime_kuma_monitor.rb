@@ -2,7 +2,7 @@
 # server it watches when one matches.
 class UptimeKumaMonitor < ApplicationRecord
   STATUSES = { 1 => "up", 0 => "down", 2 => "pending", 3 => "maintenance" }.freeze
-  MATCHES = { "ip" => "par son adresse IP", "url" => "par l'hôte de son URL", "dns" => "par résolution DNS", "name" => "par son nom", "manual" => "à la main" }.freeze
+  MATCHES = %w[ip url dns name manual].freeze # labels: uptime_kuma_monitor.matches.*
 
   belongs_to :server, optional: true
 

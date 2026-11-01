@@ -161,3 +161,25 @@ en:
     days:
       one: "%{count} day"
       other: "%{count} days"
+  servers:
+    import:
+      no_server: No server found in the file.
+      group_too_long: Group “%{name}” too long
+  image_registry:
+    client:
+      auth_https_only: Authentication address refused (HTTPS only)
+      token_refused: Registry token refused (HTTP %{code})
+  vulnerabilities:
+    json_object_stream:
+      invalid_after: Invalid JSON after “%{key}”
+  automation:
+    already_running: 'Already running: this run is skipped.'
+  inventory:
+    port_analysis:
+      active_deny: "%{tool} active (incoming: blocked by default)"
+      active_allow: "%{tool} active (incoming: allowed by default)"
+      inactive: "%{tool} inactive"
+  flash:
+    two_factor:
+      mandatory: 'Two-factor authentication is mandatory for your role: turn it on to continue.'
+      mandatory_role: Two-factor authentication is mandatory for your role (%{role}).

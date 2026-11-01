@@ -16,6 +16,71 @@ fr:
         w1d: 24 heures
         w30d: 30 jours
         w365d: 1 an
+      url: Adresse de l'instance
+      url_hint: 'Elio lit <adresse>/metrics. En https de préférence : en http, la clé API circule en clair.'
+      api_key: Clé API
+      api_key_hint: Uptime Kuma → Paramètres → Clés API. Elle ne donne accès qu'à /metrics.
+      self_signed: Accepter un certificat auto-signé
+      self_signed_hint: seulement pour une instance interne dont vous connaissez le certificat.
+      match_by_ip: Par adresse IP
+      section_matching: Rattachement des sondes aux serveurs
+      match_by_ip_hint: la cible de la sonde est une adresse d'un serveur (publique, réseau local, WireGuard…).
+      match_by_host: Par nom d'hôte
+      match_by_host_hint: l'hôte de la sonde ou de son URL est le hostname ou l'hôte SSH d'un serveur.
+      resolve_dns: Résoudre les noms en DNS
+      match_by_name: Par le nom de la sonde
+      match_by_name_hint: le nom du serveur apparaît en mot entier dans celui de la sonde (ex. « [SRV] FR-UTILS-1 »).
+      alert_no_monitor: Serveur sans aucune sonde
+      ignored_groups: Groupes dispensés de sonde
+      alert_down: Sonde hors ligne / de retour
+      alert_down_hint: complète les notifications d'Uptime Kuma sans les remplacer.
+      alert_cert: Certificat bientôt expiré
+      cert_days: Seuil du certificat (jours)
+      alert_uptime: Disponibilité sous un seuil
+      uptime_threshold: Seuil de disponibilité (%)
+      uptime_window: Sur
+      alert_maintenance: Sonde en maintenance depuis longtemps
+      maintenance_days: Seuil de maintenance (jours)
+      http_warning: ". ⚠ Adresse en http : la clé API circule en clair sur le réseau, préférez https"
+      monitors: Sondes
+      not_metrics: La réponse ne ressemble pas à la page /metrics d'Uptime Kuma
+      found:
+        one: "%{count} sonde trouvée"
+        other: "%{count} sondes trouvées"
+      description: 'Les sondes de votre instance Uptime Kuma, rattachées aux serveurs qu''elles surveillent : onglet « Sondes » sur chaque serveur, serveurs sans sonde, sondes hors ligne et certificats. Lecture seule, avec une clé API.'
+      help:
+        create_api_key: Créer la clé API
+        step1_html: 'Dans Uptime Kuma : <em>Paramètres → Clés API → Générer</em> (sans date d''expiration, ou en pensant à la renouveler).'
+        step2_html: Collez-la ci-dessous avec l'adresse de l'instance, puis <em>Tester la connexion</em>.
+        reads_html: 'Elio lit seulement la page <code class="font-mono">/metrics</code> (la clé ne permet rien d''autre). Les sondes sont rattachées aux serveurs par leurs adresses : pensez à lancer l''inventaire du système pour relever les adresses de chaque serveur (réseau local, WireGuard…).'
+      link_form:
+        server: "— Aucun serveur —"
+        server_monitor: Serveur de la sonde %{monitor_name}
+        attach: Rattacher
+        back_automatic_attachment: Revenir au rattachement automatique
+      monitor_row:
+        not_attached: non rattachée
+        attached: Rattachée %{how}
+      server_tab:
+        all_monitors: Toutes les sondes
+        uptime_kuma_not_synchronized: " (Uptime Kuma n'a pas encore été synchronisé)"
+        attach_existing_monitor: Rattacher une sonde existante
+        uptime_kuma_monitors: Sondes Uptime Kuma
+        synchronized_html: synchronisées %{last_synced_at}
+        state: État
+        response: Réponse
+        uptime_24_h_30: Dispo. 24 h · 30 j
+        server: Serveur
+        monitor_watches_server: Aucune sonde ne surveille ce serveur
+      sync:
+        summary: "%{monitors}, %{attached} rattachée(s) ; %{without}"
+        monitors:
+          one: "%{count} sonde"
+          other: "%{count} sondes"
+        without:
+          one: "%{count} serveur sans sonde"
+          other: "%{count} serveurs sans sonde"
+      resolve_dns_hint: pour les sondes HTTP d'un site hébergé sur un serveur (ex. https://app.example.com → son IP).
     ovh:
       health:
         expiring:
@@ -25,3 +90,238 @@ fr:
         no_reverse: Pas de reverse DNS pour %{ip}
         reverse_mismatch: Reverse DNS de %{ip} (%{reverse}) ≠ hostname
         no_dns: Aucun enregistrement DNS OVH ne pointe vers ce serveur
+      endpoint: Point d'accès
+      ovh_eu: OVHcloud Europe (ovh-eu)
+      ovh_ca: OVHcloud Canada (ovh-ca)
+      ovh_us: OVHcloud US (ovh-us)
+      consumer_key_hint: 'créée avec seulement des droits GET : voir « Droits à donner à la clé API ».'
+      products: Ressources à lire
+      zones: Zones DNS
+      zones_hint: vide = toutes les zones du compte.
+      projects: Projets Public Cloud
+      projects_placeholder: identifiants de projets
+      projects_hint: vide = tous les projets.
+      alert_expiring: Service OVH bientôt expiré
+      expiring_days: Seuil d'expiration (jours)
+      expiring_ignore_auto_renew: Ignorer les services en renouvellement automatique
+      alert_firewall_disabled: Firewall réseau OVH désactivé sur une IP d'un serveur
+      alert_reverse_mismatch: Reverse DNS absent ou différent du hostname
+      alert_server_without_dns: Serveur avec une IP OVH mais aucun enregistrement DNS
+      alert_dns_outside: Enregistrement DNS vers une IP hors du parc
+      alert_unmanaged_service: Service OVH rattaché à aucun serveur du parc
+      alert_unmanaged_service_hint: une machine payée mais pas suivie par Elio.
+      writable: ". ⚠ Cette clé permet aussi d'écrire (%{writes_first}) : refaites-en une en lecture seule"
+      valid_key: clé valide (%{status})
+      validated: validée
+      description: 'Vos ressources OVHcloud rattachées aux serveurs : service (offre, datacenter, expiration), IP et reverse, firewall réseau et anti-DDoS, enregistrements DNS qui pointent vers chaque serveur. Clé API en lecture seule.'
+      help:
+        create_key: créer la clé (%{value})
+        rights_give_api_key: Droits à donner à la clé API
+        rights_ovhcloud_api_key: Droits de la clé API OVHcloud
+        close: Fermer
+        open_ovhcloud_key_creation: 'Ouvrez la page de création de clé d''OVHcloud, déjà remplie avec ces droits :'
+        sign_choose_validity_unlimited: Connectez-vous, choisissez une durée de validité (« Unlimited » ou une date à renouveler), puis validez.
+        never_give_post_put: 'Ne donnez jamais de droit POST, PUT ou DELETE : l''extension n''en a pas besoin.'
+        intro_html: Elio ne fait que <strong class="font-medium text-ink">lire</strong> l'API OVHcloud (requêtes GET). Créez une clé limitée à ces droits.
+        rights_html: 'Seulement des droits <strong>GET</strong>, selon les ressources cochées (enregistrez après avoir changé les ressources pour mettre la liste à jour) :'
+        copy_html: 'Recopiez ici l''<em>Application Key</em>, l''<em>Application Secret</em> et la <em>Consumer Key</em>, puis « Tester la connexion » : Elio vérifie les droits et prévient si la clé permet d''écrire.'
+      link_form:
+        server: "— Aucun serveur —"
+        server_2: Serveur de %{resource_name}
+        attach: Rattacher
+        back_automatic_attachment: Revenir au rattachement automatique
+      server_tab:
+        not_synchronized_yet: " (pas encore synchronisé)"
+        see_resources_not_attached: Voir les ressources non rattachées
+        region: Région
+        datacenter: Datacenter
+        text: activé
+        'off': désactivé
+        ovhcloud_resource_attached_server: Aucune ressource OVHcloud n'est rattachée à ce serveur
+        attached_html: rattaché %{ovh_match_label}
+        state: État
+        ovh_service: Service OVH
+        ovh_ips_reverse_network: IP OVH, reverse et firewall réseau
+        reverse: Reverse de
+        ovh_network_firewall_not: Firewall réseau OVH non configuré.
+        firewall: Firewall de
+        anti_ddos: Anti-DDoS de
+        dns_records_server: Enregistrements DNS vers ce serveur
+        dns_record_zones_read: Aucun enregistrement DNS des zones lues ne pointe vers ce serveur.
+      client:
+        unknown_endpoint: 'Point d''accès OVH inconnu : %{endpoint}'
+        unreadable: Réponse d'OVHcloud illisible pour %{path}
+        unreadable_time: Heure d'OVHcloud illisible
+      sync:
+        summary: "%{parts} ; %{unattached}"
+        no_resource: Aucune ressource
+        unattached:
+          one: "%{count} service non rattaché"
+          other: "%{count} services non rattachés"
+        counts:
+          instance:
+            one: "%{count} instance"
+            other: "%{count} instances"
+          dedicated:
+            one: "%{count} dédié"
+            other: "%{count} dédiés"
+          vps:
+            one: "%{count} VPS"
+            other: "%{count} VPS"
+          ip:
+            one: "%{count} bloc IP"
+            other: "%{count} blocs IP"
+          dns_record:
+            one: "%{count} enregistrement DNS"
+            other: "%{count} enregistrements DNS"
+      product_labels:
+        ip: service
+        firewall: Firewall réseau des IP
+        mitigation: Anti-DDoS (mitigation)
+        dns: AAAA
+        dedicated: Serveurs dédiés
+        vps: VPS
+        cloud: Instances Public Cloud
+    http:
+      too_large: Réponse de %{service} trop volumineuse (plus de %{megabyte} Mo)
+      forbidden: "%{service} refuse l'accès (%{code}) : vérifiez la clé API"
+      answered: "%{service} a répondu %{code} : %{truncate}"
+      unreachable: 'Impossible de joindre %{service} (%{class}: %{message})'
+      invalid_url: 'Adresse invalide : %{url}'
+    sync_job:
+      turned_off: 'Extension désactivée : rien à faire'
+      internal_error: Erreur interne (%{class})
+  integration:
+    sync_label: Synchronisation %{label}
+    required: "%{label} : obligatoire pour activer l'extension"
+  uptime_kuma_monitor:
+    matches:
+      ip: par son adresse IP
+      url: par l'hôte de son URL
+      dns: par résolution DNS
+      name: par son nom
+      manual: à la main
+  ovh_resource:
+    matches:
+      address: par son adresse IP
+      service: par le service OVH de l'IP
+      name: par son nom
+      cname: par l'enregistrement visé
+      manual: à la main
+    kinds:
+      ip: Adresse IP
+      dns_record: Enregistrement DNS
+      dedicated: Serveur dédié
+      vps: VPS
+      instance: Instance Public Cloud
+  monitors:
+    index:
+      monitors: Sondes
+      down: Hors ligne
+      not_attached: Non rattachées
+      server: à aucun serveur
+      servers_without_monitor: Serveurs sans sonde
+      all: Toutes
+      name_host_url: Nom, hôte, URL…
+      search_monitor: Rechercher une sonde
+      monitor_matches: Aucune sonde ne correspond.
+      not_synchronized_uptime_kuma: Pas encore synchronisé avec Uptime Kuma.
+      uptime_kuma_monitors_attached: Sondes d'Uptime Kuma rattachées aux serveurs du parc
+      synchronized_html: ", synchronisées %{last_synced_at}"
+      last_sync_failed_html: 'Dernière synchronisation impossible : %{last_error}'
+      filters: Filtres
+      server_2: Serveur
+      groups: Groupes
+      each_server_watched_least: Chaque serveur est surveillé par au moins une sonde.
+      state: État
+      response: Réponse
+      uptime_24_h_30: Dispo. 24 h · 30 j
+      attach: Rattacher à
+  ovh:
+    index:
+      services: Services
+      dedicated_vps_instances: dédiés, VPS, instances
+      not_attached: Non rattachés
+      services_outside_fleet: services hors du parc
+      expiring_soon: Expirent bientôt
+      dns_outside_fleet: DNS hors du parc
+      ip_addresses: Adresses IP
+      dns: DNS
+      name_ip_target: Nom, IP, cible…
+      search: Rechercher
+      outside_fleet_only: Hors du parc seulement
+      not_attached_only: Non rattachés seulement
+      text: activé
+      'off': désactivé
+      outside_fleet: hors du parc
+      not_attached_2: non rattaché
+      resource_matches: Aucune ressource ne correspond.
+      not_synchronized_ovhcloud_yet: Pas encore synchronisé avec OVHcloud.
+      resources_ovhcloud_account_attached: Ressources du compte OVHcloud, rattachées aux serveurs du parc
+      synchronized_html: ", synchronisées %{last_synced_at}"
+      last_sync_failed_html: 'Dernière synchronisation impossible : %{last_error}'
+      resources: Ressources
+      ip_block: Bloc IP
+      ovh_service: Service OVH
+      server: Serveur
+      attach: Rattacher à
+  settings:
+    integrations:
+      field:
+        leave_empty_keep: "•••••••• (laisser vide pour la conserver)"
+        optional: "(facultatif)"
+      test_result:
+        succeeded: 'Connexion réussie : '
+        failed: 'Échec : '
+      edit:
+        save: Enregistrer
+        sync_now: Synchroniser maintenant
+        last_sync_failed_html: 'Dernière synchronisation impossible : %{last_error}'
+        synchronized_html: Synchronisée %{last_synced_at}.
+        turn_extension: Activer l'extension
+        tabs_pages_alerts_appear: "— ses onglets, pages et alertes apparaissent ; une synchronisation est lancée."
+        test_connection: Tester la connexion
+      index:
+        text: Activée
+        'off': Désactivée
+        configure: Configurer
+        configure_turn: Configurer et activer
+        synchronized_html: Synchronisée %{last_synced_at}
+        not_synchronized_yet: Pas encore synchronisée
+        extension_available: Aucune extension disponible.
+        intro_html: 'Les extensions relient Elio à vos autres outils, <strong class="font-medium text-ink-2">en lecture seule</strong> : Elio n''y crée, ne modifie et ne supprime rien. Une extension désactivée n''apparaît nulle part dans l''interface.'
+  monitor_links_controller:
+    attached: Sonde « %{monitor_name} » rattachée à « %{server_name} ».
+    detached: Sonde « %{monitor_name} » rattachée à aucun serveur.
+    automatic: 'Sonde « %{monitor_name} » : rattachement automatique.'
+    automatic_on: 'Sonde « %{monitor_name} » : rattachement automatique à « %{server_name} ».'
+  ovh_links_controller:
+    attached: "« %{resource_name} » rattaché à « %{server_name} »."
+    detached: "« %{resource_name} » rattaché à aucun serveur."
+    automatic: "« %{resource_name} » : retour au rattachement automatique (synchronisation lancée)."
+  integrations_controller:
+    saved_off: Extension %{label} enregistrée (désactivée).
+    turn_on_first: Activez l'extension avant de la synchroniser.
+    sync_started: Synchronisation %{label} lancée.
+    saved: Extension %{label} enregistrée.
+    saved_enabled: 'Extension %{label} enregistrée et activée : première synchronisation lancée.'
+  ovh_helper:
+    from_source: depuis %{source}
+    no_firewall: 'OVH : pas de firewall'
+    in_days:
+      one: dans %{count} jour
+      other: dans %{count} jours
+    verdicts:
+      permit: 'OVH : autorisé'
+      deny: 'OVH : bloqué'
+      restricted: 'OVH : sources limitées'
+    auto_renew: "(renouvellement auto)"
+    permit: autoriser
+    deny: refuser
+  uptime_kuma_helper:
+    states:
+      up: En ligne
+      down: Hors ligne
+      pending: En attente
+      maintenance: Maintenance
+      unknown: Inconnu

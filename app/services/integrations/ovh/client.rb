@@ -10,7 +10,7 @@ class Integrations::Ovh::Client
                   "ovh-us" => "https://api.us.ovhcloud.com/createToken/" }.freeze
 
   def initialize(endpoint:, application_key:, application_secret:, consumer_key:)
-    @base = ENDPOINTS.fetch(endpoint) { raise Integrations::Error, "Point d'accès OVH inconnu : #{endpoint}" }
+    @base = ENDPOINTS.fetch(endpoint) { raise Integrations::Error, I18n.t("integrations.ovh.client.unknown_endpoint", endpoint: endpoint) }
     @application_key = application_key.to_s
     @application_secret = application_secret.to_s
     @consumer_key = consumer_key.to_s
@@ -25,7 +25,7 @@ class Integrations::Ovh::Client
                 "Accept" => "application/json" }
     JSON.parse(Integrations::Http.get(url, service: "OVHcloud", headers: headers))
   rescue JSON::ParserError
-    raise Integrations::Error, "Réponse d'OVHcloud illisible pour #{path}"
+    raise Integrations::Error, I18n.t("integrations.ovh.client.unreadable", path: path)
   end
 
   def self.signature(secret, consumer_key, method, url, body, timestamp)
@@ -41,6 +41,6 @@ class Integrations::Ovh::Client
   def time_delta
     @time_delta ||= Integer(Integrations::Http.get("#{@base}/auth/time", service: "OVHcloud").strip) - Time.now.to_i
   rescue ArgumentError
-    raise Integrations::Error, "Heure d'OVHcloud illisible"
+    raise Integrations::Error, I18n.t("integrations.ovh.client.unreadable_time")
   end
 end
