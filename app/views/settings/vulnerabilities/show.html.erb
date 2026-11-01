@@ -88,6 +88,29 @@
   </ol>
 </section>
 
+<section id="score-colors" class="card mt-6 p-5">
+  <h2 class="font-semibold">Couleurs des notes</h2>
+  <p class="mt-1 text-xs text-ink-3">Couleur de la pastille d'une note CVSS (0 à 10) dans les listes et le détail d'une vulnérabilité, selon le palier atteint.</p>
+  <%= form_with model: @setting, url: settings_vulnerabilities_path, method: :patch, class: "mt-4 space-y-2" do |f| %>
+    <% @setting.score_bands.each_with_index do |band, index| %>
+      <div class="score-band flex flex-wrap items-center gap-3 text-sm">
+        <span class="w-24 text-ink-2">Palier <%= index + 1 %></span>
+        <label class="flex items-center gap-1.5">à partir de
+          <% if index.zero? %>
+            <%= hidden_field_tag "app_setting[score_bands_form][#{index}][from]", 0 %><span class="w-16 font-mono">0</span>
+          <% else %>
+            <%= number_field_tag "app_setting[score_bands_form][#{index}][from]", band["from"], min: 0.1, max: 10, step: 0.1, class: "input w-20 py-1", aria: { label: "Palier #{index + 1} à partir de" } %>
+          <% end %>
+        </label>
+        <%= select_tag "app_setting[score_bands_form][#{index}][color]", options_for_select(AppSetting::SCORE_COLORS.invert, band["color"]),
+              class: "input w-auto py-1", aria: { label: "Couleur du palier #{index + 1}" } %>
+        <%= score_pill([ band["from"].to_f, 0.0 ].max + (index.zero? ? 1.5 : 0.5)) %>
+      </div>
+    <% end %>
+    <div class="pt-2"><%= f.submit "Enregistrer les couleurs", class: "btn btn-primary" %></div>
+  <% end %>
+</section>
+
 <section id="vulnerability-import" class="card mt-6 p-5">
   <h2 class="font-semibold">Importer une base à la main</h2>
   <p class="mt-1 text-xs text-ink-3">Pour un réseau fermé : téléchargez le fichier ailleurs puis envoyez-le ici. Il remplace la base correspondante, reconnue à son contenu.</p>

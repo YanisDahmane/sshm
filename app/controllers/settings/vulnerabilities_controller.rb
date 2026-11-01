@@ -28,9 +28,11 @@ module Settings
 
     def update
       setting = AppSetting.current
-      if setting.update(params.expect(app_setting: [ :vulnerability_alert_severity ]))
-        Server.find_each(&:refresh_health!)
-        redirect_to settings_vulnerabilities_path, notice: "Alertes de vulnérabilités enregistrées."
+      attributes = params.expect(app_setting: [ :vulnerability_alert_severity, score_bands_form: {} ])
+      if setting.update(attributes)
+        Server.find_each(&:refresh_health!) if setting.saved_change_to_vulnerability_alert_severity?
+        redirect_to settings_vulnerabilities_path(anchor: (attributes.key?(:score_bands_form) ? "score-colors" : nil)),
+                    notice: attributes.key?(:score_bands_form) ? "Couleurs des notes enregistrées." : "Alertes de vulnérabilités enregistrées."
       else
         redirect_to settings_vulnerabilities_path, alert: setting.errors.full_messages.to_sentence
       end

@@ -88,7 +88,7 @@ class ScoreProvidersTest < ActionDispatch::IntegrationTest
       assert_select ".detail-score", text: /8,1/
       assert_select ".detail-exploited", text: /Exploitée activement.*3 juillet 2024/
       assert_select ".detail-description", "regreSSHion"
-      assert_select "li.detail-provider-score[data-provider=nvd]", text: /8,1\s+CVSS 3.1.*Vecteur : réseau.*Complexité : élevée/m
+      assert_select "li.detail-provider-score[data-provider=nvd]", text: /8,1\s+NVD \(NIST\)\s+CVSS 3.1.*Vecteur : réseau.*Complexité : élevée/m
       assert_select "li.detail-provider-score[data-provider=nvd] a[href=?]", "https://nvd.nist.gov/vuln/detail/CVE-2024-6387"
       assert_select "li.detail-provider-score[data-provider=redhat] a[href=?]", "https://access.redhat.com/security/cve/cve-2024-6387"
       assert_select ".detail-on-server", text: /Sur Web.*openssh.*openssh-server.*1.0.*2.0/m
@@ -101,5 +101,42 @@ class ScoreProvidersTest < ActionDispatch::IntegrationTest
     assert_select "aside.sidebar" # as a page: with the layout
     get vulnerability_path("CVE-2099-0001")
     assert_response :not_found
+  end
+
+  test "the modal lists every enabled provider, asked or not, each score in a pill of its colour" do
+    vulnerable(servers(:web), "CVE-2024-6387")
+    CveScore.store("nvd", [ { cve: "CVE-2024-6387", score: 9.3, version: "3.1" } ])
+    CveScore.store("cveorg", [ { cve: "CVE-2024-6387", score: nil } ])
+    CveRating.refresh!
+    sign_in users(:viewer)
+
+    get vulnerability_path("CVE-2024-6387", server_id: servers(:web).id), headers: { "Turbo-Frame" => "vulnerability-detail" }
+
+    assert_select "li.detail-provider-score", 3, "NVD, Red Hat, CVE.org; EPSS and KEV apart"
+    assert_select "li.detail-provider-score[data-provider=nvd] .score-pill[data-color=red]", "9,3"
+    assert_select "li.detail-provider-score[data-provider=redhat] .provider-pending", /pas encore demandé/
+    assert_select "li.detail-provider-score[data-provider=cveorg]", /pas de note chez ce fournisseur/
+    assert_select ".detail-score .score-pill[data-color=red]", "9,3"
+  end
+
+  test "the score colours are set in the settings and used in the lists" do
+    vulnerable(servers(:web), "CVE-2024-6387")
+    CveScore.store("nvd", [ { cve: "CVE-2024-6387", score: 6.5 } ])
+    CveRating.refresh!
+
+    get settings_vulnerabilities_path
+    assert_select "#score-colors .score-band", 3
+
+    patch settings_vulnerabilities_path, params: { app_setting: { score_bands_form: { "0" => { from: "0", color: "gray" }, "1" => { from: "5,5", color: "blue" }, "2" => { from: "9", color: "red" } } } }
+    assert_redirected_to settings_vulnerabilities_path(anchor: "score-colors")
+    assert_equal [ 0.0, 5.5, 9.0 ], AppSetting.current.score_bands.map { |band| band["from"] }
+
+    get server_path(servers(:web), tab: "vulnerabilities")
+    assert_select "tr.server-vulnerability .score-pill[data-color=blue]", "6,5"
+
+    patch settings_vulnerabilities_path, params: { app_setting: { score_bands_form: { "0" => { from: "0", color: "green" }, "1" => { from: "8", color: "orange" }, "2" => { from: "7", color: "pink" } } } }
+    assert_match "montent jusqu'à 10", flash[:alert]
+    assert_match "couleur inconnue", flash[:alert]
+    assert_equal "blue", AppSetting.current.reload.score_bands[1]["color"]
   end
 end

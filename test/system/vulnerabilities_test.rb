@@ -33,6 +33,6 @@ class VulnerabilitiesSystemTest < ApplicationSystemTestCase
 
     find("a.vulnerability-link", text: "CVE-2024-0002").click
     assert_selector "dialog.vulnerability-dialog[open] .vulnerability-detail[data-cve='CVE-2024-0002']"
-    assert_text "Aucun fournisseur n'a encore noté cette CVE."
+    assert_selector "li.detail-provider-score[data-provider=nvd] .provider-pending", text: "pas encore demandé"
   end
 end

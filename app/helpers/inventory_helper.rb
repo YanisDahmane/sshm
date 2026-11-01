@@ -69,16 +69,29 @@ module InventoryHelper
 
   SCAN_LABELS = { "trivy" => "Trivy", "grype" => "Grype", "elio" => "Elio (paquets de l'image)", "none" => "non analysée" }.freeze
 
+  # Classes of each score colour (written in full for Tailwind).
+  SCORE_PILL_CLASSES = {
+    "green" => "bg-good-soft text-good-ink ring-good/40", "orange" => "bg-warn-soft text-warn-ink ring-warn/40",
+    "red" => "bg-crit-soft text-crit-ink ring-crit/40", "violet" => "bg-accent-soft text-accent ring-accent/40",
+    "blue" => "bg-sky-100 text-sky-800 ring-sky-400/50 dark:bg-sky-950 dark:text-sky-200", "gray" => "bg-subtle text-ink-2 ring-line"
+  }.freeze
+
+  # A CVSS score in a rounded rectangle of the colour of its band
+  # (Settings → Vulnérabilités); a dash without a score.
+  def score_pill(score, size: :small, **options)
+    sizes = { small: "min-w-9 px-1.5 py-0.5 text-xs", medium: "min-w-12 px-2 py-1 text-sm", large: "min-w-16 px-3 py-1.5 text-2xl" }
+    color = score && app_settings.score_color(score)
+    classes = [ "score-pill inline-flex items-center justify-center rounded-md font-semibold tabular-nums ring-1 ring-inset", sizes.fetch(size),
+                SCORE_PILL_CLASSES.fetch(color, SCORE_PILL_CLASSES["gray"]), options.delete(:class) ]
+    tag.span(score ? number_with_precision(score, precision: 1) : "—", class: classes.compact.join(" "), data: { color: color }, **options)
+  end
+
   # Average CVSS score of a CVE ("8,6"), with the exploitation badges.
   def cve_score(rating, compact: false)
     return tag.span("—", class: "cve-score text-xs text-ink-3", title: "Pas encore de note") unless rating&.score || rating&.exploited || rating&.epss
 
     parts = []
-    if rating.score
-      tone = { "critical" => "text-crit-ink", "high" => "text-crit-ink", "medium" => "text-warn-ink" }.fetch(rating.severity, "text-ink-2")
-      parts << tag.strong(number_with_precision(rating.score, precision: 1), class: "tabular-nums #{tone}",
-                          title: "Moyenne de #{pluralize_fr(rating.scores_count, "fournisseur", "fournisseurs")}")
-    end
+    parts << score_pill(rating.score, title: "Moyenne de #{pluralize_fr(rating.scores_count, "fournisseur", "fournisseurs")}") if rating.score
     parts << status_badge(:crit, "exploitée", class: "cve-exploited", title: "Catalogue CISA KEV#{" depuis le #{l(rating.exploited_since, format: :long)}" if rating.exploited_since}") if rating.exploited
     if rating.epss && rating.epss >= 0.01 && !compact
       parts << tag.span("EPSS #{epss_percentage(rating.epss)}", class: "text-[11px] text-ink-3", title: "Probabilité d'exploitation dans les 30 jours")

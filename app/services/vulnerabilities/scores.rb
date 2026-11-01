@@ -18,6 +18,7 @@ module Vulnerabilities::Scores
     results = BoundedParallel.map(providers, limit: providers.size.clamp(1, 6)) do |provider|
       count = fetcher(provider).fetch(cves)
       provider.update!(last_run_at: Time.current, last_error: nil)
+      CveRating.refresh!(cves) # its scores count at once, without waiting for the slower providers
       "#{provider.name} : #{count}"
     rescue Vulnerabilities::Error, Integrations::Error => e
       provider.update!(last_run_at: Time.current, last_error: e.message.truncate(250))

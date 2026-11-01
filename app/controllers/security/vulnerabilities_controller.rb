@@ -22,9 +22,14 @@ class VulnerabilitiesController < ApplicationController
     @server = Server.find_by(id: params[:server_id])
     @server_rows = @server ? @rows.select { |row| row.server_id == @server.id } : []
     @rating = CveRating.find_by(cve: @cve)
-    providers = ScoreProvider.all_providers.index_by(&:key)
-    @scores = CveScore.where(cve: @cve).to_a.select { |score| providers[score.provider_key] }.sort_by { |score| providers[score.provider_key].position }
-    @providers = providers
+    providers = ScoreProvider.all_providers
+    @providers = providers.index_by(&:key)
+    @scores = CveScore.where(cve: @cve).to_a.select { |score| @providers[score.provider_key] }.sort_by { |score| @providers[score.provider_key].position }
+    scored = @scores.index_by(&:provider_key)
+    # Every enabled CVSS provider (asked or not yet), and the disabled ones that have a score.
+    @provider_scores = providers.select(&:cvss?).filter_map do |provider|
+      [ provider, scored[provider.key] ] if provider.enabled? || scored[provider.key]&.score
+    end
     @description = @feed_entries.filter_map(&:description).first || @rows.filter_map(&:description).first ||
                    @scores.filter_map { |score| score.data["description"] }.first
     @servers = @rows.group_by(&:server).sort_by { |server, _| server.name }

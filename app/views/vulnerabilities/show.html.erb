@@ -15,7 +15,7 @@
       </div>
       <div class="text-right">
         <% if @rating&.score %>
-          <p class="detail-score text-3xl font-semibold tabular-nums"><%= number_with_precision(@rating.score, precision: 1) %><span class="text-sm font-normal text-ink-3"> / 10</span></p>
+          <p class="detail-score"><%= score_pill(@rating.score, size: :large) %><span class="ml-1 text-sm text-ink-3">/ 10</span></p>
           <p class="text-xs text-ink-3">moyenne de <%= pluralize_fr(@rating.scores_count, "fournisseur", "fournisseurs") %></p>
         <% else %>
           <p class="text-sm text-ink-3">Pas encore de note</p>
@@ -31,34 +31,32 @@
 
     <section>
       <h3 class="text-xs font-semibold tracking-wide text-ink-3 uppercase">Notes par fournisseur</h3>
-      <% cvss = @scores.select { |score| @providers[score.provider_key].cvss? } %>
-      <% if cvss.any? %>
-        <ul class="mt-2 divide-y divide-line rounded-lg border border-line">
-          <% cvss.each do |score| %>
-            <% provider = @providers[score.provider_key] %>
-            <li class="detail-provider-score px-3 py-2 text-sm" data-provider="<%= provider.key %>">
+      <ul class="mt-2 divide-y divide-line rounded-lg border border-line">
+        <% @provider_scores.each do |provider, score| %>
+          <li class="detail-provider-score flex gap-3 px-3 py-2.5 text-sm" data-provider="<%= provider.key %>">
+            <%= score_pill(score&.score, size: :medium, class: "self-start") %>
+            <div class="min-w-0 flex-1">
               <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <span class="w-36 font-medium <%= "text-ink-3" unless provider.enabled? %>"><%= provider.name %><% unless provider.enabled? %> (désactivé)<% end %></span>
-                <% if score.score %>
-                  <strong class="tabular-nums"><%= number_with_precision(score.score, precision: 1) %></strong>
+                <span class="font-medium <%= "text-ink-3" unless provider.enabled? %>"><%= provider.name %><% unless provider.enabled? %> (désactivé)<% end %></span>
+                <% if score&.score %>
                   <% if score.version %><span class="text-xs text-ink-3">CVSS <%= score.version %></span><% end %>
                   <% if score.severity %><span class="text-xs text-ink-3"><%= score.severity %></span><% end %>
+                <% elsif score %>
+                  <span class="text-xs text-ink-3">pas de note chez ce fournisseur (redemandé <%= relative_time_tag score.fetched_at + CveScore::REFRESH_MISSING %>)</span>
                 <% else %>
-                  <span class="text-xs text-ink-3">pas de note</span>
+                  <span class="provider-pending text-xs text-ink-3">pas encore demandé (prochain passage des notes)</span>
                 <% end %>
                 <%= link_to "Voir", provider.page_url(@cve), target: "_blank", rel: "noopener", class: "ml-auto text-xs text-accent hover:underline" %>
               </div>
-              <% if (parts = cvss_vector_parts(score.vector)).any? %>
-                <p class="mt-1 flex flex-wrap gap-1" title="<%= score.vector %>">
+              <% if (parts = cvss_vector_parts(score&.vector)).any? %>
+                <p class="mt-1.5 flex flex-wrap gap-1" title="<%= score.vector %>">
                   <% parts.each do |label, value| %><span class="badge bg-subtle text-[11px] text-ink-2"><%= label %> : <%= value %></span><% end %>
                 </p>
               <% end %>
-            </li>
-          <% end %>
-        </ul>
-      <% else %>
-        <p class="mt-2 text-sm text-ink-3">Aucun fournisseur n'a encore noté cette CVE.</p>
-      <% end %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
     </section>
 
     <% if @server_rows.any? %>

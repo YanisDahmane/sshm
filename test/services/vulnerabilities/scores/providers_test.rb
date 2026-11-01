@@ -107,6 +107,7 @@ class Vulnerabilities::Scores::ProvidersTest < ActiveSupport::TestCase
     CveScore.store(custom.key, [ { cve: "CVE-2024-0003", score: 5.0 } ])
     with_score_answers("CVE-2024-0001" => "custom-page.html", "CVE-2024-0002" => :not_found, "CVE-2024-0004" => :limited) do
       assert_equal 2, Vulnerabilities::Scores.fetcher(custom).fetch(%w[CVE-2024-0001 CVE-2024-0002 CVE-2024-0003])
+      assert_equal 8.1, CveRating.find_by!(cve: "CVE-2024-0001").score.to_f, "rated as soon as asked, without waiting for the end of the run"
       assert_equal({ "CVE-2024-0001" => 8.1, "CVE-2024-0002" => nil, "CVE-2024-0003" => 5.0 }, custom.scores.pluck(:cve, :score).to_h { |cve, score| [ cve, score&.to_f ] })
       error = assert_raises(Vulnerabilities::Error) { Vulnerabilities::Scores.fetcher(custom).fetch(%w[CVE-2024-0004]) }
       assert_match "429", error.message

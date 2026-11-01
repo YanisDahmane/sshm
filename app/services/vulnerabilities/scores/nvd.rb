@@ -56,7 +56,7 @@ class Vulnerabilities::Scores::Nvd < Vulnerabilities::Scores::Base
 
           found << cve
           batch << { cve: cve, **(score_of(item["cve"])&.to_h || { score: nil }) }
-          (CveScore.store(provider.key, batch) && batch.clear) if batch.size >= 1000
+          (CveScore.store(provider.key, batch); batch.clear) if batch.size >= 1000
         end
       end
     end

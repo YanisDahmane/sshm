@@ -20,7 +20,18 @@ class CveRating < ApplicationRecord
   # Recomputes the ratings of `cves` (all those of the fleet by default) from
   # the scores of the enabled providers, then the severity in use of the
   # unrated rows, logging (and alerting on) those that became serious.
+  # Under a database lock: providers running side by side refresh their
+  # CVEs as they go, a transition must be logged once.
   def self.refresh!(cves = ServerVulnerability.distinct.pluck(:cve))
+    transaction do
+      connection.execute("SELECT pg_advisory_xact_lock(#{LOCK})")
+      compute!(cves)
+    end
+  end
+
+  LOCK = 4_242_001
+
+  def self.compute!(cves)
     providers = ScoreProvider.all_providers.select(&:enabled?)
     cvss = providers.select(&:cvss?).map(&:key)
     scores = CveScore.where(cve: cves, provider_key: providers.map(&:key)).pluck(:cve, :provider_key, :score, :data).group_by(&:first)

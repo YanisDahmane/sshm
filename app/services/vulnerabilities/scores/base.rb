@@ -8,6 +8,8 @@ class Vulnerabilities::Scores::Base
 
   # Pause after a "too many requests" or an error streak: the provider is left for the next run.
   MAX_ERRORS = 5
+  # Ratings refreshed every so many CVEs during a long run (the lists show them at once).
+  REFRESH_EVERY = 100
 
   attr_reader :provider
 
@@ -24,15 +26,23 @@ class Vulnerabilities::Scores::Base
   def fetch_each(cves)
     due = CveScore.due(provider.key, cves).first(provider.setting("max_per_run").to_i)
     errors = 0
+    done = []
     due.each_with_index do |cve, index|
       sleep(provider.setting("delay_ms").to_f / 1000) if index.positive? && pause?
       score = lookup(cve)
       CveScore.store(provider.key, [ { cve: cve, **(score&.to_h || { score: nil }) } ])
       errors = 0
+      done << cve
+      if done.size >= REFRESH_EVERY
+        CveRating.refresh!(done)
+        done = []
+      end
     rescue Integrations::Error => e
       raise Vulnerabilities::Error, e.message if e.message.include?(" 429") || (errors += 1) >= MAX_ERRORS
     end
     due.size
+  ensure
+    CveRating.refresh!(done) if done.present?
   end
 
   # Tests run without waiting between requests.
