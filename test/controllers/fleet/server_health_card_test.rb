@@ -30,7 +30,7 @@ class ServerHealthCardTest < ActionDispatch::IntegrationTest
       assert_select ".health-disk", text: %r{Disque le plus plein /\s+94 %}
       assert_select ".health-disk .text-crit-ink", text: /94 %/
       assert_select ".health-reasons li", 2
-      assert_select ".health-reasons li", text: "Disque / à 94 %"
+      assert_select ".health-reasons li", text: "Disque / à 94\u00A0%"
       assert_select ".health-facts", text: /3 dont 2 de sécurité/
       assert_select ".health-facts", text: /fail2ban\.service/
       assert_select ".history-chart", 3

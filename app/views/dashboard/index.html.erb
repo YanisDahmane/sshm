@@ -87,7 +87,7 @@
     </section>
 
     <section id="systems" class="card">
-      <div class="card-header"><h2 class="font-semibold">Systèmes</h2><span class="text-xs text-ink-3"><%= pluralize_fr(@public_keys_count, "clé", "clés") %> au trousseau</span></div>
+      <div class="card-header"><h2 class="font-semibold">Systèmes</h2><span class="text-xs text-ink-3"><%= pluralize_fr(@systems.sum(&:last), "serveur", "serveurs") %></span></div>
       <% if @systems.any? %>
         <ul class="divide-y divide-line px-4 text-sm">
           <% @systems.each do |name, count| %>

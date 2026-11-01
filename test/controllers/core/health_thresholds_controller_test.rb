@@ -29,7 +29,7 @@ class HealthThresholdsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to settings_path(anchor: "health-thresholds")
     assert_equal "Seuils de santé enregistrés.", flash[:notice]
     assert_equal [ 70, 85, 1.5 ], AppSetting.current.attributes.values_at("health_disk_warn", "health_disk_crit", "health_load_warn").map { |v| v.is_a?(BigDecimal) ? v.to_f : v }
-    assert_equal [ "warn", [ "Disque / à 75 %" ] ], [ servers(:web).reload.health_status, servers(:web).health_reason_texts ]
+    assert_equal [ "warn", [ "Disque / à 75\u00A0%" ] ], [ servers(:web).reload.health_status, servers(:web).health_reason_texts ]
   end
 
   test "refuses inconsistent thresholds" do

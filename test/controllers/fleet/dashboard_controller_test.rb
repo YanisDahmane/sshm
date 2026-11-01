@@ -207,5 +207,6 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_select "#systems li", 1
     assert_select "#systems a[href=?]", servers_path(os: "Debian GNU/Linux 12 (bookworm)")
     assert_select "#systems li span", "2"
+    assert_select "#systems .card-header", text: /Systèmes\s*2 serveurs/
   end
 end

@@ -188,7 +188,7 @@ class Inventory::CollectionTest < ActiveSupport::TestCase
 
     @server.reload
     assert_equal 94.4, @server.health_samples.sole.disk_percent
-    assert_equal [ "crit", "Disque / à 94 %" ], [ @server.health_status, @server.health_reason_texts.first ]
+    assert_equal [ "crit", "Disque / à 94\u00A0%" ], [ @server.health_status, @server.health_reason_texts.first ]
   end
 
   test "the packages collector keeps the counts in the snapshot and the list in the table" do

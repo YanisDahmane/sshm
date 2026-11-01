@@ -28,7 +28,7 @@ class Inventory::HealthStatusTest < ActiveSupport::TestCase
     result = evaluate
 
     assert_equal "crit", result.state
-    assert_equal [ [ "crit", "Disque / à 94 %" ], [ "warn", "fail2ban en échec" ] ], result.reasons.map { |reason| [ reason.tone, reason.text ] }
+    assert_equal [ [ "crit", "Disque / à 94\u00A0%" ], [ "warn", "fail2ban en échec" ] ], result.reasons.map { |reason| [ reason.tone, reason.text ] }
   end
 
   test "warnings: full inodes, reboot, clock, several failed services, high load" do
@@ -38,7 +38,7 @@ class Inventory::HealthStatusTest < ActiveSupport::TestCase
     result = evaluate
 
     assert_equal "warn", result.state
-    assert_equal [ "Inodes / à 85 %", "Charge 9,3 pour 4 processeurs", "Redémarrage requis", "2 services en échec", "Horloge non synchronisée" ],
+    assert_equal [ "Inodes / à 85\u00A0%", "Charge 9,3 pour 4 processeurs", "Redémarrage requis", "2 services en échec", "Horloge non synchronisée" ],
                  result.reasons.map(&:text)
   end
 
@@ -52,7 +52,7 @@ class Inventory::HealthStatusTest < ActiveSupport::TestCase
     assert_equal "ok", evaluate.state
 
     AppSetting.current.update!(health_memory_warn: 80)
-    assert_equal [ "Mémoire à 85 %" ], evaluate.reasons.map(&:text)
+    assert_equal [ "Mémoire à 85\u00A0%" ], evaluate.reasons.map(&:text)
   end
 
   test "a system past its end of support needs attention" do

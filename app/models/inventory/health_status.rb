@@ -117,9 +117,10 @@ class Inventory::HealthStatus
 
   def threshold_reason(label, value, warn, crit)
     return unless value
-    return Reason.new("crit", "#{label} à #{value.round} %") if value >= crit
+    # Non-breaking space: « 83 % » never splits at the end of a line.
+    return Reason.new("crit", "#{label} à #{value.round}\u00A0%") if value >= crit
 
-    Reason.new("warn", "#{label} à #{value.round} %") if value >= warn
+    Reason.new("warn", "#{label} à #{value.round}\u00A0%") if value >= warn
   end
 
   def format_number(value) = value.round(1).to_s.sub(".", ",").delete_suffix(",0")

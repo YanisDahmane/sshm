@@ -29,7 +29,7 @@ class ServerHealthTest < ActiveSupport::TestCase
     assert_difference("Activity.of_kind(:health_critical).count") do
       collect_health(disks: [ { "mount" => "/", "used_percent" => 97 } ])
     end
-    assert_equal "« Web » est en état critique : Disque / à 97 %", Activity.of_kind(:health_critical).sole.summary
+    assert_equal "« Web » est en état critique : Disque / à 97\u00A0%", Activity.of_kind(:health_critical).sole.summary
     assert_difference("Activity.of_kind(:health_recovered).count") { collect_health }
     assert_equal "critical", Activity::KINDS.fetch(:health_critical).severity.to_s
   end
