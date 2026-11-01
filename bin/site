@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Builds the website (GitHub Pages) into _site/: pages, then the CSS with
+# the Tailwind of the project. Preview: bin/site && ruby -run -e httpd _site -p 4000
+set -euo pipefail
+cd "$(dirname "$0")/.."
+ruby site/build.rb
+bundle exec tailwindcss --input site/assets/site.css --output _site/assets/site.css --minify 2>&1 | grep -v "^$" || true
+test -s _site/assets/site.css

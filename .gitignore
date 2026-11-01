@@ -48,3 +48,4 @@
 
 # Audit notes (local, may list unfixed weaknesses: the repository is public)
 /AUDIT.md
+/_site

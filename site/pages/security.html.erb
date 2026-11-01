@@ -1,0 +1,61 @@
+<% @title = t(en: "Security — Elio", fr: "Sécurité — Elio") -%>
+<% @description = t(en: "What Elio runs on your servers, what it stores and how, where it connects, and how to report a vulnerability.",
+                    fr: "Ce qu'Elio lance sur vos serveurs, ce qu'il garde et comment, où il se connecte, et comment signaler une faille.") -%>
+<div class="mx-auto max-w-4xl px-5 pt-16">
+  <p class="eyebrow"><%= t en: "Security", fr: "Sécurité" %></p>
+  <h1 class="mt-3 text-4xl font-semibold"><%= t en: "Elio holds the key to your servers. Here is what it does with it.", fr: "Elio a la clé de vos serveurs. Voici ce qu'il en fait." %></h1>
+
+  <div class="prose-elio mt-10">
+    <h2><%= t en: "Principles", fr: "Principes" %></h2>
+    <ul>
+      <li><strong><%= t en: "Read-only.", fr: "Lecture seule." %></strong> <%= t en: "Elio only reads, except when you add or remove an SSH key. It never changes the firewall, never installs or updates anything: suggested ufw rules and update commands are for you to review and run.", fr: "Elio ne fait que lire, sauf quand vous ajoutez ou retirez une clé SSH. Il ne modifie jamais le firewall, n'installe et ne met à jour rien : les règles ufw suggérées et les commandes de mise à jour sont à relire et lancer vous-même." %></li>
+      <li><strong><%= t en: "Every command in one file.", fr: "Chaque commande dans un seul fichier." %></strong> <%= t en: "config/ssh_commands.yml is the only place commands are written; a test fails if one is sent from anywhere else. Values are always shell-escaped.", fr: "config/ssh_commands.yml est le seul endroit où les commandes sont écrites ; un test échoue si une commande est envoyée d'ailleurs. Les valeurs insérées sont toujours échappées." %></li>
+      <li><strong><%= t en: "Its own key only.", fr: "Sa propre clé seulement." %></strong> <%= t en: "Elio logs in with its own Ed25519 key — never your SSH agent or keys — and pins each server's host key on first connection: a change blocks the connection until an administrator accepts it.", fr: "Elio se connecte avec sa propre clé Ed25519 — jamais votre agent SSH ni vos clés — et mémorise l'empreinte de chaque serveur à la première connexion : un changement bloque la connexion jusqu'à ce qu'un administrateur l'accepte." %></li>
+    </ul>
+
+    <h2 id="commands"><%= t en: "Every command Elio can run", fr: "Toutes les commandes qu'Elio peut lancer" %></h2>
+    <p><%= t en: "Generated from <a href=\"https://github.com/elio-fleet/elio/blob/main/config/ssh_commands.yml\">config/ssh_commands.yml</a> for this version. <em>root</em>: run through <code>sudo -n</code> when Elio logs in through sudo, partial results without it.",
+             fr: "Générée depuis <a href=\"https://github.com/elio-fleet/elio/blob/main/config/ssh_commands.yml\">config/ssh_commands.yml</a> pour cette version (descriptions en anglais, tirées du fichier). <em>root</em> : lancée par <code>sudo -n</code> quand Elio passe par sudo, résultats partiels sans." %></p>
+  </div>
+  <ul class="commands mt-4 divide-y divide-line rounded-xl border border-line bg-surface">
+    <% commands.each do |command| -%>
+      <li id="<%= command[:key] %>" class="grid gap-x-6 gap-y-1.5 px-4 py-3 text-sm md:grid-cols-[15rem_1fr_auto]">
+        <span class="font-mono text-xs break-all text-ink md:pt-0.5"><%= command[:key] %></span>
+        <span class="text-ink-2"><%= h(command[:description]) %><% if command[:variants].size > 1 %> <span class="text-ink-3">(<%= t en: "variants:", fr: "variantes :" %> <%= command[:variants].join(", ") %>)</span><% end %></span>
+        <span class="flex flex-wrap gap-1 md:justify-end">
+          <% if command[:writes] %><span class="badge bg-warn-soft text-warn-ink"><%= t en: "writes", fr: "écrit" %></span><% else %><span class="badge bg-good-soft text-good-ink"><%= t en: "read-only", fr: "lecture" %></span><% end %>
+          <% if command[:root] %><span class="badge bg-subtle text-ink-2">root</span><% end %>
+        </span>
+      </li>
+    <% end -%>
+  </ul>
+
+  <div class="prose-elio mt-6">
+    <h2><%= t en: "What Elio stores", fr: "Ce qu'Elio garde" %></h2>
+    <ul>
+      <li><%= t en: "Its SSH key, API keys of the extensions, webhook addresses, registry tokens and two-factor secrets are <strong>encrypted in the database</strong> (Active Record Encryption, keys of your installation) and never sent back to the browser.", fr: "Sa clé SSH, les clés d'API des extensions, les adresses de webhooks, les jetons des registres et les secrets de double authentification sont <strong>chiffrés en base</strong> (Active Record Encryption, clés de votre installation) et jamais renvoyés au navigateur." %></li>
+      <li><%= t en: "Docker containers' environment variables are never read: they often hold secrets.", fr: "Les variables d'environnement des conteneurs Docker ne sont jamais lues : elles contiennent souvent des secrets." %></li>
+      <li><%= t en: "The activity log is kept 365 days by default (ELIO_ACTIVITY_RETENTION_DAYS).", fr: "Le journal d'activité est gardé 365 jours par défaut (ELIO_ACTIVITY_RETENTION_DAYS)." %></li>
+    </ul>
+
+    <h2><%= t en: "Who can do what", fr: "Qui peut faire quoi" %></h2>
+    <ul>
+      <li><%= t en: "No public sign-up: the first account is created on first launch (optionally protected by ELIO_SETUP_TOKEN), then invitations only.", fr: "Pas d'inscription publique : le premier compte est créé au premier lancement (éventuellement protégé par ELIO_SETUP_TOKEN), puis des invitations seulement." %></li>
+      <li><%= t en: "Three roles: administrators (settings, users, Elio's key), operators (servers, keys, inventories), read-only.", fr: "Trois rôles : administrateurs (paramètres, utilisateurs, clé d'Elio), opérateurs (serveurs, clés, inventaires), lecture seule." %></li>
+      <li><%= t en: "Two-factor authentication (TOTP, backup codes) mandatory by default for administrators and operators; rate-limited sign-in, lockout after repeated failures, session timeout.", fr: "Double authentification (TOTP, codes de secours) obligatoire par défaut pour les administrateurs et opérateurs ; connexion limitée en débit, verrouillage après des échecs répétés, expiration de session." %></li>
+      <li><%= t en: "HTTPS forced in production, strict Content Security Policy, signed webhooks (HMAC SHA-256 with a timestamp).", fr: "HTTPS forcé en production, Content Security Policy stricte, webhooks signés (HMAC SHA-256 avec horodatage)." %></li>
+    </ul>
+
+    <h2><%= t en: "Where Elio connects", fr: "Où Elio se connecte" %></h2>
+    <ul>
+      <li><%= t en: "Your servers, over SSH.", fr: "Vos serveurs, en SSH." %></li>
+      <li><%= t en: "Vulnerability feeds and score providers — Debian, OSV, NVD, Red Hat, CVE.org, FIRST (EPSS), CISA (KEV) — for the releases and CVEs of your fleet only. Each provider can be disabled; the feeds can be imported by hand in a closed network.", fr: "Les bases de vulnérabilités et fournisseurs de notes — Debian, OSV, NVD, Red Hat, CVE.org, FIRST (EPSS), CISA (KEV) — pour les versions et CVE de votre parc seulement. Chaque fournisseur peut être désactivé ; les bases peuvent être importées à la main en réseau fermé." %></li>
+      <li><%= t en: "Docker registries, with HEAD requests on the manifests of the images you use.", fr: "Les registres Docker, par des requêtes HEAD sur les manifestes des images utilisées." %></li>
+      <li><%= t en: "The extensions you enable (Uptime Kuma, OVHcloud), read-only. Nothing else: no telemetry.", fr: "Les extensions que vous activez (Uptime Kuma, OVHcloud), en lecture seule. Rien d'autre : aucune télémétrie." %></li>
+    </ul>
+
+    <h2 id="report"><%= t en: "Reporting a vulnerability", fr: "Signaler une faille" %></h2>
+    <p><%= t en: "Please do not open a public issue: report it privately through <a href=\"https://github.com/elio-fleet/elio/security/advisories/new\">a GitHub security advisory</a>. See <a href=\"https://github.com/elio-fleet/elio/blob/main/SECURITY.md\">SECURITY.md</a>.",
+             fr: "N'ouvrez pas d'issue publique : signalez-la en privé par <a href=\"https://github.com/elio-fleet/elio/security/advisories/new\">un avis de sécurité GitHub</a>. Voir <a href=\"https://github.com/elio-fleet/elio/blob/main/SECURITY.md\">SECURITY.md</a>." %></p>
+  </div>
+</div>

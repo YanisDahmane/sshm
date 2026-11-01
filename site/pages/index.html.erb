@@ -1,0 +1,101 @@
+<% @title = t(en: "Elio — the self-hosted fleet manager for Linux servers", fr: "Elio — le gestionnaire auto-hébergé de votre parc de serveurs Linux") -%>
+<% @description = t(en: "Health, inventory, vulnerabilities, Docker and SSH keys of your Debian and Ubuntu servers, in one place. Agentless, read-only, over SSH. Free and self-hosted.",
+                    fr: "Santé, inventaire, vulnérabilités, Docker et clés SSH de vos serveurs Debian et Ubuntu, au même endroit. Sans agent, en lecture seule, par SSH. Libre et auto-hébergé.") -%>
+<section class="mx-auto max-w-6xl px-5 pt-16 pb-12 text-center sm:pt-24">
+  <a href="<%= repository %>/releases" class="badge bg-accent-soft text-accent"><%= t en: "Beta", fr: "Bêta" %> · v<%= version %></a>
+  <h1 class="mx-auto mt-5 max-w-3xl text-4xl font-semibold sm:text-5xl">
+    <%= t en: "Know every server of your fleet.", fr: "Connaissez chaque serveur de votre parc." %>
+  </h1>
+  <p class="lead mx-auto mt-5 max-w-2xl">
+    <%= t en: "Elio watches your Debian and Ubuntu servers from one place: their health, what runs on them, which packages are vulnerable and how to fix them, who has an SSH key on them. Nothing to install on the servers.",
+          fr: "Elio suit vos serveurs Debian et Ubuntu depuis un seul endroit : leur santé, ce qui tourne dessus, quels paquets sont vulnérables et comment les corriger, qui a une clé SSH dessus. Rien à installer sur les serveurs." %>
+  </p>
+  <div class="mt-8 flex flex-wrap justify-center gap-3">
+    <a href="<%= link("install") %>" class="btn btn-primary"><%= t en: "Get started", fr: "Commencer" %></a>
+    <a href="<%= repository %>" class="btn btn-secondary"><%= t en: "View on GitHub", fr: "Voir sur GitHub" %></a>
+  </div>
+  <p class="mt-4 text-sm text-ink-3"><%= t en: "Free software (AGPL-3.0) · self-hosted · Docker image for amd64 and arm64",
+                                         fr: "Logiciel libre (AGPL-3.0) · auto-hébergé · image Docker amd64 et arm64" %></p>
+</section>
+
+<section class="mx-auto max-w-6xl px-5">
+  <%= screenshot("fleet", t(en: "The fleet in Elio: health, system, load, memory, disk and what needs attention for each server",
+                            fr: "Le parc dans Elio : santé, système, charge, mémoire, disque et ce qui demande attention pour chaque serveur"), eager: true) %>
+</section>
+
+<section class="mx-auto mt-24 max-w-6xl px-5">
+  <p class="eyebrow text-center"><%= t en: "What it does", fr: "Ce qu'il fait" %></p>
+  <h2 class="mx-auto mt-3 max-w-2xl text-center text-3xl font-semibold"><%= t en: "One place for the state of all your servers", fr: "Un seul endroit pour l'état de tous vos serveurs" %></h2>
+  <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <% [
+         [ :pulse, t(en: "Health", fr: "Santé"), t(en: "Load, memory, disks, failed services, reboots and updates pending, with your thresholds and 30 days of history.", fr: "Charge, mémoire, disques, services en échec, redémarrages et mises à jour en attente, avec vos seuils et 30 jours d'historique.") ],
+         [ :shield_exclamation, t(en: "Vulnerabilities", fr: "Vulnérabilités"), t(en: "CVEs of every package, grouped by the update that fixes them, scored by NVD, Red Hat and CVE.org.", fr: "Les CVE de chaque paquet, regroupées par la mise à jour qui les corrige, notées par NVD, Red Hat et CVE.org.") ],
+         [ :container, "Docker", t(en: "Unhealthy containers, restart loops, new image versions on the registries, CVEs of the images.", fr: "Conteneurs en mauvaise santé, redémarrages en boucle, nouvelles versions d'images sur les registres, CVE des images.") ],
+         [ :key, t(en: "SSH keys", fr: "Clés SSH"), t(en: "A shared keyring, keys added or removed in one click, temporary access that expires on its own.", fr: "Un trousseau commun, des clés ajoutées ou retirées en un clic, des accès temporaires qui expirent tout seuls.") ],
+         [ :cube, t(en: "Inventory", fr: "Inventaire"), t(en: "System, packages, services, scheduled tasks, network addresses, listening ports and firewall.", fr: "Système, paquets, services, tâches planifiées, adresses réseau, ports en écoute et firewall.") ],
+         [ :exclamation_triangle, t(en: "Alerts", fr: "Alertes"), t(en: "What needs attention first; Slack, Discord, email or webhooks; a daily digest.", fr: "Ce qui demande attention d'abord ; Slack, Discord, email ou webhooks ; un résumé quotidien.") ],
+         [ :bolt, t(en: "Automation", fr: "Automatisations"), t(en: "Collections on schedule, per group, followed live; every command in one readable file.", fr: "Des collectes planifiées, par groupe, suivies en direct ; chaque commande dans un seul fichier lisible.") ],
+         [ :shield_check, t(en: "For teams", fr: "En équipe"), t(en: "Roles, invitations, mandatory two-factor authentication, secrets encrypted in the database.", fr: "Rôles, invitations, double authentification obligatoire, secrets chiffrés en base.") ]
+       ].each do |icon_name, title, text| -%>
+      <div class="card p-5">
+        <span class="grid h-9 w-9 place-items-center rounded-lg bg-accent-soft text-accent"><%= icon(icon_name) %></span>
+        <h3 class="mt-4 font-semibold"><%= title %></h3>
+        <p class="mt-1.5 text-sm leading-relaxed text-ink-2"><%= text %></p>
+      </div>
+    <% end -%>
+  </div>
+</section>
+
+<section class="mx-auto mt-28 grid max-w-6xl items-center gap-10 px-5 lg:grid-cols-5">
+  <div class="lg:col-span-2">
+    <p class="eyebrow"><%= t en: "Vulnerabilities", fr: "Vulnérabilités" %></p>
+    <h2 class="mt-3 text-3xl font-semibold"><%= t en: "3,000 CVEs? Often one update.", fr: "3 000 CVE ? Souvent une seule mise à jour." %></h2>
+    <p class="lead mt-4">
+      <%= t en: "Elio matches the packages of each server with the Debian and Ubuntu security data, then groups the CVEs by package: the version to install, how many CVEs it fixes, whether your repositories already offer it, and the command to copy.",
+            fr: "Elio rapproche les paquets de chaque serveur des données de sécurité de Debian et d'Ubuntu, puis regroupe les CVE par paquet : la version à installer, combien de CVE elle corrige, si vos dépôts la proposent déjà, et la commande à copier." %>
+    </p>
+    <a href="<%= link("features") %>#vulnerabilities" class="mt-5 inline-block text-sm font-medium text-accent hover:underline"><%= t en: "More about vulnerabilities →", fr: "En savoir plus sur les vulnérabilités →" %></a>
+  </div>
+  <div class="lg:col-span-3">
+    <%= screenshot("vulnerabilities-by-package", t(en: "Vulnerabilities grouped by package: linux, 64 CVEs, update from 6.1.106-3 to 6.1.119-1, available, with the apt command", fr: "Vulnérabilités par paquet : linux, 64 CVE, mise à jour de 6.1.106-3 vers 6.1.119-1, disponible, avec la commande apt")) %>
+  </div>
+</section>
+
+<section class="mx-auto mt-28 max-w-6xl px-5">
+  <p class="eyebrow text-center"><%= t en: "How it works", fr: "Comment ça marche" %></p>
+  <h2 class="mx-auto mt-3 max-w-2xl text-center text-3xl font-semibold"><%= t en: "No agent. Just SSH and commands you can read.", fr: "Pas d'agent. Juste SSH et des commandes que vous pouvez lire." %></h2>
+  <div class="mt-12 grid gap-8 lg:grid-cols-2">
+    <ol class="space-y-6">
+      <% [
+           [ t(en: "Elio has its own SSH key", fr: "Elio a sa propre clé SSH"), t(en: "Generated by Elio, kept encrypted. You add its public key to the servers you want to follow.", fr: "Générée par Elio, gardée chiffrée. Vous ajoutez sa clé publique aux serveurs que vous voulez suivre.") ],
+           [ t(en: "It runs read-only commands", fr: "Il lance des commandes en lecture seule"), t(en: "All of them are written in one file, config/ssh_commands.yml, that you can review. A test fails if a command is sent from anywhere else.", fr: "Elles sont toutes écrites dans un seul fichier, config/ssh_commands.yml, que vous pouvez relire. Un test échoue si une commande est envoyée d'ailleurs.") ],
+           [ t(en: "It tells you what matters", fr: "Il vous dit ce qui compte"), t(en: "Health, inventory and vulnerabilities are compared over time: you are told what changed and what needs attention, most serious first.", fr: "Santé, inventaire et vulnérabilités sont comparés dans le temps : on vous dit ce qui a changé et ce qui demande attention, le plus grave d'abord.") ]
+         ].each_with_index do |(title, text), index| -%>
+        <li class="flex gap-4">
+          <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-accent-fill text-sm font-semibold text-white"><%= index + 1 %></span>
+          <div><h3 class="font-semibold"><%= title %></h3><p class="mt-1 text-ink-2"><%= text %></p></div>
+        </li>
+      <% end -%>
+    </ol>
+    <%= code(commands.find { |command| command[:key] == "inventory.health" }[:script], label: "config/ssh_commands.yml — inventory.health (Debian)") %>
+  </div>
+</section>
+
+<section class="mx-auto mt-28 max-w-6xl px-5">
+  <div class="card grid gap-8 p-8 lg:grid-cols-2 lg:items-center">
+    <div>
+      <h2 class="text-2xl font-semibold"><%= t en: "Try it in two minutes", fr: "Essayez-le en deux minutes" %></h2>
+      <p class="mt-3 text-ink-2"><%= t en: "With Docker: the image, PostgreSQL, and the secrets of your installation. Then open http://localhost:8080 and create the first account.",
+                                       fr: "Avec Docker : l'image, PostgreSQL, et les secrets de votre installation. Puis ouvrez http://localhost:8080 et créez le premier compte." %></p>
+      <a href="<%= link("install") %>" class="mt-5 inline-block text-sm font-medium text-accent hover:underline"><%= t en: "Install for real →", fr: "Installer pour de bon →" %></a>
+    </div>
+    <%= code(<<~SH)
+      mkdir elio && cd elio
+      curl -fsSLO https://raw.githubusercontent.com/elio-fleet/elio/main/docker-compose.yml
+      docker run --rm ghcr.io/elio-fleet/elio:beta bin/elio-keys > .env
+      echo "ELIO_DATABASE_PASSWORD=$(openssl rand -hex 24)" >> .env
+      docker compose up -d
+    SH
+    %>
+  </div>
+</section>

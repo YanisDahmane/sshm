@@ -1,0 +1,75 @@
+<% @title = t(en: "Install — Elio", fr: "Installation — Elio") -%>
+<% @description = t(en: "Install Elio with Docker Compose or Kamal, configure it, and prepare your servers.", fr: "Installer Elio avec Docker Compose ou Kamal, le configurer, et préparer vos serveurs.") -%>
+<div class="mx-auto max-w-3xl px-5 pt-16">
+  <p class="eyebrow"><%= t en: "Install", fr: "Installation" %></p>
+  <h1 class="mt-3 text-4xl font-semibold"><%= t en: "Install Elio", fr: "Installer Elio" %></h1>
+  <p class="lead mt-4"><%= t en: "Elio is a Rails application with PostgreSQL, shipped as a Docker image for amd64 and arm64. A small virtual machine is enough: it only needs to reach your servers over SSH.",
+                            fr: "Elio est une application Rails avec PostgreSQL, fournie en image Docker pour amd64 et arm64. Une petite machine virtuelle suffit : il lui faut seulement joindre vos serveurs en SSH." %></p>
+
+  <div class="prose-elio mt-10">
+    <h2 id="quick-start"><%= t en: "Quick start", fr: "Démarrage rapide" %></h2>
+    <p><%= t en: "On a machine with Docker:", fr: "Sur une machine avec Docker :" %></p>
+    <%= code(<<~SH)
+      mkdir elio && cd elio
+      curl -fsSLO https://raw.githubusercontent.com/elio-fleet/elio/main/docker-compose.yml
+      docker run --rm ghcr.io/elio-fleet/elio:beta bin/elio-keys > .env
+      echo "ELIO_DATABASE_PASSWORD=$(openssl rand -hex 24)" >> .env
+      docker compose up -d
+    SH
+    %>
+    <p><%= t en: "Open <a href=\"http://localhost:8080\">http://localhost:8080</a> and create the first account: it is the administrator.",
+             fr: "Ouvrez <a href=\"http://localhost:8080\">http://localhost:8080</a> et créez le premier compte : c'est l'administrateur." %></p>
+    <p><strong><%= t en: "Keep .env safe.", fr: "Gardez .env en lieu sûr." %></strong>
+       <%= t en: "It holds the keys of your installation: without them, the encrypted data — Elio's SSH key, API keys, webhooks — cannot be read back.",
+             fr: "Il contient les clés de votre installation : sans elles, les données chiffrées — clé SSH d'Elio, clés d'API, webhooks — ne peuvent plus être relues." %></p>
+
+    <h2 id="production"><%= t en: "In production", fr: "En production" %></h2>
+    <p><%= t en: "Put Elio behind a reverse proxy with HTTPS (Caddy, Traefik, nginx…). In <code>docker-compose.yml</code>, set <code>ELIO_HOST</code> to your domain and remove <code>ELIO_FORCE_SSL: \"false\"</code>: Elio then only answers on HTTPS, with secure cookies.",
+             fr: "Placez Elio derrière un reverse proxy en HTTPS (Caddy, Traefik, nginx…). Dans <code>docker-compose.yml</code>, définissez <code>ELIO_HOST</code> avec votre domaine et retirez <code>ELIO_FORCE_SSL: \"false\"</code> : Elio ne répond alors qu'en HTTPS, avec des cookies sécurisés." %></p>
+    <p><%= t en: "With <a href=\"https://kamal-deploy.org\">Kamal</a>, <code>config/deploy.yml</code> is ready, HTTPS included (Let's Encrypt): put the secrets in <code>.kamal/secrets</code> and run <code>bin/kamal setup</code>.",
+             fr: "Avec <a href=\"https://kamal-deploy.org\">Kamal</a>, <code>config/deploy.yml</code> est prêt, HTTPS compris (Let's Encrypt) : mettez les secrets dans <code>.kamal/secrets</code> et lancez <code>bin/kamal setup</code>." %></p>
+    <ul>
+      <li><strong><%= t en: "Updates", fr: "Mises à jour" %></strong> — <code>docker compose pull &amp;&amp; docker compose up -d</code>; <%= t en: "migrations run on start.", fr: "les migrations se lancent au démarrage." %></li>
+      <li><strong><%= t en: "Backups", fr: "Sauvegardes" %></strong> — <%= t en: "the PostgreSQL databases, the <code>elio_storage</code> volume (host keys of the servers) and <code>.env</code>.", fr: "les bases PostgreSQL, le volume <code>elio_storage</code> (empreintes des serveurs) et <code>.env</code>." %></li>
+      <li><strong><%= t en: "Background jobs", fr: "Tâches de fond" %></strong> — <%= t en: "collections and notifications run inside the web process (<code>SOLID_QUEUE_IN_PUMA</code>), nothing else to start.", fr: "les collectes et notifications tournent dans le processus web (<code>SOLID_QUEUE_IN_PUMA</code>), rien d'autre à lancer." %></li>
+    </ul>
+
+    <h2 id="configuration">Configuration</h2>
+  </div>
+  <div class="mt-4 overflow-x-auto">
+    <table class="data-table">
+      <thead><tr><th><%= t en: "Variable", fr: "Variable" %></th><th><%= t en: "What for", fr: "À quoi ça sert" %></th></tr></thead>
+      <tbody>
+        <% [
+             [ "SECRET_KEY_BASE, ACTIVE_RECORD_ENCRYPTION_*", t(en: "The secrets of the installation, printed by bin/elio-keys. Required.", fr: "Les secrets de l'installation, affichés par bin/elio-keys. Obligatoires.") ],
+             [ "ELIO_DATABASE_PASSWORD, PGHOST", t(en: "PostgreSQL password of the elio user, and host. Four databases: elio_production, _cache, _queue, _cable.", fr: "Mot de passe PostgreSQL de l'utilisateur elio, et hôte. Quatre bases : elio_production, _cache, _queue, _cable.") ],
+             [ "ELIO_HOST", t(en: "Elio's domain: links in emails, and the only host name it answers to.", fr: "Le domaine d'Elio : liens des emails, et seul nom d'hôte auquel il répond.") ],
+             [ "ELIO_SETUP_TOKEN", t(en: "Asked when creating the first account, if set.", fr: "Demandé à la création du premier compte, s'il est défini.") ],
+             [ "ELIO_FORCE_SSL", t(en: "false only to try Elio over plain HTTP.", fr: "false seulement pour essayer Elio en HTTP simple.") ],
+             [ "SMTP_ADDRESS, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, ELIO_MAIL_FROM", t(en: "Emails: invitations, password reset, notifications.", fr: "Emails : invitations, mot de passe oublié, notifications.") ],
+             [ "ELIO_PARALLEL_LIMIT", t(en: "Servers collected at the same time (4).", fr: "Serveurs collectés en même temps (4).") ],
+             [ "ELIO_ACTIVITY_RETENTION_DAYS", t(en: "How long the activity log is kept (365 days).", fr: "Durée de conservation du journal d'activité (365 jours).") ],
+             [ "ELIO_DEBIAN_TRACKER_URL, ELIO_UBUNTU_OSV_URL, ELIO_NVD_FEED_URL, ELIO_EPSS_URL, ELIO_KEV_URL", t(en: "Mirrors of the vulnerability feeds, for a closed network.", fr: "Miroirs des bases de vulnérabilités, pour un réseau fermé.") ]
+           ].each do |names, text| -%>
+          <tr><td class="font-mono text-xs text-ink"><%= names %></td><td><%= text %></td></tr>
+        <% end -%>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose-elio mt-6">
+    <h2 id="servers"><%= t en: "Preparing your servers", fr: "Préparer vos serveurs" %></h2>
+    <ol>
+      <li><%= t en: "In <em>Paramètres → Général</em>, generate Elio's SSH key (Ed25519, kept encrypted).", fr: "Dans <em>Paramètres → Général</em>, générez la clé SSH d'Elio (Ed25519, gardée chiffrée)." %></li>
+      <li><%= t en: "Add its public key to <code>~/.ssh/authorized_keys</code> of the account Elio will use — the page gives the command.", fr: "Ajoutez sa clé publique au <code>~/.ssh/authorized_keys</code> du compte qu'Elio utilisera — la page donne la commande." %></li>
+      <li><%= t en: "Add the server, or import many from a CSV file or your <code>~/.ssh/config</code>, then run an inventory.", fr: "Ajoutez le serveur, ou importez-en plusieurs depuis un CSV ou votre <code>~/.ssh/config</code>, puis lancez un inventaire." %></li>
+    </ol>
+    <p><%= t en: "Elio reads what an unprivileged account can read. Some details need root: the process behind each port, the firewall, Docker, the users' crontabs. Log Elio in as root, or give its account password-less <code>sudo</code>; otherwise those collections are marked <em>partial</em>. See exactly what runs on the <a href=\"security.html#commands\">security page</a>.",
+             fr: "Elio lit ce qu'un compte sans privilège peut lire. Certains détails demandent root : le processus derrière chaque port, le firewall, Docker, les crontabs des utilisateurs. Connectez Elio en root, ou donnez à son compte un <code>sudo</code> sans mot de passe ; sinon ces collectes sont marquées <em>partielles</em>. Voyez exactement ce qui est lancé sur la <a href=\"security.html#commands\">page sécurité</a>." %></p>
+    <p><%= t en: "Supported: Debian and Ubuntu (full inventory), any Linux for health and system; Docker and snap.", fr: "Pris en charge : Debian et Ubuntu (inventaire complet), tout Linux pour la santé et le système ; Docker et snap." %></p>
+
+    <h2 id="from-source"><%= t en: "From the sources", fr: "Depuis les sources" %></h2>
+    <p><%= t en: "To develop or try a change: Ruby (see <code>.ruby-version</code>), PostgreSQL, then <code>bin/setup</code>. See <a href=\"https://github.com/elio-fleet/elio/blob/main/CONTRIBUTING.md\">CONTRIBUTING.md</a>.",
+             fr: "Pour développer ou essayer une modification : Ruby (voir <code>.ruby-version</code>), PostgreSQL, puis <code>bin/setup</code>. Voir <a href=\"https://github.com/elio-fleet/elio/blob/main/CONTRIBUTING.md\">CONTRIBUTING.md</a>." %></p>
+  </div>
+</div>

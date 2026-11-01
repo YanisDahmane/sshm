@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="<%= language %>">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= h(@title) %></title>
+  <meta name="description" content="<%= h(@description) %>">
+  <link rel="canonical" href="<%= canonical %>">
+  <link rel="alternate" hreflang="en" href="<%= Page.new("en", name).canonical %>">
+  <link rel="alternate" hreflang="fr" href="<%= Page.new("fr", name).canonical %>">
+  <link rel="icon" href="<%= asset("icon.svg") %>" type="image/svg+xml">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="<%= h(@title) %>">
+  <meta property="og:description" content="<%= h(@description) %>">
+  <meta property="og:url" content="<%= canonical %>">
+  <meta property="og:image" content="<%= URL %>/assets/social.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#4f46e5">
+  <script>
+    (function () {
+      var theme = localStorage.getItem("elio-site-theme");
+      if (theme === "dark" || (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)) document.documentElement.classList.add("dark");
+    })();
+  </script>
+  <link rel="stylesheet" href="<%= asset("site.css") %>">
+  <script src="<%= asset("site.js") %>" defer></script>
+</head>
+<body class="bg-canvas text-ink antialiased">
+  <a href="#content" class="skip-link"><%= t en: "Skip to content", fr: "Aller au contenu" %></a>
+  <header class="sticky top-0 z-30 border-b border-line bg-canvas/85 backdrop-blur">
+    <div class="mx-auto flex max-w-6xl items-center gap-4 px-5 py-3">
+      <a href="<%= link("index") %>" class="flex shrink-0 items-center" aria-label="Elio — <%= t en: "home", fr: "accueil" %>">
+        <img src="<%= asset("logo-light.svg") %>" alt="" height="28" width="73" class="h-7 w-auto dark:hidden">
+        <img src="<%= asset("logo-dark.svg") %>" alt="" height="28" width="73" class="hidden h-7 w-auto dark:block">
+      </a>
+      <nav class="ml-auto flex items-center gap-1 text-sm" aria-label="<%= t en: "Main", fr: "Principale" %>">
+        <% [ [ "features", t(en: "Features", fr: "Fonctionnalités") ], [ "install", t(en: "Install", fr: "Installation") ],
+             [ "security", t(en: "Security", fr: "Sécurité") ], [ "faq", "FAQ" ] ].each do |page, label| -%>
+          <a href="<%= link(page) %>" class="nav-link hidden md:inline-flex" <%= 'aria-current="page"' if page == name %>><%= label %></a>
+        <% end -%>
+        <a href="<%= link(name, language: other_language) %>" hreflang="<%= other_language %>" lang="<%= other_language %>" class="nav-link font-medium"
+           title="<%= t en: "Version française", fr: "English version" %>"><%= other_language.upcase %></a>
+        <button type="button" class="nav-link" data-theme-toggle aria-label="<%= t en: "Dark or light theme", fr: "Thème sombre ou clair" %>">
+          <%= icon(:moon, "h-5 w-5 dark:hidden") %><%= icon(:sun, "hidden h-5 w-5 dark:block") %>
+        </button>
+        <a href="<%= repository %>" class="btn btn-secondary ml-1 hidden sm:inline-flex">GitHub</a>
+      </nav>
+    </div>
+    <nav class="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-5 pb-2 text-sm md:hidden" aria-label="<%= t en: "Pages", fr: "Pages" %>">
+      <% [ [ "features", t(en: "Features", fr: "Fonctionnalités") ], [ "install", t(en: "Install", fr: "Installation") ],
+           [ "security", t(en: "Security", fr: "Sécurité") ], [ "faq", "FAQ" ] ].each do |page, label| -%>
+        <a href="<%= link(page) %>" class="nav-link shrink-0" <%= 'aria-current="page"' if page == name %>><%= label %></a>
+      <% end -%>
+    </nav>
+  </header>
+
+  <main id="content">
+<%= content %>
+  </main>
+
+  <footer class="mt-24 border-t border-line">
+    <div class="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-10 text-sm text-ink-2 sm:flex-row sm:items-start sm:justify-between">
+      <div class="max-w-sm">
+        <img src="<%= asset("logo-light.svg") %>" alt="Elio" height="24" width="62" class="h-6 w-auto dark:hidden">
+        <img src="<%= asset("logo-dark.svg") %>" alt="Elio" height="24" width="62" class="hidden h-6 w-auto dark:block">
+        <p class="mt-3"><%= t en: "The self-hosted fleet manager for Linux servers. Free software under the AGPL-3.0 licence.",
+                              fr: "Le gestionnaire auto-hébergé de votre parc de serveurs Linux. Logiciel libre sous licence AGPL-3.0." %></p>
+        <p class="mt-2 text-ink-3"><%= t en: "Version", fr: "Version" %> <%= version %></p>
+      </div>
+      <div class="grid grid-cols-2 gap-x-10 gap-y-2">
+        <a href="<%= link("features") %>" class="hover:text-ink"><%= t en: "Features", fr: "Fonctionnalités" %></a>
+        <a href="<%= repository %>" class="hover:text-ink">GitHub</a>
+        <a href="<%= link("install") %>" class="hover:text-ink"><%= t en: "Install", fr: "Installation" %></a>
+        <a href="<%= repository %>/releases" class="hover:text-ink"><%= t en: "Releases", fr: "Versions" %></a>
+        <a href="<%= link("security") %>" class="hover:text-ink"><%= t en: "Security", fr: "Sécurité" %></a>
+        <a href="<%= repository %>/blob/main/CHANGELOG.md" class="hover:text-ink"><%= t en: "Changelog", fr: "Changements" %></a>
+        <a href="<%= link("faq") %>" class="hover:text-ink">FAQ</a>
+        <a href="<%= repository %>/blob/main/CONTRIBUTING.md" class="hover:text-ink"><%= t en: "Contributing", fr: "Contribuer" %></a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

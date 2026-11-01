@@ -1,0 +1,37 @@
+<% @title = t(en: "FAQ — Elio", fr: "FAQ — Elio") -%>
+<% @description = t(en: "Questions about Elio: supported systems, root or sudo, closed networks, cost, how it compares.", fr: "Questions sur Elio : systèmes pris en charge, root ou sudo, réseau fermé, coût, comparaison.") -%>
+<div class="mx-auto max-w-3xl px-5 pt-16">
+  <p class="eyebrow">FAQ</p>
+  <h1 class="mt-3 text-4xl font-semibold"><%= t en: "Questions", fr: "Questions" %></h1>
+  <div class="mt-10 space-y-3">
+    <% [
+         [ t(en: "Do I need to install anything on my servers?", fr: "Faut-il installer quelque chose sur mes serveurs ?"),
+           t(en: "No. Elio logs in over SSH with its own key and runs standard commands (dpkg-query, systemctl, ss, docker…). Add its public key to the servers, that's all.", fr: "Non. Elio se connecte en SSH avec sa propre clé et lance des commandes standard (dpkg-query, systemctl, ss, docker…). Ajoutez sa clé publique aux serveurs, c'est tout.") ],
+         [ t(en: "Which systems are supported?", fr: "Quels systèmes sont pris en charge ?"),
+           t(en: "Debian and Ubuntu get the full inventory and vulnerabilities. Other Linux systems get health and system details. Docker and snap are supported.", fr: "Debian et Ubuntu ont l'inventaire complet et les vulnérabilités. Les autres Linux ont la santé et le système. Docker et snap sont pris en charge.") ],
+         [ t(en: "Does Elio need root?", fr: "Elio a-t-il besoin de root ?"),
+           t(en: "No, but some details do: the process behind each port, the firewall, Docker, the users' crontabs. Log Elio in as root or give its account password-less sudo; without it, those collections are partial and marked so.", fr: "Non, mais certains détails oui : le processus derrière chaque port, le firewall, Docker, les crontabs des utilisateurs. Connectez Elio en root ou donnez à son compte un sudo sans mot de passe ; sinon ces collectes sont partielles, et signalées comme telles.") ],
+         [ t(en: "Can Elio break something on my servers?", fr: "Elio peut-il casser quelque chose sur mes serveurs ?"),
+           t(en: "Its commands are read-only, except adding or removing an SSH key when you ask for it. Each has a time limit, and they are all listed on the security page.", fr: "Ses commandes sont en lecture seule, sauf l'ajout ou le retrait d'une clé SSH quand vous le demandez. Chacune a un délai maximum, et toutes sont listées sur la page sécurité.") ],
+         [ t(en: "Does it work without Internet access?", fr: "Fonctionne-t-il sans accès Internet ?"),
+           t(en: "Yes. Elio only needs to reach your servers. Vulnerability feeds can be imported by hand, or read from a mirror; score providers and registry checks can be disabled.", fr: "Oui. Elio a seulement besoin de joindre vos serveurs. Les bases de vulnérabilités peuvent être importées à la main ou lues depuis un miroir ; les fournisseurs de notes et la vérification des registres peuvent être désactivés.") ],
+         [ t(en: "How many servers can it follow?", fr: "Combien de serveurs peut-il suivre ?"),
+           t(en: "It is made for fleets of a few to a few hundred servers. Collections run a few servers at a time (ELIO_PARALLEL_LIMIT) and each takes a few seconds.", fr: "Il est fait pour des parcs de quelques serveurs à quelques centaines. Les collectes avancent quelques serveurs à la fois (ELIO_PARALLEL_LIMIT) et chacune prend quelques secondes.") ],
+         [ t(en: "How much does it cost?", fr: "Combien ça coûte ?"),
+           t(en: "Nothing: Elio is free software under the AGPL-3.0 licence. You host it yourself.", fr: "Rien : Elio est un logiciel libre sous licence AGPL-3.0. Vous l'hébergez vous-même.") ],
+         [ t(en: "How is it different from a monitoring tool?", fr: "En quoi est-ce différent d'un outil de supervision ?"),
+           t(en: "Monitoring tools (Prometheus, Zabbix, Uptime Kuma) watch metrics continuously with agents or probes. Elio answers other questions — what is installed, what is vulnerable and how to fix it, who has access — without agents, and it works next to them (it reads Uptime Kuma).", fr: "Les outils de supervision (Prometheus, Zabbix, Uptime Kuma) suivent des métriques en continu avec des agents ou des sondes. Elio répond à d'autres questions — ce qui est installé, ce qui est vulnérable et comment le corriger, qui a accès — sans agent, et il travaille à côté d'eux (il lit Uptime Kuma).") ],
+         [ t(en: "Is the interface available in English?", fr: "L'interface existe-t-elle en anglais ?"),
+           t(en: "Not yet: the interface is in French. This website, the README and the code are in English.", fr: "Pas encore : l'interface est en français. Ce site, le README et le code sont en anglais.") ]
+       ].each do |question, answer| -%>
+      <details class="card group p-5">
+        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-medium [&::-webkit-details-marker]:hidden">
+          <%= question %><%= icon(:chevron_down, "h-4 w-4 shrink-0 text-ink-3 transition-transform group-open:rotate-180") %>
+        </summary>
+        <p class="mt-3 leading-relaxed text-ink-2"><%= answer %></p>
+      </details>
+    <% end -%>
+  </div>
+  <p class="mt-8 text-sm text-ink-2"><%= t en: "Another question? Ask in the <a class=\"font-medium text-accent hover:underline\" href=\"https://github.com/elio-fleet/elio/discussions\">discussions</a>.",
+                                          fr: "Une autre question ? Posez-la dans les <a class=\"font-medium text-accent hover:underline\" href=\"https://github.com/elio-fleet/elio/discussions\">discussions</a>." %></p>
+</div>

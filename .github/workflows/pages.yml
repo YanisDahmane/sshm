@@ -1,0 +1,52 @@
+name: Website
+
+# Builds the website (site/, bin/site) and publishes it on GitHub Pages:
+# https://elio-fleet.github.io/elio/. On every push to main that touches it,
+# and by hand.
+on:
+  push:
+    branches: [main]
+    paths: ["site/**", "docs/screenshots/**", "docs/brand/**", "config/ssh_commands.yml", "lib/elio/version.rb", "bin/site", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install packages (gems, cwebp for lighter screenshots)
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libpq-dev libyaml-dev webp
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Build
+        run: bin/site
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
