@@ -7,9 +7,9 @@ class SshKeysController < ApplicationController
     Activity.record!(:ssh_key_generated, regenerated: regenerated)
 
     notice = if regenerated
-      "Nouvelle clé SSH générée. Remplacez l'ancienne clé publique sur vos serveurs."
+      t("ssh_keys_controller.regenerated")
     else
-      "Clé SSH générée. Ajoutez la clé publique sur vos serveurs."
+      t("ssh_keys_controller.generated")
     end
     redirect_to settings_path, notice: notice
   end

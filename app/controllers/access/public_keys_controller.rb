@@ -7,7 +7,7 @@ class PublicKeysController < ApplicationController
 
   # Optional filter: ?kind=person|server.
   def index
-    @kind = params[:kind].presence_in(PublicKey::KINDS.keys)
+    @kind = params[:kind].presence_in(PublicKey::KINDS)
     public_keys = PublicKey.order(:name)
     public_keys = public_keys.of_kind(@kind) if @kind
     @pager = paginate(public_keys, per_page: PER_PAGE)
@@ -20,7 +20,7 @@ class PublicKeysController < ApplicationController
   # Can be prefilled (e.g. from an unknown key of a server) with `content`,
   # `name`, `kind` and a local `return_to` path.
   def new
-    @public_key = PublicKey.new(name: params[:name], content: params[:content], kind: params[:kind].presence_in(PublicKey::KINDS.keys) || "person")
+    @public_key = PublicKey.new(name: params[:name], content: params[:content], kind: params[:kind].presence_in(PublicKey::KINDS) || "person")
     @return_to = safe_return_to
   end
 
@@ -31,7 +31,7 @@ class PublicKeysController < ApplicationController
 
     if @public_key.save
       Activity.record!(:public_key_created, public_key: @public_key, fingerprint: @public_key.fingerprint)
-      redirect_to @return_to || public_key_path(@public_key), notice: "La clé « #{@public_key.name} » a été ajoutée au trousseau."
+      redirect_to @return_to || public_key_path(@public_key), notice: t("public_keys_controller.created", public_key_name: @public_key.name)
     else
       render :new, status: :unprocessable_entity
     end
@@ -42,7 +42,7 @@ class PublicKeysController < ApplicationController
 
   def update
     if @public_key.update(public_key_params)
-      redirect_to public_key_path(@public_key), notice: "La clé « #{@public_key.name} » a été modifiée."
+      redirect_to public_key_path(@public_key), notice: t("public_keys_controller.updated", public_key_name: @public_key.name)
     else
       render :edit, status: :unprocessable_entity
     end
@@ -51,7 +51,7 @@ class PublicKeysController < ApplicationController
   def destroy
     @public_key.destroy!
     Activity.record!(:public_key_deleted, public_key_name: @public_key.name, fingerprint: @public_key.fingerprint)
-    redirect_to public_keys_path, notice: "La clé « #{@public_key.name} » a été retirée du trousseau.", status: :see_other
+    redirect_to public_keys_path, notice: t("public_keys_controller.deleted", public_key_name: @public_key.name), status: :see_other
   end
 
   private

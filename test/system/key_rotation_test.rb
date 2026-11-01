@@ -16,7 +16,7 @@ class KeyRotationTest < ApplicationSystemTestCase
     accept_app_confirm("Lancer la rotation") { click_on "Faire tourner la clé" }
 
     assert_selector "h2", text: "Rotation de la clé Elio"
-    assert_selector ".rotation-status", text: "En cours : 0/3 serveur(s)"
+    assert_selector ".rotation-status", text: "En cours : 0/3 serveurs"
     perform_enqueued_jobs # the page refreshes itself and shows the result
 
     assert_selector ".rotation-status", text: "Terminée : la nouvelle clé est active, l'ancienne a été supprimée."

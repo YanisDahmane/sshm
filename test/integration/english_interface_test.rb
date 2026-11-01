@@ -76,7 +76,7 @@ class EnglishInterfaceTest < ActionDispatch::IntegrationTest
   end
 
   test "the inventory pages" do
-    data = [ ".sidebar-groups", ".account-link", ".server-group-filter", "#servers td:nth-child(2)", "#server-health" ] # TODO(access lot): #server-health
+    data = [ ".sidebar-groups", ".account-link", ".server-group-filter", "#servers td:nth-child(2)" ]
     %w[overview packages services ports schedules].each do |tab|
       assert_english server_path(servers(:web), tab: tab), except: data
     end
@@ -85,6 +85,16 @@ class EnglishInterfaceTest < ActionDispatch::IntegrationTest
     assert_english packages_path(q: "openssl"), except: data
     assert_english ports_path, except: data
     assert_english scheduled_tasks_path, except: data
+  end
+
+  test "the access pages" do
+    data = [ ".sidebar-groups", ".account-link", "#public-keys td:first-child", ".key-comment", "pre", "code", "textarea" ]
+    assert_english public_keys_path, except: data
+    assert_english public_key_path(public_keys(:alice)), except: data
+    assert_english new_public_key_path, except: data
+    assert_english edit_public_key_path(public_keys(:alice)), except: data
+    assert_english server_path(servers(:web), tab: "keys"), except: data
+    assert_english settings_path, except: data
   end
 
   test "the check finds French" do

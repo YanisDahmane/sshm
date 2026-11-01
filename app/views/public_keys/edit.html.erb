@@ -1,8 +1,8 @@
-<% content_for :title, "Modifier #{@public_key.name_was} · Elio" %>
+<% content_for :title, t("title", page: t("public_keys.edit.heading_html", name_was: @public_key.name_was)) %>
 
 <div class="mx-auto max-w-xl">
-  <%= link_to "← Retour à la clé", public_key_path(@public_key), class: "text-sm text-ink-3 hover:text-ink-2" %>
-  <h1 class="mt-2 text-2xl font-bold tracking-tight">Modifier « <%= @public_key.name_was %> »</h1>
+  <%= link_to t(".back_key"), public_key_path(@public_key), class: "text-sm text-ink-3 hover:text-ink-2" %>
+  <h1 class="mt-2 text-2xl font-bold tracking-tight"><%= t(".heading_html", name_was: @public_key.name_was) %></h1>
 
   <div class="mt-6 rounded-xl border border-line bg-surface p-6 shadow-sm">
     <%= render "form", public_key: @public_key %>

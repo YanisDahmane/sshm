@@ -1,10 +1,10 @@
-<% content_for :title, "Ajouter une clé · Elio" %>
+<% content_for :title, t("title", page: t("command_palette.add_key")) %>
 
 <div class="mx-auto max-w-xl">
-  <%= link_to (@return_to ? "← Retour au serveur" : "← Trousseau"), @return_to || public_keys_path, class: "text-sm text-ink-3 hover:text-ink-2" %>
-  <h1 class="mt-2 text-2xl font-bold tracking-tight">Ajouter une clé au trousseau</h1>
+  <%= link_to (@return_to ? t(".back_server") : "← Trousseau"), @return_to || public_keys_path, class: "text-sm text-ink-3 hover:text-ink-2" %>
+  <h1 class="mt-2 text-2xl font-bold tracking-tight"><%= t("command_palette.add_key") %></h1>
   <% if @return_to && @public_key.content.present? %>
-    <p class="prefilled-hint mt-2 text-sm text-ink-3">La clé trouvée sur le serveur est déjà remplie : choisissez simplement un nom.</p>
+    <p class="prefilled-hint mt-2 text-sm text-ink-3"><%= t(".key_found_server_already") %></p>
   <% end %>
 
   <div class="mt-6 rounded-xl border border-line bg-surface p-6 shadow-sm">

@@ -7,11 +7,11 @@ class PublicKeyAccessesController < ApplicationController
 
   def create
     servers = Server.where(id: params[:server_ids]).order(:name)
-    return redirect_to(public_key_path(@public_key), alert: "Choisissez au moins un serveur.") if servers.empty?
+    return redirect_to(public_key_path(@public_key), alert: t("public_key_accesses_controller.choose_server")) if servers.empty?
 
     @results = Keys::BulkAccess.grant([ @public_key ], servers, duration: requested_duration)
 
-    respond_with_accesses(:notice, "Ajouts terminés : #{@results.count { |result| !result.error? }}/#{@results.size} serveur(s).")
+    respond_with_accesses(:notice, t("public_key_accesses_controller.done", succeeded: @results.count { |result| !result.error? }, count: @results.size))
   end
 
   def destroy
@@ -20,9 +20,9 @@ class PublicKeyAccessesController < ApplicationController
     result = Keys::Revocation.call(server, @public_key.authorized_key.key, account: account, key_name: @public_key.authorized_key.comment || @public_key.name, public_key: @public_key)
 
     if result.success?
-      respond_with_accesses(:notice, "L'accès de « #{@public_key.name} » à « #{server.name} » a été retiré.")
+      respond_with_accesses(:notice, t("public_key_accesses_controller.removed", public_key_name: @public_key.name, server_name: server.name))
     else
-      respond_with_accesses(:alert, "Impossible de retirer l'accès : #{result.error_title} — #{result.error_details}")
+      respond_with_accesses(:alert, t("public_key_accesses_controller.remove_failed", error_title: result.error_title, error_details: result.error_details))
     end
   end
 

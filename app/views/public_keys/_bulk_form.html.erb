@@ -1,7 +1,7 @@
 <%# Grants the keyring key access to several servers at once (PublicKeyAccessesController#create). %>
 <% select_class = "input w-auto mt-1" %>
 <section id="bulk-authorize" class="mt-6 rounded-xl border border-line bg-surface p-6 shadow-sm">
-  <h2 class="text-lg font-semibold">Ajouter sur plusieurs serveurs</h2>
+  <h2 class="text-lg font-semibold"><%= t(".add_several_servers") %></h2>
 
   <% if Server.exists? %>
     <%= form_with url: public_key_accesses_path(public_key), data: { controller: "quiet-submit" }, class: "mt-4 space-y-5" do |f| %>
@@ -9,21 +9,21 @@
 
       <div class="flex flex-wrap items-end gap-4">
         <div>
-          <%= label_tag :bulk_duration, "Durée", class: "label" %>
-          <%= select_tag :duration, options_for_select([ [ "Permanent", "" ], *TemporaryAccess::DURATIONS.map { |value, (label, _)| [ label, value ] } ]),
+          <%= label_tag :bulk_duration, t(".duration"), class: "label" %>
+          <%= select_tag :duration, options_for_select([ [ t(".permanent"), "" ], *TemporaryAccess.options ]),
                 id: "bulk_duration", class: select_class %>
         </div>
         <div>
           <%= f.button type: "submit", class: "btn btn-primary group" do %>
             <%= icon :arrow_path, class: "hidden h-4 w-4 animate-spin group-disabled:block" %>
-            <span class="group-disabled:hidden">Ajouter</span>
-            <span class="hidden group-disabled:inline">Ajout en cours…</span>
+            <span class="group-disabled:hidden"><%= t(".add") %></span>
+            <span class="hidden group-disabled:inline"><%= t(".adding") %></span>
           <% end %>
         </div>
       </div>
     <% end %>
     <div id="bulk-results"></div>
   <% else %>
-    <p class="mt-4 text-sm text-ink-3"><%= link_to "Ajoutez un serveur", new_server_path, class: "font-medium text-accent hover:text-accent" %> pour pouvoir y ajouter cette clé.</p>
+    <p class="mt-4 text-sm text-ink-3"><%= link_to t(".add_server"), new_server_path, class: "font-medium text-accent hover:text-accent" %> <%= t(".able_add_key_there") %></p>
   <% end %>
 </section>

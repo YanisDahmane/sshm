@@ -3,6 +3,6 @@
              loading="<%= local_assigns.fetch(:loading, :lazy) %>" class="group block">
   <div class="flex items-center gap-2 py-6 text-sm text-ink-3">
     <%= icon :arrow_path, class: "h-4 w-4 animate-spin" %>
-    Lecture des clés autorisées…
+    <%= t(".reading_authorized_keys") %>
   </div>
 </turbo-frame>

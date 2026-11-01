@@ -1,13 +1,11 @@
-<% content_for :title, "Paramètres · Elio" %>
+<% content_for :title, t("title", page: t("settings.nav.title")) %>
 
 <%= render "settings/nav" %>
 
 <section id="ssh-key" class="mt-8 rounded-xl border border-line bg-surface p-6 shadow-sm">
-  <h2 class="text-lg font-semibold">Clé SSH de l'application</h2>
+  <h2 class="text-lg font-semibold"><%= t(".ssh_key_application") %></h2>
   <p class="mt-1 text-sm text-ink-3">
-    Elio se connecte à vos serveurs avec cette clé. Sa clé publique doit être ajoutée au fichier
-    <code class="rounded bg-subtle px-1 font-mono text-xs">~/.ssh/authorized_keys</code> de l'utilisateur configuré sur chaque serveur.
-    La clé privée reste chiffrée dans la base et n'est jamais affichée.
+    <%= t(".key_intro_html", file: tag.code("~/.ssh/authorized_keys", class: "rounded bg-subtle px-1 font-mono text-xs")) %>
   </p>
 
   <% if @ssh_key %>
@@ -17,14 +15,14 @@
         <dd id="ssh-key-fingerprint" class="mt-1 break-all font-mono text-ink-2"><%= @ssh_key.fingerprint %></dd>
       </div>
       <div>
-        <dt class="font-medium text-ink-2">Générée le</dt>
+        <dt class="font-medium text-ink-2"><%= t(".generated") %></dt>
         <dd class="mt-1 text-ink-2"><%= relative_time_tag @ssh_key.created_at %></dd>
       </div>
     </dl>
 
     <div class="mt-6" data-controller="clipboard">
       <div class="flex items-end justify-between gap-4">
-        <label for="ssh-public-key" class="text-sm font-medium text-ink-2">Clé publique</label>
+        <label for="ssh-public-key" class="text-sm font-medium text-ink-2"><%= t(".public_key") %></label>
         <%= render "copy_button" %>
       </div>
       <textarea id="ssh-public-key" readonly rows="3" data-clipboard-target="source"
@@ -33,7 +31,7 @@
 
     <div class="mt-6" data-controller="clipboard">
       <div class="flex items-end justify-between gap-4">
-        <label for="ssh-install-command" class="text-sm font-medium text-ink-2">Commande à lancer sur chaque serveur</label>
+        <label for="ssh-install-command" class="text-sm font-medium text-ink-2"><%= t(".command_run_each_server") %></label>
         <%= render "copy_button" %>
       </div>
       <textarea id="ssh-install-command" readonly rows="3" data-clipboard-target="source"
@@ -43,32 +41,32 @@
     <div id="key-rotation" class="mt-6 border-t border-line pt-6">
       <% if @rotation %>
         <div class="flex flex-wrap items-center justify-between gap-4 rounded-md border border-accent/40 bg-accent-soft/50 px-4 py-3">
-          <p class="text-sm text-accent">Une rotation de la clé est en cours : Elio utilise l'ancienne et la nouvelle clé.</p>
-          <%= link_to "Suivre la rotation", settings_key_rotation_path(@rotation), class: "text-sm font-medium text-accent hover:text-accent" %>
+          <p class="text-sm text-accent"><%= t(".key_rotation_progress_elio") %></p>
+          <%= link_to t(".follow_rotation"), settings_key_rotation_path(@rotation), class: "text-sm font-medium text-accent hover:text-accent" %>
         </div>
       <% else %>
         <div class="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p class="text-sm font-medium text-ink-2">Faire tourner la clé</p>
-            <p class="text-sm text-ink-3">Une nouvelle clé est installée sur chaque serveur avec l'ancienne, vérifiée, puis l'ancienne est retirée : aucune coupure.</p>
+            <p class="text-sm font-medium text-ink-2"><%= t(".rotate_key") %></p>
+            <p class="text-sm text-ink-3"><%= t(".new_key_installed_each") %></p>
           </div>
-          <%= button_to "Faire tourner la clé", settings_key_rotations_path,
-                data: { turbo_confirm: "Une nouvelle clé Elio va remplacer l'actuelle sur les #{Server.count} serveur(s), sans coupure. Les serveurs injoignables pourront être relancés ensuite.", confirm_label: "Lancer la rotation" },
+          <%= button_to t(".rotate_key"), settings_key_rotations_path,
+                data: { turbo_confirm: t(".rotation_confirm", count: Server.count), confirm_label: t(".start_rotation") },
                 class: "btn btn-primary shrink-0" %>
         </div>
       <% end %>
       <div class="mt-6 flex flex-wrap items-center justify-between gap-4">
-        <p class="text-sm text-ink-3">En cas de compromission seulement : régénérer coupe immédiatement l'accès à tous les serveurs jusqu'à ce que la nouvelle clé publique y soit ajoutée à la main.</p>
-        <%= button_to "Régénérer la clé", ssh_key_path,
-              data: { turbo_confirm: "L'ancienne clé sera définitivement supprimée et Elio ne pourra plus se connecter aux serveurs tant que la nouvelle clé publique n'y aura pas été ajoutée.",
-                      confirm_label: "Régénérer la clé", confirm_variant: "danger" },
+        <p class="text-sm text-ink-3"><%= t(".only_if_key_compromised") %></p>
+        <%= button_to t(".regenerate_key"), ssh_key_path,
+              data: { turbo_confirm: t(".old_key_will_deleted"),
+                      confirm_label: t(".regenerate_key"), confirm_variant: "danger" },
               class: "shrink-0 cursor-pointer rounded-md border border-crit/40 bg-surface px-4 py-2 text-sm font-medium text-crit-ink shadow-sm hover:bg-crit-soft" %>
       </div>
     </div>
   <% else %>
     <div class="mt-6 rounded-lg border border-dashed border-line px-6 py-10 text-center">
-      <p class="text-sm text-ink-3">Aucune clé SSH n'a encore été générée.</p>
-      <%= button_to "Générer une clé SSH", ssh_key_path,
+      <p class="text-sm text-ink-3"><%= t(".ssh_key_has_been") %></p>
+      <%= button_to t(".generate_ssh_key"), ssh_key_path,
             class: "btn btn-primary mt-4" %>
     </div>
   <% end %>
@@ -79,24 +77,24 @@
 <% setting = app_settings %>
 <section id="health-thresholds" class="card mt-6">
   <div class="card-header">
-    <h2 class="font-semibold">Seuils de santé</h2>
-    <span class="text-xs text-ink-3">au-delà, un serveur est « à surveiller » ou « critique »</span>
+    <h2 class="font-semibold"><%= t(".health_thresholds") %></h2>
+    <span class="text-xs text-ink-3"><%= t(".beyond_them_server_watch") %></span>
   </div>
   <%= form_with model: setting, url: settings_health_thresholds_path, method: :patch, class: "grid gap-4 p-4 sm:grid-cols-5" do |f| %>
-    <% [ [ :health_disk_warn, "Disque : attention (%)" ], [ :health_disk_crit, "Disque : critique (%)" ], [ :health_memory_warn, "Mémoire : attention (%)" ],
-         [ :health_memory_crit, "Mémoire : critique (%)" ] ].each do |field, label| %>
+    <% [ [ :health_disk_warn, t(".disk_warning") ], [ :health_disk_crit, t(".disk_critical") ], [ :health_memory_warn, t(".memory_warning") ],
+         [ :health_memory_crit, t(".memory_critical") ] ].each do |field, label| %>
       <div>
         <%= f.label field, label, class: "label text-xs" %>
         <%= f.number_field field, in: 1..100, step: 1, required: true, class: "input mt-1" %>
       </div>
     <% end %>
     <div>
-      <%= f.label :health_load_warn, "Charge : attention (× processeurs)", class: "label text-xs" %>
+      <%= f.label :health_load_warn, t(".load_warning_processors"), class: "label text-xs" %>
       <%= f.number_field :health_load_warn, in: 0.1..50, step: 0.1, required: true, class: "input mt-1" %>
     </div>
     <div class="sm:col-span-5 flex items-center justify-between gap-3">
-      <p class="text-xs text-ink-3">Sont aussi « à surveiller » : redémarrage requis, service en échec, horloge non synchronisée, système plus supporté.</p>
-      <%= f.submit "Enregistrer les seuils", class: "btn btn-primary" %>
+      <p class="text-xs text-ink-3"><%= t(".also_watch_reboot_required") %></p>
+      <%= f.submit t(".save_thresholds"), class: "btn btn-primary" %>
     </div>
   <% end %>
 </section>

@@ -3,15 +3,8 @@
 # expired even if the app is down; ExpireTemporaryAccessJob then removes the
 # line and ends the access. At most one active access per server, account and key.
 class TemporaryAccess < ApplicationRecord
-  # Choices offered in the UI: param value (minutes) => [label, duration].
-  DURATIONS = {
-    "10" => [ "10 minutes", 10.minutes ],
-    "30" => [ "30 minutes", 30.minutes ],
-    "60" => [ "1 heure", 1.hour ],
-    "240" => [ "4 heures", 4.hours ],
-    "1440" => [ "1 jour", 1.day ],
-    "10080" => [ "7 jours", 7.days ]
-  }.freeze
+  # Choices offered in the UI: param value (minutes) => duration.
+  DURATIONS = { "10" => 10.minutes, "30" => 30.minutes, "60" => 1.hour, "240" => 4.hours, "1440" => 1.day, "10080" => 7.days }.freeze
 
   belongs_to :server
   belongs_to :public_key, optional: true
@@ -22,12 +15,18 @@ class TemporaryAccess < ApplicationRecord
   scope :expired, -> { active.where(expires_at: ..Time.current) }
 
   def self.duration_for(param)
-    DURATIONS.fetch(param.to_s) { raise ArgumentError, "Unknown duration: #{param.inspect}" }.last
+    DURATIONS.fetch(param.to_s) { raise ArgumentError, "Unknown duration: #{param.inspect}" }
   end
 
+  # "10 minutes", "1 hour", "7 days" in the reader's language.
   def self.label_for(duration)
-    DURATIONS.values.find { |_label, value| value == duration }&.first || ActiveSupport::Duration.build(duration).inspect
+    seconds = duration.to_i
+    unit, size = [ [ :days, 86_400 ], [ :hours, 3600 ], [ :minutes, 60 ] ].find { |_, size| (seconds % size).zero? && seconds >= size } || [ :minutes, 60 ]
+    I18n.t("duration.#{unit}", count: seconds / size)
   end
+
+  # [label, value] of the duration select.
+  def self.options = DURATIONS.map { |value, duration| [ label_for(duration), value ] }
 
   def account = AuthorizedKeysAccount.login(server)
 

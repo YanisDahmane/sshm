@@ -151,3 +151,13 @@ en:
     updates:
       one: "%{count} update"
       other: "%{count} updates"
+  duration:
+    minutes:
+      one: "%{count} minute"
+      other: "%{count} minutes"
+    hours:
+      one: "%{count} hour"
+      other: "%{count} hours"
+    days:
+      one: "%{count} day"
+      other: "%{count} days"

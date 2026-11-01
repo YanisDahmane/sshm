@@ -1,4 +1,4 @@
-<% content_for :title, "Trousseau · Elio" %>
+<% content_for :title, t("title", page: t("nav.keyring")) %>
 
 <section id="keyring-section">
   <div class="flex items-center justify-between gap-4">
@@ -9,13 +9,13 @@
       </p>
     </div>
     <% if can?(:operate) %>
-      <%= link_to "Ajouter une clé", new_public_key_path,
+      <%= link_to t(".add_key"), new_public_key_path,
             class: "btn btn-primary" %>
     <% end %>
   </div>
 
-  <nav class="key-kind-filter mt-4 flex flex-wrap gap-2" aria-label="Type de clé">
-    <% [ [ "Toutes", nil ], [ "Personnes", "person" ], [ "Serveurs", "server" ] ].each do |label, value| %>
+  <nav class="key-kind-filter mt-4 flex flex-wrap gap-2" aria-label="<%= t(".key_type") %>">
+    <% [ [ t(".all"), nil ], [ t(".people"), "person" ], [ t(".servers"), "server" ] ].each do |label, value| %>
       <%= filter_pill label, public_keys_path(kind: value), active: @kind == value %>
     <% end %>
   </nav>
@@ -48,7 +48,7 @@
                 <div class="flex items-center justify-end gap-1">
                   <% if can?(:operate) %>
                     <%= link_to edit_public_key_path(public_key),
-                          title: "Modifier", aria: { label: "Modifier #{public_key.name}" },
+                          title: t(".edit"), aria: { label: t(".edit_2", public_key_name: public_key.name) },
                           class: "rounded-md p-1.5 text-ink-3 hover:bg-subtle hover:text-ink-2" do %>
                       <%= icon :pencil_square %>
                     <% end %>
@@ -63,12 +63,12 @@
         </tbody>
       </table>
     </div>
-    <%= render "shared/pagination", pager: @pager, noun: "clés" %>
+    <%= render "shared/pagination", pager: @pager, noun: t(".keys") %>
   <% else %>
     <div class="mt-4 rounded-xl border border-dashed border-line bg-surface px-6 py-12 text-center">
-      <p class="text-sm text-ink-3">Le trousseau est vide.</p>
+      <p class="text-sm text-ink-3"><%= t(".keyring_empty") %></p>
       <% if can?(:operate) %>
-        <%= link_to "Ajouter la première clé", new_public_key_path, class: "mt-2 inline-block text-sm font-medium text-accent hover:text-accent" %>
+        <%= link_to t(".add_first_key"), new_public_key_path, class: "mt-2 inline-block text-sm font-medium text-accent hover:text-accent" %>
       <% end %>
     </div>
   <% end %>

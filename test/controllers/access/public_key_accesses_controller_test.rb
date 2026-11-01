@@ -44,7 +44,7 @@ class PublicKeyAccessesControllerTest < ActionDispatch::IntegrationTest
       assert_select "li.key-access", 2
     end
     assert_turbo_stream action: :update, target: "flash" do
-      assert_select ".toast-notice", text: /Ajouts terminés : 2\/2 serveur\(s\)\./
+      assert_select ".toast-notice", text: "Ajouts terminés : 2/2 serveurs."
     end
     assert_equal 2, AccountSnapshot.count
   end

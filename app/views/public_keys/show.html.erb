@@ -9,7 +9,7 @@
       <h1 class="text-2xl font-bold tracking-tight"><%= @public_key.name %></h1>
       <p class="mt-1 text-sm text-ink-3">
         <span class="key-kind font-medium text-ink-2"><%= @public_key.kind_label %></span>
-        · ajoutée au trousseau <%= relative_time_tag @public_key.created_at %>
+        <%= t(".added_keyring_html", created_at: (relative_time_tag @public_key.created_at)) %>
       </p>
       <% if @public_key.description %>
         <p class="key-description mt-1 text-sm text-ink-2"><%= @public_key.description %></p>
@@ -19,16 +19,16 @@
       <% if can?(:operate) %>
         <%= link_to edit_public_key_path(@public_key),
               class: "btn btn-secondary" do %>
-          <%= icon :pencil_square %> Modifier
+          <%= icon :pencil_square %> <%= t(".edit") %>
         <% end %>
-        <%= render "delete_button", public_key: @public_key, label: "Supprimer",
+        <%= render "delete_button", public_key: @public_key, label: t(".delete"),
               class: "inline-flex cursor-pointer items-center gap-2 rounded-md border border-crit/40 bg-surface px-3 py-2 text-sm font-medium text-crit-ink shadow-sm hover:bg-crit-soft" %>
       <% end %>
     </div>
   </div>
 
   <section id="keyring-key" class="mt-8 rounded-xl border border-line bg-surface p-6 shadow-sm">
-    <h2 class="text-lg font-semibold">Clé SSH</h2>
+    <h2 class="text-lg font-semibold"><%= t(".ssh_key") %></h2>
 
     <dl class="mt-4 grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
       <div>
@@ -41,13 +41,13 @@
       </div>
       <div class="sm:col-span-3">
         <dt class="font-medium text-ink-2">Commentaire</dt>
-        <dd class="mt-1 text-ink-2"><%= key.comment || tag.span("Aucun", class: "italic text-ink-3") %></dd>
+        <dd class="mt-1 text-ink-2"><%= key.comment || tag.span(t(".none"), class: "italic text-ink-3") %></dd>
       </div>
     </dl>
 
     <div class="mt-6" data-controller="clipboard">
       <div class="flex items-end justify-between gap-4">
-        <label for="keyring-content" class="text-sm font-medium text-ink-2">Clé publique</label>
+        <label for="keyring-content" class="text-sm font-medium text-ink-2"><%= t(".public_key") %></label>
         <%= render "settings/copy_button" %>
       </div>
       <textarea id="keyring-content" readonly rows="3" data-clipboard-target="source"

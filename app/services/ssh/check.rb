@@ -11,9 +11,9 @@ class Ssh::Check
     output = Ssh::Connection.open(server, **connection_options) { |ssh| ssh.run_command!("connection.check", token: token).stdout.strip }
 
     if output == token
-      Result.new(success: true, message: "Connexion SSH réussie", details: "#{server.username}@#{server.host} a répondu à `echo #{token}`.")
+      Result.new(success: true, message: I18n.t("ssh.check.succeeded"), details: I18n.t("ssh.check.answered", username: server.username, host: server.host, token: token))
     else
-      Result.new(success: false, message: "Réponse inattendue du serveur", details: "Attendu « #{token} », reçu « #{output.truncate(200)} ».")
+      Result.new(success: false, message: I18n.t("ssh.check.unexpected"), details: I18n.t("ssh.check.unexpected_details", token: token, truncate: (output.truncate(200))))
     end
   rescue Ssh::Connection::Error => e
     host_key = { new: e.new_fingerprint, known: e.known_fingerprints } if e.is_a?(Ssh::Connection::HostKeyMismatchError)

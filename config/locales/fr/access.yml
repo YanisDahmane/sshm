@@ -1,0 +1,256 @@
+fr:
+  public_keys:
+    accesses:
+      expires: 'Expire '
+      expired: Expiré, suppression en cours
+      remove: Retirer l'accès
+      remove_label: Retirer l'accès à %{server_name}
+      remove_confirm: La clé de « %{public_key_name} » sera supprimée de « %{server_name} ».
+      access: Accès
+      servers_where_key_installed: Serveurs où cette clé est installée, d'après la dernière lecture des clés.
+      known_access_add_below: Aucun accès connu. Ajoutez-la ci-dessous, ou lancez un scan si des clés ont été ajoutées à la main.
+    bulk_form:
+      duration: Durée
+      permanent: Permanent
+      add_server: Ajoutez un serveur
+      add_several_servers: Ajouter sur plusieurs serveurs
+      add: Ajouter
+      adding: Ajout en cours…
+      able_add_key_there: pour pouvoir y ajouter cette clé.
+    delete_button:
+      delete: Supprimer
+      delete_2: Supprimer %{public_key_name}
+      key_will_removed_keyring: La clé « %{public_key_name} » sera retirée du trousseau. Là où elle est déjà installée, elle reste en place.
+    form:
+      name: Nom
+      alice: Alice
+      team_member: un membre de l'équipe
+      machine_logs_others_ci: une machine qui se connecte aux autres (CI, sauvegarde…)
+      public_ssh_key: Clé SSH publique
+      work_laptop_github_actions: Portable de travail, runner GitHub Actions…
+      cancel: Annuler
+      save: Enregistrer
+      add_keyring: Ajouter au trousseau
+      optional: "(facultative)"
+      content_hint_html: Contenu du fichier %{extension}, par exemple %{command}. Jamais la clé privée.
+    edit:
+      back_key: "← Retour à la clé"
+      heading_html: Modifier « %{name_was} »
+    index:
+      all: Toutes
+      people: Personnes
+      servers: Serveurs
+      edit: Modifier
+      edit_2: Modifier %{public_key_name}
+      keys: clés
+      add_first_key: Ajouter la première clé
+      key_type: Type de clé
+      keyring_empty: Le trousseau est vide.
+      add_key: Ajouter une clé
+    new:
+      back_server: "← Retour au serveur"
+      key_found_server_already: 'La clé trouvée sur le serveur est déjà remplie : choisissez simplement un nom.'
+    show:
+      delete: Supprimer
+      none: Aucun
+      added_keyring_html: "· ajoutée au trousseau %{created_at}"
+      edit: Modifier
+      ssh_key: Clé SSH
+      public_key: Clé publique
+  server_authorized_keys:
+    frame:
+      reading_authorized_keys: Lecture des clés autorisées…
+    key_details:
+      unnamed: Sans nom
+      none: Aucun
+      close: Fermer
+      line_file_html: n° %{line_number} du fichier
+      file_line: Ligne du fichier
+    index:
+      reload_keys: Recharger les clés
+      try_again: Réessayer
+      unnamed: Sans nom
+      unnamed_2: sans nom
+      delete_key: Supprimer la clé
+      delete_key_2: Supprimer la clé %{nom}
+      key_will_deleted_will: La clé « %{nom} » sera supprimée de « %{server_name} ». Elle ne pourra plus s'y connecter.
+      authorized_key_server: Aucune clé autorisée sur ce serveur.
+      keyring_html: "%{t} dans le trousseau."
+      outside_keyring: Hors trousseau
+      ssh_key_elio_application: Clé SSH de l'application Elio
+      key_details: Détails de la clé
+      add_keyring: Ajouter au trousseau
+      title: Clés autorisées · %{server_name}
+      recognize:
+        one: Si vous la reconnaissez, ajoutez-la avec le bouton « Ajouter au trousseau » ; sinon supprimez-la.
+        other: Si vous les reconnaissez, ajoutez-les avec le bouton « Ajouter au trousseau » ; sinon supprimez-les.
+  servers:
+    add_key_dialog:
+      keyring: Depuis le trousseau
+      new_key: Nouvelle clé
+      keyring_key: Clé du trousseau
+      name: Nom
+      alice: Alice
+      public_ssh_key: Clé SSH publique
+      work_laptop_github_actions: Portable de travail, runner GitHub Actions…
+      duration: Durée
+      permanent: Permanent
+      add_key: Ajouter une clé
+      add_key_html: Ajouter une clé sur « %{server_name} »
+      close: Fermer
+      key_origin: Origine de la clé
+      last_key_reading_html: D'après la dernière lecture des clés, %{relative_time_in_words}.
+      optional: "(facultative)"
+      add_server: Ajouter sur le serveur
+      content_hint_html: Contenu du fichier %{extension}. Elle sera aussi enregistrée dans le trousseau.
+    ssh_status:
+      ssh_connection_never_tested: Connexion SSH jamais testée
+      key_refused: Clé refusée
+      refused: La clé d'Elio a été refusée%{checked}
+      succeeded: Connexion SSH réussie%{checked}
+    host_key_changed:
+      trust_new_fingerprint: Faire confiance à la nouvelle empreinte
+      new_fingerprint_will_replace: La nouvelle empreinte %{new} remplacera l'ancienne pour « %{server_name} ».
+      trust: Faire confiance
+      presented: Présentée
+      ask_administrator_check_accept: Demandez à un administrateur de vérifier et d'accepter la nouvelle empreinte.
+      warning_html: 'Si le serveur vient d''être %{reinstalled} ou a changé de clé d''hôte, c''est normal. Sinon, quelqu''un se fait peut-être passer pour lui : vérifiez l''empreinte sur le serveur (%{command}) avant d''accepter.'
+      reinstalled: réinstallé
+  server_ssh_checks:
+    show:
+      ssh: SSH
+      test_ssh_connection_again: Retester la connexion SSH
+      connection_ok: Connexion OK
+      checked_html: vérifié %{current}
+  keys:
+    authorized_key_removal:
+      invalid_title: Clé invalide
+      invalid_details: La clé à supprimer n'est pas une clé publique valide.
+      forbidden_title: Suppression interdite
+      forbidden_details: 'La clé Elio ne peut pas être supprimée : l''application perdrait l''accès au serveur.'
+    bulk_access:
+      added_for: ajoutée pendant %{label_for}
+      added: ajoutée
+      present: déjà présente
+  ssh:
+    check:
+      succeeded: Connexion SSH réussie
+      answered: "%{username}@%{host} a répondu à `echo %{token}`."
+      unexpected: Réponse inattendue du serveur
+      unexpected_details: Attendu « %{token} », reçu « %{truncate} ».
+    connection:
+      error: Erreur SSH
+      connection: Connexion impossible
+      authentication: Clé SSH refusée par le serveur
+      host_key_mismatch: L'empreinte du serveur a changé
+      missing_key: Aucune clé SSH configurée
+      timeout: Délai dépassé
+      command: La commande a échoué
+      missing_key_details: 'Aucune clé SSH configurée : générez-en une dans les paramètres.'
+      authentication_details: Authentification refusée pour %{username}@%{host} (%{message})
+      host_key_details: La clé d'hôte de %{host} a changé (%{fingerprint}). Connexion refusée.
+      connection_details: 'Impossible de se connecter à %{host}:%{port} (%{class}: %{message})'
+      session_closed: La session a été fermée après un délai dépassé.
+      command_timeout: 'La commande n''a pas répondu en %{timeout} s sur %{host} : %{truncate}'
+  public_key_accesses_controller:
+    choose_server: Choisissez au moins un serveur.
+    removed: L'accès de « %{public_key_name} » à « %{server_name} » a été retiré.
+    remove_failed: 'Impossible de retirer l''accès : %{error_title} — %{error_details}'
+    done:
+      one: 'Ajouts terminés : %{succeeded}/%{count} serveur.'
+      other: 'Ajouts terminés : %{succeeded}/%{count} serveurs.'
+  public_keys_controller:
+    created: La clé « %{public_key_name} » a été ajoutée au trousseau.
+    updated: La clé « %{public_key_name} » a été modifiée.
+    deleted: La clé « %{public_key_name} » a été retirée du trousseau.
+  server_authorizations_controller:
+    not_saved: 'Clé non enregistrée : %{full_messages_to_sentence}'
+    target: "« %{server_name} »"
+    added_for: "%{name} est ajoutée sur %{target} pendant %{label_for}, jusqu'à %{date}."
+    added: "%{name} a été ajoutée sur %{target}."
+    present: "%{name} était déjà présente sur %{target}."
+    name: La clé « %{public_key_name} »
+    name_created: La clé « %{public_key_name} » (ajoutée au trousseau)
+    failed: 'Impossible d''ajouter « %{public_key_name} » sur %{target} : %{error_title} — %{error_details}'
+    failed_kept: 'Impossible d''ajouter « %{public_key_name} » sur %{target} (elle reste dans le trousseau) : %{error_title} — %{error_details}'
+  server_authorized_keys_controller:
+    unnamed: sans nom
+    target: "« %{server_name} »"
+    deleted: La clé « %{name} » a été supprimée de %{target}.
+    absent: La clé « %{name} » n'était plus présente sur %{target}.
+    failed: 'Impossible de supprimer la clé « %{name} » de %{target} : %{error_title} — %{error_details}'
+  ssh_keys_controller:
+    regenerated: Nouvelle clé SSH générée. Remplacez l'ancienne clé publique sur vos serveurs.
+    generated: Clé SSH générée. Ajoutez la clé publique sur vos serveurs.
+  server_host_keys_controller:
+    accepted: Nouvelle empreinte acceptée pour « %{server_name} ».
+    changed_again: 'Le serveur ne présente plus l''empreinte affichée (%{expected}) : rien n''a été accepté. Vérifiez le serveur avant de réessayer.'
+  key_rotations_controller:
+    started: Rotation de la clé Elio lancée.
+    already_running: Une rotation de la clé est déjà en cours.
+    nothing_to_retry: Rien à relancer.
+    retrying: Relance des serveurs en échec.
+    cannot_finalize: Cette rotation ne peut pas être finalisée.
+    activated: Nouvelle clé activée, l'ancienne est supprimée.
+  public_key:
+    kinds:
+      person: Personne
+      server: Serveur
+  key_rotation_step:
+    phases:
+      install: installation de la nouvelle clé
+      verify: connexion avec la nouvelle clé
+      cleanup: retrait de l'ancienne clé
+  settings:
+    show:
+      follow_rotation: Suivre la rotation
+      rotate_key: Faire tourner la clé
+      start_rotation: Lancer la rotation
+      regenerate_key: Régénérer la clé
+      old_key_will_deleted: L'ancienne clé sera définitivement supprimée et Elio ne pourra plus se connecter aux serveurs tant que la nouvelle clé publique n'y aura pas été ajoutée.
+      generate_ssh_key: Générer une clé SSH
+      disk_warning: 'Disque : attention (%)'
+      disk_critical: 'Disque : critique (%)'
+      memory_warning: 'Mémoire : attention (%)'
+      memory_critical: 'Mémoire : critique (%)'
+      load_warning_processors: 'Charge : attention (× processeurs)'
+      save_thresholds: Enregistrer les seuils
+      ssh_key_application: Clé SSH de l'application
+      generated: Générée le
+      public_key: Clé publique
+      command_run_each_server: Commande à lancer sur chaque serveur
+      key_rotation_progress_elio: 'Une rotation de la clé est en cours : Elio utilise l''ancienne et la nouvelle clé.'
+      new_key_installed_each: 'Une nouvelle clé est installée sur chaque serveur avec l''ancienne, vérifiée, puis l''ancienne est retirée : aucune coupure.'
+      only_if_key_compromised: 'En cas de compromission seulement : régénérer coupe immédiatement l''accès à tous les serveurs jusqu''à ce que la nouvelle clé publique y soit ajoutée à la main.'
+      ssh_key_has_been: Aucune clé SSH n'a encore été générée.
+      health_thresholds: Seuils de santé
+      beyond_them_server_watch: au-delà, un serveur est « à surveiller » ou « critique »
+      also_watch_reboot_required: 'Sont aussi « à surveiller » : redémarrage requis, service en échec, horloge non synchronisée, système plus supporté.'
+      rotation_confirm:
+        one: Une nouvelle clé Elio va remplacer l'actuelle sur le serveur, sans coupure. Les serveurs injoignables pourront être relancés ensuite.
+        other: Une nouvelle clé Elio va remplacer l'actuelle sur les %{count} serveurs, sans coupure. Les serveurs injoignables pourront être relancés ensuite.
+      key_intro_html: Elio se connecte à vos serveurs avec cette clé. Sa clé publique doit être ajoutée au fichier %{file} de l'utilisateur configuré sur chaque serveur. La clé privée reste chiffrée dans la base et n'est jamais affichée.
+    key_rotations:
+      show:
+        ssh_key_application: "← Clé SSH de l'application"
+        deleted_user: un utilisateur supprimé
+        retry_failures: Relancer les échecs
+        finalize_despite_failures: Finaliser malgré les échecs
+        old_key_will_deleted: 'L''ancienne clé sera supprimée : Elio perdra l''accès aux serveurs en échec tant que la nouvelle clé n''y sera pas installée.'
+        finalize: Finaliser
+        new_key_installed_checked: nouvelle clé installée et vérifiée, ancienne retirée
+        failed: 'échec : %{phase_label}'
+        title: Rotation de la clé Elio
+        started: Lancée par
+        during_rotation_elio_logs_html: "%{created_at}. Pendant la rotation, Elio se connecte avec l'ancienne ou la nouvelle clé : aucun serveur ne perd l'accès."
+        done_new_key_active: 'Terminée : la nouvelle clé est active, l''ancienne a été supprimée.'
+        they_keep_old_key_html: "%{t} : ils gardent l'ancienne clé, qui reste utilisable."
+        finalized_with_failures:
+          one: "(finalisée malgré %{count} échec)"
+          other: "(finalisée malgré %{count} échecs)"
+        in_progress:
+          one: 'En cours : %{done}/%{count} serveur'
+          other: 'En cours : %{done}/%{count} serveurs'
+  health_thresholds_controller:
+    saved: Seuils de santé enregistrés.
+    invalid: 'Seuils invalides : %{full_messages_to_sentence}'

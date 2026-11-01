@@ -43,24 +43,24 @@ class ServerAuthorizationsController < ApplicationController
                status: :unprocessable_entity
       end
       format.html do
-        redirect_to server_path(server, tab: "keys"), alert: "Clé non enregistrée : #{public_key.errors.full_messages.to_sentence}", status: :see_other
+        redirect_to server_path(server, tab: "keys"), alert: t("server_authorizations_controller.not_saved", full_messages_to_sentence: public_key.errors.full_messages.to_sentence), status: :see_other
       end
     end
     nil
   end
 
   def grant_message(server, public_key, result, duration)
-    target = "« #{server.name} »"
-    name = "La clé « #{public_key.name} »#{" (ajoutée au trousseau)" if @created}"
+    target = t("server_authorizations_controller.target", server_name: server.name)
+    name = (@created ? t("server_authorizations_controller.name_created", public_key_name: public_key.name) : t("server_authorizations_controller.name", public_key_name: public_key.name))
 
     if result.added? && duration
-      [ :notice, "#{name} est ajoutée sur #{target} pendant #{TemporaryAccess.label_for(duration)}, jusqu'à #{l(duration.from_now, format: :short)}." ]
+      [ :notice, t("server_authorizations_controller.added_for", name: name, target: target, label_for: (TemporaryAccess.label_for(duration)), date: (l(duration.from_now, format: :short))) ]
     elsif result.added?
-      [ :notice, "#{name} a été ajoutée sur #{target}." ]
+      [ :notice, t("server_authorizations_controller.added", name: name, target: target) ]
     elsif result.already_present?
-      [ :notice, "#{name} était déjà présente sur #{target}." ]
+      [ :notice, t("server_authorizations_controller.present", name: name, target: target) ]
     else
-      [ :alert, "Impossible d'ajouter « #{public_key.name} » sur #{target}#{" (elle reste dans le trousseau)" if @created} : #{result.error_title} — #{result.error_details}" ]
+      [ :alert, t(@created ? "server_authorizations_controller.failed_kept" : "server_authorizations_controller.failed", public_key_name: public_key.name, target: target, error_title: result.error_title, error_details: result.error_details) ]
     end
   end
 end

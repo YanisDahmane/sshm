@@ -2,7 +2,7 @@
 # of a server (e.g. a CI runner, a backup host), that can be added to or
 # removed from the servers. `content` is one OpenSSH public key line.
 class PublicKey < ApplicationRecord
-  KINDS = { "person" => "Personne", "server" => "Serveur" }.freeze
+  KINDS = %w[person server].freeze
 
   normalizes :name, with: ->(value) { value.squish }
   normalizes :content, with: ->(value) { value.strip }
@@ -11,7 +11,7 @@ class PublicKey < ApplicationRecord
   before_validation :set_fingerprint
 
   validates :name, presence: true, uniqueness: { case_sensitive: false }
-  validates :kind, inclusion: { in: KINDS.keys }
+  validates :kind, inclusion: { in: KINDS }
   validates :content, presence: true
   validate :content_must_be_a_single_public_key
   validate :content_must_not_be_the_app_key
@@ -19,7 +19,9 @@ class PublicKey < ApplicationRecord
 
   scope :of_kind, ->(kind) { where(kind: kind) }
 
-  def kind_label = KINDS.fetch(kind)
+  def kind_label = self.class.kind_label(kind)
+
+  def self.kind_label(kind) = I18n.t("public_key.kinds.#{kind}")
 
   def server? = kind == "server"
 

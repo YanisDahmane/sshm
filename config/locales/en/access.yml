@@ -1,0 +1,256 @@
+en:
+  public_keys:
+    accesses:
+      expires: 'Expires '
+      expired: Expired, being removed
+      remove: Remove the access
+      remove_label: Remove the access to %{server_name}
+      remove_confirm: The key of “%{public_key_name}” will be deleted from “%{server_name}”.
+      access: Access
+      servers_where_key_installed: Servers where this key is installed, from the last key reading.
+      known_access_add_below: No known access. Add it below, or run a scan if keys were added by hand.
+    bulk_form:
+      duration: Duration
+      permanent: Permanent
+      add_server: Add a server
+      add_several_servers: Add on several servers
+      add: Add
+      adding: Adding…
+      able_add_key_there: to be able to add this key there.
+    delete_button:
+      delete: Delete
+      delete_2: Delete %{public_key_name}
+      key_will_removed_keyring: The key “%{public_key_name}” will be removed from the keyring. Where it is already installed, it stays in place.
+    form:
+      name: Name
+      alice: Alice
+      team_member: a team member
+      machine_logs_others_ci: a machine that logs in to the others (CI, backup…)
+      public_ssh_key: Public SSH key
+      work_laptop_github_actions: Work laptop, GitHub Actions runner…
+      cancel: Cancel
+      save: Save
+      add_keyring: Add to the keyring
+      optional: "(optional)"
+      content_hint_html: Content of the %{extension} file, for example %{command}. Never the private key.
+    edit:
+      back_key: "← Back to the key"
+      heading_html: Edit “%{name_was}”
+    index:
+      all: All
+      people: People
+      servers: Servers
+      edit: Edit
+      edit_2: Edit %{public_key_name}
+      keys: keys
+      add_first_key: Add the first key
+      key_type: Key type
+      keyring_empty: The keyring is empty.
+      add_key: Add a key
+    new:
+      back_server: "← Back to the server"
+      key_found_server_already: 'The key found on the server is already filled in: just choose a name.'
+    show:
+      delete: Delete
+      none: None
+      added_keyring_html: "· added to the keyring %{created_at}"
+      edit: Edit
+      ssh_key: SSH key
+      public_key: Public key
+  server_authorized_keys:
+    frame:
+      reading_authorized_keys: Reading the authorized keys…
+    key_details:
+      unnamed: Unnamed
+      none: None
+      close: Close
+      line_file_html: line %{line_number} of the file
+      file_line: File line
+    index:
+      reload_keys: Reload the keys
+      try_again: Try again
+      unnamed: Unnamed
+      unnamed_2: unnamed
+      delete_key: Delete the key
+      delete_key_2: Delete the key %{nom}
+      key_will_deleted_will: The key “%{nom}” will be deleted from “%{server_name}”. It will no longer be able to log in to it.
+      authorized_key_server: No authorized key on this server.
+      keyring_html: "%{t} in the keyring."
+      outside_keyring: Outside the keyring
+      ssh_key_elio_application: SSH key of the Elio application
+      key_details: Key details
+      add_keyring: Add to the keyring
+      title: Authorized keys · %{server_name}
+      recognize:
+        one: If you recognize it, add it with the “Add to the keyring” button; otherwise delete it.
+        other: If you recognize them, add them with the “Add to the keyring” button; otherwise delete them.
+  servers:
+    add_key_dialog:
+      keyring: From the keyring
+      new_key: New key
+      keyring_key: Keyring key
+      name: Name
+      alice: Alice
+      public_ssh_key: Public SSH key
+      work_laptop_github_actions: Work laptop, GitHub Actions runner…
+      duration: Duration
+      permanent: Permanent
+      add_key: Add a key
+      add_key_html: Add a key on “%{server_name}”
+      close: Close
+      key_origin: Key origin
+      last_key_reading_html: From the last key reading, %{relative_time_in_words}.
+      optional: "(optional)"
+      add_server: Add on the server
+      content_hint_html: Content of the %{extension} file. It will also be saved in the keyring.
+    ssh_status:
+      ssh_connection_never_tested: SSH connection never tested
+      key_refused: Key refused
+      refused: Elio's key was refused%{checked}
+      succeeded: SSH connection succeeded%{checked}
+    host_key_changed:
+      trust_new_fingerprint: Trust the new fingerprint
+      new_fingerprint_will_replace: The new fingerprint %{new} will replace the old one for “%{server_name}”.
+      trust: Trust
+      presented: Presented
+      ask_administrator_check_accept: Ask an administrator to check and accept the new fingerprint.
+      warning_html: 'If the server has just been %{reinstalled} or has changed its host key, this is normal. Otherwise, someone may be impersonating it: check the fingerprint on the server (%{command}) before accepting.'
+      reinstalled: reinstalled
+  server_ssh_checks:
+    show:
+      ssh: SSH
+      test_ssh_connection_again: Test the SSH connection again
+      connection_ok: Connection OK
+      checked_html: checked %{current}
+  keys:
+    authorized_key_removal:
+      invalid_title: Invalid key
+      invalid_details: The key to delete is not a valid public key.
+      forbidden_title: Deletion forbidden
+      forbidden_details: 'Elio''s key cannot be deleted: the application would lose access to the server.'
+    bulk_access:
+      added_for: added for %{label_for}
+      added: added
+      present: already present
+  ssh:
+    check:
+      succeeded: SSH connection succeeded
+      answered: "%{username}@%{host} answered `echo %{token}`."
+      unexpected: Unexpected answer from the server
+      unexpected_details: Expected “%{token}”, received “%{truncate}”.
+    connection:
+      error: SSH error
+      connection: Cannot connect
+      authentication: SSH key refused by the server
+      host_key_mismatch: The server's fingerprint has changed
+      missing_key: No SSH key configured
+      timeout: Timeout
+      command: The command failed
+      missing_key_details: 'No SSH key configured: generate one in the settings.'
+      authentication_details: Authentication refused for %{username}@%{host} (%{message})
+      host_key_details: The host key of %{host} has changed (%{fingerprint}). Connection refused.
+      connection_details: 'Cannot connect to %{host}:%{port} (%{class}: %{message})'
+      session_closed: The session was closed after a timeout.
+      command_timeout: 'The command did not answer within %{timeout} s on %{host}: %{truncate}'
+  public_key_accesses_controller:
+    choose_server: Choose at least one server.
+    removed: The access of “%{public_key_name}” to “%{server_name}” has been removed.
+    remove_failed: 'Cannot remove the access: %{error_title} — %{error_details}'
+    done:
+      one: 'Additions done: %{succeeded}/%{count} server.'
+      other: 'Additions done: %{succeeded}/%{count} servers.'
+  public_keys_controller:
+    created: The key “%{public_key_name}” has been added to the keyring.
+    updated: The key “%{public_key_name}” has been updated.
+    deleted: The key “%{public_key_name}” has been removed from the keyring.
+  server_authorizations_controller:
+    not_saved: 'Key not saved: %{full_messages_to_sentence}'
+    target: "“%{server_name}”"
+    added_for: "%{name} is added on %{target} for %{label_for}, until %{date}."
+    added: "%{name} has been added on %{target}."
+    present: "%{name} was already present on %{target}."
+    name: The key “%{public_key_name}”
+    name_created: The key “%{public_key_name}” (added to the keyring)
+    failed: 'Cannot add “%{public_key_name}” on %{target}: %{error_title} — %{error_details}'
+    failed_kept: 'Cannot add “%{public_key_name}” on %{target} (it stays in the keyring): %{error_title} — %{error_details}'
+  server_authorized_keys_controller:
+    unnamed: unnamed
+    target: "“%{server_name}”"
+    deleted: The key “%{name}” has been deleted from %{target}.
+    absent: The key “%{name}” was no longer present on %{target}.
+    failed: 'Cannot delete the key “%{name}” from %{target}: %{error_title} — %{error_details}'
+  ssh_keys_controller:
+    regenerated: New SSH key generated. Replace the old public key on your servers.
+    generated: SSH key generated. Add the public key on your servers.
+  server_host_keys_controller:
+    accepted: New fingerprint accepted for “%{server_name}”.
+    changed_again: 'The server no longer presents the fingerprint shown (%{expected}): nothing was accepted. Check the server before trying again.'
+  key_rotations_controller:
+    started: Rotation of Elio's key started.
+    already_running: A key rotation is already in progress.
+    nothing_to_retry: Nothing to retry.
+    retrying: Retrying the failed servers.
+    cannot_finalize: This rotation cannot be finalized.
+    activated: New key activated, the old one is deleted.
+  public_key:
+    kinds:
+      person: Person
+      server: Server
+  key_rotation_step:
+    phases:
+      install: installing the new key
+      verify: logging in with the new key
+      cleanup: removing the old key
+  settings:
+    show:
+      follow_rotation: Follow the rotation
+      rotate_key: Rotate the key
+      start_rotation: Start the rotation
+      regenerate_key: Regenerate the key
+      old_key_will_deleted: The old key will be deleted for good and Elio will not be able to log in to the servers until the new public key has been added to them.
+      generate_ssh_key: Generate an SSH key
+      disk_warning: 'Disk: warning (%)'
+      disk_critical: 'Disk: critical (%)'
+      memory_warning: 'Memory: warning (%)'
+      memory_critical: 'Memory: critical (%)'
+      load_warning_processors: 'Load: warning (× processors)'
+      save_thresholds: Save the thresholds
+      ssh_key_application: SSH key of the application
+      generated: Generated on
+      public_key: Public key
+      command_run_each_server: Command to run on each server
+      key_rotation_progress_elio: 'A key rotation is in progress: Elio uses the old and the new key.'
+      new_key_installed_each: 'A new key is installed on each server next to the old one, checked, then the old one is removed: no interruption.'
+      only_if_key_compromised: 'Only if the key is compromised: regenerating cuts the access to every server at once, until the new public key is added to them by hand.'
+      ssh_key_has_been: No SSH key has been generated yet.
+      health_thresholds: Health thresholds
+      beyond_them_server_watch: beyond them, a server is “to watch” or “critical”
+      also_watch_reboot_required: 'Also “to watch”: reboot required, failed service, clock not synchronized, system no longer supported.'
+      rotation_confirm:
+        one: A new Elio key will replace the current one on the %{count} server, without interruption. Unreachable servers can be retried afterwards.
+        other: A new Elio key will replace the current one on the %{count} servers, without interruption. Unreachable servers can be retried afterwards.
+      key_intro_html: Elio logs in to your servers with this key. Its public key must be added to the %{file} file of the user configured on each server. The private key stays encrypted in the database and is never shown.
+    key_rotations:
+      show:
+        ssh_key_application: "← SSH key of the application"
+        deleted_user: a deleted user
+        retry_failures: Retry the failures
+        finalize_despite_failures: Finalize despite the failures
+        old_key_will_deleted: 'The old key will be deleted: Elio will lose access to the failed servers until the new key is installed on them.'
+        finalize: Finalize
+        new_key_installed_checked: new key installed and checked, old one removed
+        failed: 'failed: %{phase_label}'
+        title: Rotation of Elio's key
+        started: Started by
+        during_rotation_elio_logs_html: "%{created_at}. During the rotation, Elio logs in with the old or the new key: no server loses access."
+        done_new_key_active: 'Done: the new key is active, the old one has been deleted.'
+        they_keep_old_key_html: "%{t}: they keep the old key, which still works."
+        finalized_with_failures:
+          one: "(finalized despite %{count} failure)"
+          other: "(finalized despite %{count} failures)"
+        in_progress:
+          one: 'In progress: %{done}/%{count} server'
+          other: 'In progress: %{done}/%{count} servers'
+  health_thresholds_controller:
+    saved: Health thresholds saved.
+    invalid: 'Invalid thresholds: %{full_messages_to_sentence}'

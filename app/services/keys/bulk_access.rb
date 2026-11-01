@@ -16,8 +16,8 @@ class Keys::BulkAccess
     account = AuthorizedKeysAccount.login(server)
     results = public_keys.map do |public_key|
       outcome = Keys::AccessGrant.call(server, public_key, account: account, duration: duration)
-      message = if outcome.added? then duration ? "ajoutée pendant #{TemporaryAccess.label_for(duration)}" : "ajoutée"
-      elsif outcome.already_present? then "déjà présente"
+      message = if outcome.added? then duration ? I18n.t("keys.bulk_access.added_for", label_for: (TemporaryAccess.label_for(duration))) : I18n.t("keys.bulk_access.added")
+      elsif outcome.already_present? then I18n.t("keys.bulk_access.present")
       else "#{outcome.error_title} — #{outcome.error_details}"
       end
       Result.new(server, public_key, account.unix_user, outcome.status, message)

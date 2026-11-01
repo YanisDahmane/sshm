@@ -6,40 +6,41 @@
   <%= hidden_field_tag :return_to, return_to if local_assigns[:return_to] %>
 
   <div>
-    <%= f.label :name, "Nom", class: label_class %>
-    <%= f.text_field :name, autofocus: true, required: true, placeholder: "Alice", class: input_class %>
+    <%= f.label :name, t(".name"), class: label_class %>
+    <%= f.text_field :name, autofocus: true, required: true, placeholder: t(".alice"), class: input_class %>
   </div>
 
   <fieldset>
     <legend class="<%= label_class %>">Type</legend>
     <div class="mt-2 flex flex-wrap gap-4">
-      <% PublicKey::KINDS.each do |value, label| %>
+      <% PublicKey::KINDS.each do |value| %>
+              <% label = PublicKey.kind_label(value) %>
         <label class="flex cursor-pointer items-center gap-2 text-sm text-ink-2">
           <%= f.radio_button :kind, value, class: "h-4 w-4 border-line text-accent" %>
           <%= label %>
-          <span class="text-xs text-ink-3"><%= value == "person" ? "un membre de l'équipe" : "une machine qui se connecte aux autres (CI, sauvegarde…)" %></span>
+          <span class="text-xs text-ink-3"><%= value == "person" ? t(".team_member") : t(".machine_logs_others_ci") %></span>
         </label>
       <% end %>
     </div>
   </fieldset>
 
   <div>
-    <%= f.label :content, "Clé SSH publique", class: label_class %>
+    <%= f.label :content, t(".public_ssh_key"), class: label_class %>
     <%= f.text_area :content, required: true, rows: 4, spellcheck: false, autocomplete: "off",
           placeholder: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA… alice@laptop",
           class: "#{input_class} font-mono text-xs" %>
     <p class="mt-1 text-xs text-ink-3">
-      Contenu du fichier <code class="font-mono">.pub</code>, par exemple <code class="font-mono">cat ~/.ssh/id_ed25519.pub</code>. Jamais la clé privée.
+      <%= t(".content_hint_html", extension: tag.code(".pub", class: "font-mono"), command: tag.code("cat ~/.ssh/id_ed25519.pub", class: "font-mono")) %>
     </p>
   </div>
 
   <div>
-    <%= f.label :description, class: label_class do %>Description <span class="font-normal text-ink-3">(facultative)</span><% end %>
-    <%= f.text_field :description, placeholder: "Portable de travail, runner GitHub Actions…", class: input_class %>
+    <%= f.label :description, class: label_class do %>Description <span class="font-normal text-ink-3"><%= t(".optional") %></span><% end %>
+    <%= f.text_field :description, placeholder: t(".work_laptop_github_actions"), class: input_class %>
   </div>
 
   <div class="flex items-center justify-end gap-3 pt-2">
-    <%= link_to "Annuler", local_assigns[:return_to] || (public_key.persisted? ? public_key_path(public_key) : public_keys_path), class: "btn btn-ghost" %>
-    <%= f.submit public_key.persisted? ? "Enregistrer" : "Ajouter au trousseau", class: "btn btn-primary" %>
+    <%= link_to t(".cancel"), local_assigns[:return_to] || (public_key.persisted? ? public_key_path(public_key) : public_keys_path), class: "btn btn-ghost" %>
+    <%= f.submit public_key.persisted? ? t(".save") : t(".add_keyring"), class: "btn btn-primary" %>
   </div>
 <% end %>

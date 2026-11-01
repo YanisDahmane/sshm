@@ -1,12 +1,11 @@
-<% content_for :title, "Rotation de la clé Elio · Elio" %>
+<% content_for :title, t("title", page: t("settings.key_rotations.show.title")) %>
 <%= render "settings/nav" %>
 
 <div class="mx-auto mt-8 max-w-3xl">
-  <%= link_to "← Clé SSH de l'application", settings_path, class: "text-sm text-ink-3 hover:text-ink-2" %>
-  <h2 class="mt-2 text-xl font-semibold">Rotation de la clé Elio</h2>
+  <%= link_to t(".ssh_key_application"), settings_path, class: "text-sm text-ink-3 hover:text-ink-2" %>
+  <h2 class="mt-2 text-xl font-semibold"><%= t(".title") %></h2>
   <p class="mt-1 text-sm text-ink-3">
-    Lancée par <%= @rotation.started_by&.email || "un utilisateur supprimé" %> <%= relative_time_tag @rotation.created_at %>.
-    Pendant la rotation, Elio se connecte avec l'ancienne ou la nouvelle clé : aucun serveur ne perd l'accès.
+    <%= t(".started") %> <%= @rotation.started_by&.email || t(".deleted_user") %> <%= t(".during_rotation_elio_logs_html", created_at: (relative_time_tag @rotation.created_at)) %>
   </p>
 
   <%# No src here: Turbo refuses a frame whose src is the page itself (auto-refresh sets it). %>
@@ -18,23 +17,23 @@
     <section id="rotation-summary" class="mt-6 rounded-xl border border-line bg-surface p-6 shadow-sm">
       <% if @rotation.status == :running %>
         <p class="rotation-status flex items-center gap-2 text-sm font-medium text-accent">
-          <%= icon :arrow_path, class: "h-4 w-4 animate-spin" %> En cours : <%= @rotation.servers_done %>/<%= @rotation.servers_count %> serveur(s)
+          <%= icon :arrow_path, class: "h-4 w-4 animate-spin" %> <%= t(".in_progress", done: @rotation.servers_done, count: @rotation.servers_count) %>
         </p>
       <% elsif @rotation.status == :activated %>
         <p class="rotation-status flex items-center gap-2 text-sm font-medium text-good-ink">
-          <%= icon :check, class: "h-4 w-4" %> Terminée : la nouvelle clé est active, l'ancienne a été supprimée.
-          <%= "(finalisée malgré #{@rotation.failed_count} échec(s))" if @rotation.forced %>
+          <%= icon :check, class: "h-4 w-4" %> <%= t(".done_new_key_active") %>
+          <%= t(".finalized_with_failures", count: @rotation.failed_count) if @rotation.forced %>
         </p>
       <% else %>
         <p class="rotation-status flex items-center gap-2 text-sm font-medium text-crit-ink">
-          <%= icon :x_mark, class: "h-4 w-4" %> <%= t("count.servers_failed", count: @rotation.failed_count) %> : ils gardent l'ancienne clé, qui reste utilisable.
+          <%= icon :x_mark, class: "h-4 w-4" %> <%= t(".they_keep_old_key_html", t: (t("count.servers_failed", count: @rotation.failed_count))) %>
         </p>
         <div class="mt-4 flex flex-wrap gap-3">
-          <%= button_to "Relancer les échecs", retry_settings_key_rotation_path(@rotation), data: { turbo_frame: "_top" },
+          <%= button_to t(".retry_failures"), retry_settings_key_rotation_path(@rotation), data: { turbo_frame: "_top" },
                 class: "btn btn-primary" %>
-          <%= button_to "Finaliser malgré les échecs", finalize_settings_key_rotation_path(@rotation),
-                form: { data: { turbo_frame: "_top", turbo_confirm: "L'ancienne clé sera supprimée : Elio perdra l'accès aux serveurs en échec tant que la nouvelle clé n'y sera pas installée.",
-                                confirm_label: "Finaliser", confirm_variant: "danger" } },
+          <%= button_to t(".finalize_despite_failures"), finalize_settings_key_rotation_path(@rotation),
+                form: { data: { turbo_frame: "_top", turbo_confirm: t(".old_key_will_deleted"),
+                                confirm_label: t(".finalize"), confirm_variant: "danger" } },
                 class: "cursor-pointer rounded-md border border-crit/40 bg-surface px-3 py-1.5 text-sm font-medium text-crit-ink shadow-sm hover:bg-crit-soft" %>
         </div>
       <% end %>
@@ -46,7 +45,7 @@
           <li class="rotation-step flex items-start gap-3 px-4 py-3 is-<%= step.status %>">
             <span class="mt-0.5 <%= step.rotated? ? "text-good-ink" : "text-crit-ink" %>"><%= icon(step.rotated? ? :check : :x_mark) %></span>
             <div class="min-w-0 flex-1">
-              <p><span class="font-medium"><%= step.server_name %></span> — <%= step.rotated? ? "nouvelle clé installée et vérifiée, ancienne retirée" : "échec : #{step.phase_label}" %></p>
+              <p><span class="font-medium"><%= step.server_name %></span> — <%= step.rotated? ? t(".new_key_installed_checked") : t(".failed", phase_label: step.phase_label) %></p>
               <% if step.error_message %><p class="mt-0.5 break-all font-mono text-xs text-crit-ink"><%= step.error_message %></p><% end %>
             </div>
           </li>

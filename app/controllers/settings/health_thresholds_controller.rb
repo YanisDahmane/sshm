@@ -10,9 +10,9 @@ module Settings
       setting = AppSetting.current
       if setting.update(params.expect(app_setting: FIELDS))
         Server.find_each(&:refresh_health!)
-        redirect_to settings_path(anchor: "health-thresholds"), notice: "Seuils de santé enregistrés."
+        redirect_to settings_path(anchor: "health-thresholds"), notice: t("health_thresholds_controller.saved")
       else
-        redirect_to settings_path(anchor: "health-thresholds"), alert: "Seuils invalides : #{setting.errors.full_messages.to_sentence}"
+        redirect_to settings_path(anchor: "health-thresholds"), alert: t("health_thresholds_controller.invalid", full_messages_to_sentence: setting.errors.full_messages.to_sentence)
       end
     end
   end

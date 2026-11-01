@@ -14,8 +14,8 @@ class Keys::AuthorizedKeyRemoval
 
   def self.call(server, blob, account: nil, protected_keys: SshKey.app_keys, **connection_options)
     account ||= AuthorizedKeysAccount.login(server)
-    return error("Clé invalide", "La clé à supprimer n'est pas une clé publique valide.") unless blob.to_s.match?(BLOB_FORMAT)
-    return error("Suppression interdite", "La clé Elio ne peut pas être supprimée : l'application perdrait l'accès au serveur.") if Array(protected_keys).any? { |key| key.blob == blob }
+    return error(I18n.t("keys.authorized_key_removal.invalid_title"), I18n.t("keys.authorized_key_removal.invalid_details")) unless blob.to_s.match?(BLOB_FORMAT)
+    return error(I18n.t("keys.authorized_key_removal.forbidden_title"), I18n.t("keys.authorized_key_removal.forbidden_details")) if Array(protected_keys).any? { |key| key.blob == blob }
 
     output = Ssh::Connection.open(server, **connection_options) do |ssh|
       ssh.run_command!("keys.remove", blob: blob).stdout

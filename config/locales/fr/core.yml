@@ -151,3 +151,13 @@ fr:
     updates:
       one: "%{count} mise à jour"
       other: "%{count} mises à jour"
+  duration:
+    minutes:
+      one: "%{count} minute"
+      other: "%{count} minutes"
+    hours:
+      one: "%{count} heure"
+      other: "%{count} heures"
+    days:
+      one: "%{count} jour"
+      other: "%{count} jours"

@@ -16,16 +16,16 @@ class Ssh::Connection
   # `reason` lets the UI guide the user: :key_refused (install the app key on
   # the server) or :missing_key (generate it in the settings).
   class Error < StandardError
-    def title = "Erreur SSH"
+    def title = I18n.t("ssh.connection.error")
     def reason = nil
   end
 
   class ConnectionError < Error
-    def title = "Connexion impossible"
+    def title = I18n.t("ssh.connection.connection")
   end
 
   class AuthenticationError < Error
-    def title = "Clé SSH refusée par le serveur"
+    def title = I18n.t("ssh.connection.authentication")
     def reason = :key_refused
   end
 
@@ -40,25 +40,25 @@ class Ssh::Connection
       super(message)
     end
 
-    def title = "L'empreinte du serveur a changé"
+    def title = I18n.t("ssh.connection.host_key_mismatch")
     def reason = :host_key_changed
   end
 
   class MissingKeyError < Error
-    def title = "Aucune clé SSH configurée"
+    def title = I18n.t("ssh.connection.missing_key")
     def reason = :missing_key
   end
 
   # The command ran longer than its time limit: its channel and the session
   # are closed, so the connection cannot be used anymore.
   class CommandTimeoutError < Error
-    def title = "Délai dépassé"
+    def title = I18n.t("ssh.connection.timeout")
   end
 
   class CommandError < Error
     attr_reader :result
 
-    def title = "La commande a échoué"
+    def title = I18n.t("ssh.connection.command")
 
     def initialize(command, result)
       @result = result
@@ -96,7 +96,7 @@ class Ssh::Connection
 
   # Yields the connection and closes the session afterwards. Returns the block's value.
   def open
-    raise MissingKeyError, "Aucune clé SSH configurée : générez-en une dans les paramètres." if @keys.empty?
+    raise MissingKeyError, I18n.t("ssh.connection.missing_key_details") if @keys.empty?
 
     FileUtils.mkdir_p(@known_hosts_file.dirname)
 
@@ -110,19 +110,19 @@ class Ssh::Connection
       @timed_out = false
     end
   rescue Net::SSH::AuthenticationFailed => e
-    raise AuthenticationError, "Authentification refusée pour #{server.username}@#{server.host} (#{e.message})"
+    raise AuthenticationError, I18n.t("ssh.connection.authentication_details", username: server.username, host: server.host, message: e.message)
   rescue Net::SSH::HostKeyMismatch => e
-    raise HostKeyMismatchError.new("La clé d'hôte de #{server.host} a changé (#{e.fingerprint}). Connexion refusée.",
+    raise HostKeyMismatchError.new(I18n.t("ssh.connection.host_key_details", host: server.host, fingerprint: e.fingerprint),
                                    new_fingerprint: e.fingerprint,
                                    known_fingerprints: Ssh::KnownHosts.fingerprints(server.host, server.port, file: @known_hosts_file))
   rescue Net::SSH::ConnectionTimeout, Net::SSH::Disconnect, Net::SSH::Exception, SocketError, SystemCallError, IOError, Timeout::Error => e
-    raise ConnectionError, "Impossible de se connecter à #{server.host}:#{server.port} (#{e.class}: #{e.message})"
+    raise ConnectionError, I18n.t("ssh.connection.connection_details", host: server.host, port: server.port, class: e.class, message: e.message)
   end
 
   # Runs a command and returns its Result, whatever the exit status. Raises
   # CommandTimeoutError (and shuts the session down) after `timeout` seconds.
   def exec(command, timeout: @command_timeout || DEFAULT_COMMAND_TIMEOUT)
-    raise CommandTimeoutError, "La session a été fermée après un délai dépassé." if @timed_out
+    raise CommandTimeoutError, I18n.t("ssh.connection.session_closed") if @timed_out
     raise Error, "No open session, call #exec inside Ssh::Connection.open" unless @session
 
     stdout = +""
@@ -193,7 +193,7 @@ class Ssh::Connection
   def raise_timeout(command, timeout)
     @session.shutdown!
     @timed_out = true
-    raise CommandTimeoutError, "La commande n'a pas répondu en #{timeout} s sur #{server.host} : #{command.truncate(80)}"
+    raise CommandTimeoutError, I18n.t("ssh.connection.command_timeout", timeout: timeout, host: server.host, truncate: (command.truncate(80)))
   end
 
   def ssh_options

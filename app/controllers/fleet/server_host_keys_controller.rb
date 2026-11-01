@@ -14,10 +14,10 @@ class ServerHostKeysController < ApplicationController
 
     if Ssh::KnownHosts.fingerprints(server.host, server.port).include?(expected)
       Activity.record!(:host_key_changed, server: server, new_fingerprint: expected, previous_fingerprints: previous)
-      redirect_to server_path(server), notice: "Nouvelle empreinte acceptée pour « #{server.name} »."
+      redirect_to server_path(server), notice: t("server_host_keys_controller.accepted", server_name: server.name)
     else
       Ssh::KnownHosts.forget(server.host, server.port)
-      redirect_to server_path(server), alert: "Le serveur ne présente plus l'empreinte affichée (#{expected}) : rien n'a été accepté. Vérifiez le serveur avant de réessayer."
+      redirect_to server_path(server), alert: t("server_host_keys_controller.changed_again", expected: expected)
     end
   end
 end

@@ -16,16 +16,16 @@ class ServerAuthorizedKeysController < ApplicationController
 
   # Removes the key whose base64 blob is params[:key] from the account's file.
   def destroy
-    name = params[:name].presence || "sans nom"
+    name = params[:name].presence || t("server_authorized_keys_controller.unnamed")
     result = Keys::Revocation.call(@server, params.expect(:key), account: @account, key_name: params[:name].presence)
-    target = "« #{@server.name} »"
+    target = t("server_authorized_keys_controller.target", server_name: @server.name)
 
     flash_type, message = if result.removed?
-      [ :notice, "La clé « #{name} » a été supprimée de #{target}." ]
+      [ :notice, t("server_authorized_keys_controller.deleted", name: name, target: target) ]
     elsif result.absent?
-      [ :notice, "La clé « #{name} » n'était plus présente sur #{target}." ]
+      [ :notice, t("server_authorized_keys_controller.absent", name: name, target: target) ]
     else
-      [ :alert, "Impossible de supprimer la clé « #{name} » de #{target} : #{result.error_title} — #{result.error_details}" ]
+      [ :alert, t("server_authorized_keys_controller.failed", name: name, target: target, error_title: result.error_title, error_details: result.error_details) ]
     end
 
     respond_with_authorized_keys_refresh(@account, flash_type, message)
