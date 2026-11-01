@@ -50,7 +50,7 @@
 <% elsif @rows.any? %>
   <div class="card mt-3 overflow-x-auto" data-controller="modal">
     <table id="vulnerabilities" class="table-dense">
-      <thead><tr><th class="pl-4"><%= t(".severity") %></th><th>Note</th><th>CVE</th><th><%= t(".packages") %></th><th><%= t(".servers") %></th><th class="pr-4">Correctif</th></tr></thead>
+      <thead><tr><th class="pl-4"><%= t(".severity") %></th><th><%= t("words.score") %></th><th>CVE</th><th><%= t(".packages") %></th><th><%= t(".servers") %></th><th class="pr-4"><%= t("words.fix") %></th></tr></thead>
       <tbody>
         <% @rows.each do |row| %>
           <tr class="fleet-vulnerability hover:bg-subtle" data-cve="<%= row.cve %>">

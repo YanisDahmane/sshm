@@ -50,7 +50,7 @@
               </div>
               <% if (parts = cvss_vector_parts(score&.vector)).any? %>
                 <p class="mt-1.5 flex flex-wrap gap-1" title="<%= score.vector %>">
-                  <% parts.each do |label, value| %><span class="badge bg-subtle text-[11px] text-ink-2"><%= label %> : <%= value %></span><% end %>
+                  <% parts.each do |label, value| %><span class="badge bg-subtle text-[11px] text-ink-2"><%= t("words.label_value", label: label, value: value) %></span><% end %>
                 </p>
               <% end %>
             </div>
@@ -85,7 +85,7 @@
           <li class="flex flex-wrap items-baseline gap-x-2">
             <%= link_to server.name, server_path(server, tab: "vulnerabilities"), data: { turbo_frame: "_top" }, class: "font-medium hover:text-accent hover:underline" %>
             <span class="text-xs text-ink-3"><%= rows.map { |row| [ row.image ? "image #{row.image}" : t(".system"), row.installed_version ].join(" ") }.uniq.join(" · ") %></span>
-            <% if rows.any?(&:fixable?) %><%= status_badge :good, "corrigeable" %><% end %>
+            <% if rows.any?(&:fixable?) %><%= status_badge :good, t("words.fixable") %><% end %>
           </li>
         <% end %>
       </ul>
@@ -95,7 +95,7 @@
       <section>
         <h3 class="text-xs font-semibold tracking-wide text-ink-3 uppercase"><%= t(".fixes_release") %></h3>
         <p class="mt-1 text-xs text-ink-2">
-          <%= safe_join(@feed_entries.map { |entry| "#{entry.source == "ubuntu" ? "Ubuntu" : "Debian"} #{entry.release} : #{entry.fixed_version || "pas de correctif"} (#{Vulnerability.severity_label(entry.severity).downcase})" }, " · ") %>
+          <%= safe_join(@feed_entries.map { |entry| "#{t("words.label_value", label: "#{entry.source == "ubuntu" ? "Ubuntu" : "Debian"} #{entry.release}", value: entry.fixed_version || t("words.no_fix"))} (#{Vulnerability.severity_label(entry.severity).downcase})" }, " · ") %>
         </p>
       </section>
     <% end %>

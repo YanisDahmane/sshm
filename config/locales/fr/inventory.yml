@@ -73,6 +73,7 @@ fr:
       used: Utilisé
       measure_yet_run_inventory: 'Pas encore de mesure : lancez l''inventaire pour suivre la charge, la mémoire, les disques et les mises à jour.'
       swap_html: "%{percent} de %{size}"
+      including_html: dont %{security}
     network_card:
       'off': désactivée
       network_inventory_yet_refresh: 'Pas encore d''inventaire du réseau : actualisez l''inventaire pour relever les adresses du serveur.'

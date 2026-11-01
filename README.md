@@ -26,7 +26,7 @@
   <a href="README.fr.md">Français</a>
 </p>
 
-![The fleet in Elio](docs/screenshots/fleet.png)
+![The fleet in Elio](docs/screenshots/en/fleet.png)
 
 Elio watches a fleet of Debian and Ubuntu servers from one place: which ones are healthy, what runs on them, which packages are vulnerable and how to fix them, who has an SSH key on them. Nothing to install on the servers: Elio logs in with its own SSH key and runs a short list of **read-only commands**, all written in one file you can review — [`config/ssh_commands.yml`](config/ssh_commands.yml).
 
@@ -48,16 +48,16 @@ Elio watches a fleet of Debian and Ubuntu servers from one place: which ones are
 
 | | |
 |:---:|:---:|
-| ![Vulnerabilities grouped by package](docs/screenshots/vulnerabilities-by-package.png) | ![A CVE in detail](docs/screenshots/vulnerability-detail.png) |
+| ![Vulnerabilities grouped by package](docs/screenshots/en/vulnerabilities-by-package.png) | ![A CVE in detail](docs/screenshots/en/vulnerability-detail.png) |
 | **Vulnerabilities by package**, with the update to make | **A CVE in detail**: scores per provider, CVSS vector in words |
-| ![A server](docs/screenshots/server.png) | ![Docker](docs/screenshots/docker.png) |
+| ![A server](docs/screenshots/en/server.png) | ![Docker](docs/screenshots/en/docker.png) |
 | **A server**: health, 24-hour charts, system | **Docker**: containers, images, updates, CVEs |
-| ![Overview](docs/screenshots/overview.png) | ![Dark theme](docs/screenshots/fleet-dark.png) |
+| ![Overview](docs/screenshots/en/overview.png) | ![Dark theme](docs/screenshots/en/fleet-dark.png) |
 | **What needs attention**, most serious first | **Dark theme** |
-| ![Uptime Kuma monitors](docs/screenshots/uptime-kuma-monitors.png) | ![OVHcloud](docs/screenshots/ovh.png) |
+| ![Uptime Kuma monitors](docs/screenshots/en/uptime-kuma-monitors.png) | ![OVHcloud](docs/screenshots/en/ovh.png) |
 | **Uptime Kuma**: monitors attached to each server | **OVHcloud**: service, IPs, network firewall per port, DNS |
 
-The interface is in French for now.
+The interface is in **English and French**. Each user picks a language in *My account*; otherwise Elio follows the browser, then the default language of the installation (*Settings → General*). Notification channels and invitations have their own language. Adding a language is adding a folder of translations: see [CONTRIBUTING.md](CONTRIBUTING.md#translating-elio).
 
 ## Quick start
 
@@ -160,7 +160,6 @@ The OVH client of Elio only knows the GET method: it cannot write, whatever the 
 - The Uptime Kuma and OVHcloud extensions were built on recorded API answers, not tried on a real account yet.
 - Container image CVEs without Trivy or Grype: Debian and Ubuntu based images only (not Alpine).
 - Debian rates few of its CVEs: the scores come from the providers you enable (NVD, Red Hat, CVE.org by default).
-- The interface is in French.
 
 ## Development
 

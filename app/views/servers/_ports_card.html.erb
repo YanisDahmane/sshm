@@ -29,7 +29,7 @@
     <% if analysis.ports.any? %>
       <div class="overflow-x-auto">
         <table class="ports table-dense">
-          <thead><tr><th class="pl-4"><%= t(".port") %></th><th><%= t(".listening") %></th><th>Exposition</th><th>Processus</th><th><%= t(".service_container") %></th><th class="pr-4">Firewall</th></tr></thead>
+          <thead><tr><th class="pl-4"><%= t(".port") %></th><th><%= t(".listening") %></th><th><%= t("words.exposure") %></th><th><%= t("words.process") %></th><th><%= t(".service_container") %></th><th class="pr-4"><%= t("words.firewall") %></th></tr></thead>
           <tbody>
             <% analysis.ports.each do |port| %>
               <tr class="port" data-scope="<%= port.scope %>">
@@ -37,8 +37,8 @@
                   <% if port.unexpected %><%= status_badge :warn, "inattendu", class: "port-unexpected ml-1" %><% end %></td>
                 <td class="font-mono text-xs text-ink-2"><%= port.addresses.join(", ") %></td>
                 <td><span class="badge <%= { "public" => "bg-crit-soft text-crit-ink", "private" => "bg-subtle text-ink-2", "local" => "bg-subtle text-ink-3" }.fetch(port.scope, "bg-subtle") %>"><%= { "public" => "public", "private" => t(".private"), "local" => "local" }.fetch(port.scope, port.scope) %></span></td>
-                <td class="font-mono text-xs"><%= port.process || tag.span("inconnu", class: "text-ink-3") %></td>
-                <td class="text-xs text-ink-2"><%= port.container ? "conteneur #{port.container}" : port.unit&.delete_suffix(".service") || "—" %></td>
+                <td class="font-mono text-xs"><%= port.process || tag.span(t("words.unknown"), class: "text-ink-3") %></td>
+                <td class="text-xs text-ink-2"><%= port.container ? t("words.container_name", name: port.container) : port.unit&.delete_suffix(".service") || "—" %></td>
                 <td class="pr-4 text-xs"><%= render "servers/port_firewall", port: port %></td>
               </tr>
             <% end %>

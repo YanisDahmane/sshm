@@ -62,7 +62,7 @@
                 <% members.sort_by { |container| container["name"] }.each do |container| %>
                   <li class="docker-container flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs" data-state="<%= container["state"] %>">
                     <% running = container["state"] == "running" %>
-                    <span class="w-24 shrink-0"><%= status_badge(running ? :good : :neutral, running ? "en cours" : (container["state"] == "exited" ? t(".stopped") : container["state"])) %></span>
+                    <span class="w-24 shrink-0"><%= status_badge(running ? :good : :neutral, running ? t("words.running") : (container["state"] == "exited" ? t(".stopped") : container["state"])) %></span>
                     <span class="font-mono"><%= container["name"] %></span>
                     <span class="text-ink-3"><%= container["image"] %></span>
                     <% if container["ports"] %><span class="ml-auto font-mono text-[11px] text-ink-2"><%= container["ports"] %></span><% end %>

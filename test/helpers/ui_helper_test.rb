@@ -26,7 +26,7 @@ class UiHelperTest < ActionView::TestCase
     assert_select ".meter[data-tone=warn] .bg-warn"
     assert_select ".meter[data-tone=crit]" do
       assert_select "span", text: "Disque"
-      assert_select "span.text-crit-ink", text: "94 %"
+      assert_select "span.text-crit-ink", text: "94\u00A0%"
     end
   end
 
@@ -86,7 +86,7 @@ class UiHelperTest < ActionView::TestCase
     render html: history_chart(points, label: "Mémoire", threshold: 90, from: now - 24.hours, to: now)
 
     assert_select "figure.history-chart" do
-      assert_select "figcaption", text: /Mémoire\s*80 % maintenant/
+      assert_select "figcaption", text: /Mémoire\s*80\u00A0% maintenant/
       assert_select "svg[role=img][aria-label='Mémoire sur 24 heures'] path[d='M50.0,60.0 L100.0,20.0']"
       assert_select "line.chart-threshold[y1='10.0']"
       assert_select "rect.chart-point", 2

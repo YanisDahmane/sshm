@@ -35,7 +35,7 @@ module UiHelper
                 aria: { valuenow: percent.round, valuemin: 0, valuemax: 100, label: label }) do
           tag.div(class: "h-full rounded-full #{fill}", style: "width: #{percent.round(1)}%")
         end,
-        (tag.span("#{percent.round} %", class: "w-10 text-right text-xs tabular-nums #{tone == :crit ? "font-semibold text-crit-ink" : "text-ink-2"}") if value)
+        (tag.span(number_to_percentage(percent, precision: 0), class: "w-10 text-right text-xs tabular-nums #{tone == :crit ? "font-semibold text-crit-ink" : "text-ink-2"}") if value)
       ].compact)
     end
   end
@@ -120,7 +120,7 @@ module UiHelper
       safe_join([
         tag.figcaption(class: "flex items-baseline justify-between text-xs") do
           safe_join([ tag.span(label, class: "font-medium text-ink-2"),
-                      tag.span(points.any? ? "#{points.last.last.round} % maintenant" : "pas encore de mesure", class: "text-ink-3") ])
+                      tag.span(points.any? ? t("ui.now", value: number_to_percentage(points.last.last, precision: 0)) : t("ui.no_measure"), class: "text-ink-3") ])
         end,
         tag.div(class: "relative mt-1.5 pl-7") do
           safe_join([
@@ -128,7 +128,7 @@ module UiHelper
             svg
           ])
         end,
-        tag.div(class: "mt-1 flex justify-between pl-7 text-[10px] text-ink-3") { safe_join([ tag.span("il y a 24 h"), tag.span("12 h"), tag.span("maintenant") ]) }
+        tag.div(class: "mt-1 flex justify-between pl-7 text-[10px] text-ink-3") { safe_join([ tag.span(t("ui.hours_ago_24")), tag.span(t("ui.hours_12")), tag.span(t("ui.now_axis")) ]) }
       ])
     end
   end

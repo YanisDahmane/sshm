@@ -39,7 +39,7 @@ class DockerTest < ActionDispatch::IntegrationTest
       assert_select "tr.docker-container-row[data-name=worker] .container-state", text: "redémarre en boucle"
       assert_select "tr.docker-container-row[data-name=backup-once]", text: /arrêté\s+backup-once.*arrêté il y a 31 jours/m
       assert_select "tr.docker-container-row[data-name=web]", text: /12,5 Mo/
-      assert_select "tr.docker-image[data-reference='nginx:1.27']", text: /nouvelle version.*2\s+dont 1 corrigeables/m
+      assert_select "tr.docker-image[data-reference='nginx:1.27']", text: /nouvelle version.*2\s+dont 1 corrigeable/m
       assert_select "tr.docker-image[data-reference='postgres:16'] .image-update", text: "à jour"
       assert_select "tr.docker-image[data-reference='postgres:16']", text: /pas encore téléchargée/
       assert_select "tr.docker-image[data-reference='redis:latest']", text: /latest.*non/m
@@ -67,7 +67,7 @@ class DockerTest < ActionDispatch::IntegrationTest
       assert_select "#stat-updates .stat-value", "1"
       assert_select "#troubled-containers li.troubled-container", 3
       assert_select "#troubled-containers li.troubled-container", text: /redémarre en boucle\s+Web\s+worker.*12 redémarrages/m
-      assert_select "tr.docker-repository-version:first-child[data-repository=nginx]", text: /nginx\s+1.27\s+Web\s+nouvelle version\s+2\s+dont 1 corrigeables/
+      assert_select "tr.docker-repository-version:first-child[data-repository=nginx]", text: /nginx\s+1.27\s+Web\s+nouvelle version\s+2\s+dont 1 corrigeable/
       assert_select "tr.docker-repository-version[data-repository=redis]", text: /aucun conteneur/
 
       get docker_path(updates: "1")

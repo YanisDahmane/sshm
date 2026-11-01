@@ -55,8 +55,8 @@ class Page
   def asset(path) = "#{root}assets/#{path}"
 
   def screenshot(name, alt, eager: false)
-    width, height = png_size(File.join(ROOT, "docs/screenshots/#{name}.png"))
-    %(<img src="#{asset("screenshots/#{name}.#{SCREENSHOT_FORMAT}")}" alt="#{h(alt)}" width="#{width}" height="#{height}" class="screenshot" #{eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">)
+    width, height = png_size(File.join(ROOT, "docs/screenshots/#{language}/#{name}.png"))
+    %(<img src="#{asset("screenshots/#{language}/#{name}.#{SCREENSHOT_FORMAT}")}" alt="#{h(alt)}" width="#{width}" height="#{height}" class="screenshot" #{eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">)
   end
 
   # Width and height of a PNG, read from its header (no image library needed).
@@ -93,21 +93,21 @@ class Page
 end
 
 FileUtils.rm_rf(OUT)
-FileUtils.mkdir_p(File.join(OUT, "assets/screenshots"))
+LANGUAGES.each { |language| FileUtils.mkdir_p(File.join(OUT, "assets/screenshots", language)) }
 FileUtils.mkdir_p(File.join(OUT, "fr"))
 
 # Screenshots: WebP when cwebp is installed (much lighter), else the PNGs.
 SCREENSHOT_FORMAT = ENV["ELIO_SITE_PNG"].nil? && system("command -v cwebp > /dev/null 2>&1") ? "webp" : "png"
-Dir[File.join(ROOT, "docs/screenshots/*.png")].each do |source|
-  target = File.join(OUT, "assets/screenshots", File.basename(source, ".png") + ".#{SCREENSHOT_FORMAT}")
+Dir[File.join(ROOT, "docs/screenshots/*/*.png")].each do |source|
+  target = File.join(OUT, "assets/screenshots", File.basename(File.dirname(source)), File.basename(source, ".png") + ".#{SCREENSHOT_FORMAT}")
   SCREENSHOT_FORMAT == "webp" ? system("cwebp", "-quiet", "-q", "82", source, "-o", target, exception: true) : FileUtils.cp(source, target)
 end
 FileUtils.cp(File.join(ROOT, "docs/brand/icon.svg"), File.join(OUT, "assets/icon.svg"))
 FileUtils.cp(File.join(ROOT, "docs/brand/logo-light.svg"), File.join(OUT, "assets/logo-light.svg"))
 FileUtils.cp(File.join(ROOT, "docs/brand/logo-dark.svg"), File.join(OUT, "assets/logo-dark.svg"))
 FileUtils.cp(File.join(SITE, "assets/site.js"), File.join(OUT, "assets/site.js"))
-system("cwebp", "-quiet", "-q", "85", "-resize", "1200", "0", File.join(ROOT, "docs/screenshots/fleet.png"), "-o", File.join(OUT, "assets/social.webp")) if SCREENSHOT_FORMAT == "webp"
-FileUtils.cp(File.join(ROOT, "docs/screenshots/fleet.png"), File.join(OUT, "assets/social.png"))
+system("cwebp", "-quiet", "-q", "85", "-resize", "1200", "0", File.join(ROOT, "docs/screenshots/en/fleet.png"), "-o", File.join(OUT, "assets/social.webp")) if SCREENSHOT_FORMAT == "webp"
+FileUtils.cp(File.join(ROOT, "docs/screenshots/en/fleet.png"), File.join(OUT, "assets/social.png"))
 
 LANGUAGES.product(PAGES).each do |language, name|
   page = Page.new(language, name)

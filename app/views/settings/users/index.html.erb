@@ -56,7 +56,7 @@
       <%= f.check_box :require_operator_two_factor, class: "h-4 w-4 rounded border-line text-accent" %>
       <%= t(".operator_two_factor") %>
     </label>
-    <%= f.submit "Enregistrer", class: "btn btn-secondary" %>
+    <%= f.submit t("words.save"), class: "btn btn-secondary" %>
   <% end %>
 </section>
 
@@ -82,7 +82,7 @@
         </div>
         <%= form_with model: user, url: settings_user_path(user), class: "flex flex-wrap items-center gap-2" do |f| %>
           <%= f.select :role, User.role_options, {}, aria: { label: t(".role_of", email: user.email) }, class: select_class %>
-          <%= f.submit "Enregistrer", class: "btn btn-secondary" %>
+          <%= f.submit t("words.save"), class: "btn btn-secondary" %>
         <% end %>
         <% if user.two_factor_enabled? && user != current_user %>
           <%= button_to t(".reset_two_factor"), reset_two_factor_settings_user_path(user),

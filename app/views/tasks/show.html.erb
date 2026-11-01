@@ -29,7 +29,7 @@
     </div>
     <% if @items.any? %>
       <table id="task-items" class="table-dense w-full">
-        <thead><tr><th><%= t(".server") %></th><th>Statut</th><th><%= t(".details") %></th><th><%= t(".duration") %></th></tr></thead>
+        <thead><tr><th><%= t(".server") %></th><th><%= t("words.status") %></th><th><%= t(".details") %></th><th><%= t(".duration") %></th></tr></thead>
         <tbody>
           <% @items.each do |item| %>
             <tr id="<%= dom_id(item) %>" class="task-item">

@@ -22,7 +22,7 @@
             <%= link_to group.name, servers_path(group: group.id), class: "font-medium hover:text-accent hover:underline" %>
             <p class="truncate text-xs text-ink-3">
               <% if group.servers.any? %>
-                <%= t("count.servers", count: group.servers.size) %> : <%= group.servers.map(&:name).join(", ") %>
+                <%= t("words.label_value", label: t("count.servers", count: group.servers.size), value: group.servers.map(&:name).join(", ")) %>
               <% else %>
                 <%= t(".server") %>
               <% end %>

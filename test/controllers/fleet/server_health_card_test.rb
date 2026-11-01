@@ -26,9 +26,9 @@ class ServerHealthCardTest < ActionDispatch::IntegrationTest
     assert_select "#server-health-details" do
       assert_select ".health-load", text: /1,92\s+\/ 8 processeurs/
       assert_select ".health-load svg.sparkline"
-      assert_select ".health-memory", text: /88 %\s+27,6 Go \/ 31,3 Go/
-      assert_select ".health-disk", text: %r{Disque le plus plein /\s+94 %}
-      assert_select ".health-disk .text-crit-ink", text: /94 %/
+      assert_select ".health-memory", text: /88\u00A0%\s+27,6 Go \/ 31,3 Go/
+      assert_select ".health-disk", text: %r{Disque le plus plein /\s+94\u00A0%}
+      assert_select ".health-disk .text-crit-ink", text: /94\u00A0%/
       assert_select ".health-reasons li", 2
       assert_select ".health-reasons li", text: "Disque / à 94\u00A0%"
       assert_select ".health-facts", text: /3 dont 2 de sécurité/

@@ -10,7 +10,7 @@
   </div>
   <% if can?(:operate) && @servers.any? %>
     <div class="flex flex-wrap gap-2">
-      <%= button_to server_inventories_path, class: "btn btn-secondary" do %><%= icon :pulse %> Inventaire<% end %>
+      <%= button_to server_inventories_path, class: "btn btn-secondary" do %><%= icon :pulse %> <%= t("words.inventory") %><% end %>
       <%= button_to server_scans_path, class: "btn btn-secondary" do %><%= icon :key %> <%= t(".scan_keys") %><% end %>
     </div>
   <% end %>

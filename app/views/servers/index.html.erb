@@ -5,7 +5,7 @@
 
   <div class="flex flex-wrap items-start justify-between gap-4">
     <div>
-      <h1 class="text-xl font-semibold">Parc</h1>
+      <h1 class="text-xl font-semibold"><%= t("words.fleet") %></h1>
       <p class="text-xs text-ink-3">
         <%= t("count.servers", count: @summary.total) %>
         <% if @summary.last_inventory_at %> <%= t("dashboard.index.inventory_html", last_inventory_at: (relative_time_tag @summary.last_inventory_at)) %><% end %>
@@ -19,7 +19,7 @@
         <% end %>
         <% if can?(:operate) %>
           <%= button_to server_inventories_path, title: t(".read_again_system_health"), class: "btn btn-secondary" do %>
-            <%= icon :pulse %> Inventaire
+            <%= icon :pulse %> <%= t("words.inventory") %>
           <% end %>
           <%= button_to server_scans_path, title: t(".read_keys_every_server"), class: "btn btn-secondary" do %>
             <%= icon :key %> <%= t("dashboard.index.scan_keys") %>
@@ -107,9 +107,9 @@
             <th scope="col"><%= t(".memory") %></th>
             <th scope="col"><%= t(".disk") %></th>
             <th scope="col"><%= t(".updates") %></th>
-            <% if @monitor_counts %><th scope="col">Sondes</th><% end %>
+            <% if @monitor_counts %><th scope="col"><%= t("words.monitors") %></th><% end %>
             <th scope="col"><%= t(".notes") %></th>
-            <th scope="col" class="pr-4"><span class="sr-only">Actions</span></th>
+            <th scope="col" class="pr-4"><span class="sr-only"><%= t("words.actions") %></span></th>
           </tr>
         </thead>
         <tbody>

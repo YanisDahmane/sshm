@@ -12,7 +12,7 @@
   <% if monitors.any? %>
     <div class="overflow-x-auto">
       <table class="table-dense">
-        <thead><tr><th class="pl-4">Sonde</th><th>Cible</th><th><%= t(".state") %></th><th><%= t(".response") %></th><th><%= t(".uptime_24_h_30") %></th><th>Certificat</th><% if can?(:operate) %><th class="pr-4 text-right"><%= t(".server") %></th><% end %></tr></thead>
+        <thead><tr><th class="pl-4"><%= t("words.monitor") %></th><th><%= t("words.target") %></th><th><%= t(".state") %></th><th><%= t(".response") %></th><th><%= t(".uptime_24_h_30") %></th><th><%= t("words.certificate") %></th><% if can?(:operate) %><th class="pr-4 text-right"><%= t(".server") %></th><% end %></tr></thead>
         <tbody><%= render partial: "integrations/uptime_kuma/monitor_row", collection: monitors, as: :monitor, locals: { base_url: base_url } %></tbody>
       </table>
     </div>

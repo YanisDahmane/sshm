@@ -6,7 +6,7 @@ Thanks for your interest! Issues, ideas and pull requests are welcome.
 
 - **Bugs and ideas**: open an [issue](https://github.com/elio-fleet/elio/issues/new/choose). For a larger change, discuss it in an issue first.
 - **Security issues**: never in a public issue, see [SECURITY.md](SECURITY.md).
-- The interface is in **French**; code, comments, commit messages and tests are in **English**.
+- The interface is in **English and French** (see [Translating Elio](#translating-elio)); code, comments, commit messages and tests are in **English**.
 
 ## Running Elio locally
 
@@ -40,6 +40,14 @@ Rules that keep Elio safe and readable:
 ## Code layout
 
 Models, controllers and jobs are grouped by domain (`app/models/fleet`, `access`, `security`, `operations`…; the folders are not namespaces). Inventory collectors live in `app/services/inventory/collectors`, one per category, with a pure Ruby parser.
+
+## Translating Elio
+
+Every text of the interface is in `config/locales/<language>/`, one file per domain of the application (`fleet.yml`, `inventory.yml`, `security.yml`, `access.yml`, `activity.yml`, `operations.yml`, `extensions.yml`, `settings.yml`, `accounts.yml`, `core.yml`), plus `rails.yml` (models, errors, formats) and `js.yml` (the texts of the JavaScript controllers). Views use relative keys (`t(".title")`, the key follows the path of the view); models and services use full keys.
+
+**To add a language**, copy `config/locales/en/` to `config/locales/<code>/` (for example `de`), translate the values (not the keys), and set `elio.language_name` in `meta.yml` to the name of the language in that language. That's all: the languages are read from the folders, and the language appears in *My account* and *Settings → General*. Dates, numbers and Devise's texts come from `rails-i18n` and `devise-i18n`, which already know most languages.
+
+`test/i18n/locale_files_test.rb` checks that every language has the same keys and `%{variables}` as English, and a missing translation fails the tests. Plural forms (`one`, `other`, and `few` / `many` where the language has them) follow the [CLDR rules](https://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html).
 
 ## Writing an extension
 

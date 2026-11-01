@@ -10,7 +10,7 @@
     <div class="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-line px-4 py-2.5 text-xs text-ink-2">
       <span><strong class="text-ink"><%= counts["total"] %></strong> <%= t(".installed") %></span>
       <% (counts["by_manager"] || {}).each do |manager, count| %>
-        <span><%= Inventory::Package.manager_label(manager) %> : <%= count %></span>
+        <span><%= t("words.label_value", label: Inventory::Package.manager_label(manager), value: count) %></span>
       <% end %>
       <span><strong class="text-ink"><%= counts["upgradable"] %></strong> <%= t(".update") %><% if counts["security"].to_i.positive? %><%= t(".including") %> <strong class="text-crit-ink"><%= t(".security_html", security: (counts["security"])) %></strong><% end %></span>
       <% if @snapshot.status == "partial" %><%= inventory_status_badge(@snapshot) %><% end %>
@@ -30,7 +30,7 @@
 
     <% if @packages.any? %>
       <table class="packages table-dense">
-        <thead><tr><th class="pl-4"><%= t(".package") %></th><th>Version</th><th><%= t(".update_2") %></th><th class="pr-4">Type</th></tr></thead>
+        <thead><tr><th class="pl-4"><%= t(".package") %></th><th><%= t("words.version") %></th><th><%= t(".update_2") %></th><th class="pr-4">Type</th></tr></thead>
         <tbody>
           <% @packages.each do |package| %>
             <tr class="package">

@@ -32,7 +32,7 @@ class ServersGridTest < ActionDispatch::IntegrationTest
     assert_includes css_select("##{dom_id(servers(:db), :card)}").first["class"], "border-crit/40"
     assert_select "##{dom_id(servers(:backup), :card)}[data-state=off]", text: /Pas de réponse/
     assert_select "##{dom_id(servers(:web), :card)} .server-card-gauges .meter", 3
-    assert_select "##{dom_id(servers(:web), :card)} .server-card-gauges", text: /CPU.*RAM.*61 %.*Disque.*48 %/m
+    assert_select "##{dom_id(servers(:web), :card)} .server-card-gauges", text: /CPU.*RAM.*61\u00A0%.*Disque.*48\u00A0%/m
     assert_select "##{dom_id(servers(:web), :card)} .server-card-footer", text: /3 mises à jour/
 
     get servers_path

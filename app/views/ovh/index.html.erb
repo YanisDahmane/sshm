@@ -17,7 +17,7 @@
   <%= stat_tile t(".services"), @counts.slice(*OvhResource::SERVICE_KINDS).values.sum, t(".dedicated_vps_instances"), icon: :server_stack, id: "stat-ovh-services" %>
   <%= stat_tile t(".not_attached"), @unattached_services, t(".services_outside_fleet"), tone: (@unattached_services.positive? ? :warn : nil), icon: :exclamation_triangle, id: "stat-ovh-unattached" %>
   <%= stat_tile t(".expiring_soon"), @expiring, nil, tone: (@expiring.positive? ? :warn : nil), icon: :clock, id: "stat-ovh-expiring" %>
-  <%= stat_tile t(".dns_outside_fleet"), @outside_records, "enregistrements A / AAAA", tone: (@outside_records.positive? ? :warn : nil), icon: :list_bullet, id: "stat-ovh-dns-outside" %>
+  <%= stat_tile t(".dns_outside_fleet"), @outside_records, t("words.a_records"), tone: (@outside_records.positive? ? :warn : nil), icon: :list_bullet, id: "stat-ovh-dns-outside" %>
 </div>
 
 <nav class="ovh-tabs mt-6 flex gap-5 border-b border-line text-sm" aria-label="<%= t(".resources") %>">
@@ -43,9 +43,9 @@
     <table id="ovh-resources" class="table-dense">
       <thead>
         <tr>
-          <% if @tab == "services" %><th class="pl-4">Service</th><th>Type</th><th>Offre</th><th>Datacenter</th><th>Expiration</th>
-          <% elsif @tab == "ips" %><th class="pl-4"><%= t(".ip_block") %></th><th>Type</th><th><%= t(".ovh_service") %></th><th>Firewall</th>
-          <% else %><th class="pl-4">Nom</th><th>Type</th><th>Cible</th>
+          <% if @tab == "services" %><th class="pl-4"><%= t("words.service") %></th><th>Type</th><th><%= t("words.offer") %></th><th>Datacenter</th><th><%= t("words.expiry") %></th>
+          <% elsif @tab == "ips" %><th class="pl-4"><%= t(".ip_block") %></th><th>Type</th><th><%= t(".ovh_service") %></th><th><%= t("words.firewall") %></th>
+          <% else %><th class="pl-4"><%= t("words.name") %></th><th>Type</th><th><%= t("words.target") %></th>
           <% end %>
           <th><%= t(".server") %></th>
           <% if can?(:operate) && @tab != "dns" %><th class="pr-4 text-right"><%= t(".attach") %></th><% end %>

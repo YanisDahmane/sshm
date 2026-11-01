@@ -25,14 +25,14 @@
       </div>
       <div class="health-memory rounded-lg border border-line px-3 py-2.5">
         <p class="text-xs text-ink-3"><%= t(".memory") %></p>
-        <p class="mt-1 text-xl font-semibold tabular-nums"><%= memory["used_percent"]&.round %> %
+        <p class="mt-1 text-xl font-semibold tabular-nums"><%= memory["used_percent"] && number_to_percentage(memory["used_percent"], precision: 0) %>
           <span class="text-xs font-normal text-ink-3"><%= human_bytes(memory["total"].to_i - memory["available"].to_i) %> / <%= human_bytes(memory["total"]) %></span></p>
         <div class="mt-2"><%= meter memory["used_percent"], warn: settings.health_memory_warn, crit: settings.health_memory_crit, width: "w-full", value: false %></div>
       </div>
       <div class="health-disk rounded-lg border border-line px-3 py-2.5">
         <p class="text-xs text-ink-3"><%= t(".fullest_disk") %> <% if fullest %><span class="font-mono"><%= fullest["mount"] %></span><% end %></p>
         <% if fullest %>
-          <p class="mt-1 text-xl font-semibold tabular-nums <%= "text-crit-ink" if fullest["used_percent"] >= settings.health_disk_crit %>"><%= fullest["used_percent"].round %> %
+          <p class="mt-1 text-xl font-semibold tabular-nums <%= "text-crit-ink" if fullest["used_percent"] >= settings.health_disk_crit %>"><%= number_to_percentage(fullest["used_percent"], precision: 0) %>
             <span class="text-xs font-normal text-ink-3"><%= human_bytes(fullest["used"]) %> / <%= human_bytes(fullest["size"]) %></span></p>
           <div class="mt-2"><%= meter fullest["used_percent"], warn: settings.health_disk_warn, crit: settings.health_disk_crit, width: "w-full", value: false %></div>
         <% else %>
@@ -57,12 +57,12 @@
         <% end %>
         <dl class="health-facts mt-4 space-y-1 text-xs">
           <div class="flex justify-between gap-2"><dt class="text-ink-3"><%= t(".updates") %></dt>
-            <dd><% if (updates = health["updates"]) %><%= updates["total"] %><% if updates["security"].to_i.positive? %> dont <span class="font-medium text-crit-ink"><%= t(".security_html", security: (updates["security"])) %></span><% end %><% else %>—<% end %></dd></div>
+            <dd><% if (updates = health["updates"]) %><%= updates["total"] %><% if updates["security"].to_i.positive? %> <%= t(".including_html", security: tag.span(t(".security_html", security: updates["security"]), class: "font-medium text-crit-ink")) %><% end %><% else %>—<% end %></dd></div>
           <div class="flex justify-between gap-2"><dt class="text-ink-3"><%= t(".reboot_required") %></dt><dd><%= health["reboot_required"] ? t("words.yes") : t("words.no") %></dd></div>
           <div class="flex justify-between gap-2"><dt class="text-ink-3"><%= t(".failed_services") %></dt><dd class="text-right font-mono"><%= Array(health["failed_units"]).join(", ").presence || t("words.none") %></dd></div>
-          <div class="flex justify-between gap-2"><dt class="text-ink-3">Horloge</dt><dd><%= { true => t(".synchronized"), false => t(".not_synchronized") }.fetch(health["ntp_synchronized"], "—") %></dd></div>
+          <div class="flex justify-between gap-2"><dt class="text-ink-3"><%= t("words.clock") %></dt><dd><%= { true => t(".synchronized"), false => t(".not_synchronized") }.fetch(health["ntp_synchronized"], "—") %></dd></div>
           <% if (swap = health["swap"]) %>
-            <div class="flex justify-between gap-2"><dt class="text-ink-3">Swap</dt><dd><%= t(".swap_html", percent: number_to_percentage(swap["used_percent"], precision: 0), size: human_bytes(swap["total"])) %></dd></div>
+            <div class="flex justify-between gap-2"><dt class="text-ink-3"><%= t("words.swap") %></dt><dd><%= t(".swap_html", percent: number_to_percentage(swap["used_percent"], precision: 0), size: human_bytes(swap["total"])) %></dd></div>
           <% end %>
         </dl>
       </div>
@@ -76,7 +76,7 @@
 
     <% if Array(health["disks"]).any? %>
       <table class="health-disks table-dense border-t border-line">
-        <thead><tr><th class="pl-4"><%= t(".mount_point") %></th><th>Type</th><th>Taille</th><th><%= t(".used") %></th><th class="pr-4">Inodes</th></tr></thead>
+        <thead><tr><th class="pl-4"><%= t(".mount_point") %></th><th>Type</th><th><%= t("words.size") %></th><th><%= t(".used") %></th><th class="pr-4">Inodes</th></tr></thead>
         <tbody>
           <% health["disks"].each do |disk| %>
             <tr>
@@ -84,7 +84,7 @@
               <td class="text-xs text-ink-2"><%= disk["type"] %></td>
               <td class="text-xs tabular-nums"><%= human_bytes(disk["size"]) %></td>
               <td><%= meter disk["used_percent"], warn: settings.health_disk_warn, crit: settings.health_disk_crit, width: "w-24" %></td>
-              <td class="pr-4 text-xs tabular-nums text-ink-2"><%= disk["inodes_used_percent"] ? "#{disk["inodes_used_percent"].round} %" : "—" %></td>
+              <td class="pr-4 text-xs tabular-nums text-ink-2"><%= disk["inodes_used_percent"] ? number_to_percentage(disk["inodes_used_percent"], precision: 0) : "—" %></td>
             </tr>
           <% end %>
         </tbody>

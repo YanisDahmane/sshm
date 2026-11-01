@@ -26,7 +26,7 @@
     <% if @tasks.any? %>
       <table id="background-tasks" class="table-dense w-full">
         <thead>
-          <tr><th><%= t(".task") %></th><th>Statut</th><th>Progression</th><th><%= t(".started") %></th><th><%= t(".started_2") %></th><th><%= t(".duration") %></th></tr>
+          <tr><th><%= t(".task") %></th><th><%= t("words.status") %></th><th><%= t("words.progress") %></th><th><%= t(".started") %></th><th><%= t(".started_2") %></th><th><%= t(".duration") %></th></tr>
         </thead>
         <tbody>
           <% @tasks.each do |task| %>

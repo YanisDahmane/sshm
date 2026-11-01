@@ -93,6 +93,11 @@ fr:
   ui:
     trend: Tendance
     over_24_hours: "%{label} sur 24 heures"
+    now: "%{value} maintenant"
+    no_measure: pas encore de mesure
+    hours_ago_24: il y a 24 h
+    hours_12: 12 h
+    now_axis: maintenant
   count:
     servers:
       one: "%{count} serveur"
@@ -193,3 +198,77 @@ fr:
     none: aucun
     'yes': oui
     'no': non
+    monitors: Sondes
+    addresses: Adresses
+    monitor: Sonde
+    target: Cible
+    certificate: Certificat
+    fingerprint: Empreinte
+    alerts: Alertes
+    registry: Registre
+    format: Format
+    active: Actif
+    automations: Automatisations
+    test: Tester
+    status: Statut
+    progress: Progression
+    tag: Tag
+    service: Service
+    offer: Offre
+    expiry: Expiration
+    firewall: Firewall
+    name: Nom
+    color: Couleur
+    when: Quand
+    user: Utilisateur
+    inventory: Inventaire
+    project: Projet
+    ttl: TTL
+    keyring: Trousseau
+    algorithm: Algorithme
+    actions: Actions
+    permanent: Permanent
+    comment: Commentaire
+    version: Version
+    master: Master
+    options: Options
+    line: Ligne
+    address: Adresse
+    process: Processus
+    fleet: Parc
+    known: Connue
+    cancel: Annuler
+    clock: Horloge
+    swap: Swap
+    size: Taille
+    timer: Timer
+    next: Prochain
+    cron: Cron
+    command: Commande
+    file: Fichier
+    interface: Interface
+    temporary: temporaire
+    containers: Conteneurs
+    container: Conteneur
+    kernel: Noyau
+    machine: Machine
+    exposure: Exposition
+    score: Note
+    fix: Correctif
+    back_notifications: "← Notifications"
+    save: Enregistrer
+    cvss_score: note CVSS
+    exploitation: exploitation
+    a_records: enregistrements A / AAAA
+    back_keyring: "← Trousseau"
+    unknown: inconnu
+    container_name: conteneur %{name}
+    available: disponible
+    fixes_html: corrige %{count}
+    running: en cours
+    including_fixable:
+      one: dont %{count} corrigeable
+      other: dont %{count} corrigeables
+    label_value: "%{label} : %{value}"
+    fixable: corrigeable
+    no_fix: pas de correctif

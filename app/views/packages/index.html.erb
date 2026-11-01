@@ -27,7 +27,7 @@
             <span class="text-xs text-ink-3"><%= t("count.servers", count: rows.map(&:server_id).uniq.size) %> · <%= t("count.versions", count: @versions[name].size) %></span>
           </div>
           <table class="table-dense">
-            <thead><tr><th class="pl-4">Version</th><th><%= t(".update") %></th><th class="pr-4"><%= t(".servers") %></th></tr></thead>
+            <thead><tr><th class="pl-4"><%= t("words.version") %></th><th><%= t(".update") %></th><th class="pr-4"><%= t(".servers") %></th></tr></thead>
             <tbody>
               <% @versions[name].each do |version, packages| %>
                 <tr class="package-version">

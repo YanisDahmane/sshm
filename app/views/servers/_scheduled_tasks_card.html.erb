@@ -30,7 +30,7 @@
     <% if timers.any? %>
       <div class="overflow-x-auto">
         <table class="table-dense">
-          <thead><tr><th class="pl-4"><%= t(".state") %></th><th>Timer</th><th>Quand</th><th><%= t(".last_run") %></th><th class="pr-4">Prochain</th></tr></thead>
+          <thead><tr><th class="pl-4"><%= t(".state") %></th><th><%= t("words.timer") %></th><th><%= t("words.when") %></th><th><%= t(".last_run") %></th><th class="pr-4"><%= t("words.next") %></th></tr></thead>
           <tbody>
             <% timers.each do |timer| %>
               <tr class="systemd-timer" data-name="<%= timer["name"] %>">
@@ -49,11 +49,11 @@
       <p class="px-4 py-3 text-sm text-ink-3"><%= t(".systemd_timer") %></p>
     <% end %>
 
-    <h3 class="border-t border-line px-4 pt-3 text-xs font-semibold tracking-wide text-ink-3 uppercase">Cron</h3>
+    <h3 class="border-t border-line px-4 pt-3 text-xs font-semibold tracking-wide text-ink-3 uppercase"><%= t("words.cron") %></h3>
     <% if cron.any? %>
       <div class="overflow-x-auto">
         <table class="table-dense">
-          <thead><tr><th class="pl-4">Quand</th><th>Utilisateur</th><th>Commande</th><th class="pr-4">Fichier</th></tr></thead>
+          <thead><tr><th class="pl-4"><%= t("words.when") %></th><th><%= t("words.user") %></th><th><%= t("words.command") %></th><th class="pr-4"><%= t("words.file") %></th></tr></thead>
           <tbody>
             <% cron.each do |task| %>
               <tr class="cron-task">

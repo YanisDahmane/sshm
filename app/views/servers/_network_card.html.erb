@@ -13,7 +13,7 @@
   <% interfaces = Array(data["interfaces"]).select { |interface| interface["addresses"].present? } %>
   <% if snapshot&.collected? && interfaces.any? %>
     <table class="table-dense">
-      <thead><tr><th class="pl-4">Interface</th><th>Adresse</th><th class="pr-4"><%= t(".scope") %></th></tr></thead>
+      <thead><tr><th class="pl-4"><%= t("words.interface") %></th><th><%= t("words.address") %></th><th class="pr-4"><%= t(".scope") %></th></tr></thead>
       <tbody>
         <% interfaces.each do |interface| %>
           <% interface["addresses"].each_with_index do |address, index| %>
@@ -31,7 +31,7 @@
               </td>
               <td class="font-mono text-xs">
                 <%= address["address"] %><span class="text-ink-3">/<%= address["prefix"] %></span>
-                <% if address["temporary"] %><span class="ml-1 font-sans text-ink-3">temporaire</span><% end %>
+                <% if address["temporary"] %><span class="ml-1 font-sans text-ink-3"><%= t("words.temporary") %></span><% end %>
               </td>
               <td class="pr-4 text-xs"><%= address_scope_badge(address["scope"]) %></td>
             </tr>

@@ -93,6 +93,11 @@ en:
   ui:
     trend: Trend
     over_24_hours: "%{label} over 24 hours"
+    now: "%{value} now"
+    no_measure: no measure yet
+    hours_ago_24: 24 h ago
+    hours_12: 12 h
+    now_axis: now
   count:
     servers:
       one: "%{count} server"
@@ -193,3 +198,77 @@ en:
     none: none
     'yes': 'yes'
     'no': 'no'
+    monitors: Monitors
+    addresses: Addresses
+    monitor: Monitor
+    target: Target
+    certificate: Certificate
+    fingerprint: Fingerprint
+    alerts: Alerts
+    registry: Registry
+    format: Format
+    active: Active
+    automations: Automations
+    test: Test
+    status: Status
+    progress: Progress
+    tag: Tag
+    service: Service
+    offer: Offer
+    expiry: Expiry
+    firewall: Firewall
+    name: Name
+    color: Colour
+    when: When
+    user: User
+    inventory: Inventory
+    project: Project
+    ttl: TTL
+    keyring: Keyring
+    algorithm: Algorithm
+    actions: Actions
+    permanent: Permanent
+    comment: Comment
+    version: Version
+    master: Master
+    options: Options
+    line: Line
+    address: Address
+    process: Process
+    fleet: Fleet
+    known: Known
+    cancel: Cancel
+    clock: Clock
+    swap: Swap
+    size: Size
+    timer: Timer
+    next: Next
+    cron: Cron
+    command: Command
+    file: File
+    interface: Interface
+    temporary: temporary
+    containers: Containers
+    container: Container
+    kernel: Kernel
+    machine: Machine
+    exposure: Exposure
+    score: Score
+    fix: Fix
+    back_notifications: "← Notifications"
+    save: Save
+    cvss_score: CVSS score
+    exploitation: exploitation
+    a_records: A / AAAA records
+    back_keyring: "← Keyring"
+    unknown: unknown
+    container_name: container %{name}
+    available: available
+    fixes_html: fixes %{count}
+    running: running
+    including_fixable:
+      one: including %{count} fixable
+      other: including %{count} fixable
+    label_value: "%{label}: %{value}"
+    fixable: fixable
+    no_fix: no fix

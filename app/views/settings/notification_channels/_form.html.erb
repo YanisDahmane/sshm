@@ -7,7 +7,7 @@
 
   <div>
     <%= f.label :name, t(".name"), class: label_class %>
-    <%= f.text_field :name, required: true, autofocus: true, placeholder: "#ops-alertes", class: input_class %>
+    <%= f.text_field :name, required: true, autofocus: true, placeholder: "#ops-alerts", class: input_class %>
   </div>
 
   <div>
@@ -84,7 +84,7 @@
     </label>
     <label class="flex cursor-pointer items-start gap-2 text-sm text-ink-2">
       <%= f.check_box :enabled, class: "mt-0.5 h-4 w-4 rounded border-line text-accent" %>
-      <span>Actif <span class="text-ink-3"><%= t(".uncheck_pause_channel") %></span></span>
+      <span><%= t("words.active") %> <span class="text-ink-3"><%= t(".uncheck_pause_channel") %></span></span>
     </label>
   </div>
 

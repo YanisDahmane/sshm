@@ -4,6 +4,14 @@ All notable changes to Elio. The format follows [Keep a Changelog](https://keepa
 
 ## [Unreleased]
 
+### Added
+
+- The interface in **English and French**, and any other language by adding a folder of translations (`config/locales/<language>/`). Each user picks a language in My account; otherwise Elio follows the browser, then the default language of the installation (Settings → General: English on a new installation, French on an existing one). Notification channels have their own language, and an invitation is sent in the language chosen for it.
+
+### Changed
+
+- Health reasons are stored as translation keys and written in the reader's language; the reasons of an existing installation are computed again at the upgrade.
+
 ## [0.1.0-beta.2] — 2026-11-01
 
 ### Fixed

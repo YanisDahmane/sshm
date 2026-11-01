@@ -86,7 +86,7 @@
       </div>
 
       <div class="flex items-center justify-end gap-2 border-t border-line pt-4">
-        <button type="button" data-action="modal#close" class="btn btn-ghost">Annuler</button>
+        <button type="button" data-action="modal#close" class="btn btn-ghost"><%= t("words.cancel") %></button>
         <%= button_tag type: "submit", class: "group btn btn-primary disabled:cursor-wait disabled:opacity-60" do %>
           <%= icon :arrow_path, class: "hidden h-4 w-4 animate-spin group-disabled:block" %> <%= t(".add_server") %>
         <% end %>

@@ -26,7 +26,7 @@
   <a href="README.md">English</a>
 </p>
 
-![Le parc dans Elio](docs/screenshots/fleet.png)
+![Le parc dans Elio](docs/screenshots/fr/fleet.png)
 
 Elio suit un parc de serveurs Debian et Ubuntu depuis un seul endroit : lesquels vont bien, ce qui tourne dessus, quels paquets sont vulnérables et comment les corriger, qui a une clé SSH dessus. Rien à installer sur les serveurs : Elio s'y connecte avec sa propre clé SSH et lance une courte liste de **commandes en lecture seule**, toutes écrites dans un seul fichier à relire — [`config/ssh_commands.yml`](config/ssh_commands.yml).
 
@@ -48,14 +48,16 @@ Elio suit un parc de serveurs Debian et Ubuntu depuis un seul endroit : lesquels
 
 | | |
 |:---:|:---:|
-| ![Vulnérabilités par paquet](docs/screenshots/vulnerabilities-by-package.png) | ![Une CVE en détail](docs/screenshots/vulnerability-detail.png) |
+| ![Vulnérabilités par paquet](docs/screenshots/fr/vulnerabilities-by-package.png) | ![Une CVE en détail](docs/screenshots/fr/vulnerability-detail.png) |
 | **Vulnérabilités par paquet**, avec la mise à jour à faire | **Une CVE en détail** : notes par fournisseur, vecteur CVSS en clair |
-| ![Un serveur](docs/screenshots/server.png) | ![Docker](docs/screenshots/docker.png) |
+| ![Un serveur](docs/screenshots/fr/server.png) | ![Docker](docs/screenshots/fr/docker.png) |
 | **Un serveur** : santé, courbes sur 24 h, système | **Docker** : conteneurs, images, mises à jour, CVE |
-| ![Vue d'ensemble](docs/screenshots/overview.png) | ![Thème sombre](docs/screenshots/fleet-dark.png) |
+| ![Vue d'ensemble](docs/screenshots/fr/overview.png) | ![Thème sombre](docs/screenshots/fr/fleet-dark.png) |
 | **Ce qui est à traiter**, le plus grave d'abord | **Thème sombre** |
-| ![Sondes Uptime Kuma](docs/screenshots/uptime-kuma-monitors.png) | ![OVHcloud](docs/screenshots/ovh.png) |
+| ![Sondes Uptime Kuma](docs/screenshots/fr/uptime-kuma-monitors.png) | ![OVHcloud](docs/screenshots/fr/ovh.png) |
 | **Uptime Kuma** : les sondes rattachées à chaque serveur | **OVHcloud** : service, IP, firewall réseau port par port, DNS |
+
+L'interface existe en **anglais et en français**. Chaque utilisateur choisit sa langue dans *Mon compte* ; sinon Elio suit le navigateur, puis la langue par défaut de l'installation (*Paramètres → Général*). Les canaux de notification et les invitations ont leur propre langue. Ajouter une langue, c'est ajouter un dossier de traductions : voir [CONTRIBUTING.md](CONTRIBUTING.md#translating-elio).
 
 ## Démarrage rapide
 

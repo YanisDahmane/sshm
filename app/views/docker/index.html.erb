@@ -43,7 +43,7 @@
 <% if @repositories.any? %>
   <div class="card mt-3 overflow-x-auto">
     <table id="docker-images" class="table-dense">
-      <thead><tr><th class="pl-4">Image</th><th>Tag</th><th><%= t(".servers") %></th><th>Registre</th><th class="pr-4"><%= t(".vulnerabilities") %></th></tr></thead>
+      <thead><tr><th class="pl-4">Image</th><th><%= t("words.tag") %></th><th><%= t(".servers") %></th><th><%= t("words.registry") %></th><th class="pr-4"><%= t(".vulnerabilities") %></th></tr></thead>
       <tbody>
         <% @repositories.each do |repository| %>
           <% repository.versions.each_with_index do |version, index| %>
@@ -57,7 +57,7 @@
                 <% else %><span class="text-ink-3"><%= t(".container") %></span><% end %>
               </td>
               <td><%= image_update_badge(version.state) %></td>
-              <td class="pr-4 text-xs"><%= version.cves.positive? ? safe_join([ tag.strong(version.cves, class: (version.fixable.positive? ? "text-crit-ink" : nil)), " dont #{version.fixable} corrigeables" ]) : tag.span("—", class: "text-ink-3") %></td>
+              <td class="pr-4 text-xs"><%= version.cves.positive? ? safe_join([ tag.strong(version.cves, class: (version.fixable.positive? ? "text-crit-ink" : nil)), " #{t("words.including_fixable", count: version.fixable)}" ]) : tag.span("—", class: "text-ink-3") %></td>
             </tr>
           <% end %>
         <% end %>

@@ -71,7 +71,7 @@
                         class: "key-expiry inline-flex items-center rounded-full bg-warn-soft px-2 py-0.5 text-xs font-medium text-warn-ink ring-1 ring-inset ring-warn/20" %>
                 <% end %>
                 <% if key.matches?(@app_key) %>
-                  <span class="key-badge key-master rounded-full bg-accent-fill px-2 py-0.5 text-xs font-semibold text-white" title="<%= t(".ssh_key_elio_application") %>">Master</span>
+                  <span class="key-badge key-master rounded-full bg-accent-fill px-2 py-0.5 text-xs font-semibold text-white" title="<%= t(".ssh_key_elio_application") %>"><%= t("words.master") %></span>
                 <% end %>
               </div>
             </div>

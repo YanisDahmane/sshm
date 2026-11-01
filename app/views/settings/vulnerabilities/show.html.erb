@@ -58,7 +58,7 @@
         </div>
         <div class="min-w-0 flex-1">
           <p class="font-medium"><%= provider.name %>
-            <span class="badge <%= provider.cvss? ? "bg-subtle text-ink-2" : "bg-accent-soft text-accent" %>"><%= provider.cvss? ? "note CVSS" : "exploitation" %></span>
+            <span class="badge <%= provider.cvss? ? "bg-subtle text-ink-2" : "bg-accent-soft text-accent" %>"><%= provider.cvss? ? t("words.cvss_score") : t("words.exploitation") %></span>
             <% unless provider.enabled? %><span class="badge bg-subtle text-ink-3"><%= t(".off") %></span><% end %></p>
           <p class="text-xs text-ink-3"><%= provider.description %></p>
           <p class="provider-state text-xs">
@@ -69,7 +69,7 @@
         </div>
         <%= form_with url: test_settings_score_provider_path(provider), data: { turbo_stream: true }, class: "flex items-center gap-1.5" do %>
           <%= text_field_tag :cve, "CVE-2024-6387", class: "input w-36 py-1 font-mono text-xs", aria: { label: t(".cve_test", provider_name: provider.name) } %>
-          <button type="submit" class="btn btn-ghost text-xs">Tester</button>
+          <button type="submit" class="btn btn-ghost text-xs"><%= t("words.test") %></button>
         <% end %>
         <div class="flex items-center gap-1">
           <%= button_to provider.enabled? ? t(".turn_off") : t(".turn"), toggle_settings_score_provider_path(provider), method: :patch, class: "btn btn-secondary text-xs" %>
@@ -122,7 +122,7 @@
 </section>
 
 <section id="vulnerability-alerts" class="card mt-6 p-5">
-  <h2 class="font-semibold">Alertes</h2>
+  <h2 class="font-semibold"><%= t("words.alerts") %></h2>
   <p class="mt-1 text-xs text-ink-3"><%= t(".alert_html") %></p>
   <p class="mt-1 text-xs text-ink-3"><%= t(".debian_rates_only_small") %></p>
   <%= form_with model: @setting, url: settings_vulnerabilities_path, method: :patch, class: "mt-4 flex flex-wrap items-center gap-3" do |f| %>

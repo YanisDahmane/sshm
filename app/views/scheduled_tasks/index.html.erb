@@ -18,7 +18,7 @@
 <% if @rows.any? %>
   <div class="card mt-3 overflow-x-auto">
     <table id="scheduled-tasks" class="table-dense">
-      <thead><tr><th class="pl-4"><%= t(".server") %></th><th>Type</th><th>Quand</th><th><%= t(".task") %></th><th>Utilisateur</th><th class="pr-4"><%= t(".state") %></th></tr></thead>
+      <thead><tr><th class="pl-4"><%= t(".server") %></th><th>Type</th><th><%= t("words.when") %></th><th><%= t(".task") %></th><th><%= t("words.user") %></th><th class="pr-4"><%= t(".state") %></th></tr></thead>
       <tbody>
         <% @rows.each do |row| %>
           <tr class="scheduled-task" data-kind="<%= row.kind %>">

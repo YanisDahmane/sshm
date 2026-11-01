@@ -11,7 +11,7 @@
   <% if @ssh_key %>
     <dl class="mt-6 grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
       <div>
-        <dt class="font-medium text-ink-2">Empreinte</dt>
+        <dt class="font-medium text-ink-2"><%= t("words.fingerprint") %></dt>
         <dd id="ssh-key-fingerprint" class="mt-1 break-all font-mono text-ink-2"><%= @ssh_key.fingerprint %></dd>
       </div>
       <div>

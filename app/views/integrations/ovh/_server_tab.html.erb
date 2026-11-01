@@ -19,12 +19,12 @@
         <span class="text-xs text-ink-3"><%= t(".attached_html", ovh_match_label: (ovh_match_label(service))) %></span>
       </div>
       <dl class="grid grid-cols-2 gap-x-6 gap-y-2 px-4 py-3 text-sm sm:grid-cols-4">
-        <div><dt class="text-xs text-ink-3">Offre</dt><dd><%= service.data["offer"] || "—" %></dd></div>
+        <div><dt class="text-xs text-ink-3"><%= t("words.offer") %></dt><dd><%= service.data["offer"] || "—" %></dd></div>
         <div><dt class="text-xs text-ink-3"><%= service.kind == "instance" ? t(".region") : t(".datacenter") %></dt><dd><%= service.data["datacenter"] || service.data["region"] || "—" %></dd></div>
         <div><dt class="text-xs text-ink-3"><%= t(".state") %></dt><dd><%= service.data["state"] || "—" %></dd></div>
-        <div><dt class="text-xs text-ink-3">Expiration</dt><dd><%= ovh_expiration(service) %></dd></div>
+        <div><dt class="text-xs text-ink-3"><%= t("words.expiry") %></dt><dd><%= ovh_expiration(service) %></dd></div>
         <% if service.kind == "instance" %>
-          <div class="col-span-2"><dt class="text-xs text-ink-3">Projet</dt><dd><%= service.data["project_name"] || service.data["project"] %></dd></div>
+          <div class="col-span-2"><dt class="text-xs text-ink-3"><%= t("words.project") %></dt><dd><%= service.data["project_name"] || service.data["project"] %></dd></div>
         <% end %>
         <div class="col-span-2"><dt class="text-xs text-ink-3"><%= t(".ovh_service") %></dt><dd class="font-mono text-xs"><%= service.data["service"] || service.external_id %></dd></div>
       </dl>
@@ -82,7 +82,7 @@
       <div class="card-header"><h2 class="flex items-center gap-2 font-semibold"><%= icon :list_bullet, class: "h-4 w-4 text-ink-3" %> <%= t(".dns_records_server") %></h2></div>
       <% if records.any? %>
         <table class="table-dense">
-          <thead><tr><th class="pl-4">Nom</th><th>Type</th><th>Cible</th><th class="pr-4">TTL</th></tr></thead>
+          <thead><tr><th class="pl-4"><%= t("words.name") %></th><th>Type</th><th><%= t("words.target") %></th><th class="pr-4"><%= t("words.ttl") %></th></tr></thead>
           <tbody>
             <% records.each do |record| %>
               <tr class="ovh-dns-record"><td class="pl-4 font-mono text-xs"><%= record.name %></td><td class="text-xs"><%= record.data["type"] %></td>

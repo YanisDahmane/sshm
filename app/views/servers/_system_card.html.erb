@@ -22,11 +22,11 @@
         </dd>
       </div>
       <div class="flex justify-between gap-4 py-2">
-        <dt class="text-ink-3">Noyau</dt>
+        <dt class="text-ink-3"><%= t("words.kernel") %></dt>
         <dd class="font-mono text-xs"><%= os["kernel"] %> <span class="text-ink-3"><%= os["arch"] %></span></dd>
       </div>
       <div class="flex justify-between gap-4 py-2">
-        <dt class="text-ink-3">Machine</dt>
+        <dt class="text-ink-3"><%= t("words.machine") %></dt>
         <dd class="machine text-right">
           <%= virtualization_label(os["virtualization"]) %>
           <% if os["cpus"] %> · <%= t("count.processors", count: os["cpus"]) %><% end %>

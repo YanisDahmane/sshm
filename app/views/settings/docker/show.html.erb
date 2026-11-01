@@ -3,7 +3,7 @@
 
 <%= form_with model: @setting, url: settings_docker_path, method: :patch do |f| %>
   <section id="docker-alerts" class="card mt-6 p-5">
-    <h2 class="font-semibold">Alertes</h2>
+    <h2 class="font-semibold"><%= t("words.alerts") %></h2>
     <p class="mt-1 text-xs text-ink-3"><%= t(".what_containers_images_report") %></p>
     <div class="mt-4 space-y-2 text-sm">
       <label class="flex items-start gap-2"><%= f.check_box :docker_alert_unhealthy, class: "mt-0.5" %>
@@ -46,7 +46,7 @@
   <% if @updates.any? %>
     <div class="overflow-x-auto">
       <table class="table-dense">
-        <thead><tr><th class="pl-4">Image</th><th>Registre</th><th><%= t(".checked") %></th><th class="pr-4"><%= t(".result") %></th></tr></thead>
+        <thead><tr><th class="pl-4">Image</th><th><%= t("words.registry") %></th><th><%= t(".checked") %></th><th class="pr-4"><%= t(".result") %></th></tr></thead>
         <tbody>
           <% @updates.each do |update| %>
             <tr class="image-check">

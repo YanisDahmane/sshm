@@ -16,7 +16,7 @@
     <%= f.url_field :page_url_template, value: provider.setting("page_url_template"), class: "input font-mono text-xs", placeholder: t(".default_score_address") %>
   </div>
   <fieldset>
-    <legend class="label">Format</legend>
+    <legend class="label"><%= t("words.format") %></legend>
     <div class="flex flex-wrap gap-4 text-sm">
       <% ScoreProvider::FORMATS.each do |value| %>
         <% label = ScoreProvider.format_label(value) %>

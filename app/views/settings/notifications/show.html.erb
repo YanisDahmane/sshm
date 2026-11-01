@@ -21,7 +21,7 @@
               <%= channel.name %>
               <span class="channel-kind-label rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent ring-1 ring-inset ring-accent/20"><%= channel.kind_label %></span>
               <% if channel.enabled? %>
-                <span class="channel-state rounded-full bg-good-soft px-2 py-0.5 text-xs font-medium text-good-ink ring-1 ring-inset ring-good/20">Actif</span>
+                <span class="channel-state rounded-full bg-good-soft px-2 py-0.5 text-xs font-medium text-good-ink ring-1 ring-inset ring-good/20"><%= t("words.active") %></span>
               <% else %>
                 <span class="channel-state rounded-full bg-subtle px-2 py-0.5 text-xs font-medium text-ink-2"><%= t(".paused") %></span>
               <% end %>

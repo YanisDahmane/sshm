@@ -12,7 +12,7 @@ module UptimeKumaHelper
     return tag.span("—", class: "text-ink-3") unless ratio
 
     percent = ratio * 100
-    text = "#{format(percent >= 99.995 ? "%.0f" : "%.2f", percent).sub(".", ",")} %"
+    text = number_to_percentage(percent, precision: percent >= 99.995 ? 0 : 2)
     tag.span(text, class: "tabular-nums #{percent < 99 ? "text-warn-ink" : ""}")
   end
 

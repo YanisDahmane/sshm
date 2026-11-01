@@ -3,7 +3,7 @@
 
 <div class="flex flex-wrap items-end justify-between gap-4">
   <div>
-    <h1 class="text-xl font-semibold">Sondes</h1>
+    <h1 class="text-xl font-semibold"><%= t("words.monitors") %></h1>
     <p class="text-xs text-ink-3">
       <%= t(".uptime_kuma_monitors_attached") %><% if @integration.last_synced_at %><%= t(".synchronized_html", last_synced_at: (relative_time_tag @integration.last_synced_at)) %><% end %>.
       <% if @integration.last_error %><span class="text-crit-ink"><%= t(".last_sync_failed_html", last_error: @integration.last_error) %></span><% end %>
@@ -40,7 +40,7 @@
   <% if @pager.records.any? %>
     <div class="card mt-3 overflow-x-auto">
       <table id="servers-without-monitor" class="table-dense">
-        <thead><tr><th class="pl-4"><%= t(".server_2") %></th><th>Adresses</th><th class="pr-4"><%= t(".groups") %></th></tr></thead>
+        <thead><tr><th class="pl-4"><%= t(".server_2") %></th><th><%= t("words.addresses") %></th><th class="pr-4"><%= t(".groups") %></th></tr></thead>
         <tbody>
           <% @pager.records.each do |server| %>
             <tr class="server-without-monitor">
@@ -59,7 +59,7 @@
 <% elsif @pager.records.any? %>
   <div class="card mt-3 overflow-x-auto">
     <table id="monitors" class="table-dense">
-      <thead><tr><th class="pl-4">Sonde</th><th><%= t(".server_2") %></th><th>Cible</th><th><%= t(".state") %></th><th><%= t(".response") %></th><th><%= t(".uptime_24_h_30") %></th><th>Certificat</th><% if can?(:operate) %><th class="pr-4 text-right"><%= t(".attach") %></th><% end %></tr></thead>
+      <thead><tr><th class="pl-4"><%= t("words.monitor") %></th><th><%= t(".server_2") %></th><th><%= t("words.target") %></th><th><%= t(".state") %></th><th><%= t(".response") %></th><th><%= t(".uptime_24_h_30") %></th><th><%= t("words.certificate") %></th><% if can?(:operate) %><th class="pr-4 text-right"><%= t(".attach") %></th><% end %></tr></thead>
       <tbody><%= render partial: "integrations/uptime_kuma/monitor_row", collection: @pager.records, as: :monitor, locals: { base_url: base_url, show_server: true } %></tbody>
     </table>
   </div>

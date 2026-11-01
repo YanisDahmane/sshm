@@ -73,6 +73,7 @@ en:
       used: Used
       measure_yet_run_inventory: 'No measure yet: run the inventory to follow the load, memory, disks and updates.'
       swap_html: "%{percent} of %{size}"
+      including_html: including %{security}
     network_card:
       'off': 'off'
       network_inventory_yet_refresh: 'No network inventory yet: refresh the inventory to read the addresses of the server.'

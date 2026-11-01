@@ -212,8 +212,8 @@ class ServersIndexTest < ActionDispatch::IntegrationTest
       assert_select ".server-status[data-state=crit]", text: "Critique"
       assert_select ".server-status[title=?]", "Disque / à 95 % · Redémarrage requis"
       assert_select ".server-load svg.sparkline"
-      assert_select ".server-memory .meter[data-tone=neutral]", text: "61 %"
-      assert_select ".server-disk .meter[data-tone=crit]", text: "95 %"
+      assert_select ".server-memory .meter[data-tone=neutral]", text: "61\u00A0%"
+      assert_select ".server-disk .meter[data-tone=crit]", text: "95\u00A0%"
       assert_select ".server-updates", text: /3\s+1 sécu/
       assert_select ".server-notes .text-crit-ink", "Disque / à 95 %"
       assert_select ".server-notes span[title=?]", "Redémarrage requis", text: "+1"
