@@ -26,10 +26,11 @@ module Vulnerabilities::Matcher
   end
 
   def self.call(server, refresh_health: true)
-    target = Vulnerabilities.target(server.inventory("os")&.data)
+    # Read from the database: during a collection, a copy loaded before it would hold the previous kernel.
+    os = Inventory::Snapshot.find_by(server_id: server.id, category: "os")&.data || {}
+    target = Vulnerabilities.target(os)
     return unless target && VulnerabilityFeed.for(target.first).releases.include?(target.last)
 
-    os = server.inventory("os")&.data || {}
     packages = server.packages.where(manager: "dpkg").pluck(:name, :source_name, :source_version, :version)
                      .map { |name, source, source_version, version| package(name, version, source: source, source_version: source_version) }
     rows = affected(*target, packages, running_kernel: os["kernel"]).map { |row| row.merge(server_id: server.id, origin: "host", image: nil) }

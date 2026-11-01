@@ -10,6 +10,8 @@ class Vulnerabilities::Scores::CveOrg < Vulnerabilities::Scores::Base
   def lookup(cve)
     body = get(url_for(URL, cve)) or return nil
     record = JSON.parse(body)
+    return nil unless record.is_a?(Hash)
+
     cna = record.dig("containers", "cna") || {}
     cisa = Array(record.dig("containers", "adp")).find { |adp| adp.dig("providerMetadata", "shortName") == "CISA-ADP" } || {}
     [ [ cna, "CNA" ], [ cisa, "CISA" ] ].each do |container, from|

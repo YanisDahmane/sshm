@@ -23,6 +23,10 @@ module Vulnerabilities::Scores
     rescue Vulnerabilities::Error, Integrations::Error => e
       provider.update!(last_run_at: Time.current, last_error: e.message.truncate(250))
       "#{provider.name} : échec"
+    rescue StandardError => e # an unexpected answer: this provider stops, the others go on
+      Rails.error.report(e, context: { score_provider: provider.key })
+      provider.update!(last_run_at: Time.current, last_error: "Erreur interne (#{e.class}) : #{e.message.truncate(150)}")
+      "#{provider.name} : échec"
     end
     CveRating.refresh!(cves)
     "#{cves.size} CVE · #{results.join(" · ")}"

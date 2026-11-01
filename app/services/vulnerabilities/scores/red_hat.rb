@@ -8,6 +8,9 @@ class Vulnerabilities::Scores::RedHat < Vulnerabilities::Scores::Base
   def lookup(cve)
     body = get(url_for(URL, cve)) or return nil
     report = JSON.parse(body)
+    report = JSON.parse(report) if report.is_a?(String) # some recent CVEs come JSON-encoded twice
+    return nil unless report.is_a?(Hash)
+
     if (score = cvss(report.dig("cvss3", "cvss3_base_score")))
       Score.new(score: score, version: "3", vector: report.dig("cvss3", "cvss3_scoring_vector"), severity: report["threat_severity"])
     elsif (score = cvss(report.dig("cvss", "cvss_base_score")))

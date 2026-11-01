@@ -84,4 +84,17 @@ class Vulnerabilities::MatcherTest < ActiveSupport::TestCase
     assert_equal [ [ "CVE-2026-0002", "6.12.107-1" ] ], rows.pluck(:cve, :installed_version), "the running 6.12.107, not the old 6.12.94 nor the headers"
     assert_equal %w[linux-image-6.12.107+deb13-amd64 linux-libc-dev], rows.sole.packages
   end
+
+  test "during a collection, the CVEs follow the kernel just collected, not the one loaded before (real DB-3 case)" do
+    Vulnerability.create!(source: "debian", release: "bookworm", package: "linux", cve: "CVE-2026-0002", fixed_version: "6.12.113-1", severity: "high")
+    server = Server.includes(:inventory_snapshots).find(servers(:web).id)
+    server.inventory("os").update_columns(data: server.inventory("os").data.merge("kernel" => "6.12.107+deb13-amd64"))
+    server.inventory_snapshots.reset
+    server.inventory("os") # loaded with the old kernel, as at the start of a collection
+    Inventory::Snapshot.where(server_id: server.id, category: "os").update_all(data: server.inventory("os").data.merge("kernel" => "6.12.113+deb13-amd64"))
+    record_packages(server, [ dpkg("linux-image-6.12.107+deb13-amd64", "6.12.107-1", source: "linux-signed-amd64"),
+                              dpkg("linux-image-6.12.113+deb13-amd64", "6.12.113-1", source: "linux-signed-amd64") ])
+
+    assert_empty server.server_vulnerabilities.where(source_package: "linux"), "rebooted on 6.12.113: fixed"
+  end
 end

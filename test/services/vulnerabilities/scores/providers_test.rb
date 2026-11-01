@@ -19,6 +19,22 @@ class Vulnerabilities::Scores::ProvidersTest < ActiveSupport::TestCase
     end
   end
 
+  test "Red Hat: a recent CVE answered JSON-encoded twice (real answer)" do
+    with_score_answers("CVE-2026-98902" => "redhat-double-encoded.json") do
+      assert_equal [ 4.7, "Moderate" ], lookup("redhat", "CVE-2026-98902").then { [ it.score, it.severity ] }
+    end
+  end
+
+  test "an unexpected error stops its provider only" do
+    stub_method(Vulnerabilities::Scores::RedHat, :new, ->(*) { raise NoMethodError, "boom" }) do
+      with_score_downloads({}) do
+        result = Vulnerabilities::Scores.update_all(cves: [])
+        assert_match "Red Hat : échec", result
+      end
+    end
+    assert_match "Erreur interne (NoMethodError)", provider("redhat").last_error
+  end
+
   test "CVE.org: the score of the CNA" do
     with_score_answers("cveawg.mitre.org/api/cve/CVE-2024-6387" => "cveorg-CVE-2024-6387.json") do
       score = lookup("cveorg")

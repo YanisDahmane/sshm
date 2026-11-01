@@ -63,6 +63,7 @@ class Inventory::Collection
 
     if outcome.status == "error"
       snapshot.update!(status: "error", message: outcome.message, checked_at: now)
+      @server.inventory_snapshots.reset
     else
       collector = Inventory::Collector.for(category)
       data = outcome.data.as_json
@@ -71,6 +72,9 @@ class Inventory::Collection
       log_changes(collector, previous, kept) if previous
       attributes = collector.server_attributes(data)
       @server.update_columns(attributes) if attributes.any?
+      # What follows (the next categories' records, the health) reads the new
+      # snapshot, not the copy loaded before the collection.
+      @server.inventory_snapshots.reset
       collector.record(@server, data, now)
     end
   end
