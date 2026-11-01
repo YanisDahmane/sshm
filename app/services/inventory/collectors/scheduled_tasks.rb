@@ -4,8 +4,9 @@
 # their last run, its result and the next one.
 #
 # Cron keeps no trace of its runs that Elio could read without logs: only the
-# timers can be "failed" or "late" (last run older than LATE_FACTOR periods,
-# or next run overdue).
+# timers can be "failed" or "late": next run overdue, or last run older than
+# LATE_FACTOR periods while the machine has been up for a whole period (a
+# server that was off catches up after booting: not late).
 class Inventory::Collectors::ScheduledTasks < Inventory::Collector
   ENVIRONMENT = /\A[A-Za-z_][A-Za-z0-9_]*\s*=/
   PERIODS = %w[hourly daily weekly monthly].freeze
@@ -31,7 +32,10 @@ class Inventory::Collectors::ScheduledTasks < Inventory::Collector
     users = sections["users"].strip == "unreadable" ? "unreadable" : "ok"
     cron += files(sections["users"]).flat_map { |user, body| parse_crontab(body, source: "crontab de #{user}", user: user) } if users == "ok"
 
-    { "cron" => cron, "periodic" => parse_periodic(sections["periodic"]), "timers" => parse_timers(sections["timers"], now: now), "user_crontabs" => users }
+    uptime = sections["uptime"].to_s.split.first&.to_f
+    booted_at = uptime && now - uptime
+    { "cron" => cron, "periodic" => parse_periodic(sections["periodic"]), "timers" => parse_timers(sections["timers"], now: now, booted_at: booted_at),
+      "user_crontabs" => users }
   end
 
   # "@@file <name>" blocks → { name => body }.
@@ -66,7 +70,7 @@ class Inventory::Collectors::ScheduledTasks < Inventory::Collector
 
   # Blocks of `systemctl show` (timer, then its service prefixed "Service"),
   # separated by blank lines. nil without systemd.
-  def self.parse_timers(text, now:)
+  def self.parse_timers(text, now:, booted_at: nil)
     return if text.strip == "unsupported"
 
     text.split(/\n\s*\n/).filter_map do |block|
@@ -87,7 +91,7 @@ class Inventory::Collectors::ScheduledTasks < Inventory::Collector
                 "last_at" => last_at&.iso8601, "next_at" => next_at&.iso8601, "result" => result,
                 "exit_status" => properties["ServiceExecMainStatus"].first&.to_i }
       timer["failed"] = true if last_at && result && result != "success"
-      timer["late"] = true if late?(schedules, last_at, next_at, timer["active"], now)
+      timer["late"] = true if late?(schedules, last_at, next_at, timer["active"], now, booted_at)
       timer.compact
     end
   end
@@ -102,12 +106,15 @@ class Inventory::Collectors::ScheduledTasks < Inventory::Collector
     nil
   end
 
-  def self.late?(schedules, last_at, next_at, active, now)
+  def self.late?(schedules, last_at, next_at, active, now, booted_at)
     return false unless active == "active"
     return true if next_at && next_at < now - OVERDUE_MARGIN
 
     period = schedules.filter_map { |schedule| Inventory::CronSchedule.timer(schedule).period }.min
-    period.present? && last_at.present? && last_at < now - [ period * LATE_FACTOR, OVERDUE_MARGIN ].max
+    return false unless period.present? && last_at.present?
+    return false if booted_at && booted_at > now - period # just booted: systemd catches up
+
+    last_at < now - [ period * LATE_FACTOR, OVERDUE_MARGIN ].max
   end
 
   def self.changes(previous, data)

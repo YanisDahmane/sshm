@@ -1,3 +1,5 @@
+@@elio uptime
+864000.52 3400000.10
 @@elio crontab
 # /etc/crontab: system-wide crontab
 # Unlike any other crontab you don't have to run the `crontab'

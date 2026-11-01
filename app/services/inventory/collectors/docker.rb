@@ -153,7 +153,7 @@ class Inventory::Collectors::Docker < Inventory::Collector
       next unless fields["Package"].present? && fields["Version"].present? && fields["Status"].to_s.end_with?(" installed")
 
       source, source_version = fields["Source"].to_s.match(/\A(\S+)(?:\s+\((.+)\))?\z/)&.captures
-      Vulnerabilities::Matcher::Package.new(fields["Package"], source || fields["Package"], source_version || fields["Version"])
+      Vulnerabilities::Matcher.package(fields["Package"], fields["Version"], source: source, source_version: source_version)
     end
   end
 
@@ -234,7 +234,11 @@ class Inventory::Collectors::Docker < Inventory::Collector
       image["os"] = os
       target = Vulnerabilities.target(os)
       return { "method" => "elio", "at" => Time.current.iso8601, "os" => os, "error" => (os ? "Système de l'image non couvert" : "Système de l'image inconnu") }.compact unless target
-      return { "method" => "elio", "at" => Time.current.iso8601, "os" => os, "error" => "Base #{Vulnerability::SOURCES.fetch(target.first)} pas encore téléchargée" } unless VulnerabilityFeed.for(target.first).refreshed_at
+      feed = VulnerabilityFeed.for(target.first)
+      unless feed.refreshed_at && feed.releases.include?(target.last)
+        return { "method" => "elio", "at" => Time.current.iso8601, "os" => os,
+                 "error" => "#{target.last} pas encore dans la base #{feed.label} (prochaine mise à jour des vulnérabilités)" }
+      end
 
       rows = Vulnerabilities::Matcher.affected(*target, self.class.parse_dpkg_status(sections["dpkg"]))
       store(data, image, rows.map { |row| row.except(:source) }, target.first)

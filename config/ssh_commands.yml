@@ -128,7 +128,7 @@ inventory:
       if [ -z "$version" ]; then docker version 2>&1 | grep -i -m 1 -E 'denied|cannot|error' || echo unreadable; exit 0; fi
       echo "$version"
       echo "@@elio containers"; ids=$(docker ps -aq --no-trunc 2>/dev/null)
-      if [ -n "$ids" ]; then docker inspect --format '{{.Id}}	{{.Name}}	{{.Config.Image}}	{{.Image}}	{{.State.Status}}	{{.RestartCount}}	{{with .State.Health}}{{.Status}}{{end}}	{{.State.StartedAt}}	{{.State.FinishedAt}}	{{.State.ExitCode}}	{{.HostConfig.RestartPolicy.Name}}	{{.Created}}	{{with .Config.Labels}}{{index . "com.docker.compose.project"}}{{end}}	{{with .Config.Labels}}{{index . "com.docker.compose.service"}}{{end}}' $ids 2>/dev/null; fi
+      if [ -n "$ids" ]; then docker inspect --format '{{.Id}}	{{.Name}}	{{.Config.Image}}	{{.Image}}	{{.State.Status}}	{{.RestartCount}}	{{with index .State "Health"}}{{index . "Status"}}{{end}}	{{.State.StartedAt}}	{{.State.FinishedAt}}	{{.State.ExitCode}}	{{.HostConfig.RestartPolicy.Name}}	{{.Created}}	{{with .Config.Labels}}{{index . "com.docker.compose.project"}}{{end}}	{{with .Config.Labels}}{{index . "com.docker.compose.service"}}{{end}}' $ids 2>/dev/null; fi
       echo "@@elio stats"; if [ -n "$ids" ]; then docker stats --no-stream --no-trunc --format '{{.ID}}	{{.CPUPerc}}	{{.MemUsage}}	{{.MemPerc}}' 2>/dev/null; fi
       echo "@@elio images"; images=$(docker image ls -q --no-trunc 2>/dev/null | sort -u)
       if [ -n "$images" ]; then docker image inspect --format '{{.Id}}	{{json .RepoTags}}	{{json .RepoDigests}}	{{.Created}}	{{.Size}}	{{.Os}}/{{.Architecture}}' $images 2>/dev/null; fi
@@ -160,6 +160,7 @@ inventory:
     run_as: root
     shell: true
     default: |
+      echo "@@elio uptime"; cat /proc/uptime 2>/dev/null
       echo "@@elio crontab"; cat /etc/crontab 2>/dev/null || true
       echo "@@elio cron.d"; for f in /etc/cron.d/*; do [ -f "$f" ] || continue; echo "@@file $f"; cat "$f" 2>/dev/null; done
       echo "@@elio periodic"; for d in hourly daily weekly monthly; do for f in /etc/cron.$d/*; do if [ -f "$f" ] && [ -x "$f" ]; then echo "$d ${f##*/}"; fi; done; done

@@ -78,6 +78,9 @@ class Inventory::CronSchedule
     if hour == "*" && [ day, month, weekday ].all?("*")
       step = minute[%r{\A\*/(\d+)\z}, 1]&.to_i
       return [ step == 1 ? "toutes les minutes" : "toutes les #{step} minutes", step.minutes ] if step&.positive?
+      if (offset = minute.match(%r{\A(\d+)(?:-\d+)?/(\d+)\z})) && offset[2].to_i.positive?
+        return [ "toutes les #{offset[2]} minutes à partir de :#{offset[1].rjust(2, "0")}", offset[2].to_i.minutes ]
+      end
       return [ "toutes les heures à :#{minute.rjust(2, "0")}", 1.hour ] if minute.match?(/\A\d+\z/)
 
       return
@@ -122,7 +125,7 @@ class Inventory::CronSchedule
       return "du #{DAYS[first]} au #{DAYS[last]}"
     end
     days = list(normalized, 0..7) or return
-    names = days.map { |day| DAYS[day % 7] }.uniq
+    names = days.map { |day| day % 7 }.uniq.sort_by { |day| day.zero? ? 7 : day }.map { |day| DAYS[day] } # the week starts on Monday
     names.one? ? "le #{names.first}" : "le #{names.to_sentence(words_connector: ", ", last_word_connector: " et ", two_words_connector: " et ")}"
   end
 

@@ -81,7 +81,7 @@ class Inventory::Collectors::DockerTest < ActiveSupport::TestCase
 
   test "the feed of the image must be downloaded first" do
     outcome, = collect(:debian13)
-    assert_equal "Base Debian Security Tracker pas encore téléchargée", outcome.data["scans"]["sha256:#{"a" * 64}"]["error"]
+    assert_equal "bookworm pas encore dans la base Debian Security Tracker (prochaine mise à jour des vulnérabilités)", outcome.data["scans"]["sha256:#{"a" * 64}"]["error"]
   end
 
   test "with Trivy, scans each image, once a day, and keeps the rows of the others" do
@@ -136,5 +136,19 @@ class Inventory::Collectors::DockerTest < ActiveSupport::TestCase
     assert_equal [ { kind: :container_unhealthy, data: { container: "db" } }, { kind: :container_restarting, data: { container: "worker" } } ],
                  Collector.changes({ "containers" => [] }, data)
     assert_empty Collector.changes(data, data)
+  end
+
+  test "real output of DB-3 (Docker 26, Debian 13): containers without health check are listed too" do
+    data = Collector.parse(Collector.sections(output(:"debian13-real")), now: Time.zone.parse("2026-11-01 13:22:30"))
+    containers = data["containers"].index_by { |container| container["name"] }
+
+    assert_equal %w[api backup-once web worker], containers.keys.sort
+    assert_equal [ "running", "unhealthy", "shop", "api" ], containers["api"].values_at("state", "health", "project", "service")
+    assert_equal [ "exited", nil, 0 ], containers["backup-once"].values_at("state", "health", "exit_code")
+    assert_equal [ "restarting", true, "always" ], containers["worker"].values_at("state", "looping", "restart_policy")
+    assert_equal %w[alpine:3.20 debian:12-slim nginx:1.27 redis:7], data["images"].map { |image| image["tags"].first }.sort
+    assert_equal [ false ], data["images"].select { |image| image["tags"] == [ "redis:7" ] }.map { |image| image["used"] }
+    assert_equal 4, data["disk"]["images"]["total"]
+    assert_not_includes output(:"debian13-real"), "ne-doit-pas-sortir", "the environment of the worker (SECRET_TOKEN) is not read"
   end
 end

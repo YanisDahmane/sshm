@@ -16,6 +16,8 @@ class Inventory::CronScheduleTest < ActiveSupport::TestCase
       "0 8 * * 1-5" => [ "du lundi au vendredi à 8 h 00", nil ],
       "0 8 * * mon,thu" => [ "le lundi et jeudi à 8 h 00", nil ],
       "52 6 1 * *" => [ "le 1er du mois à 6 h 52", 1.month.to_i ],
+      "5-55/10 * * * *" => [ "toutes les 10 minutes à partir de :05", 600 ],
+      "00 00 * * 6,0" => [ "le samedi et dimanche à 0 h 00", nil ],
       "@reboot" => [ "au démarrage", nil ],
       "@daily" => [ "tous les jours à 0 h 00", 86_400 ]
     }.each do |expression, (text, period)|

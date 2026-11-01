@@ -50,6 +50,11 @@ class Inventory::Collectors::ScheduledTasksTest < ActiveSupport::TestCase
     assert_equal [ "inactive", nil, nil ], timers["fstrim.timer"].values_at("active", "last_at", "late")
   end
 
+  test "a server that was off is not late: systemd catches up after booting (real DB-2 case)" do
+    output = file_fixture("inventory/scheduled_tasks/debian13.txt").read.sub("864000.52", "360.0")
+    assert_not Collector.parse(output, now: NOW)["timers"].find { |timer| timer["name"] == "backup.timer" }.key?("late"), "up for 6 minutes"
+  end
+
   test "a next run long overdue makes a timer late" do
     timers = Collector.parse(output(:no_root), now: Time.zone.parse("2025-11-03 12:00"))["timers"]
     assert timers.sole["late"]
@@ -87,5 +92,15 @@ class Inventory::Collectors::ScheduledTasksTest < ActiveSupport::TestCase
     texts = Inventory::HealthStatus.evaluate(server.reload).reasons.map(&:text)
     assert_includes texts, "Tâche planifiée certbot en échec"
     assert_includes texts, "Tâche planifiée backup en retard"
+  end
+
+  test "real output of DB-2 (Debian 13, just rebooted after 3 days off): nothing is late" do
+    data = Collector.parse(output(:"debian13-real"), now: Time.zone.parse("2026-11-01 13:33"))
+
+    assert_equal [ 10, 7, 8, "ok" ], [ data["cron"].size, data["periodic"].size, data["timers"].size, data["user_crontabs"] ]
+    assert_empty data["timers"].select { |timer| timer["late"] || timer["failed"] }.map { |timer| timer["name"] }
+    man_db = data["timers"].find { |timer| timer["name"] == "man-db.timer" }
+    assert_equal [ "2026-10-29T16:37:33+01:00", [ "OnCalendar=*-*-* 00:00:00" ] ], man_db.values_at("last_at", "schedules")
+    assert_includes data["cron"].map { |task| Inventory::CronSchedule.cron(task["schedule"]).text }, "toutes les 10 minutes à partir de :05"
   end
 end

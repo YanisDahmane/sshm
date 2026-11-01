@@ -70,4 +70,18 @@ class Vulnerabilities::MatcherTest < ActiveSupport::TestCase
     record_packages(servers(:db), [ dpkg("openssl", "1.0") ])
     assert_nil servers(:db).reload.vulnerabilities_checked_at, "the Ubuntu feed was never loaded"
   end
+
+  test "the kernel: signed images belong to linux, the running one counts (real DB-1 packages)" do
+    Vulnerability.create!(source: "debian", release: "bookworm", package: "linux", cve: "CVE-2026-0001", fixed_version: "6.12.100-1", severity: "high")
+    Vulnerability.create!(source: "debian", release: "bookworm", package: "linux", cve: "CVE-2026-0002", fixed_version: "6.12.110-1", severity: "high")
+    servers(:web).inventory("os").update!(data: servers(:web).inventory("os").data.merge("kernel" => "6.12.107+deb13-amd64"))
+    packages(dpkg("linux-image-6.12.107+deb13-amd64", "6.12.107-1", source: "linux-signed-amd64", source_version: "6.12.107+1"),
+             dpkg("linux-image-6.12.94+deb13-amd64", "6.12.94-1", source: "linux-signed-amd64", source_version: "6.12.94+1"),
+             dpkg("linux-image-amd64", "6.12.107-1", source: "linux-signed-amd64", source_version: "6.12.107+1"),
+             dpkg("linux-libc-dev", "6.12.113-1", source: "linux"))
+
+    rows = servers(:web).server_vulnerabilities.where(source_package: "linux")
+    assert_equal [ [ "CVE-2026-0002", "6.12.107-1" ] ], rows.pluck(:cve, :installed_version), "the running 6.12.107, not the old 6.12.94 nor the headers"
+    assert_equal %w[linux-image-6.12.107+deb13-amd64 linux-libc-dev], rows.sole.packages
+  end
 end

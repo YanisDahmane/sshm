@@ -7,25 +7,45 @@
 module Vulnerabilities::Matcher
   Package = Data.define(:name, :source, :version)
 
+  # Signed packages are built from another source package, under which the
+  # feeds list the CVEs (linux-image-* come from linux-signed-amd64, its
+  # version "6.12.107+1" being that of the signing: the binary one counts).
+  SIGNED_SOURCES = [ [ /\Alinux-signed(-.+)?\z/, "linux" ], [ /\Agrub-efi-.+-signed\z/, "grub2" ], [ /\Ashim-signed\z/, "shim" ],
+                     [ /\Afwupd-.+-signed\z/, "fwupd" ] ].freeze
+
+  # A dpkg package for the feeds: its source package and source version
+  # (the binary ones when absent, and for the signed packages).
+  def self.package(name, version, source: nil, source_version: nil)
+    source ||= name
+    _, unsigned = SIGNED_SOURCES.find { |pattern, _| pattern.match?(source) }
+    unsigned ? Package.new(name, unsigned, version) : Package.new(name, source, source_version || version)
+  end
+
   def self.call_all
     Server.includes(:inventory_snapshots).find_each { |server| call(server) }
   end
 
   def self.call(server, refresh_health: true)
     target = Vulnerabilities.target(server.inventory("os")&.data)
-    return unless target && VulnerabilityFeed.for(target.first).refreshed_at
+    return unless target && VulnerabilityFeed.for(target.first).releases.include?(target.last)
 
+    os = server.inventory("os")&.data || {}
     packages = server.packages.where(manager: "dpkg").pluck(:name, :source_name, :source_version, :version)
-                     .map { |name, source, source_version, version| Package.new(name, source || name, source_version || version) }
-    rows = affected(*target, packages).map { |row| row.merge(server_id: server.id, origin: "host", image: nil) }
+                     .map { |name, source, source_version, version| package(name, version, source: source, source_version: source_version) }
+    rows = affected(*target, packages, running_kernel: os["kernel"]).map { |row| row.merge(server_id: server.id, origin: "host", image: nil) }
     replace(server, rows, origin: "host", log: server.vulnerabilities_checked_at.present?)
     server.update_columns(vulnerabilities_checked_at: Time.current)
     server.refresh_health! if refresh_health
   end
 
   # CVEs of `packages` (Package) in a feed release: rows without server_id.
-  def self.affected(source, release, packages)
+  # The oldest installed version of a source counts, except for the kernel:
+  # the running one (an old kernel left installed does not run).
+  def self.affected(source, release, packages, running_kernel: nil)
     by_source = packages.group_by(&:source)
+    if running_kernel && (running = by_source["linux"]&.find { |package| package.name == "linux-image-#{running_kernel}" })
+      by_source["linux"] = [ running ] + by_source["linux"].reject { |package| package.name.start_with?("linux-image-") }
+    end
     return [] if by_source.empty?
 
     Vulnerability.where(source: source, release: release, package: by_source.keys)
