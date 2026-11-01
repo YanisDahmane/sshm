@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+# Prints a fresh set of secrets for a new Elio installation, to put in its
+# environment (.env of Docker Compose, .kamal/secrets…). Keep them safe: the
+# data encrypted in the database cannot be read without them.
+require_relative "../lib/elio/secrets"
+
+Elio::Secrets.generate.each { |name, value| puts "#{name}=#{value}" }
