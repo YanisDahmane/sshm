@@ -30,7 +30,7 @@ class ImageRegistry::UpdateCheckTest < ActiveSupport::TestCase
 
   test "asks each tag of the fleet once, remembers the digests and errors, compares with the pulled image" do
     client = FakeClient.new("library/nginx" => NEWER, "acme/app" => PULLED)
-    assert_equal "3 image(s) suivie(s), 2 vérifiée(s), 1 en échec", ImageRegistry::UpdateCheck.call(client: client)
+    assert_equal "3 images suivies, 2 vérifiée(s), 1 en échec", ImageRegistry::UpdateCheck.call(client: client)
     assert_equal [ "docker.io/library/nginx:1.27", "ghcr.io/acme/app:2", "docker.io/library/redis:7" ], client.asked
 
     updates = ImageUpdate.all.index_by(&:reference)

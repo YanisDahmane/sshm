@@ -41,7 +41,7 @@ class Vulnerabilities::Scores::Nvd < Vulnerabilities::Scores::Base
     item = Array(JSON.parse(body)["vulnerabilities"]).first
     item && score_of(item["cve"])
   rescue JSON::ParserError
-    raise Integrations::Error, "Réponse de NVD illisible pour #{cve}"
+    raise Integrations::Error, I18n.t("vulnerabilities.scores.nvd.unreadable", cve: cve)
   end
 
   # Stores the scores of the wanted CVEs of a feed; returns their ids.
@@ -63,7 +63,7 @@ class Vulnerabilities::Scores::Nvd < Vulnerabilities::Scores::Base
     CveScore.store(provider.key, batch)
     found
   rescue Vulnerabilities::JsonObjectStream::Error, Zlib::Error, JSON::ParserError => e
-    raise Vulnerabilities::Error, "Flux NVD #{name} illisible : #{e.message.truncate(120)}"
+    raise Vulnerabilities::Error, I18n.t("vulnerabilities.scores.nvd.unreadable_feed", name: name, truncate: (e.message.truncate(120)))
   end
 
   def score_of(record)

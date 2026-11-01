@@ -9,11 +9,14 @@ class AppSetting < ApplicationRecord
   validate :warning_thresholds_below_critical
   # From which severity a fixable CVE is a critical health reason and an activity ("none": never).
   # Debian rates few issues (most are "not yet assigned"): "any" alerts on every fixable one.
-  VULNERABILITY_ALERTS = { "critical" => "Critique", "high" => "Haute ou critique", "medium" => "Moyenne ou plus",
-                           "any" => "Toutes les corrigeables", "none" => "Jamais" }.freeze
-  validates :vulnerability_alert_severity, inclusion: { in: VULNERABILITY_ALERTS.keys }
+  VULNERABILITY_ALERTS = %w[critical high medium any none].freeze
+
+  def self.vulnerability_alert_options = VULNERABILITY_ALERTS.map { |key| [ I18n.t("app_setting.vulnerability_alerts.#{key}"), key ] }
+  validates :vulnerability_alert_severity, inclusion: { in: VULNERABILITY_ALERTS }
   # Colours of the CVSS scores: three bands, each from a score (0 to 10, increasing).
-  SCORE_COLORS = { "green" => "Vert", "orange" => "Orange", "red" => "Rouge", "violet" => "Violet", "blue" => "Bleu", "gray" => "Gris" }.freeze
+  SCORE_COLORS = %w[green orange red violet blue gray].freeze
+
+  def self.score_color_options = SCORE_COLORS.map { |key| [ I18n.t("app_setting.score_colors.#{key}"), key ] }
   validate :score_bands_valid
 
   # Colour of a score ("green"…), nil without a score.
@@ -37,9 +40,9 @@ class AppSetting < ApplicationRecord
 
   def score_bands_valid
     froms = score_bands.map { |band| band["from"].to_f }
-    errors.add(:score_bands, "doivent être trois paliers") unless score_bands.size == 3
-    errors.add(:score_bands, "commencent à 0 et montent jusqu'à 10 au plus") unless froms.first&.zero? && froms == froms.sort && froms.uniq.size == froms.size && froms.all? { |from| from.between?(0, 10) }
-    errors.add(:score_bands, "ont une couleur inconnue") unless score_bands.all? { |band| SCORE_COLORS.key?(band["color"]) }
+    errors.add(:score_bands, I18n.t("app_setting.three_bands")) unless score_bands.size == 3
+    errors.add(:score_bands, I18n.t("app_setting.band_range")) unless froms.first&.zero? && froms == froms.sort && froms.uniq.size == froms.size && froms.all? { |from| from.between?(0, 10) }
+    errors.add(:score_bands, I18n.t("app_setting.unknown_color")) unless score_bands.all? { |band| SCORE_COLORS.include?(band["color"]) }
   end
 
   def warning_thresholds_below_critical

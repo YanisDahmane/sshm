@@ -19,7 +19,7 @@ module Vulnerabilities::Download
   end
 
   def self.fetch(uri, file, max_size, redirects)
-    raise Vulnerabilities::Error, "Adresse refusée (HTTPS seulement) : #{uri}" unless uri.is_a?(URI::HTTPS)
+    raise Vulnerabilities::Error, I18n.t("vulnerabilities.download.https_only", uri: uri) unless uri.is_a?(URI::HTTPS)
 
     options = { use_ssl: true, open_timeout: 15, read_timeout: 120 }
     options[:cert_store] = cert_store if cert_store
@@ -27,23 +27,23 @@ module Vulnerabilities::Download
       http.request(Net::HTTP::Get.new(uri, "User-Agent" => "Elio")) do |response|
         case response
         when Net::HTTPRedirection
-          raise Vulnerabilities::Error, "Trop de redirections pour #{uri}" if redirects.zero?
+          raise Vulnerabilities::Error, I18n.t("vulnerabilities.download.too_many_redirects", uri: uri) if redirects.zero?
 
           return fetch(URI.join(uri, response["location"]), file, max_size, redirects - 1)
         when Net::HTTPSuccess
           size = 0
           response.read_body do |chunk|
             size += chunk.bytesize
-            raise Vulnerabilities::Error, "Fichier trop volumineux (plus de #{max_size / 1.megabyte} Mo)" if size > max_size
+            raise Vulnerabilities::Error, I18n.t("vulnerabilities.download.too_large", megabyte: (max_size / 1.megabyte)) if size > max_size
 
             file.write(chunk)
           end
         else
-          raise Vulnerabilities::Error, "Téléchargement impossible (HTTP #{response.code}) : #{uri}"
+          raise Vulnerabilities::Error, I18n.t("vulnerabilities.download.http_error", code: response.code, uri: uri)
         end
       end
     end
   rescue SocketError, SystemCallError, IOError, OpenSSL::SSL::SSLError, Net::OpenTimeout, Net::ReadTimeout => e
-    raise Vulnerabilities::Error, "Téléchargement impossible : #{e.message.truncate(120)}"
+    raise Vulnerabilities::Error, I18n.t("vulnerabilities.download.failed", truncate: (e.message.truncate(120)))
   end
 end

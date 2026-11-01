@@ -1,12 +1,12 @@
 <%# Modal of a CVE, filled by the links with data-turbo-frame="vulnerability-detail" (VulnerabilitiesController#show). Inside a data-controller="modal". %>
-<dialog data-modal-target="dialog" data-action="click->modal#backdropClose" aria-label="Détail de la vulnérabilité"
+<dialog data-modal-target="dialog" data-action="click->modal#backdropClose" aria-label="<%= t(".vulnerability_details") %>"
         class="vulnerability-dialog m-auto w-full max-w-3xl rounded-xl border border-line bg-surface p-0 text-ink shadow-xl backdrop:bg-black/40">
   <div class="flex justify-end px-3 pt-3">
-    <button type="button" data-action="modal#close" class="btn btn-ghost btn-icon" aria-label="Fermer"><%= icon :x_mark %></button>
+    <button type="button" data-action="modal#close" class="btn btn-ghost btn-icon" aria-label="<%= t(".close") %>"><%= icon :x_mark %></button>
   </div>
   <div class="max-h-[80vh] overflow-y-auto px-6 pb-6">
     <%= turbo_frame_tag "vulnerability-detail", class: "block aria-busy:opacity-50" do %>
-      <p class="py-8 text-center text-sm text-ink-3">Chargement…</p>
+      <p class="py-8 text-center text-sm text-ink-3"><%= t(".loading") %></p>
     <% end %>
   </div>
 </dialog>

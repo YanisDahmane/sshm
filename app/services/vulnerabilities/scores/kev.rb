@@ -24,6 +24,6 @@ class Vulnerabilities::Scores::Kev < Vulnerabilities::Scores::Base
       end
     end
   rescue JSON::ParserError => e
-    raise Vulnerabilities::Error, "Catalogue KEV illisible : #{e.message.truncate(120)}"
+    raise Vulnerabilities::Error, I18n.t("vulnerabilities.scores.kev.unreadable", truncate: (e.message.truncate(120)))
   end
 end

@@ -29,13 +29,13 @@ class Vulnerabilities::JsonObjectStream
 
   def each
     read_more until (start = @buffer.index("{")) || @io.eof?
-    raise Error, "Ce fichier n'est pas un objet JSON" unless start && @buffer.byteslice(0, start).strip.empty?
+    raise Error, I18n.t("vulnerabilities.json_object_stream.not_object") unless start && @buffer.byteslice(0, start).strip.empty?
 
     @pos = start + 1
     loop do
       member = next_member
       if member == :more
-        raise Error, "JSON tronqué" unless read_more
+        raise Error, I18n.t("vulnerabilities.json_object_stream.truncated") unless read_more
       elsif member == :end
         return
       else
@@ -47,7 +47,7 @@ class Vulnerabilities::JsonObjectStream
   def each_element(key)
     opening = /"#{Regexp.escape(key)}"\s*:\s*\[/n
     until (match = opening.match(@buffer, @pos))
-      raise Error, "Clé « #{key} » absente" unless read_more
+      raise Error, I18n.t("vulnerabilities.json_object_stream.missing_key", key: key) unless read_more
     end
     @pos = match.end(0)
     loop do
@@ -55,7 +55,7 @@ class Vulnerabilities::JsonObjectStream
       scanner.pos = @pos
       scanner.skip(WHITESPACE)
       if scanner.eos?
-        raise Error, "JSON tronqué" unless read_more
+        raise Error, I18n.t("vulnerabilities.json_object_stream.truncated") unless read_more
       elsif scanner.skip(/\]/)
         return
       else
@@ -64,7 +64,7 @@ class Vulnerabilities::JsonObjectStream
           @pos = scanner.pos
           yield JSON.parse(@buffer.byteslice(start, scanner.pos - start).force_encoding(Encoding::UTF_8))
         else
-          raise Error, "JSON tronqué" unless read_more
+          raise Error, I18n.t("vulnerabilities.json_object_stream.truncated") unless read_more
         end
       end
     end
@@ -80,7 +80,7 @@ class Vulnerabilities::JsonObjectStream
     scanner.skip(WHITESPACE)
     return :more if scanner.eos?
     return finish(scanner) if scanner.skip(/\}/)
-    raise Error, "JSON invalide près de « #{scanner.peek(20)} »" unless scanner.skip(/"/)
+    raise Error, I18n.t("vulnerabilities.json_object_stream.invalid", peek: (scanner.peek(20))) unless scanner.skip(/"/)
 
     key_start = scanner.pos - 1
     return :more unless scanner.skip(STRING_REST)

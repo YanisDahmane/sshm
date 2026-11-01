@@ -1,0 +1,402 @@
+fr:
+  vulnerabilities:
+    detail_dialog:
+      vulnerability_details: Détail de la vulnérabilité
+      close: Fermer
+      loading: Chargement…
+    index:
+      settings_vulnerabilities: Paramètres → Vulnérabilités
+      vulnerabilities: Vulnérabilités
+      distinct_cves: CVE distinctes
+      fixable: Corrigeables
+      update_exists: une mise à jour existe
+      serious_fixable: Graves et corrigeables
+      high_critical: haute ou critique
+      servers_affected: Serveurs touchés
+      package: Par paquet
+      cve: Par CVE
+      cve_package_e_g: CVE ou paquet (ex. openssl)
+      search: Rechercher
+      all_severities: Toutes gravités
+      minimum_severity: Gravité minimale
+      all_groups: Tous les groupes
+      group: Groupe
+      systems_images: Systèmes et images
+      origin: Origine
+      filter: Filtrer
+      fix: pas de correctif
+      vulnerabilities_2: vulnérabilités
+      vulnerability_matches: Aucune vulnérabilité ne correspond.
+      known_vulnerability_fleet: Aucune vulnérabilité connue sur le parc.
+      cves_packages_fleet_docker: CVE des paquets du parc et des images Docker, d'après les bases de Debian et d'Ubuntu. Les corrigeables et les plus graves en premier.
+      feeds_not_downloaded_yet: Bases pas encore téléchargées
+      group_2: Regrouper
+      fixable_only_html: "%{submit} Corrigeables seulement"
+      severity: Gravité
+      packages: Paquets
+      servers: Serveurs
+      images_html: 'images : %{images_first}%{count}'
+    show:
+      exploited: Exploitée activement (CISA KEV%{date})
+      see: Voir
+      system: système
+      vulnerability_page: Page de la vulnérabilité
+      average_html: moyenne de %{t}
+      score_yet: Pas encore de note
+      risk_exploitation_within_30_html: de risque d'exploitation sous 30 jours, plus que %{epss_percentage} des CVE
+      scores_provider: Notes par fournisseur
+      turned_off: "(désactivé)"
+      score_provider_asked_again_html: pas de note chez ce fournisseur (redemandé %{_})
+      not_asked_yet_next: pas encore demandé (prochain passage des notes)
+      text_html: Sur %{server_name}
+      source_package: Paquet source
+      installed_packages: Paquets installés
+      installed: Installée
+      fixed: Corrigée
+      servers_affected_html: Serveurs touchés (%{count})
+      fixes_release: Correctifs par version
+      derived: 'non évaluée par %{distribution} : déduite de la note'
+    debian_tracker:
+      not_tracker: Ce fichier n'est pas celui du Debian Security Tracker
+      unreadable: 'Fichier du Debian Security Tracker illisible : %{truncate}'
+    download:
+      https_only: 'Adresse refusée (HTTPS seulement) : %{uri}'
+      too_many_redirects: Trop de redirections pour %{uri}
+      too_large: Fichier trop volumineux (plus de %{megabyte} Mo)
+      http_error: 'Téléchargement impossible (HTTP %{code}) : %{uri}'
+      failed: 'Téléchargement impossible : %{truncate}'
+    json_object_stream:
+      not_object: Ce fichier n'est pas un objet JSON
+      truncated: JSON tronqué
+      missing_key: Clé « %{key} » absente
+      invalid: JSON invalide près de « %{peek} »
+    scores:
+      failed: "%{provider_name} : échec"
+      internal_error: 'Erreur interne (%{class}) : %{truncate}'
+      summary: "%{count} CVE · %{results_join}"
+      custom:
+        not_json: "%{provider_name} : la réponse n'est pas du JSON"
+      cve_org:
+        unreadable: Réponse de CVE.org illisible pour %{cve}
+      epss:
+        unreadable: 'Fichier EPSS illisible : %{message}'
+      kev:
+        unreadable: 'Catalogue KEV illisible : %{truncate}'
+      nvd:
+        unreadable: Réponse de NVD illisible pour %{cve}
+        unreadable_feed: 'Flux NVD %{name} illisible : %{truncate}'
+      red_hat:
+        unreadable: Réponse de Red Hat illisible pour %{cve}
+    ubuntu_osv:
+      unreadable: 'Archive OSV d''Ubuntu illisible : %{truncate}'
+    update:
+      no_server: "%{label} : aucun serveur concerné"
+      done: "%{label} : %{count} vulnérabilités (%{releases_join})"
+      nothing_for_fleet: Aucune vulnérabilité des versions du parc (%{releases_join}) dans ce fichier
+  servers:
+    vulnerabilities_card:
+      whole_fleet: Tout le parc
+      distribution_not_covered_elio: 'Distribution non couverte : Elio connaît les vulnérabilités de Debian et d''Ubuntu.'
+      system_inventory_yet: Pas encore d'inventaire du système.
+      settings_vulnerabilities: Paramètres → Vulnérabilités
+      package: Par paquet
+      cve: Par CVE
+      cve_package_e_g: CVE ou paquet (ex. linux, CVE-2024-6387)
+      search_cve_package: Rechercher une CVE ou un paquet
+      all_severities: Toutes gravités
+      minimum_severity: Gravité minimale
+      filter: Filtrer
+      remove_package_filter: Retirer le filtre de paquet
+      score: Note ↓
+      score_2: Note
+      sort_score: Trier par note
+      vulnerabilities: vulnérabilités
+      known_vulnerability_server: Aucune vulnérabilité connue sur ce serveur.
+      cve_package_matches: Aucune CVE ni paquet ne correspond à « %{vulnerability_query} ».
+      vulnerability_matches_filters: Aucune vulnérabilité ne correspond aux filtres.
+      checked_html: vérifié %{vulnerabilities_checked_at}
+      feed_has_not_been_html: La base %{label} n'a pas encore été téléchargée.
+      group: Regrouper
+      fixable_only_html: "%{submit} Corrigeables seulement"
+      package_2: paquet
+      severity: Gravité
+      package_3: Paquet
+      installed_fixed: Installée → corrigée
+      fix: pas de correctif
+      summary_html: "%{total} vulnérabilités connues · %{fixable} par une mise à jour"
+      fixable:
+        one: "%{count} corrigeable"
+        other: "%{count} corrigeables"
+    vulnerability_packages:
+      highest_score: Note la plus haute
+      repositories_server_already_offer: Les dépôts du serveur proposent déjà cette version
+      not_repositories_yet: pas encore dans les dépôts
+      fix_exists_but_server: 'Le correctif existe mais le serveur ne le voit pas : apt update, ou dépôt de sécurité manquant'
+      update_image: mettre à jour l'image
+      fix: aucun correctif
+      fixed: corrigée en %{fixed_version}
+      fix_2: pas de correctif
+      see_cves: Voir les %{count} CVE de %{source_package}
+      cve_package_matches: Aucune CVE ni paquet ne correspond à « %{query} ».
+      vulnerability_matches_filters: Aucune vulnérabilité ne correspond aux filtres.
+      update_fixes_these_vulnerabilities: Aucune mise à jour ne corrige ces vulnérabilités pour l'instant.
+      reboot_needed: redémarrage nécessaire
+      without_fix_html: "· %{count} sans correctif"
+      nothing_update_now: rien à mettre à jour pour l'instant
+      servers: 'Serveurs :'
+      update_page_each_server: "— mettez à jour depuis la fiche de chaque serveur (commande adaptée à ses dépôts)."
+      installed_packages: 'Paquets installés :'
+      most_serious_cves: CVE les plus graves
+      exploited:
+        one: "%{count} exploitée"
+        other: "%{count} exploitées"
+      to_update_html: "%{packages} à mettre à jour corrigeraient %{cves}"
+      to_update_fleet_html: "%{packages} à mettre à jour corrigeraient %{cves} sur le parc"
+      update: 'Mettre à jour :'
+      update_and_reboot: 'Mettre à jour, puis redémarrer le serveur pour charger le nouveau noyau :'
+      pending_html: 'Le serveur ne propose pas encore cette version : lancez %{command}, ou vérifiez que le dépôt de sécurité est configuré.'
+      in_image_html: 'Ces paquets sont dans l''image %{image} : téléchargez une version plus récente de l''image (ou reconstruisez-la), puis recréez ses conteneurs.'
+    docker_card:
+      images_fleet: Images du parc
+      elio_neither_trivy_nor: Elio (ni Trivy ni Grype sur le serveur)
+      tag: sans tag
+      moving_tag_real_version: 'Tag mouvant : la version réelle dépend de la date du téléchargement'
+      read_html: relevé %{collected_at}
+      containers_running_html: "/%{count} conteneurs en cours"
+      trouble_html: "%{problems} en difficulté"
+      images_unused_html: images (%{used} inutilisées)
+      images_reclaimable_html: "· %{human_bytes} d'images, %{human_bytes2} récupérables"
+      analysis: "· analyse :"
+      state: État
+      restarts: Redémarrages
+      memory: Mémoire
+      since: Depuis
+      stopped_html: arrêté %{parse}
+      container: Aucun conteneur.
+      created: Créée
+      used: Utilisée
+      vulnerabilities: Vulnérabilités
+      including_fixable_html: dont %{fixable} corrigeables
+      none: aucune
+      image: Aucune image.
+      docker_inventory_yet: Pas encore d'inventaire Docker.
+  docker:
+    index:
+      docker_servers: Serveurs Docker
+      running_containers: Conteneurs en cours
+      trouble: En difficulté
+      loop_unhealthy: boucle ou mauvaise santé
+      new_versions: Nouvelles versions
+      images_update: images à mettre à jour
+      image_e_g_nginx: Image (ex. nginx)
+      image: Image
+      all_groups: Tous les groupes
+      group: Groupe
+      filter: Filtrer
+      image_matches: Aucune image ne correspond.
+      known_docker_image: Aucune image Docker connue.
+      containers_images_whole_fleet: Conteneurs et images de tout le parc, d'après le dernier inventaire Docker de chaque serveur ; nouvelles versions demandées aux registres.
+      containers_watch: Conteneurs à surveiller
+      restarts_html: "%{restarts} redémarrages"
+      stopped_html: arrêté %{parse}
+      new_version_available_html: "%{submit} Nouvelle version disponible"
+      servers: Serveurs
+      vulnerabilities: Vulnérabilités
+      versions_fleet_html: "%{count} versions sur le parc"
+      container: aucun conteneur
+  settings:
+    docker:
+      show:
+        credentials_saved_leave_empty: 'Identifiants enregistrés pour : %{registries_join}. Laissez vide pour les garder.'
+        credentials_saved: Aucun identifiant enregistré.
+        registry_credentials: Identifiants des registres
+        save: Enregistrer
+        automation_off: désactivée
+        what_containers_images_report: 'Ce que les conteneurs et les images signalent : raison « à surveiller » sur le serveur et activité (notifiable).'
+        healthcheck_fails: Son healthcheck échoue.
+        restarting_state_least_restarts_html: État « restarting », ou au moins %{_} redémarrages et relancé il y a moins de %{in_minutes_to_i} minutes.
+        handy_latest_1_27: Pratique pour les tags « latest » ou « 1.27 » ; sans effet sur un tag figé.
+        private_registries: Registres privés
+        delete_saved_credentials_html: "%{clear_credentials} Supprimer les identifiants enregistrés"
+        image_checks: Vérification des images
+        automation_html: 'Automatisation « %{label} » :'
+        last_run_html: "— dernier passage : %{last_result}"
+        check_now: Vérifier maintenant
+        checked: Vérifiée
+        result: Résultat
+        image_checked_yet: Aucune image vérifiée pour l'instant.
+        unhealthy_html: Conteneur en <strong>mauvaise santé</strong>
+        looping_html: Conteneur qui <strong>redémarre en boucle</strong>
+        updates_html: Image utilisée dont le registre publie une <strong>nouvelle version</strong> du même tag
+        registries_html: 'Elio demande aux registres l''empreinte de chaque tag utilisé (lecture seule, requêtes HEAD qui ne comptent pas dans les limites de Docker Hub). Les images publiques n''ont besoin de rien ; pour une image privée, un jeton <strong>en lecture seule</strong> par registre, une ligne chacun :'
+        registries_example: |-
+          ghcr.io mon-compte ghp_…
+          docker.io mon-compte dckr_pat_…
+          registry.example.com:5000 elio jeton
+    vulnerabilities:
+      show:
+        releases_fleet: 'Versions du parc : %{releases_join}'
+        server_concerned: Aucun serveur concerné
+        failed: Échec
+        vulnerabilities: "%{entries_count} vulnérabilités"
+        never_updated: Jamais mise à jour
+        automations: Automatisations
+        up: Monter
+        move_up: Monter %{provider_name}
+        down: Descendre
+        move_down: Descendre %{provider_name}
+        scored: notées
+        exploited: exploitées
+        epss: avec EPSS
+        cve_test: CVE à tester avec %{provider_name}
+        turn_off: Désactiver
+        turn: Activer
+        edit: Modifier
+        delete: Supprimer
+        delete_2: Supprimer %{provider_name}
+        delete_scores: Supprimer « %{provider_name} » et ses notes ?
+        band: Palier %{index} à partir de
+        colour_band: Couleur du palier %{index}
+        save_colours: Enregistrer les couleurs
+        feed_file: Fichier de la base
+        import: Importer
+        minimum_severity: Gravité minimale
+        save: Enregistrer
+        vulnerability_feeds: Bases de vulnérabilités
+        downloaded_every_day_releases: 'Téléchargées chaque jour pour les versions présentes sur le parc, puis rapprochées des paquets inventoriés : aucune commande de plus sur les serveurs.'
+        update_now: Mettre à jour maintenant
+        updated_html: mise à jour %{refreshed_at} (%{origin_label})
+        automation_html: 'Automatisation « %{label} » :'
+        sources: ". Sources :"
+        score_providers: Fournisseurs de notes
+        add: Ajouter
+        update: Mettre à jour
+        'off': désactivé
+        run_html: "· passage %{last_run_at}"
+        score_colours: Couleurs des notes
+        colour_pill_cvss_score: Couleur de la pastille d'une note CVSS (0 à 10) dans les listes et le détail d'une vulnérabilité, selon le palier atteint.
+        text: à partir de
+        import_feed_hand: Importer une base à la main
+        closed_network_download_file: 'Pour un réseau fermé : téléchargez le fichier ailleurs puis envoyez-le ici. Il remplace la base correspondante, reconnue à son contenu.'
+        debian: 'Debian :'
+        json: "(JSON)"
+        ubuntu: 'Ubuntu :'
+        zip: "(zip)"
+        debian_rates_only_small: 'Debian n''évalue qu''une petite partie de ses vulnérabilités (la plupart restent « non évaluées ») : pour être prévenu de toutes celles qu''une mise à jour corrige, choisissez « Toutes les corrigeables ». Ubuntu donne une priorité à presque toutes.'
+        scores_intro_html: 'La note affichée est la <strong>moyenne</strong> des notes CVSS des fournisseurs actifs ; elle donne la gravité des vulnérabilités que Debian ou Ubuntu n''évaluent pas. EPSS et KEV disent si une vulnérabilité est exploitée. %{fleet_cves} CVE sur le parc. Automatisation « %{label} » :'
+        alert_html: Une vulnérabilité <strong>corrigeable</strong> (une version qui la corrige existe) à partir de cette gravité rend le serveur critique et enregistre l'activité « Vulnérabilité corrigeable » (notifiable).
+    score_providers:
+      form:
+        name: Nom
+        cvefind: CVEFind
+        score_address: Adresse de la note
+        page_open_optional: Page à ouvrir (facultatif)
+        default_score_address: Par défaut, l'adresse de la note
+        json_path_score: Chemin JSON de la note
+        css_selector_optional: Sélecteur CSS (facultatif)
+        regex_optional_1st_group: Regex (facultatif, 1er groupe)
+        delay_between_two_requests: Délai entre deux requêtes (ms)
+        requests_most_per_run: Requêtes au plus par passage
+        cve_test: CVE à tester
+        test: Tester
+        save: Enregistrer
+        add_provider: Ajouter le fournisseur
+        cancel: Annuler
+        selector_takes_text_element: 'Le sélecteur prend le texte d''un élément de la page, la regex y cherche la note (sur toute la page sans sélecteur). Exemple CVEFind : la regex ci-dessus lit la note de ses données structurées.'
+        reading_pages_third_party: 'Lire les pages d''un site tiers peut être contraire à ses conditions d''utilisation : vérifiez-les. Elio respecte le délai et le nombre de requêtes choisis.'
+        url_hint_html: HTTPS, avec %{placeholder} à la place de l'identifiant. Requêtes GET uniquement.
+      test_result:
+        exploited_since: exploitée depuis le %{date_added}
+        cvss_html: "· CVSS %{version}"
+        score_found_provider_html: "%{cve} : aucune note trouvée chez ce fournisseur."
+      new:
+        title: Nouveau fournisseur de notes
+  score_provider:
+    custom_description: 'Fournisseur personnalisé : %{fetch} sur %{setting}'
+    unknown_format: Format inconnu
+    json_path_required: Indiquez le chemin JSON de la note (ex. cvss3.cvss3_base_score)
+    selector_required: Indiquez un sélecteur CSS ou une regex
+    invalid_regex: 'Regex invalide : %{message}'
+    delay_too_short: 'Délai entre deux requêtes : 200 ms minimum'
+    max_per_run_range: 'Requêtes par passage : entre 1 et 5000'
+    builtins:
+      nvd: La référence CVSS du NIST, presque toutes les CVE. Fichiers annuels téléchargés (une fois par mois) puis les modifications du jour.
+      redhat: Note CVSS v3 de Red Hat (API publique de sécurité), une requête par CVE.
+      cveorg: Note donnée par l'éditeur de la CVE (CNA), sinon par l'enrichissement de la CISA ; une requête par CVE.
+      epss: Probabilité d'exploitation dans les 30 jours (pas une note CVSS) ; un fichier par jour.
+      kev: Catalogue des vulnérabilités exploitées activement ; un fichier par jour.
+    formats:
+      json: API JSON (chemin)
+      html: Page HTML (sélecteur CSS et / ou regex)
+  app_setting:
+    three_bands: doivent être trois paliers
+    band_range: commencent à 0 et montent jusqu'à 10 au plus
+    unknown_color: ont une couleur inconnue
+    vulnerability_alerts:
+      critical: Critique
+      high: Haute ou critique
+      medium: Moyenne ou plus
+      any: Toutes les corrigeables
+      none: Jamais
+    score_colors:
+      green: Vert
+      orange: Orange
+      red: Rouge
+      violet: Violet
+      blue: Bleu
+      gray: Gris
+  image_registry:
+    client:
+      no_digest: Le registre ne donne pas d'empreinte
+      tag_not_found: Tag introuvable sur le registre
+      access_refused: Accès refusé par le registre (image privée ? identifiants dans Paramètres → Docker)
+      rate_limited: Limite de requêtes du registre atteinte
+      unexpected: Réponse inattendue du registre (HTTP %{code})
+      credentials_required: Le registre demande des identifiants (Paramètres → Docker)
+      unreadable_token: Jeton du registre illisible
+      unreachable: 'Registre injoignable : %{truncate}'
+    update_check:
+      summary: "%{images}, %{checked} vérifiée(s)"
+      images:
+        one: "%{count} image suivie"
+        other: "%{count} images suivies"
+      failed:
+        one: ", %{count} en échec"
+        other: ", %{count} en échec"
+  vulnerabilities_controller:
+    scores_started: Mise à jour des notes lancée.
+    colors_saved: Couleurs des notes enregistrées.
+    alerts_saved: Alertes de vulnérabilités enregistrées.
+    refresh_started: Mise à jour des bases de vulnérabilités lancée.
+    choose_file: Choisissez un fichier.
+    too_large: Fichier trop volumineux.
+    not_recognized: 'Fichier non reconnu : JSON du Debian Security Tracker ou archive OSV d''Ubuntu (.zip) attendu.'
+    import_label: 'Import : %{fetch}'
+    import_started: Import lancé (%{fetch}).
+  docker_controller:
+    credentials_refused: 'Identifiants refusés : %{errors_to_sentence}'
+    saved: Réglages Docker enregistrés.
+    check_started: Vérification des registres lancée.
+  score_providers_controller:
+    created: Fournisseur « %{provider_name} » ajouté.
+    updated: Fournisseur « %{provider_name} » modifié.
+    deleted: Fournisseur « %{provider_name} » supprimé.
+    cve_required: Indiquez une CVE (ex. CVE-2024-6387)
+    enabled: "« %{provider_name} » activé ; notes recalculées."
+    disabled: "« %{provider_name} » désactivé ; notes recalculées."
+  vulnerability:
+    severities:
+      critical: Critique
+      high: Haute
+      medium: Moyenne
+      low: Faible
+      unknown: Non évaluée
+    at_least: "%{severity} ou plus"
+  server_vulnerability:
+    origins:
+      host: Système
+      image: Image Docker
+  vulnerability_feed:
+    origins:
+      download: téléchargement automatique
+      import: import manuel

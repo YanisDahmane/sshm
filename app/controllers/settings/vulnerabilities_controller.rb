@@ -23,7 +23,7 @@ module Settings
     def scores
       automation = Automation.all_kinds.find { |candidate| candidate.kind == "cve_scores_update" }
       task, started = automation.start_now!(user: current_user)
-      redirect_to task_path(task), notice: started ? "Mise à jour des notes lancée." : "Déjà en cours : voici la tâche en cours."
+      redirect_to task_path(task), notice: started ? t("vulnerabilities_controller.scores_started") : t("flash.already_running")
     end
 
     def update
@@ -32,7 +32,7 @@ module Settings
       if setting.update(attributes)
         Server.find_each(&:refresh_health!) if setting.saved_change_to_vulnerability_alert_severity?
         redirect_to settings_vulnerabilities_path(anchor: (attributes.key?(:score_bands_form) ? "score-colors" : nil)),
-                    notice: attributes.key?(:score_bands_form) ? "Couleurs des notes enregistrées." : "Alertes de vulnérabilités enregistrées."
+                    notice: attributes.key?(:score_bands_form) ? t("vulnerabilities_controller.colors_saved") : t("vulnerabilities_controller.alerts_saved")
       else
         redirect_to settings_vulnerabilities_path, alert: setting.errors.full_messages.to_sentence
       end
@@ -42,25 +42,25 @@ module Settings
     def refresh
       automation = Automation.all_kinds.find { |candidate| candidate.kind == "vulnerabilities_update" }
       task, started = automation.start_now!(user: current_user)
-      redirect_to task_path(task), notice: started ? "Mise à jour des bases de vulnérabilités lancée." : "Déjà en cours : voici la tâche en cours."
+      redirect_to task_path(task), notice: started ? t("vulnerabilities_controller.refresh_started") : t("flash.already_running")
     end
 
     # A Debian Security Tracker JSON or an Ubuntu OSV zip, recognized by its content.
     def import
       file = params[:file]
-      return redirect_to(settings_vulnerabilities_path, alert: "Choisissez un fichier.") unless file.respond_to?(:path)
-      return redirect_to(settings_vulnerabilities_path, alert: "Fichier trop volumineux.") if file.size > MAX_IMPORT
+      return redirect_to(settings_vulnerabilities_path, alert: t("vulnerabilities_controller.choose_file")) unless file.respond_to?(:path)
+      return redirect_to(settings_vulnerabilities_path, alert: t("vulnerabilities_controller.too_large")) if file.size > MAX_IMPORT
 
       source = Vulnerabilities::Update.detect(file.path)
-      return redirect_to(settings_vulnerabilities_path, alert: "Fichier non reconnu : JSON du Debian Security Tracker ou archive OSV d'Ubuntu (.zip) attendu.") unless source
+      return redirect_to(settings_vulnerabilities_path, alert: t("vulnerabilities_controller.not_recognized")) unless source
 
       FileUtils.mkdir_p(IMPORT_DIR)
       path = IMPORT_DIR.join("import-#{SecureRandom.hex(8)}")
       FileUtils.cp(file.path, path)
-      label = "Import : #{Vulnerability::SOURCES.fetch(source)}"
+      label = t("vulnerabilities_controller.import_label", fetch: (Vulnerability::SOURCES.fetch(source)))
       task = BackgroundTask.enqueue!(kind: "vulnerabilities", label: label, servers: [], user: current_user)
       ImportVulnerabilitiesJob.perform_later(source, path.to_s, task)
-      redirect_to task_path(task), notice: "Import lancé (#{Vulnerability::SOURCES.fetch(source)})."
+      redirect_to task_path(task), notice: t("vulnerabilities_controller.import_started", fetch: (Vulnerability::SOURCES.fetch(source)))
     end
   end
 end

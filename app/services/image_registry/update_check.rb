@@ -33,7 +33,7 @@ module ImageRegistry::UpdateCheck
       end
     end
     servers_with_docker.each(&:refresh_health!)
-    "#{references.size} image(s) suivie(s), #{checked} vérifiée(s)#{", #{failed} en échec" if failed.positive?}"
+    I18n.t("image_registry.update_check.summary", images: I18n.t("image_registry.update_check.images", count: references.size), checked: checked) + (failed.positive? ? I18n.t("image_registry.update_check.failed", count: failed) : "")
   end
 
   # { "nginx:1.27" => [[server, image], …] } from the docker inventories.

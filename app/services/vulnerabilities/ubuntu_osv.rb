@@ -54,7 +54,7 @@ module Vulnerabilities::UbuntuOsv
       end
     end
   rescue Zip::Error, JSON::ParserError => e
-    raise Vulnerabilities::Error, "Archive OSV d'Ubuntu illisible : #{e.message.truncate(120)}"
+    raise Vulnerabilities::Error, I18n.t("vulnerabilities.ubuntu_osv.unreadable", truncate: (e.message.truncate(120)))
   end
 
   def self.rows(record, releases)

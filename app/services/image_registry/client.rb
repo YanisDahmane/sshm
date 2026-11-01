@@ -29,11 +29,11 @@ class ImageRegistry::Client
     end
 
     case response
-    when Net::HTTPSuccess then response["docker-content-digest"].presence || raise(ImageRegistry::Error, "Le registre ne donne pas d'empreinte")
-    when Net::HTTPNotFound then raise ImageRegistry::Error, "Tag introuvable sur le registre"
-    when Net::HTTPUnauthorized, Net::HTTPForbidden then raise ImageRegistry::Error, "Accès refusé par le registre (image privée ? identifiants dans Paramètres → Docker)"
-    when Net::HTTPTooManyRequests then raise RateLimited, "Limite de requêtes du registre atteinte"
-    else raise ImageRegistry::Error, "Réponse inattendue du registre (HTTP #{response.code})"
+    when Net::HTTPSuccess then response["docker-content-digest"].presence || raise(ImageRegistry::Error, I18n.t("image_registry.client.no_digest"))
+    when Net::HTTPNotFound then raise ImageRegistry::Error, I18n.t("image_registry.client.tag_not_found")
+    when Net::HTTPUnauthorized, Net::HTTPForbidden then raise ImageRegistry::Error, I18n.t("image_registry.client.access_refused")
+    when Net::HTTPTooManyRequests then raise RateLimited, I18n.t("image_registry.client.rate_limited")
+    else raise ImageRegistry::Error, I18n.t("image_registry.client.unexpected", code: response.code)
     end
   end
 
@@ -46,7 +46,7 @@ class ImageRegistry::Client
     user, password = @credentials[reference.registry]
     scheme, params = challenge.split(" ", 2)
     if scheme.casecmp?("basic")
-      raise ImageRegistry::Error, "Le registre demande des identifiants (Paramètres → Docker)" unless user
+      raise ImageRegistry::Error, I18n.t("image_registry.client.credentials_required") unless user
 
       return @tokens[[ reference.registry, reference.repository ]] = "Basic #{Base64.strict_encode64("#{user}:#{password}")}"
     end
@@ -62,11 +62,11 @@ class ImageRegistry::Client
     raise ImageRegistry::Error, "Jeton du registre refusé (HTTP #{response.code})" unless response.is_a?(Net::HTTPSuccess)
 
     token = JSON.parse(response.body).then { |body| body["token"] || body["access_token"] }
-    raise ImageRegistry::Error, "Jeton du registre illisible" if token.blank?
+    raise ImageRegistry::Error, I18n.t("image_registry.client.unreadable_token") if token.blank?
 
     @tokens[[ reference.registry, reference.repository ]] = "Bearer #{token}"
   rescue JSON::ParserError
-    raise ImageRegistry::Error, "Jeton du registre illisible"
+    raise ImageRegistry::Error, I18n.t("image_registry.client.unreadable_token")
   end
 
   def head(uri, authorization)
@@ -80,6 +80,6 @@ class ImageRegistry::Client
     options[:cert_store] = cert_store if cert_store
     Net::HTTP.start(uri.host, uri.port, **options, &block)
   rescue SocketError, SystemCallError, IOError, OpenSSL::SSL::SSLError, Net::OpenTimeout, Net::ReadTimeout => e
-    raise ImageRegistry::Error, "Registre injoignable : #{e.message.truncate(100)}"
+    raise ImageRegistry::Error, I18n.t("image_registry.client.unreachable", truncate: (e.message.truncate(100)))
   end
 end

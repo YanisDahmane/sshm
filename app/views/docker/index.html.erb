@@ -1,20 +1,20 @@
-<% content_for :title, "Docker · Elio" %>
+<% content_for :title, t("title", page: t("nav.docker")) %>
 
 <div>
   <h1 class="text-xl font-semibold">Docker</h1>
-  <p class="text-xs text-ink-3">Conteneurs et images de tout le parc, d'après le dernier inventaire Docker de chaque serveur ; nouvelles versions demandées aux registres.</p>
+  <p class="text-xs text-ink-3"><%= t(".containers_images_whole_fleet") %></p>
 </div>
 
 <div class="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
-  <%= stat_tile "Serveurs Docker", @summary[:servers], nil, icon: :server_stack, id: "stat-docker-servers" %>
-  <%= stat_tile "Conteneurs en cours", "#{@summary[:running]}/#{@summary[:containers]}", nil, icon: :container, id: "stat-containers" %>
-  <%= stat_tile "En difficulté", @summary[:troubled], "boucle ou mauvaise santé", tone: (:crit if @summary[:troubled].positive?), id: "stat-troubled" %>
-  <%= stat_tile "Nouvelles versions", @summary[:updates], "images à mettre à jour", tone: (:warn if @summary[:updates].positive?), id: "stat-updates" %>
+  <%= stat_tile t(".docker_servers"), @summary[:servers], nil, icon: :server_stack, id: "stat-docker-servers" %>
+  <%= stat_tile t(".running_containers"), "#{@summary[:running]}/#{@summary[:containers]}", nil, icon: :container, id: "stat-containers" %>
+  <%= stat_tile t(".trouble"), @summary[:troubled], t(".loop_unhealthy"), tone: (:crit if @summary[:troubled].positive?), id: "stat-troubled" %>
+  <%= stat_tile t(".new_versions"), @summary[:updates], t(".images_update"), tone: (:warn if @summary[:updates].positive?), id: "stat-updates" %>
 </div>
 
 <% if @troubled.any? %>
   <section id="troubled-containers" class="card mt-6">
-    <div class="card-header"><h2 class="font-semibold">Conteneurs à surveiller</h2></div>
+    <div class="card-header"><h2 class="font-semibold"><%= t(".containers_watch") %></h2></div>
     <ul class="divide-y divide-line">
       <% @troubled.each do |server, container| %>
         <li class="troubled-container flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 text-sm">
@@ -23,8 +23,8 @@
           <span class="font-mono text-xs"><%= container["name"] %></span>
           <span class="text-xs text-ink-3"><%= container["image"] %></span>
           <span class="ml-auto text-xs text-ink-3">
-            <% if container["looping"] %><%= container["restarts"] %> redémarrages
-            <% elsif container["stopped_long"] %>arrêté <%= relative_time_tag Time.zone.parse(container["finished_at"]) %><% end %>
+            <% if container["looping"] %><%= t(".restarts_html", restarts: (container["restarts"])) %>
+            <% elsif container["stopped_long"] %><%= t(".stopped_html", parse: (relative_time_tag Time.zone.parse(container["finished_at"]))) %><% end %>
           </span>
         </li>
       <% end %>
@@ -33,28 +33,28 @@
 <% end %>
 
 <%= form_with url: docker_path, method: :get, data: { controller: "auto-submit", turbo_action: "advance" }, class: "docker-filters mt-6 flex flex-wrap items-center gap-2" do |f| %>
-  <%= f.search_field :q, value: @q, placeholder: "Image (ex. nginx)", aria: { label: "Image" }, data: { action: "input->auto-submit#submitLater" }, class: "input w-56 py-1 text-xs" %>
-  <%= f.select :group, [ [ "Tous les groupes", "" ], *@groups.map { |group| [ group.name, group.id ] } ], { selected: @group&.id },
-        aria: { label: "Groupe" }, data: { action: "change->auto-submit#submit" }, class: "input w-auto py-1 text-xs" %>
-  <label class="flex items-center gap-1.5 text-xs"><%= check_box_tag :updates, "1", @updates_only, data: { action: "change->auto-submit#submit" } %> Nouvelle version disponible</label>
-  <noscript><%= f.submit "Filtrer", class: "btn btn-secondary" %></noscript>
+  <%= f.search_field :q, value: @q, placeholder: t(".image_e_g_nginx"), aria: { label: t(".image") }, data: { action: "input->auto-submit#submitLater" }, class: "input w-56 py-1 text-xs" %>
+  <%= f.select :group, [ [ t(".all_groups"), "" ], *@groups.map { |group| [ group.name, group.id ] } ], { selected: @group&.id },
+        aria: { label: t(".group") }, data: { action: "change->auto-submit#submit" }, class: "input w-auto py-1 text-xs" %>
+  <label class="flex items-center gap-1.5 text-xs"><%= t(".new_version_available_html", submit: (check_box_tag :updates, "1", @updates_only, data: { action: "change->auto-submit#submit" })) %></label>
+  <noscript><%= f.submit t(".filter"), class: "btn btn-secondary" %></noscript>
 <% end %>
 
 <% if @repositories.any? %>
   <div class="card mt-3 overflow-x-auto">
     <table id="docker-images" class="table-dense">
-      <thead><tr><th class="pl-4">Image</th><th>Tag</th><th>Serveurs</th><th>Registre</th><th class="pr-4">Vulnérabilités</th></tr></thead>
+      <thead><tr><th class="pl-4">Image</th><th>Tag</th><th><%= t(".servers") %></th><th>Registre</th><th class="pr-4"><%= t(".vulnerabilities") %></th></tr></thead>
       <tbody>
         <% @repositories.each do |repository| %>
           <% repository.versions.each_with_index do |version, index| %>
             <tr class="docker-repository-version" data-repository="<%= repository.name %>">
               <td class="pl-4 font-mono text-xs"><%= repository.name if index.zero? %>
-                <% if index.zero? && repository.versions.size > 1 %><span class="block font-sans text-[11px] text-warn-ink"><%= repository.versions.size %> versions sur le parc</span><% end %></td>
+                <% if index.zero? && repository.versions.size > 1 %><span class="block font-sans text-[11px] text-warn-ink"><%= t(".versions_fleet_html", count: repository.versions.size) %></span><% end %></td>
               <td class="font-mono text-xs"><%= version.tag %></td>
               <td class="text-xs">
                 <% if version.servers.any? %>
                   <%= safe_join(version.servers.first(4).map { |server| link_to(server.name, server_path(server, tab: "docker"), class: "hover:text-accent hover:underline") }, ", ") %><%= " …" if version.servers.size > 4 %>
-                <% else %><span class="text-ink-3">aucun conteneur</span><% end %>
+                <% else %><span class="text-ink-3"><%= t(".container") %></span><% end %>
               </td>
               <td><%= image_update_badge(version.state) %></td>
               <td class="pr-4 text-xs"><%= version.cves.positive? ? safe_join([ tag.strong(version.cves, class: (version.fixable.positive? ? "text-crit-ink" : nil)), " dont #{version.fixable} corrigeables" ]) : tag.span("—", class: "text-ink-3") %></td>
@@ -66,5 +66,5 @@
   </div>
   <%= render "shared/pagination", pager: @pager, noun: "images" %>
 <% else %>
-  <p class="card mt-3 px-4 py-6 text-sm text-ink-3"><%= @q.present? || @updates_only ? "Aucune image ne correspond." : "Aucune image Docker connue." %></p>
+  <p class="card mt-3 px-4 py-6 text-sm text-ink-3"><%= @q.present? || @updates_only ? t(".image_matches") : t(".known_docker_image") %></p>
 <% end %>

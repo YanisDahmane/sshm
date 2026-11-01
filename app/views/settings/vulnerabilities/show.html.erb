@@ -1,14 +1,14 @@
-<% content_for :title, "Vulnérabilités · Paramètres · Elio" %>
+<% content_for :title, t("title", page: "#{t("settings.nav.vulnerabilities")} · #{t("settings.nav.title")}") %>
 <%= render "settings/nav" %>
 
 <section id="vulnerability-feeds" class="card mt-6">
   <div class="card-header">
     <div>
-      <h2 class="font-semibold">Bases de vulnérabilités</h2>
-      <p class="mt-0.5 text-xs text-ink-3">Téléchargées chaque jour pour les versions présentes sur le parc, puis rapprochées des paquets inventoriés : aucune commande de plus sur les serveurs.</p>
+      <h2 class="font-semibold"><%= t(".vulnerability_feeds") %></h2>
+      <p class="mt-0.5 text-xs text-ink-3"><%= t(".downloaded_every_day_releases") %></p>
     </div>
     <%= button_to refresh_settings_vulnerabilities_path, class: "btn btn-secondary", form: { class: "shrink-0" } do %>
-      <%= icon :arrow_path %> Mettre à jour maintenant
+      <%= icon :arrow_path %> <%= t(".update_now") %>
     <% end %>
   </div>
   <ul class="divide-y divide-line">
@@ -16,70 +16,67 @@
       <li class="vulnerability-feed flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3 text-sm" data-source="<%= feed.source %>">
         <span class="w-56 font-medium"><%= feed.label %></span>
         <% releases = @releases.fetch(feed.source) %>
-        <span class="text-xs text-ink-2"><%= releases.any? ? "Versions du parc : #{releases.join(", ")}" : "Aucun serveur concerné" %></span>
+        <span class="text-xs text-ink-2"><%= releases.any? ? t(".releases_fleet", releases_join: (releases.join(", "))) : t(".server_concerned") %></span>
         <span class="ml-auto text-xs">
           <% if feed.failed? %>
-            <%= status_badge :crit, "Échec", title: feed.last_error, class: "feed-state" %> <span class="text-crit-ink"><%= feed.last_error %></span>
+            <%= status_badge :crit, t(".failed"), title: feed.last_error, class: "feed-state" %> <span class="text-crit-ink"><%= feed.last_error %></span>
           <% elsif feed.refreshed_at %>
-            <%= status_badge :good, "#{feed.entries_count} vulnérabilités", class: "feed-state" %>
-            <span class="text-ink-3">mise à jour <%= relative_time_tag feed.refreshed_at %> (<%= feed.origin_label %>)</span>
+            <%= status_badge :good, t(".vulnerabilities", entries_count: feed.entries_count), class: "feed-state" %>
+            <span class="text-ink-3"><%= t(".updated_html", refreshed_at: (relative_time_tag feed.refreshed_at), origin_label: feed.origin_label) %></span>
           <% else %>
-            <%= status_badge :neutral, "Jamais mise à jour", class: "feed-state" %>
+            <%= status_badge :neutral, t(".never_updated"), class: "feed-state" %>
           <% end %>
         </span>
       </li>
     <% end %>
   </ul>
   <p class="border-t border-line px-4 py-2.5 text-xs text-ink-3">
-    Automatisation « <%= @automation.label %> » : <%= @automation.enabled? ? "active, #{Automation.interval_label(@automation.interval_minutes).downcase}" : "désactivée" %>
-    — <%= link_to "Automatisations", settings_automations_path, class: "text-accent hover:underline" %>.
-    Sources : <span class="font-mono"><%= Vulnerabilities::DebianTracker::URL %></span>, <span class="font-mono"><%= Vulnerabilities::UbuntuOsv::URL %></span>.
+    <%= t(".automation_html", label: @automation.label) %> <%= @automation.enabled? ? t("settings.automation_active", interval: Automation.interval_label(@automation.interval_minutes).downcase) : t("settings.docker.show.automation_off") %>
+    — <%= link_to t(".automations"), settings_automations_path, class: "text-accent hover:underline" %><%= t(".sources") %> <span class="font-mono"><%= Vulnerabilities::DebianTracker::URL %></span>, <span class="font-mono"><%= Vulnerabilities::UbuntuOsv::URL %></span>.
   </p>
 </section>
 
 <section id="score-providers" class="card mt-6">
   <div class="card-header">
     <div>
-      <h2 class="font-semibold">Fournisseurs de notes</h2>
+      <h2 class="font-semibold"><%= t(".score_providers") %></h2>
       <p class="mt-0.5 text-xs text-ink-3">
-        La note affichée est la <strong>moyenne</strong> des notes CVSS des fournisseurs actifs ; elle donne la gravité des vulnérabilités que Debian ou Ubuntu n'évaluent pas.
-        EPSS et KEV disent si une vulnérabilité est exploitée. <%= @fleet_cves %> CVE sur le parc.
-        Automatisation « <%= @scores_automation.label %> » : <%= @scores_automation.enabled? ? Automation.interval_label(@scores_automation.interval_minutes).downcase : "désactivée" %>.
+        <%= t(".scores_intro_html", fleet_cves: @fleet_cves, label: @scores_automation.label) %> <%= @scores_automation.enabled? ? Automation.interval_label(@scores_automation.interval_minutes).downcase : t("settings.docker.show.automation_off") %>.
       </p>
     </div>
     <div class="flex shrink-0 gap-2">
-      <%= link_to new_settings_score_provider_path, class: "btn btn-secondary" do %><%= icon :plus %> Ajouter<% end %>
-      <%= button_to scores_settings_vulnerabilities_path, class: "btn btn-secondary" do %><%= icon :arrow_path %> Mettre à jour<% end %>
+      <%= link_to new_settings_score_provider_path, class: "btn btn-secondary" do %><%= icon :plus %> <%= t(".add") %><% end %>
+      <%= button_to scores_settings_vulnerabilities_path, class: "btn btn-secondary" do %><%= icon :arrow_path %> <%= t(".update") %><% end %>
     </div>
   </div>
   <ol class="divide-y divide-line">
     <% @providers.each_with_index do |provider, index| %>
       <li class="score-provider flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 text-sm <%= "opacity-60" unless provider.enabled? %>" data-key="<%= provider.key %>">
         <div class="flex flex-col">
-          <%= button_to move_settings_score_provider_path(provider, direction: "up"), method: :patch, disabled: index.zero?, class: "btn btn-ghost btn-icon h-5", title: "Monter", aria: { label: "Monter #{provider.name}" } do %><%= icon :chevron_up, class: "h-3.5 w-3.5" %><% end %>
-          <%= button_to move_settings_score_provider_path(provider, direction: "down"), method: :patch, disabled: index == @providers.size - 1, class: "btn btn-ghost btn-icon h-5", title: "Descendre", aria: { label: "Descendre #{provider.name}" } do %><%= icon :chevron_down, class: "h-3.5 w-3.5" %><% end %>
+          <%= button_to move_settings_score_provider_path(provider, direction: "up"), method: :patch, disabled: index.zero?, class: "btn btn-ghost btn-icon h-5", title: t(".up"), aria: { label: t(".move_up", provider_name: provider.name) } do %><%= icon :chevron_up, class: "h-3.5 w-3.5" %><% end %>
+          <%= button_to move_settings_score_provider_path(provider, direction: "down"), method: :patch, disabled: index == @providers.size - 1, class: "btn btn-ghost btn-icon h-5", title: t(".down"), aria: { label: t(".move_down", provider_name: provider.name) } do %><%= icon :chevron_down, class: "h-3.5 w-3.5" %><% end %>
         </div>
         <div class="min-w-0 flex-1">
           <p class="font-medium"><%= provider.name %>
             <span class="badge <%= provider.cvss? ? "bg-subtle text-ink-2" : "bg-accent-soft text-accent" %>"><%= provider.cvss? ? "note CVSS" : "exploitation" %></span>
-            <% unless provider.enabled? %><span class="badge bg-subtle text-ink-3">désactivé</span><% end %></p>
+            <% unless provider.enabled? %><span class="badge bg-subtle text-ink-3"><%= t(".off") %></span><% end %></p>
           <p class="text-xs text-ink-3"><%= provider.description %></p>
           <p class="provider-state text-xs">
-            <span class="text-ink-2"><%= @coverage.fetch(provider.key, 0) %> CVE <%= provider.cvss? ? "notées" : (provider.kind == "kev" ? "exploitées" : "avec EPSS") %></span>
-            <% if provider.last_run_at %><span class="text-ink-3">· passage <%= relative_time_tag provider.last_run_at %></span><% end %>
+            <span class="text-ink-2"><%= @coverage.fetch(provider.key, 0) %> CVE <%= provider.cvss? ? t(".scored") : (provider.kind == "kev" ? t(".exploited") : t(".epss")) %></span>
+            <% if provider.last_run_at %><span class="text-ink-3"><%= t(".run_html", last_run_at: (relative_time_tag provider.last_run_at)) %></span><% end %>
             <% if provider.last_error %><span class="text-crit-ink">· <%= provider.last_error %></span><% end %>
           </p>
         </div>
         <%= form_with url: test_settings_score_provider_path(provider), data: { turbo_stream: true }, class: "flex items-center gap-1.5" do %>
-          <%= text_field_tag :cve, "CVE-2024-6387", class: "input w-36 py-1 font-mono text-xs", aria: { label: "CVE à tester avec #{provider.name}" } %>
+          <%= text_field_tag :cve, "CVE-2024-6387", class: "input w-36 py-1 font-mono text-xs", aria: { label: t(".cve_test", provider_name: provider.name) } %>
           <button type="submit" class="btn btn-ghost text-xs">Tester</button>
         <% end %>
         <div class="flex items-center gap-1">
-          <%= button_to provider.enabled? ? "Désactiver" : "Activer", toggle_settings_score_provider_path(provider), method: :patch, class: "btn btn-secondary text-xs" %>
+          <%= button_to provider.enabled? ? t(".turn_off") : t(".turn"), toggle_settings_score_provider_path(provider), method: :patch, class: "btn btn-secondary text-xs" %>
           <% if provider.custom? %>
-            <%= link_to "Modifier", edit_settings_score_provider_path(provider), class: "btn btn-ghost text-xs" %>
-            <%= button_to settings_score_provider_path(provider), method: :delete, class: "btn btn-ghost btn-icon", title: "Supprimer", aria: { label: "Supprimer #{provider.name}" },
-                  form: { data: { turbo_confirm: "Supprimer « #{provider.name} » et ses notes ?", confirm_variant: "danger" } } do %><%= icon :trash %><% end %>
+            <%= link_to t(".edit"), edit_settings_score_provider_path(provider), class: "btn btn-ghost text-xs" %>
+            <%= button_to settings_score_provider_path(provider), method: :delete, class: "btn btn-ghost btn-icon", title: t(".delete"), aria: { label: t(".delete_2", provider_name: provider.name) },
+                  form: { data: { turbo_confirm: t(".delete_scores", provider_name: provider.name), confirm_variant: "danger" } } do %><%= icon :trash %><% end %>
           <% end %>
         </div>
         <div id="score-provider-test-<%= provider.id %>" class="basis-full empty:hidden"></div>
@@ -89,48 +86,48 @@
 </section>
 
 <section id="score-colors" class="card mt-6 p-5">
-  <h2 class="font-semibold">Couleurs des notes</h2>
-  <p class="mt-1 text-xs text-ink-3">Couleur de la pastille d'une note CVSS (0 à 10) dans les listes et le détail d'une vulnérabilité, selon le palier atteint.</p>
+  <h2 class="font-semibold"><%= t(".score_colours") %></h2>
+  <p class="mt-1 text-xs text-ink-3"><%= t(".colour_pill_cvss_score") %></p>
   <%= form_with model: @setting, url: settings_vulnerabilities_path, method: :patch, class: "mt-4 space-y-2" do |f| %>
     <% @setting.score_bands.each_with_index do |band, index| %>
       <div class="score-band flex flex-wrap items-center gap-3 text-sm">
         <span class="w-24 text-ink-2">Palier <%= index + 1 %></span>
-        <label class="flex items-center gap-1.5">à partir de
+        <label class="flex items-center gap-1.5"><%= t(".text") %>
           <% if index.zero? %>
             <%= hidden_field_tag "app_setting[score_bands_form][#{index}][from]", 0 %><span class="w-16 font-mono">0</span>
           <% else %>
-            <%= number_field_tag "app_setting[score_bands_form][#{index}][from]", band["from"], min: 0.1, max: 10, step: 0.1, class: "input w-20 py-1", aria: { label: "Palier #{index + 1} à partir de" } %>
+            <%= number_field_tag "app_setting[score_bands_form][#{index}][from]", band["from"], min: 0.1, max: 10, step: 0.1, class: "input w-20 py-1", aria: { label: t(".band", index: (index + 1)) } %>
           <% end %>
         </label>
-        <%= select_tag "app_setting[score_bands_form][#{index}][color]", options_for_select(AppSetting::SCORE_COLORS.invert, band["color"]),
-              class: "input w-auto py-1", aria: { label: "Couleur du palier #{index + 1}" } %>
+        <%= select_tag "app_setting[score_bands_form][#{index}][color]", options_for_select(AppSetting.score_color_options, band["color"]),
+              class: "input w-auto py-1", aria: { label: t(".colour_band", index: (index + 1)) } %>
         <%= score_pill([ band["from"].to_f, 0.0 ].max + (index.zero? ? 1.5 : 0.5)) %>
       </div>
     <% end %>
-    <div class="pt-2"><%= f.submit "Enregistrer les couleurs", class: "btn btn-primary" %></div>
+    <div class="pt-2"><%= f.submit t(".save_colours"), class: "btn btn-primary" %></div>
   <% end %>
 </section>
 
 <section id="vulnerability-import" class="card mt-6 p-5">
-  <h2 class="font-semibold">Importer une base à la main</h2>
-  <p class="mt-1 text-xs text-ink-3">Pour un réseau fermé : téléchargez le fichier ailleurs puis envoyez-le ici. Il remplace la base correspondante, reconnue à son contenu.</p>
+  <h2 class="font-semibold"><%= t(".import_feed_hand") %></h2>
+  <p class="mt-1 text-xs text-ink-3"><%= t(".closed_network_download_file") %></p>
   <ul class="mt-2 list-disc pl-5 text-xs text-ink-2">
-    <li>Debian : <span class="font-mono"><%= Vulnerabilities::DebianTracker::URL %></span> (JSON)</li>
-    <li>Ubuntu : <span class="font-mono"><%= Vulnerabilities::UbuntuOsv::URL %></span> (zip)</li>
+    <li><%= t(".debian") %> <span class="font-mono"><%= Vulnerabilities::DebianTracker::URL %></span> <%= t(".json") %></li>
+    <li><%= t(".ubuntu") %> <span class="font-mono"><%= Vulnerabilities::UbuntuOsv::URL %></span> <%= t(".zip") %></li>
   </ul>
   <%= form_with url: import_settings_vulnerabilities_path, multipart: true, data: { turbo: false }, class: "mt-4 flex flex-wrap items-center gap-3" do |f| %>
-    <%= f.file_field :file, accept: ".json,.zip,application/json,application/zip", required: true, class: "text-sm", aria: { label: "Fichier de la base" } %>
-    <%= f.submit "Importer", class: "btn btn-secondary" %>
+    <%= f.file_field :file, accept: ".json,.zip,application/json,application/zip", required: true, class: "text-sm", aria: { label: t(".feed_file") } %>
+    <%= f.submit t(".import"), class: "btn btn-secondary" %>
   <% end %>
 </section>
 
 <section id="vulnerability-alerts" class="card mt-6 p-5">
   <h2 class="font-semibold">Alertes</h2>
-  <p class="mt-1 text-xs text-ink-3">Une vulnérabilité <strong>corrigeable</strong> (une version qui la corrige existe) à partir de cette gravité rend le serveur critique et enregistre l'activité « Vulnérabilité corrigeable » (notifiable).</p>
-  <p class="mt-1 text-xs text-ink-3">Debian n'évalue qu'une petite partie de ses vulnérabilités (la plupart restent « non évaluées ») : pour être prévenu de toutes celles qu'une mise à jour corrige, choisissez « Toutes les corrigeables ». Ubuntu donne une priorité à presque toutes.</p>
+  <p class="mt-1 text-xs text-ink-3"><%= t(".alert_html") %></p>
+  <p class="mt-1 text-xs text-ink-3"><%= t(".debian_rates_only_small") %></p>
   <%= form_with model: @setting, url: settings_vulnerabilities_path, method: :patch, class: "mt-4 flex flex-wrap items-center gap-3" do |f| %>
-    <%= f.label :vulnerability_alert_severity, "Gravité minimale", class: "label mb-0" %>
-    <%= f.select :vulnerability_alert_severity, AppSetting::VULNERABILITY_ALERTS.invert, {}, class: "input w-auto" %>
-    <%= f.submit "Enregistrer", class: "btn btn-primary" %>
+    <%= f.label :vulnerability_alert_severity, t(".minimum_severity"), class: "label mb-0" %>
+    <%= f.select :vulnerability_alert_severity, AppSetting.vulnerability_alert_options, {}, class: "input w-auto" %>
+    <%= f.submit t(".save"), class: "btn btn-primary" %>
   <% end %>
 </section>

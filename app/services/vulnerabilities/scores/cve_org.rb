@@ -24,6 +24,6 @@ class Vulnerabilities::Scores::CveOrg < Vulnerabilities::Scores::Base
     end
     nil
   rescue JSON::ParserError
-    raise Integrations::Error, "Réponse de CVE.org illisible pour #{cve}"
+    raise Integrations::Error, I18n.t("vulnerabilities.scores.cve_org.unreadable", cve: cve)
   end
 end

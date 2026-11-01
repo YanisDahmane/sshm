@@ -4,22 +4,22 @@
 # access; custom ones read a JSON API (path) or an HTML page (CSS selector
 # and / or regex) at an URL template with {cve}, at a limited pace.
 class ScoreProvider < ApplicationRecord
-  Builtin = Data.define(:key, :name, :category, :page_url, :description)
+  # Descriptions: score_provider.builtins.<key>.
+  Builtin = Data.define(:key, :name, :category, :page_url) do
+    def description = I18n.t("score_provider.builtins.#{key}")
+  end
 
   BUILTINS = [
-    Builtin.new("nvd", "NVD (NIST)", "cvss", "https://nvd.nist.gov/vuln/detail/{cve}",
-                "La référence CVSS du NIST, presque toutes les CVE. Fichiers annuels téléchargés (une fois par mois) puis les modifications du jour."),
-    Builtin.new("redhat", "Red Hat", "cvss", "https://access.redhat.com/security/cve/{cve}",
-                "Note CVSS v3 de Red Hat (API publique de sécurité), une requête par CVE."),
-    Builtin.new("cveorg", "CVE.org / CISA", "cvss", "https://www.cve.org/CVERecord?id={cve}",
-                "Note donnée par l'éditeur de la CVE (CNA), sinon par l'enrichissement de la CISA ; une requête par CVE."),
-    Builtin.new("epss", "EPSS (FIRST)", "exploitation", "https://www.first.org/epss/",
-                "Probabilité d'exploitation dans les 30 jours (pas une note CVSS) ; un fichier par jour."),
-    Builtin.new("kev", "CISA KEV", "exploitation", "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
-                "Catalogue des vulnérabilités exploitées activement ; un fichier par jour.")
+    Builtin.new("nvd", "NVD (NIST)", "cvss", "https://nvd.nist.gov/vuln/detail/{cve}"),
+    Builtin.new("redhat", "Red Hat", "cvss", "https://access.redhat.com/security/cve/{cve}"),
+    Builtin.new("cveorg", "CVE.org / CISA", "cvss", "https://www.cve.org/CVERecord?id={cve}"),
+    Builtin.new("epss", "EPSS (FIRST)", "exploitation", "https://www.first.org/epss/"),
+    Builtin.new("kev", "CISA KEV", "exploitation", "https://www.cisa.gov/known-exploited-vulnerabilities-catalog")
   ].index_by(&:key).freeze
 
-  FORMATS = { "json" => "API JSON (chemin)", "html" => "Page HTML (sélecteur CSS et / ou regex)" }.freeze
+  FORMATS = %w[json html].freeze
+
+  def self.format_label(format) = I18n.t("score_provider.formats.#{format}", default: format.to_s)
   DEFAULTS = { "delay_ms" => 1000, "max_per_run" => 500 }.freeze
   # Pace of the built-in per-CVE APIs (public, no published limit: kept polite).
   BUILTIN_DEFAULTS = { "redhat" => { "delay_ms" => 250, "max_per_run" => 2000 }, "cveorg" => { "delay_ms" => 250, "max_per_run" => 2000 },
@@ -47,7 +47,7 @@ class ScoreProvider < ApplicationRecord
   def custom? = kind == "custom"
   def category = custom? ? "cvss" : builtin.category
   def cvss? = category == "cvss"
-  def description = custom? ? "Fournisseur personnalisé : #{FORMATS.fetch(setting("format"), "")} sur #{setting("url_template")}" : builtin.description
+  def description = custom? ? I18n.t("score_provider.custom_description", fetch: (FORMATS.include?(setting("format")) ? self.class.format_label(setting("format")) : ""), setting: (setting("url_template"))) : builtin.description
 
   def setting(name) = settings.fetch(name.to_s) { BUILTIN_DEFAULTS.dig(kind, name.to_s) || DEFAULTS[name.to_s] }
 
@@ -76,15 +76,15 @@ class ScoreProvider < ApplicationRecord
   def custom_settings_valid
     url = setting("url_template").to_s
     errors.add(:base, "L'adresse doit commencer par https:// et contenir {cve}") unless url.start_with?("https://") && url.include?("{cve}")
-    errors.add(:base, "Format inconnu") unless FORMATS.key?(setting("format"))
-    errors.add(:base, "Indiquez le chemin JSON de la note (ex. cvss3.cvss3_base_score)") if setting("format") == "json" && setting("json_path").blank?
-    errors.add(:base, "Indiquez un sélecteur CSS ou une regex") if setting("format") == "html" && setting("css_selector").blank? && setting("regex").blank?
+    errors.add(:base, I18n.t("score_provider.unknown_format")) unless FORMATS.include?(setting("format"))
+    errors.add(:base, I18n.t("score_provider.json_path_required")) if setting("format") == "json" && setting("json_path").blank?
+    errors.add(:base, I18n.t("score_provider.selector_required")) if setting("format") == "html" && setting("css_selector").blank? && setting("regex").blank?
     begin
       Regexp.new(setting("regex"), timeout: 1) if setting("regex")
     rescue RegexpError => e
-      errors.add(:base, "Regex invalide : #{e.message}")
+      errors.add(:base, I18n.t("score_provider.invalid_regex", message: e.message))
     end
-    errors.add(:base, "Délai entre deux requêtes : 200 ms minimum") if setting("delay_ms").to_i < 200
-    errors.add(:base, "Requêtes par passage : entre 1 et 5000") unless (1..5000).cover?(setting("max_per_run").to_i)
+    errors.add(:base, I18n.t("score_provider.delay_too_short")) if setting("delay_ms").to_i < 200
+    errors.add(:base, I18n.t("score_provider.max_per_run_range")) unless (1..5000).cover?(setting("max_per_run").to_i)
   end
 end

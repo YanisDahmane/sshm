@@ -57,3 +57,4 @@ en:
     copy_button:
       copy: Copy
       copied: Copied
+    automation_active: on, %{interval}

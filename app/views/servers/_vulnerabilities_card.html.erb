@@ -3,35 +3,34 @@
 <% feed = target && VulnerabilityFeed.for(target.first) %>
 <section id="server-vulnerabilities" class="card mt-6">
   <div class="card-header">
-    <h2 class="flex items-center gap-2 font-semibold"><%= icon :shield_exclamation, class: "h-4 w-4 text-ink-3" %> Vulnérabilités</h2>
+    <h2 class="flex items-center gap-2 font-semibold"><%= icon :shield_exclamation, class: "h-4 w-4 text-ink-3" %> <%= t("nav.vulnerabilities") %></h2>
     <div class="flex items-center gap-3 text-xs text-ink-3">
-      <% if server.vulnerabilities_checked_at %><span>vérifié <%= relative_time_tag server.vulnerabilities_checked_at %></span><% end %>
-      <%= link_to "Tout le parc", vulnerabilities_path, class: "font-medium text-accent hover:underline" %>
+      <% if server.vulnerabilities_checked_at %><span><%= t(".checked_html", vulnerabilities_checked_at: (relative_time_tag server.vulnerabilities_checked_at)) %></span><% end %>
+      <%= link_to t(".whole_fleet"), vulnerabilities_path, class: "font-medium text-accent hover:underline" %>
     </div>
   </div>
 
   <% if target.nil? && @vulnerability_counts[:total].zero? %>
     <p class="vulnerabilities-empty px-4 py-4 text-sm text-ink-3">
-      <%= server.inventory("os")&.collected? ? "Distribution non couverte : Elio connaît les vulnérabilités de Debian et d'Ubuntu." : "Pas encore d'inventaire du système." %>
+      <%= server.inventory("os")&.collected? ? t(".distribution_not_covered_elio") : t(".system_inventory_yet") %>
     </p>
   <% elsif feed && feed.refreshed_at.nil? %>
     <p class="vulnerabilities-empty px-4 py-4 text-sm text-ink-3">
-      La base <%= feed.label %> n'a pas encore été téléchargée.
-      <% if can?(:administer) %><%= link_to "Paramètres → Vulnérabilités", settings_vulnerabilities_path, class: "text-accent hover:underline" %><% end %>
+      <%= t(".feed_has_not_been_html", label: feed.label) %>
+      <% if can?(:administer) %><%= link_to t(".settings_vulnerabilities"), settings_vulnerabilities_path, class: "text-accent hover:underline" %><% end %>
     </p>
   <% else %>
     <% counts = @vulnerability_counts %>
     <p class="vulnerabilities-summary border-b border-line px-4 py-2.5 text-xs text-ink-2">
-      <strong class="text-ink"><%= counts[:total] %></strong> vulnérabilités connues
-      · <strong class="<%= counts[:fixable].positive? ? "text-crit-ink" : "text-ink" %>"><%= counts[:fixable] %> corrigeables</strong> par une mise à jour
+      <%= t(".summary_html", total: tag.strong(counts[:total], class: "text-ink"), fixable: tag.strong(t(".fixable", count: counts[:fixable]), class: counts[:fixable].positive? ? "text-crit-ink" : "text-ink")) %>
       <% Vulnerability::SEVERITIES.each_key do |severity| %>
         <% if (count = counts[:by_severity][severity].to_i).positive? %>· <%= count %> <%= Vulnerability.severity_label(severity).downcase %><%= "s" if count > 1 && severity != "unknown" %><% end %>
       <% end %>
     </p>
 
     <div class="vulnerability-toolbar flex flex-wrap items-center gap-3 border-b border-line px-4 py-2 text-xs">
-      <div class="vulnerability-view-toggle flex rounded-lg border border-line bg-surface p-0.5" role="group" aria-label="Regrouper">
-        <% [ [ "packages", "Par paquet", :cube ], [ "cves", "Par CVE", :list_bullet ] ].each do |view, label, icon_name| %>
+      <div class="vulnerability-view-toggle flex rounded-lg border border-line bg-surface p-0.5" role="group" aria-label="<%= t(".group") %>">
+        <% [ [ "packages", t(".package"), :cube ], [ "cves", t(".cve"), :list_bullet ] ].each do |view, label, icon_name| %>
           <%= link_to server_path(server, request.query_parameters.except("page", "package", "sort").merge("tab" => "vulnerabilities", "view" => view)),
                 data: { view: view }, aria: { pressed: @vulnerability_view == view },
                 class: "inline-flex items-center gap-1 rounded-md px-2 py-1 #{@vulnerability_view == view ? "bg-subtle font-medium text-ink" : "text-ink-3 hover:text-ink"}" do %>
@@ -44,16 +43,16 @@
         <%= hidden_field_tag :view, @vulnerability_view %>
         <% if @sort %><%= hidden_field_tag :sort, @sort %><% end %>
         <% if @package %><%= hidden_field_tag :package, @package %><% end %>
-        <%= search_field_tag :q, @vulnerability_query, placeholder: "CVE ou paquet (ex. linux, CVE-2024-6387)", aria: { label: "Rechercher une CVE ou un paquet" },
+        <%= search_field_tag :q, @vulnerability_query, placeholder: t(".cve_package_e_g"), aria: { label: t(".search_cve_package") },
               data: { action: "input->auto-submit#submitLater" }, class: "vulnerability-search input w-64 py-1 text-xs" %>
-        <label class="flex items-center gap-1.5"><%= check_box_tag :fixable, "1", @fixable_only, data: { action: "change->auto-submit#submit" } %> Corrigeables seulement</label>
-        <%= select_tag :severity, options_for_select([ [ "Toutes gravités", "" ], *Vulnerability::SEVERITIES.except("unknown").map { |key, label| [ "#{label}#{" ou plus" unless key == "critical"}", key ] } ], @severity),
-              aria: { label: "Gravité minimale" }, data: { action: "change->auto-submit#submit" }, class: "input w-auto py-1 text-xs" %>
-        <noscript><%= f.submit "Filtrer", class: "btn btn-secondary" %></noscript>
+        <label class="flex items-center gap-1.5"><%= t(".fixable_only_html", submit: (check_box_tag :fixable, "1", @fixable_only, data: { action: "change->auto-submit#submit" })) %></label>
+        <%= select_tag :severity, options_for_select([ [ t(".all_severities"), "" ], *Vulnerability::SEVERITIES.keys.excluding("unknown").map { |key| [ key == "critical" ? Vulnerability.severity_label(key) : t("vulnerability.at_least", severity: Vulnerability.severity_label(key)), key ] } ], @severity),
+              aria: { label: t(".minimum_severity") }, data: { action: "change->auto-submit#submit" }, class: "input w-auto py-1 text-xs" %>
+        <noscript><%= f.submit t(".filter"), class: "btn btn-secondary" %></noscript>
       <% end %>
       <% if @package %>
-        <span class="package-filter inline-flex items-center gap-1 rounded-full bg-accent-soft px-2 py-0.5 text-accent">paquet <strong class="font-mono"><%= @package %></strong>
-          <%= link_to server_path(server, request.query_parameters.except("package", "page")), aria: { label: "Retirer le filtre de paquet" }, class: "hover:text-ink" do %><%= icon :x_mark, class: "h-3.5 w-3.5" %><% end %></span>
+        <span class="package-filter inline-flex items-center gap-1 rounded-full bg-accent-soft px-2 py-0.5 text-accent"><%= t(".package_2") %> <strong class="font-mono"><%= @package %></strong>
+          <%= link_to server_path(server, request.query_parameters.except("package", "page")), aria: { label: t(".remove_package_filter") }, class: "hover:text-ink" do %><%= icon :x_mark, class: "h-3.5 w-3.5" %><% end %></span>
       <% end %>
     </div>
 
@@ -63,10 +62,10 @@
       <div data-controller="modal" class="overflow-x-auto">
         <table class="table-dense">
           <thead><tr>
-            <th class="pl-4">Gravité</th>
-            <th><%= link_to (@sort ? "Note ↓" : "Note"), server_path(server, request.query_parameters.merge("tab" => "vulnerabilities", "sort" => (@sort ? nil : "score"), "page" => nil).compact),
-                      class: "hover:text-ink", title: "Trier par note" %></th>
-            <th>CVE</th><th>Paquet</th><th class="pr-4">Installée → corrigée</th>
+            <th class="pl-4"><%= t(".severity") %></th>
+            <th><%= link_to (@sort ? t(".score") : t(".score_2")), server_path(server, request.query_parameters.merge("tab" => "vulnerabilities", "sort" => (@sort ? nil : "score"), "page" => nil).compact),
+                      class: "hover:text-ink", title: t(".sort_score") %></th>
+            <th>CVE</th><th><%= t(".package_3") %></th><th class="pr-4"><%= t(".installed_fixed") %></th>
           </tr></thead>
           <tbody>
             <% @vulnerabilities.each do |vulnerability| %>
@@ -79,16 +78,16 @@
                 </td>
                 <td class="font-mono text-xs" title="<%= [ vulnerability.packages.join(", "), ("image #{vulnerability.image}" if vulnerability.image) ].compact.join(" · ") %>"><%= vulnerability.source_package %></td>
                 <td class="pr-4 font-mono text-xs whitespace-nowrap"><%= vulnerability.installed_version %> →
-                  <% if vulnerability.fixable? %><span class="text-good-ink"><%= vulnerability.fixed_version %></span><% else %><span class="font-sans text-ink-3">pas de correctif</span><% end %></td>
+                  <% if vulnerability.fixable? %><span class="text-good-ink"><%= vulnerability.fixed_version %></span><% else %><span class="font-sans text-ink-3"><%= t(".fix") %></span><% end %></td>
               </tr>
             <% end %>
           </tbody>
         </table>
         <%= render "vulnerabilities/detail_dialog" %>
       </div>
-      <% if @pager.multiple_pages? %><div class="px-4 pb-3"><%= render "shared/pagination", pager: @pager, noun: "vulnérabilités" %></div><% end %>
+      <% if @pager.multiple_pages? %><div class="px-4 pb-3"><%= render "shared/pagination", pager: @pager, noun: t(".vulnerabilities") %></div><% end %>
     <% else %>
-      <p class="vulnerabilities-none px-4 py-4 text-sm text-ink-3"><%= counts[:total].zero? ? "Aucune vulnérabilité connue sur ce serveur." : (@vulnerability_query ? "Aucune CVE ni paquet ne correspond à « #{@vulnerability_query} »." : "Aucune vulnérabilité ne correspond aux filtres.") %></p>
+      <p class="vulnerabilities-none px-4 py-4 text-sm text-ink-3"><%= counts[:total].zero? ? t(".known_vulnerability_server") : (@vulnerability_query ? t(".cve_package_matches", vulnerability_query: @vulnerability_query) : t(".vulnerability_matches_filters")) %></p>
     <% end %>
   <% end %>
 </section>

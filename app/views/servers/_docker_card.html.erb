@@ -10,25 +10,25 @@
     <h2 class="flex items-center gap-2 font-semibold"><%= icon :container, class: "h-4 w-4 text-ink-3" %> Docker <% if data["version"] %><span class="text-xs font-normal text-ink-3"><%= data["version"] %></span><% end %></h2>
     <div class="flex items-center gap-3 text-xs text-ink-3">
       <%= inventory_status_badge(snapshot) %>
-      <% if snapshot&.collected_at %><span>relevé <%= relative_time_tag snapshot.collected_at %></span><% end %>
-      <%= link_to "Images du parc", docker_path, class: "font-medium text-accent hover:underline" %>
+      <% if snapshot&.collected_at %><span><%= t(".read_html", collected_at: (relative_time_tag snapshot.collected_at)) %></span><% end %>
+      <%= link_to t(".images_fleet"), docker_path, class: "font-medium text-accent hover:underline" %>
     </div>
   </div>
 
   <% if data["docker"] == "ok" %>
     <p class="docker-summary border-b border-line px-4 py-2.5 text-xs text-ink-2">
-      <strong class="text-ink"><%= containers.count { |container| container["state"] == "running" } %></strong>/<%= containers.size %> conteneurs en cours
-      <% if (problems = containers.count { |container| container["looping"] || container["health"] == "unhealthy" }).positive? %>· <strong class="text-crit-ink"><%= problems %> en difficulté</strong><% end %>
-      · <strong class="text-ink"><%= images.size %></strong> images (<%= images.count { |image| !image["used"] } %> inutilisées)
-      <% if (disk = data.dig("disk", "images")) %>· <%= human_bytes(disk["size"]) %> d'images, <%= human_bytes(disk["reclaimable"]) %> récupérables<% end %>
-      · analyse : <%= data["scanner"] ? scan_label(data["scanner"]) : "Elio (ni Trivy ni Grype sur le serveur)" %>
+      <strong class="text-ink"><%= containers.count { |container| container["state"] == "running" } %></strong><%= t(".containers_running_html", count: containers.size) %>
+      <% if (problems = containers.count { |container| container["looping"] || container["health"] == "unhealthy" }).positive? %>· <strong class="text-crit-ink"><%= t(".trouble_html", problems: problems) %></strong><% end %>
+      · <strong class="text-ink"><%= images.size %></strong> <%= t(".images_unused_html", used: (images.count { |image| !image["used"] })) %>
+      <% if (disk = data.dig("disk", "images")) %><%= t(".images_reclaimable_html", human_bytes: (human_bytes(disk["size"])), human_bytes2: (human_bytes(disk["reclaimable"]))) %><% end %>
+      <%= t(".analysis") %> <%= data["scanner"] ? scan_label(data["scanner"]) : t(".elio_neither_trivy_nor") %>
     </p>
 
     <h3 class="px-4 pt-3 text-xs font-semibold tracking-wide text-ink-3 uppercase">Conteneurs</h3>
     <% if containers.any? %>
       <div class="overflow-x-auto">
         <table class="table-dense">
-          <thead><tr><th class="pl-4">État</th><th>Conteneur</th><th>Image</th><th class="text-right">Redémarrages</th><th class="text-right">CPU</th><th class="text-right">Mémoire</th><th class="pr-4">Depuis</th></tr></thead>
+          <thead><tr><th class="pl-4"><%= t(".state") %></th><th>Conteneur</th><th>Image</th><th class="text-right"><%= t(".restarts") %></th><th class="text-right">CPU</th><th class="text-right"><%= t(".memory") %></th><th class="pr-4"><%= t(".since") %></th></tr></thead>
           <tbody>
             <% containers.sort_by { |container| [ container["looping"] || container["health"] == "unhealthy" ? 0 : container["state"] == "running" ? 1 : 2, container["name"] ] }.each do |container| %>
               <tr class="docker-container-row" data-name="<%= container["name"] %>" data-state="<%= container["state"] %>">
@@ -41,7 +41,7 @@
                 <td class="text-right text-xs tabular-nums"><%= container["memory_bytes"]&.positive? ? human_bytes(container["memory_bytes"]) : "—" %></td>
                 <td class="pr-4 text-xs whitespace-nowrap">
                   <% if container["state"] == "running" && container["started_at"] %><%= relative_time_tag Time.zone.parse(container["started_at"]) %>
-                  <% elsif container["finished_at"] %><span class="<%= "text-warn-ink" if container["stopped_long"] %>">arrêté <%= relative_time_tag Time.zone.parse(container["finished_at"]) %></span>
+                  <% elsif container["finished_at"] %><span class="<%= "text-warn-ink" if container["stopped_long"] %>"><%= t(".stopped_html", parse: (relative_time_tag Time.zone.parse(container["finished_at"]))) %></span>
                   <% else %>—<% end %>
                 </td>
               </tr>
@@ -50,21 +50,21 @@
         </table>
       </div>
     <% else %>
-      <p class="px-4 py-3 text-sm text-ink-3">Aucun conteneur.</p>
+      <p class="px-4 py-3 text-sm text-ink-3"><%= t(".container") %></p>
     <% end %>
 
     <h3 class="border-t border-line px-4 pt-3 text-xs font-semibold tracking-wide text-ink-3 uppercase">Images</h3>
     <% if images.any? %>
       <div class="overflow-x-auto">
         <table class="table-dense">
-          <thead><tr><th class="pl-4">Image</th><th>Créée</th><th class="text-right">Taille</th><th>Utilisée</th><th>Registre</th><th class="pr-4">Vulnérabilités</th></tr></thead>
+          <thead><tr><th class="pl-4">Image</th><th><%= t(".created") %></th><th class="text-right">Taille</th><th><%= t(".used") %></th><th>Registre</th><th class="pr-4"><%= t(".vulnerabilities") %></th></tr></thead>
           <tbody>
             <% images.sort_by { |image| [ image["used"] ? 0 : 1, image["reference"].to_s ] }.each do |image| %>
               <% scan = data.dig("scans", image["id"]) || {} %>
               <% total, fixable = cves[image["reference"]] %>
               <tr class="docker-image" data-reference="<%= image["reference"] %>">
-                <td class="pl-4"><span class="font-mono text-xs"><%= image["tags"].presence&.join(", ") || tag.span("sans tag", class: "text-ink-3") %></span>
-                  <% if Array(image["tags"]).any? { |tag| tag.end_with?(":latest") } %><%= status_badge :neutral, "latest", class: "ml-1", title: "Tag mouvant : la version réelle dépend de la date du téléchargement" %><% end %>
+                <td class="pl-4"><span class="font-mono text-xs"><%= image["tags"].presence&.join(", ") || tag.span(t(".tag"), class: "text-ink-3") %></span>
+                  <% if Array(image["tags"]).any? { |tag| tag.end_with?(":latest") } %><%= status_badge :neutral, "latest", class: "ml-1", title: t(".moving_tag_real_version") %><% end %>
                   <span class="block font-mono text-[11px] text-ink-3"><%= image["id"].delete_prefix("sha256:").first(12) %><% if image.dig("os", "name") %> · <%= image.dig("os", "name") %><% end %></span></td>
                 <td class="text-xs whitespace-nowrap"><%= image["created_at"] ? relative_time_tag(Time.zone.parse(image["created_at"])) : "—" %></td>
                 <td class="text-right text-xs tabular-nums"><%= human_bytes(image["size"]) %></td>
@@ -72,9 +72,9 @@
                 <td class="text-xs"><%= image_update_badge(ImageUpdate.state_for(image, updates)) %></td>
                 <td class="pr-4 text-xs">
                   <% if total.to_i.positive? %>
-                    <%= link_to server_path(server, tab: "vulnerabilities"), class: "hover:underline" do %><strong class="<%= fixable.to_i.positive? ? "text-crit-ink" : "text-ink" %>"><%= total %></strong> dont <%= fixable %> corrigeables<% end %>
+                    <%= link_to server_path(server, tab: "vulnerabilities"), class: "hover:underline" do %><strong class="<%= fixable.to_i.positive? ? "text-crit-ink" : "text-ink" %>"><%= total %></strong> <%= t(".including_fixable_html", fixable: fixable) %><% end %>
                   <% elsif scan["error"] %><span class="text-warn-ink" title="<%= scan["error"] %>"><%= scan["error"].truncate(60) %></span>
-                  <% elsif scan["count"] %><span class="text-good-ink">aucune</span>
+                  <% elsif scan["count"] %><span class="text-good-ink"><%= t(".none") %></span>
                   <% else %><span class="text-ink-3"><%= scan_label(scan["method"]) %></span><% end %>
                   <% if scan["at"] && scan["method"] != "none" %><span class="block text-[11px] text-ink-3"><%= scan_label(scan["method"]) %> · <%= relative_time_tag Time.zone.parse(scan["at"]) %></span><% end %>
                 </td>
@@ -84,7 +84,7 @@
         </table>
       </div>
     <% else %>
-      <p class="px-4 py-3 text-sm text-ink-3">Aucune image.</p>
+      <p class="px-4 py-3 text-sm text-ink-3"><%= t(".image") %></p>
     <% end %>
   <% elsif data["docker"] == "unreadable" %>
     <p class="docker-unreadable px-4 py-4 text-sm text-warn-ink"><%= snapshot.message %></p>
@@ -93,6 +93,6 @@
   <% elsif snapshot&.failed? %>
     <p class="inventory-error px-4 py-4 text-sm text-crit-ink"><%= snapshot.message %></p>
   <% else %>
-    <p class="docker-empty px-4 py-4 text-sm text-ink-3">Pas encore d'inventaire Docker.</p>
+    <p class="docker-empty px-4 py-4 text-sm text-ink-3"><%= t(".docker_inventory_yet") %></p>
   <% end %>
 </section>

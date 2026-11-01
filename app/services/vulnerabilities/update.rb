@@ -19,7 +19,7 @@ module Vulnerabilities::Update
     reader = READERS.fetch(source)
     releases = Vulnerabilities.releases.fetch(source)
     feed = VulnerabilityFeed.for(source)
-    return "#{feed.label} : aucun serveur concerné" if releases.empty?
+    return I18n.t("vulnerabilities.update.no_server", label: feed.label) if releases.empty?
 
     if path
       covered = reader.respond_to?(:archive_releases) ? reader.archive_releases(path) : nil
@@ -34,7 +34,7 @@ module Vulnerabilities::Update
     count = Vulnerability.where(source: source).count
     feed.update!(refreshed_at: Time.current, origin: origin, entries_count: count, releases: Vulnerability.where(source: source).distinct.order(:release).pluck(:release))
     Vulnerabilities::Matcher.call_all
-    "#{feed.label} : #{count} vulnérabilités (#{feed.releases.join(", ")})"
+    I18n.t("vulnerabilities.update.done", label: feed.label, count: count, releases_join: (feed.releases.join(", ")))
   rescue Vulnerabilities::Error => e
     feed&.update!(failed_at: Time.current, last_error: e.message)
     raise
@@ -61,7 +61,7 @@ module Vulnerabilities::Update
         flush.call if batch.size >= BATCH
       end
       flush.call
-      raise Vulnerabilities::Error, "Aucune vulnérabilité des versions du parc (#{releases.join(", ")}) dans ce fichier" if replaced.empty?
+      raise Vulnerabilities::Error, I18n.t("vulnerabilities.update.nothing_for_fleet", releases_join: (releases.join(", "))) if replaced.empty?
     end
   end
 

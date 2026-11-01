@@ -28,7 +28,7 @@ class Vulnerabilities::Scores::Epss < Vulnerabilities::Scores::Base
     provider.update!(state: provider.state.merge("fetched_at" => Time.current.iso8601))
     cves.size
   rescue Zlib::Error => e
-    raise Vulnerabilities::Error, "Fichier EPSS illisible : #{e.message}"
+    raise Vulnerabilities::Error, I18n.t("vulnerabilities.scores.epss.unreadable", message: e.message)
   end
 
   def lookup(cve)

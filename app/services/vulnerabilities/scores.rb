@@ -22,13 +22,13 @@ module Vulnerabilities::Scores
       "#{provider.name} : #{count}"
     rescue Vulnerabilities::Error, Integrations::Error => e
       provider.update!(last_run_at: Time.current, last_error: e.message.truncate(250))
-      "#{provider.name} : échec"
+      I18n.t("vulnerabilities.scores.failed", provider_name: provider.name)
     rescue StandardError => e # an unexpected answer: this provider stops, the others go on
       Rails.error.report(e, context: { score_provider: provider.key })
-      provider.update!(last_run_at: Time.current, last_error: "Erreur interne (#{e.class}) : #{e.message.truncate(150)}")
-      "#{provider.name} : échec"
+      provider.update!(last_run_at: Time.current, last_error: I18n.t("vulnerabilities.scores.internal_error", class: e.class, truncate: (e.message.truncate(150))))
+      I18n.t("vulnerabilities.scores.failed", provider_name: provider.name)
     end
     CveRating.refresh!(cves)
-    "#{cves.size} CVE · #{results.join(" · ")}"
+    I18n.t("vulnerabilities.scores.summary", count: cves.size, results_join: (results.join(" · ")))
   end
 end

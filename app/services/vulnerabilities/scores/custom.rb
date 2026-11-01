@@ -26,7 +26,7 @@ class Vulnerabilities::Scores::Custom < Vulnerabilities::Scores::Base
       end
     end
   rescue JSON::ParserError
-    raise Integrations::Error, "#{provider.name} : la réponse n'est pas du JSON"
+    raise Integrations::Error, I18n.t("vulnerabilities.scores.custom.not_json", provider_name: provider.name)
   end
 
   def html_value(body)

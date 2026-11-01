@@ -21,18 +21,18 @@ module Settings
       attributes[:docker_registry_credentials] = credentials.strip.presence if credentials.present?
       attributes[:docker_registry_credentials] = nil if params[:clear_credentials] == "1"
       if (errors = credential_errors(attributes[:docker_registry_credentials])).any?
-        return redirect_to(settings_docker_path, alert: "Identifiants refusés : #{errors.to_sentence}")
+        return redirect_to(settings_docker_path, alert: t("docker_controller.credentials_refused", errors_to_sentence: errors.to_sentence))
       end
 
       setting.update!(attributes)
       Server.where(id: Inventory::Snapshot.where(category: "docker").select(:server_id)).find_each(&:refresh_health!)
-      redirect_to settings_docker_path, notice: "Réglages Docker enregistrés."
+      redirect_to settings_docker_path, notice: t("docker_controller.saved")
     end
 
     def check
       automation = Automation.all_kinds.find { |candidate| candidate.kind == "docker_image_updates" }
       task, started = automation.start_now!(user: current_user)
-      redirect_to task_path(task), notice: started ? "Vérification des registres lancée." : "Déjà en cours : voici la tâche en cours."
+      redirect_to task_path(task), notice: started ? t("docker_controller.check_started") : t("flash.already_running")
     end
 
     private

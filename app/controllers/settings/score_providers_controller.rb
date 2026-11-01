@@ -15,7 +15,7 @@ module Settings
       @provider = ScoreProvider.new(kind: "custom", key: "custom-#{SecureRandom.hex(4)}", position: ScoreProvider.all_providers.map(&:position).max.to_i + 1)
                                .assign_custom(provider_params)
       if @provider.save
-        redirect_to settings_vulnerabilities_path(anchor: "score-providers"), notice: "Fournisseur « #{@provider.name} » ajouté."
+        redirect_to settings_vulnerabilities_path(anchor: "score-providers"), notice: t("score_providers_controller.created", provider_name: @provider.name)
       else
         render :new, status: :unprocessable_entity
       end
@@ -29,7 +29,7 @@ module Settings
       return head(:not_found) unless @provider.custom?
 
       if @provider.assign_custom(provider_params).save
-        redirect_to settings_vulnerabilities_path(anchor: "score-providers"), notice: "Fournisseur « #{@provider.name} » modifié."
+        redirect_to settings_vulnerabilities_path(anchor: "score-providers"), notice: t("score_providers_controller.updated", provider_name: @provider.name)
       else
         render :edit, status: :unprocessable_entity
       end
@@ -41,7 +41,7 @@ module Settings
       @provider.scores.delete_all
       @provider.destroy!
       CveRating.refresh!
-      redirect_to settings_vulnerabilities_path(anchor: "score-providers"), notice: "Fournisseur « #{@provider.name} » supprimé.", status: :see_other
+      redirect_to settings_vulnerabilities_path(anchor: "score-providers"), notice: t("score_providers_controller.deleted", provider_name: @provider.name), status: :see_other
     end
 
     # Up or down in the priority order (swaps with its neighbour).
@@ -60,7 +60,7 @@ module Settings
       @provider.update!(enabled: !@provider.enabled?)
       CveRating.refresh!
       redirect_to settings_vulnerabilities_path(anchor: "score-providers"), status: :see_other,
-                  notice: "« #{@provider.name} » #{@provider.enabled? ? "activé" : "désactivé"} ; notes recalculées."
+                  notice: t(@provider.enabled? ? "score_providers_controller.enabled" : "score_providers_controller.disabled", provider_name: @provider.name)
     end
 
     # Reads one CVE with a saved provider, without storing anything.
@@ -82,7 +82,7 @@ module Settings
 
     def render_test(provider)
       cve = params[:cve].to_s.strip.upcase
-      return render_result(provider, error: "Indiquez une CVE (ex. CVE-2024-6387)") unless cve.match?(CVE)
+      return render_result(provider, error: t("score_providers_controller.cve_required")) unless cve.match?(CVE)
 
       render_result(provider, cve: cve, score: Vulnerabilities::Scores.fetcher(provider).test(cve))
     rescue Vulnerabilities::Error, Integrations::Error => e

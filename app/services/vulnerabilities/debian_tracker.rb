@@ -18,7 +18,7 @@ module Vulnerabilities::DebianTracker
   def self.each_row(io, releases:)
     releases = releases.to_set
     Vulnerabilities::JsonObjectStream.each(io) do |package, issues|
-      raise Vulnerabilities::Error, "Ce fichier n'est pas celui du Debian Security Tracker" unless issues.is_a?(Hash)
+      raise Vulnerabilities::Error, I18n.t("vulnerabilities.debian_tracker.not_tracker") unless issues.is_a?(Hash)
 
       issues.each do |cve, issue|
         next unless cve.start_with?("CVE-") && issue.is_a?(Hash)
@@ -32,7 +32,7 @@ module Vulnerabilities::DebianTracker
       end
     end
   rescue Vulnerabilities::JsonObjectStream::Error, JSON::ParserError => e
-    raise Vulnerabilities::Error, "Fichier du Debian Security Tracker illisible : #{e.message.truncate(120)}"
+    raise Vulnerabilities::Error, I18n.t("vulnerabilities.debian_tracker.unreadable", truncate: (e.message.truncate(120)))
   end
 
   def self.row(package, cve, issue, release, state)

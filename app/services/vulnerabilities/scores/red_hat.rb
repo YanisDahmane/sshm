@@ -17,6 +17,6 @@ class Vulnerabilities::Scores::RedHat < Vulnerabilities::Scores::Base
       Score.new(score: score, version: "2", vector: report.dig("cvss", "cvss_scoring_vector"), severity: report["threat_severity"])
     end
   rescue JSON::ParserError
-    raise Integrations::Error, "Réponse de Red Hat illisible pour #{cve}"
+    raise Integrations::Error, I18n.t("vulnerabilities.scores.red_hat.unreadable", cve: cve)
   end
 end

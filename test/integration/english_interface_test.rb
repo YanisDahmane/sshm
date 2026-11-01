@@ -113,6 +113,18 @@ class EnglishInterfaceTest < ActionDispatch::IntegrationTest
     assert_equal "« Web » est à surveiller : Redémarrage requis", I18n.with_locale(:fr) { activity.summary }
   end
 
+  test "the security pages" do
+    data = [ ".sidebar-groups", ".account-link", "pre", "code", ".font-mono" ]
+    assert_english vulnerabilities_path, except: data
+    assert_english vulnerabilities_path(view: "cves"), except: data
+    assert_english server_path(servers(:web), tab: "vulnerabilities"), except: data
+    assert_english server_path(servers(:web), tab: "docker"), except: data
+    assert_english docker_path, except: data
+    assert_english settings_vulnerabilities_path, except: data
+    assert_english settings_docker_path, except: data
+    assert_english new_settings_score_provider_path, except: data
+  end
+
   test "the check finds French" do
     app_settings(:main).update!(default_locale: "fr")
     get root_path

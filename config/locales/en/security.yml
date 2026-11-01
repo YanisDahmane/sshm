@@ -1,0 +1,402 @@
+en:
+  vulnerabilities:
+    detail_dialog:
+      vulnerability_details: Vulnerability details
+      close: Close
+      loading: Loading…
+    index:
+      settings_vulnerabilities: Settings → Vulnerabilities
+      vulnerabilities: Vulnerabilities
+      distinct_cves: Distinct CVEs
+      fixable: Fixable
+      update_exists: an update exists
+      serious_fixable: Serious and fixable
+      high_critical: high or critical
+      servers_affected: Servers affected
+      package: By package
+      cve: By CVE
+      cve_package_e_g: CVE or package (e.g. openssl)
+      search: Search
+      all_severities: All severities
+      minimum_severity: Minimum severity
+      all_groups: All groups
+      group: Group
+      systems_images: Systems and images
+      origin: Origin
+      filter: Filter
+      fix: no fix
+      vulnerabilities_2: vulnerabilities
+      vulnerability_matches: No vulnerability matches.
+      known_vulnerability_fleet: No known vulnerability on the fleet.
+      cves_packages_fleet_docker: CVEs of the packages of the fleet and of the Docker images, from the Debian and Ubuntu feeds. The fixable and most serious first.
+      feeds_not_downloaded_yet: Feeds not downloaded yet
+      group_2: Group by
+      fixable_only_html: "%{submit} Fixable only"
+      severity: Severity
+      packages: Packages
+      servers: Servers
+      images_html: 'images: %{images_first}%{count}'
+    show:
+      exploited: Actively exploited (CISA KEV%{date})
+      see: See
+      system: system
+      vulnerability_page: Vulnerability page
+      average_html: average of %{t}
+      score_yet: No score yet
+      risk_exploitation_within_30_html: risk of exploitation within 30 days, more than %{epss_percentage} of the CVEs
+      scores_provider: Scores by provider
+      turned_off: "(turned off)"
+      score_provider_asked_again_html: no score at this provider (asked again %{_})
+      not_asked_yet_next: not asked yet (next scores run)
+      text_html: On %{server_name}
+      source_package: Source package
+      installed_packages: Installed packages
+      installed: Installed
+      fixed: Fixed
+      servers_affected_html: Servers affected (%{count})
+      fixes_release: Fixes by release
+      derived: 'not rated by %{distribution}: derived from the score'
+    debian_tracker:
+      not_tracker: This file is not the Debian Security Tracker one
+      unreadable: 'Unreadable Debian Security Tracker file: %{truncate}'
+    download:
+      https_only: 'Address refused (HTTPS only): %{uri}'
+      too_many_redirects: Too many redirections for %{uri}
+      too_large: File too large (more than %{megabyte} MB)
+      http_error: 'Cannot download (HTTP %{code}): %{uri}'
+      failed: 'Cannot download: %{truncate}'
+    json_object_stream:
+      not_object: This file is not a JSON object
+      truncated: Truncated JSON
+      missing_key: Key “%{key}” missing
+      invalid: Invalid JSON near “%{peek}”
+    scores:
+      failed: "%{provider_name}: failed"
+      internal_error: 'Internal error (%{class}): %{truncate}'
+      summary: "%{count} CVEs · %{results_join}"
+      custom:
+        not_json: "%{provider_name}: the answer is not JSON"
+      cve_org:
+        unreadable: Unreadable CVE.org answer for %{cve}
+      epss:
+        unreadable: 'Unreadable EPSS file: %{message}'
+      kev:
+        unreadable: 'Unreadable KEV catalog: %{truncate}'
+      nvd:
+        unreadable: Unreadable NVD answer for %{cve}
+        unreadable_feed: 'Unreadable NVD feed %{name}: %{truncate}'
+      red_hat:
+        unreadable: Unreadable Red Hat answer for %{cve}
+    ubuntu_osv:
+      unreadable: 'Unreadable Ubuntu OSV archive: %{truncate}'
+    update:
+      no_server: "%{label}: no server concerned"
+      done: "%{label}: %{count} vulnerabilities (%{releases_join})"
+      nothing_for_fleet: No vulnerability of the fleet's releases (%{releases_join}) in this file
+  servers:
+    vulnerabilities_card:
+      whole_fleet: The whole fleet
+      distribution_not_covered_elio: 'Distribution not covered: Elio knows the vulnerabilities of Debian and Ubuntu.'
+      system_inventory_yet: No system inventory yet.
+      settings_vulnerabilities: Settings → Vulnerabilities
+      package: By package
+      cve: By CVE
+      cve_package_e_g: CVE or package (e.g. linux, CVE-2024-6387)
+      search_cve_package: Search for a CVE or a package
+      all_severities: All severities
+      minimum_severity: Minimum severity
+      filter: Filter
+      remove_package_filter: Remove the package filter
+      score: Score ↓
+      score_2: Score
+      sort_score: Sort by score
+      vulnerabilities: vulnerabilities
+      known_vulnerability_server: No known vulnerability on this server.
+      cve_package_matches: No CVE or package matches “%{vulnerability_query}”.
+      vulnerability_matches_filters: No vulnerability matches the filters.
+      checked_html: checked %{vulnerabilities_checked_at}
+      feed_has_not_been_html: The %{label} feed has not been downloaded yet.
+      group: Group by
+      fixable_only_html: "%{submit} Fixable only"
+      package_2: package
+      severity: Severity
+      package_3: Package
+      installed_fixed: Installed → fixed
+      fix: no fix
+      summary_html: "%{total} known vulnerabilities · %{fixable} by an update"
+      fixable:
+        one: "%{count} fixable"
+        other: "%{count} fixable"
+    vulnerability_packages:
+      highest_score: Highest score
+      repositories_server_already_offer: The repositories of the server already offer this version
+      not_repositories_yet: not in the repositories yet
+      fix_exists_but_server: 'The fix exists but the server does not see it: apt update, or missing security repository'
+      update_image: update the image
+      fix: no fix
+      fixed: fixed in %{fixed_version}
+      fix_2: no fix
+      see_cves: See the %{count} CVEs of %{source_package}
+      cve_package_matches: No CVE or package matches “%{query}”.
+      vulnerability_matches_filters: No vulnerability matches the filters.
+      update_fixes_these_vulnerabilities: No update fixes these vulnerabilities for now.
+      reboot_needed: reboot needed
+      without_fix_html: "· %{count} without fix"
+      nothing_update_now: nothing to update for now
+      servers: 'Servers:'
+      update_page_each_server: "— update from the page of each server (command suited to its repositories)."
+      installed_packages: 'Installed packages:'
+      most_serious_cves: Most serious CVEs
+      exploited:
+        one: "%{count} exploited"
+        other: "%{count} exploited"
+      to_update_html: "%{packages} to update would fix %{cves}"
+      to_update_fleet_html: "%{packages} to update would fix %{cves} on the fleet"
+      update: 'Update:'
+      update_and_reboot: 'Update, then reboot the server to load the new kernel:'
+      pending_html: 'The server does not offer this version yet: run %{command}, or check that the security repository is configured.'
+      in_image_html: 'These packages are in the image %{image}: download a newer version of the image (or rebuild it), then recreate its containers.'
+    docker_card:
+      images_fleet: Images of the fleet
+      elio_neither_trivy_nor: Elio (neither Trivy nor Grype on the server)
+      tag: no tag
+      moving_tag_real_version: 'Moving tag: the real version depends on the download date'
+      read_html: read %{collected_at}
+      containers_running_html: "/%{count} containers running"
+      trouble_html: "%{problems} in trouble"
+      images_unused_html: images (%{used} unused)
+      images_reclaimable_html: "· %{human_bytes} of images, %{human_bytes2} reclaimable"
+      analysis: "· analysis:"
+      state: State
+      restarts: Restarts
+      memory: Memory
+      since: Since
+      stopped_html: stopped %{parse}
+      container: No container.
+      created: Created
+      used: Used
+      vulnerabilities: Vulnerabilities
+      including_fixable_html: including %{fixable} fixable
+      none: none
+      image: No image.
+      docker_inventory_yet: No Docker inventory yet.
+  docker:
+    index:
+      docker_servers: Docker servers
+      running_containers: Running containers
+      trouble: In trouble
+      loop_unhealthy: loop or unhealthy
+      new_versions: New versions
+      images_update: images to update
+      image_e_g_nginx: Image (e.g. nginx)
+      image: Image
+      all_groups: All groups
+      group: Group
+      filter: Filter
+      image_matches: No image matches.
+      known_docker_image: No known Docker image.
+      containers_images_whole_fleet: Containers and images of the whole fleet, from the last Docker inventory of each server; new versions asked to the registries.
+      containers_watch: Containers to watch
+      restarts_html: "%{restarts} restarts"
+      stopped_html: stopped %{parse}
+      new_version_available_html: "%{submit} New version available"
+      servers: Servers
+      vulnerabilities: Vulnerabilities
+      versions_fleet_html: "%{count} versions on the fleet"
+      container: no container
+  settings:
+    docker:
+      show:
+        credentials_saved_leave_empty: 'Credentials saved for: %{registries_join}. Leave empty to keep them.'
+        credentials_saved: No credentials saved.
+        registry_credentials: Registry credentials
+        save: Save
+        automation_off: 'off'
+        what_containers_images_report: 'What the containers and images report: a “to watch” reason on the server and an activity (can be notified).'
+        healthcheck_fails: Its healthcheck fails.
+        restarting_state_least_restarts_html: "“restarting” state, or at least %{_} restarts and restarted less than %{in_minutes_to_i} minutes ago."
+        handy_latest_1_27: Handy for “latest” or “1.27” tags; no effect on a pinned tag.
+        private_registries: Private registries
+        delete_saved_credentials_html: "%{clear_credentials} Delete the saved credentials"
+        image_checks: Image checks
+        automation_html: 'Automation “%{label}”:'
+        last_run_html: "— last run: %{last_result}"
+        check_now: Check now
+        checked: Checked
+        result: Result
+        image_checked_yet: No image checked yet.
+        unhealthy_html: "<strong>Unhealthy</strong> container"
+        looping_html: Container <strong>restarting in a loop</strong>
+        updates_html: Image in use whose registry publishes a <strong>new version</strong> of the same tag
+        registries_html: 'Elio asks the registries for the digest of each tag in use (read-only, HEAD requests that do not count in the Docker Hub limits). Public images need nothing; for a private image, a <strong>read-only</strong> token per registry, one line each:'
+        registries_example: |-
+          ghcr.io my-account ghp_…
+          docker.io my-account dckr_pat_…
+          registry.example.com:5000 elio token
+    vulnerabilities:
+      show:
+        releases_fleet: 'Releases of the fleet: %{releases_join}'
+        server_concerned: No server concerned
+        failed: Failed
+        vulnerabilities: "%{entries_count} vulnerabilities"
+        never_updated: Never updated
+        automations: Automations
+        up: Up
+        move_up: Move %{provider_name} up
+        down: Down
+        move_down: Move %{provider_name} down
+        scored: scored
+        exploited: exploited
+        epss: with EPSS
+        cve_test: CVE to test with %{provider_name}
+        turn_off: Turn off
+        turn: Turn on
+        edit: Edit
+        delete: Delete
+        delete_2: Delete %{provider_name}
+        delete_scores: Delete “%{provider_name}” and its scores?
+        band: Band %{index} from
+        colour_band: Colour of band %{index}
+        save_colours: Save the colours
+        feed_file: Feed file
+        import: Import
+        minimum_severity: Minimum severity
+        save: Save
+        vulnerability_feeds: Vulnerability feeds
+        downloaded_every_day_releases: 'Downloaded every day for the releases on the fleet, then matched with the inventoried packages: no extra command on the servers.'
+        update_now: Update now
+        updated_html: updated %{refreshed_at} (%{origin_label})
+        automation_html: 'Automation “%{label}”:'
+        sources: ". Sources:"
+        score_providers: Score providers
+        add: Add
+        update: Update
+        'off': 'off'
+        run_html: "· run %{last_run_at}"
+        score_colours: Score colours
+        colour_pill_cvss_score: Colour of the pill of a CVSS score (0 to 10) in the lists and the details of a vulnerability, by the band reached.
+        text: from
+        import_feed_hand: Import a feed by hand
+        closed_network_download_file: 'For a closed network: download the file elsewhere, then send it here. It replaces the matching feed, recognized by its content.'
+        debian: 'Debian:'
+        json: "(JSON)"
+        ubuntu: 'Ubuntu:'
+        zip: "(zip)"
+        debian_rates_only_small: 'Debian rates only a small part of its vulnerabilities (most stay “unrated”): to be told of all those an update fixes, choose “All the fixable ones”. Ubuntu gives a priority to almost all.'
+        scores_intro_html: 'The score shown is the <strong>average</strong> of the CVSS scores of the active providers; it gives the severity of the vulnerabilities that Debian or Ubuntu do not rate. EPSS and KEV tell whether a vulnerability is exploited. %{fleet_cves} CVEs on the fleet. Automation “%{label}”:'
+        alert_html: A <strong>fixable</strong> vulnerability (a version that fixes it exists) from this severity makes the server critical and records the “Fixable vulnerability” activity (can be notified).
+    score_providers:
+      form:
+        name: Name
+        cvefind: CVEFind
+        score_address: Score address
+        page_open_optional: Page to open (optional)
+        default_score_address: By default, the score address
+        json_path_score: JSON path of the score
+        css_selector_optional: CSS selector (optional)
+        regex_optional_1st_group: Regex (optional, 1st group)
+        delay_between_two_requests: Delay between two requests (ms)
+        requests_most_per_run: Requests at most per run
+        cve_test: CVE to test
+        test: Test
+        save: Save
+        add_provider: Add the provider
+        cancel: Cancel
+        selector_takes_text_element: 'The selector takes the text of an element of the page, the regex looks for the score in it (in the whole page without a selector). CVEFind example: the regex above reads the score from its structured data.'
+        reading_pages_third_party: 'Reading the pages of a third-party site may be against its terms of use: check them. Elio respects the delay and the number of requests chosen.'
+        url_hint_html: HTTPS, with %{placeholder} instead of the identifier. GET requests only.
+      test_result:
+        exploited_since: exploited since %{date_added}
+        cvss_html: "· CVSS %{version}"
+        score_found_provider_html: "%{cve}: no score found at this provider."
+      new:
+        title: New score provider
+  score_provider:
+    custom_description: 'Custom provider: %{fetch} on %{setting}'
+    unknown_format: Unknown format
+    json_path_required: Give the JSON path of the score (e.g. cvss3.cvss3_base_score)
+    selector_required: Give a CSS selector or a regex
+    invalid_regex: 'Invalid regex: %{message}'
+    delay_too_short: 'Delay between two requests: 200 ms minimum'
+    max_per_run_range: 'Requests per run: between 1 and 5000'
+    builtins:
+      nvd: NIST's CVSS reference, almost every CVE. Yearly files downloaded (once a month), then the changes of the day.
+      redhat: Red Hat's CVSS v3 score (public security API), one request per CVE.
+      cveorg: Score given by the publisher of the CVE (CNA), else by CISA's enrichment; one request per CVE.
+      epss: Probability of exploitation within 30 days (not a CVSS score); one file per day.
+      kev: Catalog of actively exploited vulnerabilities; one file per day.
+    formats:
+      json: JSON API (path)
+      html: HTML page (CSS selector and / or regex)
+  app_setting:
+    three_bands: must be three bands
+    band_range: start at 0 and go up to 10 at most
+    unknown_color: have an unknown colour
+    vulnerability_alerts:
+      critical: Critical
+      high: High or critical
+      medium: Medium or more
+      any: All the fixable ones
+      none: Never
+    score_colors:
+      green: Green
+      orange: Orange
+      red: Red
+      violet: Violet
+      blue: Blue
+      gray: Gray
+  image_registry:
+    client:
+      no_digest: The registry gives no digest
+      tag_not_found: Tag not found on the registry
+      access_refused: Access refused by the registry (private image? credentials in Settings → Docker)
+      rate_limited: Request limit of the registry reached
+      unexpected: Unexpected answer from the registry (HTTP %{code})
+      credentials_required: The registry asks for credentials (Settings → Docker)
+      unreadable_token: Unreadable registry token
+      unreachable: 'Registry unreachable: %{truncate}'
+    update_check:
+      summary: "%{images}, %{checked} checked"
+      images:
+        one: "%{count} image followed"
+        other: "%{count} images followed"
+      failed:
+        one: ", %{count} failed"
+        other: ", %{count} failed"
+  vulnerabilities_controller:
+    scores_started: Scores update started.
+    colors_saved: Score colours saved.
+    alerts_saved: Vulnerability alerts saved.
+    refresh_started: Vulnerability feeds update started.
+    choose_file: Choose a file.
+    too_large: File too large.
+    not_recognized: 'File not recognized: a Debian Security Tracker JSON or an Ubuntu OSV archive (.zip) is expected.'
+    import_label: 'Import: %{fetch}'
+    import_started: Import started (%{fetch}).
+  docker_controller:
+    credentials_refused: 'Credentials refused: %{errors_to_sentence}'
+    saved: Docker settings saved.
+    check_started: Registry check started.
+  score_providers_controller:
+    created: Provider “%{provider_name}” added.
+    updated: Provider “%{provider_name}” updated.
+    deleted: Provider “%{provider_name}” deleted.
+    cve_required: Give a CVE (e.g. CVE-2024-6387)
+    enabled: "“%{provider_name}” turned on; scores computed again."
+    disabled: "“%{provider_name}” turned off; scores computed again."
+  vulnerability:
+    severities:
+      critical: Critical
+      high: High
+      medium: Medium
+      low: Low
+      unknown: Not rated
+    at_least: "%{severity} or more"
+  server_vulnerability:
+    origins:
+      host: System
+      image: Docker image
+  vulnerability_feed:
+    origins:
+      download: automatic download
+      import: manual import
