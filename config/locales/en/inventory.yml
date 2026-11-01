@@ -1,0 +1,448 @@
+en:
+  health:
+    key_refused: 'Elio''s key refused: no inventory possible'
+    disk: Disk %{mount} at %{percent}
+    inodes: Inodes %{mount} at %{percent}
+    memory: Memory at %{percent}
+    load:
+      one: Load %{load} for %{count} processor
+      other: Load %{load} for %{count} processors
+    reboot_required: Reboot required
+    service_failed: "%{name} failed"
+    services_failed:
+      one: "%{count} service failed"
+      other: "%{count} services failed"
+    clock: Clock not synchronized
+    unsupported: "%{name} is no longer supported"
+    timer_failed: Scheduled task %{name} failed
+    timers_failed:
+      one: "%{count} scheduled task failed"
+      other: "%{count} scheduled tasks failed"
+    timer_late: Scheduled task %{name} late
+    timers_late:
+      one: "%{count} scheduled task late"
+      other: "%{count} scheduled tasks late"
+    container_unhealthy: Container %{name} unhealthy
+    containers_unhealthy:
+      one: "%{count} container unhealthy"
+      other: "%{count} containers unhealthy"
+    container_looping: Container %{name} restarts in a loop
+    containers_looping:
+      one: "%{count} container restarts in a loop"
+      other: "%{count} containers restart in a loop"
+    images_to_update:
+      one: "%{count} Docker image to update"
+      other: "%{count} Docker images to update"
+    vulnerability: Vulnerability %{cve} fixable
+    vulnerabilities:
+      one: "%{count} serious fixable vulnerability"
+      other: "%{count} serious fixable vulnerabilities"
+    port_unexpected: Unexpected port %{port}
+    ports_unexpected:
+      one: "%{count} unexpected port (%{ports})"
+      other: "%{count} unexpected ports (%{ports})"
+  servers:
+    system_card:
+      system: System
+      read_html: read %{collected_at}
+      memory_html: "· %{human_bytes} of memory"
+      started: Started
+      host_name: Host name
+      time_zone: Time zone
+      root_access: Root access
+      last_attempt_html: 'Last attempt %{checked_at}: %{message}'
+      inventory_yet_elio_reads: 'No inventory yet: Elio reads the system, health and services of the server over SSH, read-only.'
+      run_inventory: Run the inventory
+    health_card:
+      load_over_24_h: Load over 24 h
+      synchronized: synchronized
+      not_synchronized: not synchronized
+      load_processors: Load (% of the processors)
+      memory: Memory
+      fullest_disk: Fullest disk
+      health: Health
+      read_html: read %{collected_at}
+      load: Load
+      do: To do
+      nothing_report: Nothing to report
+      updates: Updates
+      security_html: "%{security} security"
+      reboot_required: Reboot required
+      failed_services: Failed services
+      mount_point: Mount point
+      used: Used
+      measure_yet_run_inventory: 'No measure yet: run the inventory to follow the load, memory, disks and updates.'
+      swap_html: "%{percent} of %{size}"
+    network_card:
+      'off': 'off'
+      network_inventory_yet_refresh: 'No network inventory yet: refresh the inventory to read the addresses of the server.'
+      network: Network
+      read_html: read %{collected_at}
+      scope: Scope
+      added_hand: 'Added by hand:'
+    services_card:
+      without_compose_project: Without Compose project
+      stopped: stopped
+      read_html: read %{collected_at}
+      active_services: active services
+      failed_html: "%{count} failed"
+      inactive_html: "· %{count} inactive"
+      containers_running_html: "/%{count} containers running"
+      show_inactive_services_html: Show the %{count} inactive services
+      systemd_system: No systemd on this system.
+      docker_not_installed: Docker is not installed.
+      elio_needs_root_password_html: "%{message} Elio needs root (password-less sudo) or the docker group."
+      container: No container.
+      services_inventory_yet: No services inventory yet.
+    systemd_unit:
+      failed: failed
+      boot: at boot
+    ports_card:
+      private: private
+      ports: Ports
+      read_html: read %{collected_at}
+      public_out_listening_html: public out of %{count} listening
+      firewall_html: 'Firewall: %{firewall_label}'
+      expected_ports_html: 'Expected ports: %{filter_map}'
+      docker_publishes_ports_adding: 'Docker publishes ports by adding its own rules: ufw does not filter them. Publish them on 127.0.0.1 (“127.0.0.1:8080:80”) or filter them in the DOCKER-USER chain.'
+      port: Port
+      listening: Listening on
+      service_container: Service / container
+      listening_port: No listening port.
+      suggested_ufw_rules: Suggested ufw rules
+      elio_never_changes_firewall: 'Elio never changes the firewall: read them, then apply them yourself.'
+      ports_inventory_yet: No ports inventory yet.
+    port_firewall:
+      allowed: allowed
+      blocked: blocked
+      firewall_blocks_port_default: The firewall blocks this port by default
+      published_docker: published by Docker
+      docker_bypasses_ufw_port: 'Docker bypasses ufw: the port is reachable even without a rule'
+      not_filtered: not filtered
+      firewall_filters_port: No firewall filters this port
+      firewall_unreadable_without_root: Firewall unreadable without root access
+      unknown: unknown
+    scheduled_tasks_card:
+      search_whole_fleet: Search the whole fleet
+      scheduled_tasks: Scheduled tasks
+      read_html: read %{collected_at}
+      systemd_timers: systemd timers
+      failed_html: "%{failed} failed"
+      late_html: "%{late} late"
+      cron_lines_periodic_scripts_html: cron lines · %{count} periodic scripts
+      systemd_timers_2: systemd timers
+      state: State
+      last_run: Last run
+      systemd_timer: No systemd timer.
+      cron_line: No cron line.
+      periodic_scripts: Periodic scripts
+      etc_cron_html: "(/etc/cron.%{period})"
+      scheduled_tasks_inventory_yet: No scheduled tasks inventory yet.
+  server_packages:
+    frame:
+      loading_packages: Loading the packages…
+    index:
+      packages_inventory_yet: No packages inventory yet.
+      search_package: Search for a package…
+      search_package_2: Search for a package
+      all_types: All types
+      package_type: Package type
+      filter: Filter
+      installed: installed
+      update: to update
+      including: ", including"
+      security_html: "%{security} security"
+      updates_only: Updates only
+      package: Package
+      update_2: Update
+      security: security
+      up_date: up to date
+      package_matches: No package matches.
+  packages:
+    index:
+      package_name: Package name
+      which_servers_have_package: Which servers have a package, and in which version? From the last inventory of each server.
+      packages_inventory_yet_html: "%{t} no packages inventory yet."
+      update: Update
+      servers: Servers
+      security: security
+      up_date: up to date
+      package_contains_html: No package contains “%{q}”.
+      pending_security_updates: Pending security updates
+      package: Package
+      available_version: Available version
+      servers_concerned: Servers concerned
+      pending_security_update: No pending security update.
+  ports:
+    index:
+      all_groups: All groups
+      group: Group
+      port_e_g_3306: Port (e.g. 3306)
+      port: Port
+      filter: Filter
+      public_ports: public ports
+      server_exposes_port: No server exposes port %{port}.
+      known_public_port: No known public port.
+      public_ports_2: Public ports
+      what_each_server_exposes: What each server exposes on its public addresses, from its last inventory. Unexpected and unfiltered ports first.
+      server: Server
+      service_container: Service / container
+      without_ports_inventory: 'Without ports inventory:'
+  scheduled_tasks:
+    index:
+      command_timer_file_e: Command, timer, file (e.g. backup.sh)
+      search: Search
+      all_groups: All groups
+      group: Group
+      all_states: All states
+      failed: Failed
+      late: Late
+      state: State
+      filter: Filter
+      tasks: tasks
+      scheduled_task_matches: No scheduled task matches.
+      known_scheduled_task: No known scheduled task.
+      cron_jobs_systemd_timers: Cron jobs and systemd timers of each server, from their last inventory. Failed or late timers first.
+      server: Server
+      task: Task
+      cron_keeps_record_runs: Cron keeps no record of its runs that can be read without the logs.
+      without_scheduled_tasks_inventory: 'Without scheduled tasks inventory:'
+  cron:
+    at_boot: at boot
+    every_minute: every minute
+    every_minutes:
+      one: every minute
+      other: every %{count} minutes
+    every_minutes_from:
+      one: every minute from :%{minute}
+      other: every %{count} minutes from :%{minute}
+    every_hour: every hour
+    every_hour_at: every hour at :%{minute}
+    every_hours_at:
+      one: every hour at :%{minute}
+      other: every %{count} hours at :%{minute}
+    time: "%{hour}:%{minute}"
+    at: at %{times}
+    every_day: every day %{at}
+    daily: every day %{at}
+    weekly: on Sunday %{at}
+    weekly_monday: on Monday %{at}
+    monthly: on the 1st of the month %{at}
+    yearly: on January 1 %{at}
+    quarterly: every quarter
+    semiannually: every six months
+    on_day: on %{day}
+    on_days: "%{days} %{at}"
+    from_to: from %{first} to %{last}
+    on_dates: on the %{dates} of the month %{at}
+    first_of_month: 1st
+    quoted: "“%{expression}”"
+    after:
+      boot: "%{span} after boot"
+      activation: "%{span} after activation"
+      last_start: "%{span} after the last start"
+      last_end: "%{span} after the end of the last start"
+    span:
+      days:
+        one: "%{count} day"
+        other: "%{count} days"
+      hours:
+        one: "%{count} hour"
+        other: "%{count} hours"
+      minutes:
+        one: "%{count} minute"
+        other: "%{count} minutes"
+      seconds:
+        one: "%{count} second"
+        other: "%{count} seconds"
+  inventory:
+    port_analysis:
+      no_firewall: no active firewall
+      unknown_firewall: unknown firewall (root access required)
+      header: "# Suggested ufw rules for %{server_name} (read them before applying them)"
+      docker: "# %{key} published by Docker (%{container}): ufw does not filter it. Publish it on 127.0.0.1 or filter it in the DOCKER-USER chain."
+      unexpected: "# %{key} (%{label}): unexpected port, to close or to add to the expected ports of the group"
+      private: "# %{key} (%{comment_for}) listens on the private network (%{addresses_join}): allow it from this network if needed"
+      port: port %{port}
+    package:
+      managers:
+        dpkg: Debian (dpkg)
+        snap: Snap
+        docker: Docker image
+    collection:
+      internal_error: Internal error during the collection (%{class})
+    collector:
+      output_too_large: Output too large for “%{key}”
+    collectors:
+      docker:
+        not_installed: Docker is not installed
+        needs_root: " Elio needs root (password-less sudo) or the docker group."
+        not_covered: Image system not covered
+        unknown_system: Unknown image system
+        not_in_feed: "%{target_last} not yet in the %{label} feed (next vulnerability update)"
+        unreadable_report: Unreadable report
+        timeout: Analysis too long (timeout)
+        unreadable: 'Docker unreadable: %{error}.%{hint}'
+        no_answer: no answer
+      health:
+        failed: 'Cannot read the health: %{exit_status}'
+      network:
+        failed: 'Cannot read the network: %{exit_status}'
+        no_ip: The ip command (iproute2) is not available
+        unreadable: Unreadable output of the ip command
+      os:
+        failed: 'Cannot read the system: %{exit_status}'
+      packages:
+        failed: 'Cannot read the packages: %{exit_status}'
+        unsupported: Neither dpkg nor snap on this system
+        docker_unreadable: 'Unreadable Docker images: %{truncate}'
+      ports:
+        failed: 'Cannot read the ports: %{exit_status}'
+        no_ss: The ss command is not available
+        without_root: 'Without root access: processes of the other users and firewall unknown'
+      scheduled_tasks:
+        failed: 'Cannot read the scheduled tasks: %{exit_status}'
+        unsupported: Neither cron nor systemd on this system
+        crontabs_unreadable: 'Unreadable crontabs of the users: Elio needs root (password-less sudo).'
+        crontab_of: crontab of %{user}
+      services:
+        failed: 'Cannot read the services: %{exit_status}'
+        unsupported: Neither systemd nor Docker on this system
+        docker_unreadable: 'Unreadable Docker containers: %{truncate}'
+    categories:
+      os: System
+      health: Health
+      packages: Packages
+      services: Services
+      ports: Ports
+      network: Network
+      scheduled_tasks: Scheduled tasks
+      docker: Docker
+    network_kinds:
+      wireguard: WireGuard
+      ethernet: Ethernet
+      wifi: Wi-Fi
+      bridge: Bridge
+      vlan: VLAN
+      bond: Bond
+      tun: Tunnel (tun)
+      tap: Tunnel (tap)
+      tunnel: Tunnel
+      vxlan: VXLAN
+      other: Other
+  inventory_helper:
+    virtualization:
+      none: Physical machine
+      kvm: KVM
+      qemu: QEMU
+      vmware: VMware
+      microsoft: Hyper-V
+      oracle: VirtualBox
+      xen: Xen
+      amazon: AWS
+      lxc: LXC container
+      docker: Docker container
+      podman: Podman container
+      openvz: OpenVZ
+      wsl: WSL
+      unknown: Unknown
+    privilege:
+      root: logged in as root
+      sudo: password-less sudo
+      none: none (partial inventory)
+      unknown: unknown
+    end_of_life:
+      ended: No longer supported since %{date}
+      soon: End of support on %{date}
+      supported: supported until %{date}
+    periods:
+      hourly: every hour
+      daily: every day
+      weekly: every week
+      monthly: every month
+    timer:
+      failed: failed
+      last_run: 'Last run: %{result} (code %{code})'
+      late: late
+      inactive: inactive
+      ok: ok
+    container:
+      looping: restarts in a loop
+      unhealthy: unhealthy
+      starting: starting
+      running: running
+      stopped: stopped
+      stopped_code: stopped (code %{code})
+    image_update:
+      available: new version
+      current: up to date
+      unknown: Not checked yet, image without a tag, or private
+    scanners:
+      trivy: Trivy
+      grype: Grype
+      elio: Elio (packages of the image)
+      none: not analyzed
+    score:
+      none: No score yet
+      average: Average of %{providers}
+      exploited: exploited
+      kev: CISA KEV catalog
+      kev_since: CISA KEV catalog since %{date}
+      epss: Probability of exploitation within 30 days
+    cvss:
+      AV: Vector
+      AC: Complexity
+      AT: Prerequisites
+      PR: Privileges required
+      UI: Interaction
+      S: Scope
+      C: Confidentiality
+      VC: Confidentiality
+      I: Integrity
+      VI: Integrity
+      A: Availability
+      VA: Availability
+    cvss_values:
+      AV:
+        "N": network
+        A: adjacent network
+        L: local
+        P: physical
+      AC:
+        L: low
+        H: high
+      AT:
+        "N": none
+        P: present
+      PR:
+        "N": none
+        L: low
+        H: high
+      UI:
+        "N": none
+        R: required
+        P: passive
+        A: active
+      S:
+        U: unchanged
+        C: changed
+      C:
+        H: high
+        L: low
+        "N": none
+      I:
+        H: high
+        L: low
+        "N": none
+      A:
+        H: high
+        L: low
+        "N": none
+    snapshot:
+      error: Inventory failed
+      partial: Partial
+      unsupported: Not available
+    scope:
+      public: public
+      private: private
+      local: local

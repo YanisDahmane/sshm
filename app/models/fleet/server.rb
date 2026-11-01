@@ -100,7 +100,7 @@ class Server < ApplicationRecord
   def health_state = reachable == false ? "off" : (health_status || "unknown")
 
   # Main reasons of the health state, most serious first.
-  def health_reason_texts = Array(health_reasons).map { |reason| reason["text"] }
+  def health_reason_texts = Array(health_reasons).map { |reason| Inventory::HealthStatus.text(reason) }
 
   # Recomputes the health state (Inventory::HealthStatus) and logs when it
   # changes between ok, warn and crit (not on the first evaluation).
@@ -112,7 +112,7 @@ class Server < ApplicationRecord
     return if previous.nil? || previous == "unknown" || result.state == "unknown" || previous == result.state
 
     kind = { "ok" => :health_recovered, "warn" => :health_warning, "crit" => :health_critical }.fetch(result.state)
-    Activity.record!(kind, server: self, user: nil, reasons: result.reasons.map(&:text).first(3))
+    Activity.record!(kind, server: self, user: nil, reasons: result.reasons.map(&:to_h).first(3))
   end
 
   private

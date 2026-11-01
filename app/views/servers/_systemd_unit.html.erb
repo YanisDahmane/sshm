@@ -1,12 +1,12 @@
 <%# A systemd unit in the Services section of the server page. %>
 <% tone, label = case unit["active"]
                  when "active" then [ :good, unit["sub"] == "running" ? "actif" : unit["sub"] ]
-                 when "failed" then [ :crit, "en échec" ]
+                 when "failed" then [ :crit, t(".failed") ]
                  else [ :neutral, unit["active"] ]
                  end %>
 <li class="systemd-unit flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2" data-state="<%= unit["active"] %>">
   <span class="w-24 shrink-0"><%= status_badge tone, label %></span>
   <span class="font-mono text-xs"><%= unit["name"].delete_suffix(".service") %></span>
-  <% if unit["enabled"] == "enabled" %><span class="badge bg-subtle text-ink-3">au démarrage</span><% end %>
+  <% if unit["enabled"] == "enabled" %><span class="badge bg-subtle text-ink-3"><%= t(".boot") %></span><% end %>
   <span class="ml-auto truncate text-xs text-ink-3"><%= unit["description"] %></span>
 </li>

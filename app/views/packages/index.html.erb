@@ -1,20 +1,20 @@
-<% content_for :title, "Paquets · Elio" %>
+<% content_for :title, t("title", page: t("nav.packages")) %>
 
 <div class="flex flex-wrap items-start justify-between gap-4">
   <div>
-    <h1 class="text-xl font-semibold">Paquets</h1>
-    <p class="text-xs text-ink-3">Quels serveurs ont un paquet, et en quelle version ? D'après le dernier inventaire de chaque serveur.</p>
+    <h1 class="text-xl font-semibold"><%= t("nav.packages") %></h1>
+    <p class="text-xs text-ink-3"><%= t(".which_servers_have_package") %></p>
   </div>
 </div>
 
 <%= form_with url: packages_path, method: :get, data: { turbo_action: "advance" }, class: "packages-search mt-5 flex gap-2" do |f| %>
   <%= f.search_field :q, value: @q, placeholder: "openssl, nginx, postgres…", autofocus: true, autocomplete: "off",
-        aria: { label: "Nom du paquet" }, class: "input max-w-md" %>
+        aria: { label: t(".package_name") }, class: "input max-w-md" %>
   <%= f.button class: "btn btn-primary" do %><%= icon :magnifying_glass %> Rechercher<% end %>
 <% end %>
 
 <% if @servers_without_inventory.positive? %>
-  <p class="mt-2 text-xs text-ink-3"><%= t("count.servers_have", count: @servers_without_inventory) %> pas encore d'inventaire des paquets.</p>
+  <p class="mt-2 text-xs text-ink-3"><%= t(".packages_inventory_yet_html", t: (t("count.servers_have", count: @servers_without_inventory))) %></p>
 <% end %>
 
 <% if @q.present? %>
@@ -27,7 +27,7 @@
             <span class="text-xs text-ink-3"><%= t("count.servers", count: rows.map(&:server_id).uniq.size) %> · <%= t("count.versions", count: @versions[name].size) %></span>
           </div>
           <table class="table-dense">
-            <thead><tr><th class="pl-4">Version</th><th>Mise à jour</th><th class="pr-4">Serveurs</th></tr></thead>
+            <thead><tr><th class="pl-4">Version</th><th><%= t(".update") %></th><th class="pr-4"><%= t(".servers") %></th></tr></thead>
             <tbody>
               <% @versions[name].each do |version, packages| %>
                 <tr class="package-version">
@@ -35,9 +35,9 @@
                   <td class="text-xs">
                     <% if (update = packages.find(&:upgradable?)) %>
                       <span class="font-mono text-ink-2">→ <%= update.available_version %></span>
-                      <% if packages.any?(&:security) %><span class="badge ml-1 bg-crit-soft text-crit-ink">sécurité</span><% end %>
+                      <% if packages.any?(&:security) %><span class="badge ml-1 bg-crit-soft text-crit-ink"><%= t(".security") %></span><% end %>
                     <% else %>
-                      <span class="text-ink-3">à jour</span>
+                      <span class="text-ink-3"><%= t(".up_date") %></span>
                     <% end %>
                   </td>
                   <td class="pr-4">
@@ -56,17 +56,17 @@
     </div>
     <%= render "shared/pagination", pager: @pager, noun: "paquets" %>
   <% else %>
-    <p class="card mt-5 px-4 py-6 text-sm text-ink-3">Aucun paquet ne contient « <%= @q %> ».</p>
+    <p class="card mt-5 px-4 py-6 text-sm text-ink-3"><%= t(".package_contains_html", q: @q) %></p>
   <% end %>
 <% else %>
   <section class="security-updates card mt-5">
     <div class="card-header">
-      <h2 class="flex items-center gap-2 font-semibold"><%= icon :shield_check, class: "h-4 w-4 text-ink-3" %> Mises à jour de sécurité en attente</h2>
+      <h2 class="flex items-center gap-2 font-semibold"><%= icon :shield_check, class: "h-4 w-4 text-ink-3" %> <%= t(".pending_security_updates") %></h2>
       <span class="text-xs text-ink-3"><%= t("count.packages", count: @pager.total) %></span>
     </div>
     <% if @security.any? %>
       <table class="table-dense">
-        <thead><tr><th class="pl-4">Paquet</th><th>Version disponible</th><th class="pr-4">Serveurs concernés</th></tr></thead>
+        <thead><tr><th class="pl-4"><%= t(".package") %></th><th><%= t(".available_version") %></th><th class="pr-4"><%= t(".servers_concerned") %></th></tr></thead>
         <tbody>
           <% @security.each do |name, packages| %>
             <tr class="security-update">
@@ -85,7 +85,7 @@
       </table>
       <% if @pager.multiple_pages? %><div class="border-t border-line px-4 pb-3"><%= render "shared/pagination", pager: @pager, noun: "paquets" %></div><% end %>
     <% else %>
-      <p class="flex items-center gap-2 px-4 py-4 text-sm text-good-ink"><%= icon :check_circle %> Aucune mise à jour de sécurité en attente.</p>
+      <p class="flex items-center gap-2 px-4 py-4 text-sm text-good-ink"><%= icon :check_circle %> <%= t(".pending_security_update") %></p>
     <% end %>
   </section>
 <% end %>

@@ -7,7 +7,7 @@ class ServerPackagesController < ApplicationController
     @server = Server.find(params[:server_id])
     @snapshot = @server.inventory("packages")
     @q = params[:q].to_s.strip.first(100)
-    @manager = params[:manager].presence_in(Inventory::Package::MANAGERS.keys)
+    @manager = params[:manager].presence_in(Inventory::Package::MANAGERS)
     @updates = params[:updates] == "1"
 
     packages = @server.packages.order(:name, :arch)

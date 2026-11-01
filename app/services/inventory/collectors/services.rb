@@ -7,17 +7,17 @@ class Inventory::Collectors::Services < Inventory::Collector
 
   def collect
     result = run("inventory.services")
-    raise Error, "Lecture des services impossible : #{result.stderr.strip.presence || "code #{result.exit_status}"}" if result.stdout.blank?
+    raise Error, I18n.t("inventory.collectors.services.failed", exit_status: (result.stderr.strip.presence || "code #{result.exit_status}")) if result.stdout.blank?
 
     sections = self.class.sections(result.stdout)
     units = self.class.parse_units(sections["units"].to_s, self.class.parse_unit_files(sections["unit-files"].to_s))
     docker_present = sections["docker"].to_s.strip == "present"
-    return unsupported("Ni systemd ni Docker sur ce système") if units.nil? && !docker_present
+    return unsupported(I18n.t("inventory.collectors.services.unsupported")) if units.nil? && !docker_present
 
     data = { "units" => units || [], "containers" => [], "docker" => (docker_present ? "ok" : "absent") }
     if docker_present
       containers = run("inventory.docker_containers")
-      return partial(data.merge("docker" => "unreadable"), "Conteneurs Docker illisibles : #{containers.stderr.strip.truncate(120)}") unless containers.success?
+      return partial(data.merge("docker" => "unreadable"), I18n.t("inventory.collectors.services.docker_unreadable", truncate: (containers.stderr.strip.truncate(120)))) unless containers.success?
 
       data["containers"] = self.class.parse_containers(containers.stdout)
     end

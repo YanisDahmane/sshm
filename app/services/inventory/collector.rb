@@ -25,9 +25,6 @@ class Inventory::Collector
                  # Last: a scan that times out ends the SSH session.
                  "docker" => "Inventory::Collectors::Docker" }.freeze
 
-  LABELS = { "os" => "Système", "health" => "Santé", "packages" => "Paquets", "services" => "Services", "ports" => "Ports", "network" => "Réseau",
-             "scheduled_tasks" => "Tâches planifiées", "docker" => "Docker" }.freeze
-
   MAX_OUTPUT = 8.megabytes
 
   class << self
@@ -38,7 +35,7 @@ class Inventory::Collector
 
     def categories = registry.keys
 
-    def label_for(category) = LABELS.fetch(category.to_s, category.to_s.humanize)
+    def label_for(category) = I18n.t("inventory.categories.#{category}", default: category.to_s.humanize)
 
     def for(category) = registry.fetch(category.to_s).to_s.constantize
 
@@ -80,7 +77,7 @@ class Inventory::Collector
   # sudo when it needs root (see Ssh::Connection#run_command).
   def run(key, **values)
     ssh.run_command(key, **values).tap do |result|
-      raise Error, "Sortie trop volumineuse pour « #{key} »" if result.stdout.bytesize > MAX_OUTPUT
+      raise Error, I18n.t("inventory.collector.output_too_large", key: key) if result.stdout.bytesize > MAX_OUTPUT
     end
   end
 

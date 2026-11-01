@@ -7,7 +7,7 @@ class Inventory::Collectors::Os < Inventory::Collector
 
   def collect
     result = run("inventory.os")
-    raise Error, "Lecture du système impossible : #{result.stderr.strip.presence || "code #{result.exit_status}"}" if result.stdout.blank?
+    raise Error, I18n.t("inventory.collectors.os.failed", exit_status: (result.stderr.strip.presence || "code #{result.exit_status}")) if result.stdout.blank?
 
     ok(self.class.parse(result.stdout))
   end

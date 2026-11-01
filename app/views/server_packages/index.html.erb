@@ -1,36 +1,36 @@
 <turbo-frame id="<%= dom_id(@server, :packages) %>" class="block">
   <% if @snapshot.nil? || !@snapshot.collected? %>
     <p class="packages-empty px-4 py-4 text-sm text-ink-3">
-      <%= @snapshot&.failed? ? @snapshot.message : "Pas encore d'inventaire des paquets." %>
+      <%= @snapshot&.failed? ? @snapshot.message : t(".packages_inventory_yet") %>
     </p>
   <% elsif @snapshot.status == "unsupported" %>
     <p class="packages-empty px-4 py-4 text-sm text-ink-3"><%= @snapshot.message %></p>
   <% else %>
     <% counts = @snapshot.data %>
     <div class="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-line px-4 py-2.5 text-xs text-ink-2">
-      <span><strong class="text-ink"><%= counts["total"] %></strong> installés</span>
+      <span><strong class="text-ink"><%= counts["total"] %></strong> <%= t(".installed") %></span>
       <% (counts["by_manager"] || {}).each do |manager, count| %>
-        <span><%= Inventory::Package::MANAGERS.fetch(manager, manager) %> : <%= count %></span>
+        <span><%= Inventory::Package.manager_label(manager) %> : <%= count %></span>
       <% end %>
-      <span><strong class="text-ink"><%= counts["upgradable"] %></strong> à mettre à jour<% if counts["security"].to_i.positive? %>, dont <strong class="text-crit-ink"><%= counts["security"] %> de sécurité</strong><% end %></span>
+      <span><strong class="text-ink"><%= counts["upgradable"] %></strong> <%= t(".update") %><% if counts["security"].to_i.positive? %><%= t(".including") %> <strong class="text-crit-ink"><%= t(".security_html", security: (counts["security"])) %></strong><% end %></span>
       <% if @snapshot.status == "partial" %><%= inventory_status_badge(@snapshot) %><% end %>
     </div>
 
     <%= form_with url: server_packages_path(@server), method: :get, data: { controller: "auto-submit", turbo_frame: dom_id(@server, :packages) },
           class: "packages-filters flex flex-wrap items-center gap-2 px-4 py-2.5" do |f| %>
-      <%= f.search_field :q, value: @q, placeholder: "Rechercher un paquet…", autocomplete: "off", aria: { label: "Rechercher un paquet" },
+      <%= f.search_field :q, value: @q, placeholder: t(".search_package"), autocomplete: "off", aria: { label: t(".search_package_2") },
             data: { action: "input->auto-submit#submitLater" }, class: "input w-64 py-1 text-xs" %>
-      <%= f.select :manager, [ [ "Tous les types", "" ], *Inventory::Package::MANAGERS.invert.to_a ], { selected: @manager },
-            aria: { label: "Type de paquet" }, data: { action: "change->auto-submit#submit" }, class: "input w-auto py-1 text-xs" %>
+      <%= f.select :manager, [ [ t(".all_types"), "" ], *Inventory::Package::MANAGERS.map { |manager| [ Inventory::Package.manager_label(manager), manager ] } ], { selected: @manager },
+            aria: { label: t(".package_type") }, data: { action: "change->auto-submit#submit" }, class: "input w-auto py-1 text-xs" %>
       <label class="flex cursor-pointer items-center gap-1.5 text-xs text-ink-2">
-        <%= f.check_box :updates, { checked: @updates, data: { action: "change->auto-submit#submit" } }, "1", nil %> Mises à jour seulement
+        <%= f.check_box :updates, { checked: @updates, data: { action: "change->auto-submit#submit" } }, "1", nil %> <%= t(".updates_only") %>
       </label>
-      <noscript><%= f.submit "Filtrer", class: "btn btn-secondary" %></noscript>
+      <noscript><%= f.submit t(".filter"), class: "btn btn-secondary" %></noscript>
     <% end %>
 
     <% if @packages.any? %>
       <table class="packages table-dense">
-        <thead><tr><th class="pl-4">Paquet</th><th>Version</th><th>Mise à jour</th><th class="pr-4">Type</th></tr></thead>
+        <thead><tr><th class="pl-4"><%= t(".package") %></th><th>Version</th><th><%= t(".update_2") %></th><th class="pr-4">Type</th></tr></thead>
         <tbody>
           <% @packages.each do |package| %>
             <tr class="package">
@@ -39,9 +39,9 @@
               <td class="text-xs">
                 <% if package.upgradable? %>
                   <span class="font-mono text-ink-2">→ <%= package.available_version %></span>
-                  <% if package.security %><span class="badge ml-1 bg-crit-soft text-crit-ink">sécurité</span><% end %>
+                  <% if package.security %><span class="badge ml-1 bg-crit-soft text-crit-ink"><%= t(".security") %></span><% end %>
                 <% else %>
-                  <span class="text-ink-3">à jour</span>
+                  <span class="text-ink-3"><%= t(".up_date") %></span>
                 <% end %>
               </td>
               <td class="pr-4 text-xs text-ink-3"><%= package.manager_label %></td>
@@ -51,7 +51,7 @@
       </table>
       <% if @pager.multiple_pages? %><div class="border-t border-line px-4 pb-3"><%= render "shared/pagination", pager: @pager, noun: "paquets" %></div><% end %>
     <% else %>
-      <p class="px-4 py-4 text-sm text-ink-3">Aucun paquet ne correspond.</p>
+      <p class="px-4 py-4 text-sm text-ink-3"><%= t(".package_matches") %></p>
     <% end %>
   <% end %>
 </turbo-frame>

@@ -49,29 +49,29 @@ class Inventory::PortAnalysis
     when "ufw", "nftables", "iptables"
       tool = { "ufw" => "ufw", "nftables" => "nftables", "iptables" => "iptables" }.fetch(firewall["tool"])
       firewall_active? ? "#{tool} actif (entrant : #{firewall["default_incoming"] == "deny" ? "bloqué par défaut" : "autorisé par défaut"})" : "#{tool} inactif"
-    when "none" then "aucun firewall actif"
-    else "firewall inconnu (accès root requis)"
+    when "none" then I18n.t("inventory.port_analysis.no_firewall")
+    else I18n.t("inventory.port_analysis.unknown_firewall")
     end
   end
 
   # Commands to copy, SSH first so the session is not cut.
   def suggested_ufw_rules
     ssh_port = server.port
-    lines = [ "# Règles ufw suggérées pour #{server.name} (à relire avant de les appliquer)",
+    lines = [ I18n.t("inventory.port_analysis.header", server_name: server.name),
               "sudo ufw default deny incoming", "sudo ufw default allow outgoing",
               "sudo ufw allow #{ssh_port}/tcp comment 'ssh (Elio)'" ]
     public_ports.reject { |entry| entry.port == ssh_port && entry.proto == "tcp" }.each do |entry|
       label = comment_for(entry)
       lines << if entry.container
-        "# #{entry.key} publié par Docker (#{entry.container}) : ufw ne le filtre pas. Publiez-le sur 127.0.0.1 ou filtrez-le dans la chaîne DOCKER-USER."
+        I18n.t("inventory.port_analysis.docker", key: entry.key, container: entry.container)
       elsif entry.unexpected
-        "# #{entry.key} (#{label}) : port inattendu, à fermer ou à ajouter aux ports attendus du groupe"
+        I18n.t("inventory.port_analysis.unexpected", key: entry.key, label: label)
       else
         "sudo ufw allow #{entry.key} comment '#{label}'"
       end
     end
     ports.select { |entry| entry.scope == "private" }.each do |entry|
-      lines << "# #{entry.key} (#{comment_for(entry)}) écoute sur le réseau privé (#{entry.addresses.join(", ")}) : à autoriser depuis ce réseau si besoin"
+      lines << I18n.t("inventory.port_analysis.private", key: entry.key, comment_for: (comment_for(entry)), addresses_join: (entry.addresses.join(", ")))
     end
     lines << "sudo ufw enable"
     lines.join("\n")
@@ -130,6 +130,6 @@ class Inventory::PortAnalysis
 
   # Process or unit name, limited to safe characters for a ufw comment.
   def comment_for(entry)
-    (entry.container || entry.unit&.delete_suffix(".service") || entry.process || "port #{entry.port}").gsub(/[^\w .@-]/, "").first(40)
+    (entry.container || entry.unit&.delete_suffix(".service") || entry.process || I18n.t("inventory.port_analysis.port", port: entry.port)).gsub(/[^\w .@-]/, "").first(40)
   end
 end

@@ -107,6 +107,6 @@ class IntegrationsControllerTest < ActionDispatch::IntegrationTest
     enable_demo(alert: true)
     servers(:web).refresh_health!
     assert_equal "warn", servers(:web).reload.health_status
-    assert_includes servers(:web).health_reasons.map { |reason| reason["text"] }, "Alerte de démonstration"
+    assert_includes servers(:web).health_reason_texts, "Alerte de démonstration"
   end
 end

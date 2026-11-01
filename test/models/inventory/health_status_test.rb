@@ -67,4 +67,19 @@ class Inventory::HealthStatusTest < ActiveSupport::TestCase
 
     assert_equal [ "crit", [ "Clé Elio refusée : inventaire impossible" ] ], [ evaluate.state, evaluate.reasons.map(&:text) ]
   end
+
+  test "a reason is stored as a key and written in the reader's language" do
+    reason = Inventory::HealthStatus.reason("warn", :disk, percent: 83, mount: "/var").to_h
+    assert_equal({ "tone" => "warn", "key" => "health.disk", "params" => { "percent" => 83, "mount" => "/var" } }, reason)
+
+    assert_equal "Disque /var à 83\u00A0%", Inventory::HealthStatus.text(reason)
+    assert_equal "Disk /var at 83%", I18n.with_locale(:en) { Inventory::HealthStatus.text(reason) }
+    load = Inventory::HealthStatus.reason("warn", :load, load: 8.5, count: 4).to_h
+    assert_equal "Charge 8,5 pour 4 processeurs", Inventory::HealthStatus.text(load)
+    assert_equal "Load 8.5 for 4 processors", I18n.with_locale(:en) { Inventory::HealthStatus.text(load) }
+  end
+
+  test "a reason stored before the translations is still read" do
+    assert_equal "Redémarrage requis", Inventory::HealthStatus.text({ "tone" => "warn", "text" => "Redémarrage requis" })
+  end
 end

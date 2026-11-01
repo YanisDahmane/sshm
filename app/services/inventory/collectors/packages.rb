@@ -5,16 +5,16 @@
 class Inventory::Collectors::Packages < Inventory::Collector
   def collect
     result = run("inventory.packages")
-    raise Error, "Lecture des paquets impossible : #{result.stderr.strip.presence || "code #{result.exit_status}"}" if result.stdout.blank?
+    raise Error, I18n.t("inventory.collectors.packages.failed", exit_status: (result.stderr.strip.presence || "code #{result.exit_status}")) if result.stdout.blank?
 
     sections = self.class.sections(result.stdout)
-    return unsupported("Ni dpkg ni snap sur ce système") if sections["dpkg"].strip == "unsupported" && sections["snap"].strip == "unsupported"
+    return unsupported(I18n.t("inventory.collectors.packages.unsupported")) if sections["dpkg"].strip == "unsupported" && sections["snap"].strip == "unsupported"
 
     packages = self.class.parse_dpkg(sections["dpkg"], self.class.parse_upgradable(sections["upgradable"])) + self.class.parse_snap(sections["snap"])
     docker_error = nil
     if sections["docker"].strip == "present"
       images = run("inventory.docker_images")
-      images.success? ? packages.concat(self.class.parse_docker(images.stdout)) : docker_error = "Images Docker illisibles : #{images.stderr.strip.truncate(120)}"
+      images.success? ? packages.concat(self.class.parse_docker(images.stdout)) : docker_error = I18n.t("inventory.collectors.packages.docker_unreadable", truncate: (images.stderr.strip.truncate(120)))
     end
 
     data = self.class.summarize(packages)

@@ -8,21 +8,20 @@ require "json"
 # the server. The addresses feed the matching of external resources
 # (Uptime Kuma probes, OVH IPs) with the servers.
 class Inventory::Collectors::Network < Inventory::Collector
-  KINDS = { "wireguard" => "WireGuard", "ethernet" => "Ethernet", "wifi" => "Wi-Fi", "bridge" => "Pont", "vlan" => "VLAN", "bond" => "Agrégat",
-            "tun" => "Tunnel (tun)", "tap" => "Tunnel (tap)", "tunnel" => "Tunnel", "vxlan" => "VXLAN", "other" => "Autre" }.freeze
+  KINDS = %w[wireguard ethernet wifi bridge vlan bond tun tap tunnel vxlan other].freeze # labels: inventory.network_kinds.*
   VPN_KINDS = %w[wireguard tun tap tunnel].freeze
   CONTAINER_INTERFACE = /\A(docker\d*|br-[0-9a-f]{12}|veth|cni|flannel|cali|vethwe|lxcbr|virbr)/
 
   def collect
     result = run("inventory.network")
-    raise Error, "Lecture du réseau impossible : #{result.stderr.strip.presence || "code #{result.exit_status}"}" if result.stdout.blank?
+    raise Error, I18n.t("inventory.collectors.network.failed", exit_status: (result.stderr.strip.presence || "code #{result.exit_status}")) if result.stdout.blank?
 
     sections = self.class.sections(result.stdout)
-    return unsupported("La commande ip (iproute2) n'est pas disponible") if sections["addr"].to_s.strip == "unsupported"
+    return unsupported(I18n.t("inventory.collectors.network.no_ip")) if sections["addr"].to_s.strip == "unsupported"
 
     ok(self.class.parse(sections))
   rescue JSON::ParserError
-    raise Error, "Sortie de la commande ip illisible"
+    raise Error, I18n.t("inventory.collectors.network.unreadable")
   end
 
   def self.parse(sections)

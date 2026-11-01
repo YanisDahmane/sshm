@@ -1,0 +1,27 @@
+fr:
+  integrations:
+    uptime_kuma:
+      health:
+        no_monitor: Aucune sonde Uptime Kuma
+        monitor_down: Sonde « %{name} » hors ligne
+        cert_expired: Certificat de « %{name} » expiré
+        cert_expiring:
+          one: 'Certificat de « %{name} » : expire dans %{count} j'
+          other: 'Certificat de « %{name} » : expire dans %{count} j'
+        uptime: 'Disponibilité de « %{name} » sur %{window} : %{ratio}'
+        maintenance:
+          one: Sonde « %{name} » en maintenance depuis plus de %{count} jour
+          other: Sonde « %{name} » en maintenance depuis plus de %{count} jours
+      windows:
+        w1d: 24 heures
+        w30d: 30 jours
+        w365d: 1 an
+    ovh:
+      health:
+        expiring:
+          one: 'Service OVH « %{name} » : expire dans %{count} j'
+          other: 'Service OVH « %{name} » : expire dans %{count} j'
+        firewall_disabled: Firewall réseau OVH désactivé sur %{ip}
+        no_reverse: Pas de reverse DNS pour %{ip}
+        reverse_mismatch: Reverse DNS de %{ip} (%{reverse}) ≠ hostname
+        no_dns: Aucun enregistrement DNS OVH ne pointe vers ce serveur

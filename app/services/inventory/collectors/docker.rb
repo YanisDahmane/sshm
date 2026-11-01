@@ -22,10 +22,10 @@ class Inventory::Collectors::Docker < Inventory::Collector
     result = run("inventory.docker")
     sections = self.class.sections(result.stdout)
     access = sections["access"].strip
-    return unsupported("Docker n'est pas installé") if access == "absent"
+    return unsupported(I18n.t("inventory.collectors.docker.not_installed")) if access == "absent"
     unless access.match?(/\A\d+\.\d+/)
-      hint = access.match?(/denied/i) ? " Elio a besoin de root (sudo sans mot de passe) ou du groupe docker." : ""
-      return partial({ "docker" => "unreadable", "containers" => [], "images" => [] }, "Docker illisible : #{access.presence&.truncate(120) || "pas de réponse"}.#{hint}")
+      hint = access.match?(/denied/i) ? I18n.t("inventory.collectors.docker.needs_root") : ""
+      return partial({ "docker" => "unreadable", "containers" => [], "images" => [] }, I18n.t("inventory.collectors.docker.unreadable", error: access.presence&.truncate(120) || I18n.t("inventory.collectors.docker.no_answer"), hint: hint))
     end
 
     data = self.class.parse(sections).merge("docker" => "ok", "version" => access)
@@ -233,11 +233,11 @@ class Inventory::Collectors::Docker < Inventory::Collector
       os = Inventory::Collectors::Os.release_summary(sections["os-release"]).presence
       image["os"] = os
       target = Vulnerabilities.target(os)
-      return { "method" => "elio", "at" => Time.current.iso8601, "os" => os, "error" => (os ? "Système de l'image non couvert" : "Système de l'image inconnu") }.compact unless target
+      return { "method" => "elio", "at" => Time.current.iso8601, "os" => os, "error" => (os ? I18n.t("inventory.collectors.docker.not_covered") : I18n.t("inventory.collectors.docker.unknown_system")) }.compact unless target
       feed = VulnerabilityFeed.for(target.first)
       unless feed.refreshed_at && feed.releases.include?(target.last)
         return { "method" => "elio", "at" => Time.current.iso8601, "os" => os,
-                 "error" => "#{target.last} pas encore dans la base #{feed.label} (prochaine mise à jour des vulnérabilités)" }
+                 "error" => I18n.t("inventory.collectors.docker.not_in_feed", target_last: target.last, label: feed.label) }
       end
 
       rows = Vulnerabilities::Matcher.affected(*target, self.class.parse_dpkg_status(sections["dpkg"]))
@@ -245,11 +245,11 @@ class Inventory::Collectors::Docker < Inventory::Collector
       { "method" => "elio", "at" => Time.current.iso8601, "count" => rows.size, "os" => os }
     end
   rescue JSON::ParserError
-    { "method" => data["scanner"], "at" => Time.current.iso8601, "error" => "Rapport illisible" }
+    { "method" => data["scanner"], "at" => Time.current.iso8601, "error" => I18n.t("inventory.collectors.docker.unreadable_report") }
   rescue Inventory::Collector::Error => e
     { "method" => data["scanner"] || "elio", "at" => Time.current.iso8601, "error" => e.message }
   rescue Ssh::Connection::CommandTimeoutError
-    { "method" => data["scanner"] || "elio", "at" => Time.current.iso8601, "error" => "Analyse trop longue (délai dépassé)", "session_lost" => true }
+    { "method" => data["scanner"] || "elio", "at" => Time.current.iso8601, "error" => I18n.t("inventory.collectors.docker.timeout"), "session_lost" => true }
   end
 
   # Rows to write (record); new serious ones logged, except on the first

@@ -11,13 +11,13 @@ class Inventory::Collectors::Ports < Inventory::Collector
 
   def collect
     result = run("inventory.ports")
-    raise Error, "Lecture des ports impossible : #{result.stderr.strip.presence || "code #{result.exit_status}"}" if result.stdout.blank?
+    raise Error, I18n.t("inventory.collectors.ports.failed", exit_status: result.stderr.strip.presence || "code #{result.exit_status}") if result.stdout.blank?
 
     sections = self.class.sections(result.stdout)
-    return unsupported("La commande ss n'est pas disponible") if sections["ss"].to_s.strip == "unsupported"
+    return unsupported(I18n.t("inventory.collectors.ports.no_ss")) if sections["ss"].to_s.strip == "unsupported"
 
     data = self.class.parse(sections)
-    privileged? ? ok(data) : partial(data, "Sans accès root : processus des autres utilisateurs et firewall inconnus")
+    privileged? ? ok(data) : partial(data, I18n.t("inventory.collectors.ports.without_root"))
   end
 
   def self.parse(sections)

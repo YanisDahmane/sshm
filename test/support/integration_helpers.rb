@@ -4,6 +4,10 @@ class DemoIntegration < Integrations::Base
   self.key = "demo"
   self.label = "Démo"
   self.description = "Extension de démonstration."
+
+  # The text of its health reason, in both languages.
+  I18n.backend.store_translations(:fr, demo: { alert: "Alerte de démonstration" })
+  I18n.backend.store_translations(:en, demo: { alert: "Demo alert" })
   self.icon = :globe
 
   def self.fields
@@ -34,7 +38,7 @@ class DemoIntegration < Integrations::Base
   def self.sidebar_links = [ { label: "Démo", path: :tasks_path, icon: :globe, controller: "demo" } ]
 
   def self.health_reasons(integration, _server)
-    integration.value(:alert) ? [ Inventory::HealthStatus::Reason.new("warn", "Alerte de démonstration") ] : []
+    integration.value(:alert) ? [ Inventory::HealthStatus.reason("warn", "demo.alert") ] : []
   end
 end
 

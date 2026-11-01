@@ -75,6 +75,18 @@ class EnglishInterfaceTest < ActionDispatch::IntegrationTest
     assert_english new_server_import_path, except: data
   end
 
+  test "the inventory pages" do
+    data = [ ".sidebar-groups", ".account-link", ".server-group-filter", "#servers td:nth-child(2)", "#server-health" ] # TODO(access lot): #server-health
+    %w[overview packages services ports schedules].each do |tab|
+      assert_english server_path(servers(:web), tab: tab), except: data
+    end
+    assert_english server_packages_path(servers(:web)), except: data
+    assert_english packages_path, except: data
+    assert_english packages_path(q: "openssl"), except: data
+    assert_english ports_path, except: data
+    assert_english scheduled_tasks_path, except: data
+  end
+
   test "the check finds French" do
     app_settings(:main).update!(default_locale: "fr")
     get root_path

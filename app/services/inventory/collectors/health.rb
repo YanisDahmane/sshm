@@ -8,7 +8,7 @@ class Inventory::Collectors::Health < Inventory::Collector
 
   def collect
     result = run("inventory.health")
-    raise Error, "Lecture de la santé impossible : #{result.stderr.strip.presence || "code #{result.exit_status}"}" if result.stdout.blank?
+    raise Error, I18n.t("inventory.collectors.health.failed", exit_status: (result.stderr.strip.presence || "code #{result.exit_status}")) if result.stdout.blank?
 
     ok(self.class.parse(result.stdout))
   end

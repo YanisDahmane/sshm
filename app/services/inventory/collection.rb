@@ -48,7 +48,7 @@ class Inventory::Collection
     error_outcome("#{e.title} — #{e.message}")
   rescue StandardError => e
     Rails.error.report(e, context: { server_id: @server.id, category: category })
-    error_outcome("Erreur interne pendant la collecte (#{e.class})")
+    error_outcome(I18n.t("inventory.collection.internal_error", class: e.class))
   end
 
   def record(outcomes, privilege)

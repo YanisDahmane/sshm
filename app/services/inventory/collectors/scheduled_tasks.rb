@@ -16,13 +16,13 @@ class Inventory::Collectors::ScheduledTasks < Inventory::Collector
 
   def collect
     result = run("inventory.scheduled_tasks")
-    raise Error, "Lecture des tâches planifiées impossible : #{result.stderr.strip.presence || "code #{result.exit_status}"}" if result.stdout.blank?
+    raise Error, I18n.t("inventory.collectors.scheduled_tasks.failed", exit_status: (result.stderr.strip.presence || "code #{result.exit_status}")) if result.stdout.blank?
 
     data = self.class.parse(result.stdout)
-    return unsupported("Ni cron ni systemd sur ce système") if data["cron"].empty? && data["periodic"].empty? && data["timers"].nil?
+    return unsupported(I18n.t("inventory.collectors.scheduled_tasks.unsupported")) if data["cron"].empty? && data["periodic"].empty? && data["timers"].nil?
 
     data["timers"] ||= []
-    data["user_crontabs"] == "unreadable" ? partial(data, "Crontabs des utilisateurs illisibles : Elio a besoin de root (sudo sans mot de passe).") : ok(data)
+    data["user_crontabs"] == "unreadable" ? partial(data, I18n.t("inventory.collectors.scheduled_tasks.crontabs_unreadable")) : ok(data)
   end
 
   def self.parse(output, now: Time.current)
@@ -30,7 +30,7 @@ class Inventory::Collectors::ScheduledTasks < Inventory::Collector
     cron = parse_crontab(sections["crontab"], source: "/etc/crontab", system: true) +
            files(sections["cron.d"]).flat_map { |path, body| parse_crontab(body, source: path, system: true) }
     users = sections["users"].strip == "unreadable" ? "unreadable" : "ok"
-    cron += files(sections["users"]).flat_map { |user, body| parse_crontab(body, source: "crontab de #{user}", user: user) } if users == "ok"
+    cron += files(sections["users"]).flat_map { |user, body| parse_crontab(body, source: I18n.t("inventory.collectors.scheduled_tasks.crontab_of", user: user), user: user) } if users == "ok"
 
     uptime = sections["uptime"].to_s.split.first&.to_f
     booted_at = uptime && now - uptime

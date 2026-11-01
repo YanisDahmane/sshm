@@ -69,25 +69,24 @@ class Integrations::UptimeKuma < Integrations::Base
       reasons = []
       if monitors.empty?
         ignored = Array(integration.value(:no_monitor_ignored_groups)).map(&:to_i)
-        reasons << reason("warn", "Aucune sonde Uptime Kuma") if integration.value(:alert_no_monitor) && (server.server_group_ids & ignored).empty?
+        reasons << reason("warn", :no_monitor) if integration.value(:alert_no_monitor) && (server.server_group_ids & ignored).empty?
         return reasons
       end
 
       monitors.each do |monitor|
-        reasons << reason("crit", "Sonde « #{monitor.name} » hors ligne") if integration.value(:alert_down) && monitor.down?
+        reasons << reason("crit", :monitor_down, name: monitor.name) if integration.value(:alert_down) && monitor.down?
         if integration.value(:alert_cert) && monitor.cert_days_remaining && monitor.cert_days_remaining <= integration.value(:cert_days).to_i
           reasons << reason(monitor.cert_days_remaining <= 0 || monitor.cert_valid == false ? "crit" : "warn",
-                            monitor.cert_days_remaining <= 0 ? "Certificat de « #{monitor.name} » expiré" : "Certificat de « #{monitor.name} » : expire dans #{monitor.cert_days_remaining} j")
+                            *(monitor.cert_days_remaining <= 0 ? [ :cert_expired, { name: monitor.name } ] : [ :cert_expiring, { name: monitor.name, count: monitor.cert_days_remaining } ]))
         end
         window = integration.value(:uptime_window)
         ratio = monitor.uptime_ratio(window)
         if integration.value(:alert_uptime) && ratio && ratio * 100 < integration.value(:uptime_threshold).to_f
-          label = WINDOWS.to_h.fetch(window, window)
-          reasons << reason("warn", "Disponibilité de « #{monitor.name} » sur #{label} : #{format("%.2f", ratio * 100).sub(".", ",")} %")
+          reasons << reason("warn", :uptime, name: monitor.name, window_key: "integrations.uptime_kuma.windows.w#{window}", ratio: (ratio * 100).round(2))
         end
         if integration.value(:alert_maintenance) && monitor.state == "maintenance" && monitor.status_changed_at &&
            monitor.status_changed_at < integration.value(:maintenance_days).to_i.days.ago
-          reasons << reason("warn", "Sonde « #{monitor.name} » en maintenance depuis plus de #{integration.value(:maintenance_days).to_i} jours")
+          reasons << reason("warn", :maintenance, name: monitor.name, count: integration.value(:maintenance_days).to_i)
         end
       end
       reasons
@@ -104,6 +103,6 @@ class Integrations::UptimeKuma < Integrations::Base
 
     private
 
-    def reason(tone, text) = Inventory::HealthStatus::Reason.new(tone, text)
+    def reason(tone, key, params = {}, **more) = Inventory::HealthStatus.reason(tone, "integrations.uptime_kuma.health.#{key}", **params, **more)
   end
 end

@@ -21,7 +21,7 @@
       <% if (problems = containers.count { |container| container["looping"] || container["health"] == "unhealthy" }).positive? %>· <strong class="text-crit-ink"><%= problems %> en difficulté</strong><% end %>
       · <strong class="text-ink"><%= images.size %></strong> images (<%= images.count { |image| !image["used"] } %> inutilisées)
       <% if (disk = data.dig("disk", "images")) %>· <%= human_bytes(disk["size"]) %> d'images, <%= human_bytes(disk["reclaimable"]) %> récupérables<% end %>
-      · analyse : <%= data["scanner"] ? InventoryHelper::SCAN_LABELS.fetch(data["scanner"]) : "Elio (ni Trivy ni Grype sur le serveur)" %>
+      · analyse : <%= data["scanner"] ? scan_label(data["scanner"]) : "Elio (ni Trivy ni Grype sur le serveur)" %>
     </p>
 
     <h3 class="px-4 pt-3 text-xs font-semibold tracking-wide text-ink-3 uppercase">Conteneurs</h3>
@@ -75,8 +75,8 @@
                     <%= link_to server_path(server, tab: "vulnerabilities"), class: "hover:underline" do %><strong class="<%= fixable.to_i.positive? ? "text-crit-ink" : "text-ink" %>"><%= total %></strong> dont <%= fixable %> corrigeables<% end %>
                   <% elsif scan["error"] %><span class="text-warn-ink" title="<%= scan["error"] %>"><%= scan["error"].truncate(60) %></span>
                   <% elsif scan["count"] %><span class="text-good-ink">aucune</span>
-                  <% else %><span class="text-ink-3"><%= InventoryHelper::SCAN_LABELS.fetch(scan["method"].to_s, "non analysée") %></span><% end %>
-                  <% if scan["at"] && scan["method"] != "none" %><span class="block text-[11px] text-ink-3"><%= InventoryHelper::SCAN_LABELS.fetch(scan["method"], scan["method"]) %> · <%= relative_time_tag Time.zone.parse(scan["at"]) %></span><% end %>
+                  <% else %><span class="text-ink-3"><%= scan_label(scan["method"]) %></span><% end %>
+                  <% if scan["at"] && scan["method"] != "none" %><span class="block text-[11px] text-ink-3"><%= scan_label(scan["method"]) %> · <%= relative_time_tag Time.zone.parse(scan["at"]) %></span><% end %>
                 </td>
               </tr>
             <% end %>

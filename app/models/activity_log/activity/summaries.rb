@@ -17,8 +17,8 @@ module Activity::Summaries
     server_back_online: proc { "« #{server_name} » répond à nouveau" },
     os_upgraded: proc { "« #{server_name} » est passé de #{data["from"]} à #{data["to"]}" },
     server_rebooted: proc { "« #{server_name} » a redémarré" },
-    health_warning: proc { "« #{server_name} » est à surveiller : #{Array(data["reasons"]).join(", ")}" },
-    health_critical: proc { "« #{server_name} » est en état critique : #{Array(data["reasons"]).join(", ")}" },
+    health_warning: proc { "« #{server_name} » est à surveiller : #{Array(data["reasons"]).map { |reason| Inventory::HealthStatus.text(reason) }.join(", ")}" },
+    health_critical: proc { "« #{server_name} » est en état critique : #{Array(data["reasons"]).map { |reason| Inventory::HealthStatus.text(reason) }.join(", ")}" },
     health_recovered: proc { "« #{server_name} » est de nouveau sain" },
     packages_changed: proc do
       counts = { "installed" => "installé", "upgraded" => "mis à jour", "removed" => "supprimé" }

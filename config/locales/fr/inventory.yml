@@ -1,0 +1,448 @@
+fr:
+  health:
+    key_refused: 'Clé Elio refusée : inventaire impossible'
+    disk: Disque %{mount} à %{percent}
+    inodes: Inodes %{mount} à %{percent}
+    memory: Mémoire à %{percent}
+    load:
+      one: Charge %{load} pour %{count} processeur
+      other: Charge %{load} pour %{count} processeurs
+    reboot_required: Redémarrage requis
+    service_failed: "%{name} en échec"
+    services_failed:
+      one: "%{count} service en échec"
+      other: "%{count} services en échec"
+    clock: Horloge non synchronisée
+    unsupported: "%{name} n'est plus supporté"
+    timer_failed: Tâche planifiée %{name} en échec
+    timers_failed:
+      one: "%{count} tâche planifiée en échec"
+      other: "%{count} tâches planifiées en échec"
+    timer_late: Tâche planifiée %{name} en retard
+    timers_late:
+      one: "%{count} tâche planifiée en retard"
+      other: "%{count} tâches planifiées en retard"
+    container_unhealthy: Conteneur %{name} en mauvaise santé
+    containers_unhealthy:
+      one: "%{count} conteneur en mauvaise santé"
+      other: "%{count} conteneurs en mauvaise santé"
+    container_looping: Conteneur %{name} redémarre en boucle
+    containers_looping:
+      one: "%{count} conteneur redémarre en boucle"
+      other: "%{count} conteneurs redémarrent en boucle"
+    images_to_update:
+      one: "%{count} image Docker à mettre à jour"
+      other: "%{count} images Docker à mettre à jour"
+    vulnerability: Vulnérabilité %{cve} corrigeable
+    vulnerabilities:
+      one: "%{count} vulnérabilité grave corrigeable"
+      other: "%{count} vulnérabilités graves corrigeables"
+    port_unexpected: Port %{port} inattendu
+    ports_unexpected:
+      one: "%{count} port inattendu (%{ports})"
+      other: "%{count} ports inattendus (%{ports})"
+  servers:
+    system_card:
+      system: Système
+      read_html: relevé %{collected_at}
+      memory_html: "· %{human_bytes} de mémoire"
+      started: Démarré
+      host_name: Nom d'hôte
+      time_zone: Fuseau horaire
+      root_access: Accès root
+      last_attempt_html: 'Dernier essai %{checked_at} : %{message}'
+      inventory_yet_elio_reads: 'Aucun inventaire pour le moment : Elio lit le système, la santé et les services du serveur par SSH, en lecture seule.'
+      run_inventory: Lancer l'inventaire
+    health_card:
+      load_over_24_h: Charge sur 24 h
+      synchronized: synchronisée
+      not_synchronized: non synchronisée
+      load_processors: Charge (% des processeurs)
+      memory: Mémoire
+      fullest_disk: Disque le plus plein
+      health: Santé
+      read_html: relevé %{collected_at}
+      load: Charge
+      do: À traiter
+      nothing_report: Rien à signaler
+      updates: Mises à jour
+      security_html: "%{security} de sécurité"
+      reboot_required: Redémarrage requis
+      failed_services: Services en échec
+      mount_point: Point de montage
+      used: Utilisé
+      measure_yet_run_inventory: 'Pas encore de mesure : lancez l''inventaire pour suivre la charge, la mémoire, les disques et les mises à jour.'
+      swap_html: "%{percent} de %{size}"
+    network_card:
+      'off': désactivée
+      network_inventory_yet_refresh: 'Pas encore d''inventaire du réseau : actualisez l''inventaire pour relever les adresses du serveur.'
+      network: Réseau
+      read_html: relevé %{collected_at}
+      scope: Portée
+      added_hand: 'Ajoutées à la main :'
+    services_card:
+      without_compose_project: Sans projet Compose
+      stopped: arrêté
+      read_html: relevé %{collected_at}
+      active_services: services actifs
+      failed_html: "%{count} en échec"
+      inactive_html: "· %{count} inactifs"
+      containers_running_html: "/%{count} conteneurs en cours"
+      show_inactive_services_html: Afficher les %{count} services inactifs
+      systemd_system: Pas de systemd sur ce système.
+      docker_not_installed: Docker n'est pas installé.
+      elio_needs_root_password_html: "%{message} Elio a besoin de root (sudo sans mot de passe) ou du groupe docker."
+      container: Aucun conteneur.
+      services_inventory_yet: Pas encore d'inventaire des services.
+    systemd_unit:
+      failed: en échec
+      boot: au démarrage
+    ports_card:
+      private: privé
+      ports: Ports
+      read_html: relevé %{collected_at}
+      public_out_listening_html: publics sur %{count} en écoute
+      firewall_html: 'Firewall : %{firewall_label}'
+      expected_ports_html: 'Ports attendus : %{filter_map}'
+      docker_publishes_ports_adding: 'Docker publie des ports en ajoutant ses propres règles : ufw ne les filtre pas. Publiez-les sur 127.0.0.1 (« 127.0.0.1:8080:80 ») ou filtrez-les dans la chaîne DOCKER-USER.'
+      port: Port
+      listening: Écoute
+      service_container: Service / conteneur
+      listening_port: Aucun port en écoute.
+      suggested_ufw_rules: Règles ufw suggérées
+      elio_never_changes_firewall: 'Elio ne modifie jamais le firewall : relisez puis appliquez-les vous-même.'
+      ports_inventory_yet: Pas encore d'inventaire des ports.
+    port_firewall:
+      allowed: autorisé
+      blocked: bloqué
+      firewall_blocks_port_default: Le firewall bloque ce port par défaut
+      published_docker: publié par Docker
+      docker_bypasses_ufw_port: 'Docker contourne ufw : le port est joignable même sans règle'
+      not_filtered: non filtré
+      firewall_filters_port: Aucun firewall ne filtre ce port
+      firewall_unreadable_without_root: Firewall illisible sans accès root
+      unknown: inconnu
+    scheduled_tasks_card:
+      search_whole_fleet: Chercher sur tout le parc
+      scheduled_tasks: Tâches planifiées
+      read_html: relevé %{collected_at}
+      systemd_timers: timers systemd
+      failed_html: "%{failed} en échec"
+      late_html: "%{late} en retard"
+      cron_lines_periodic_scripts_html: lignes cron · %{count} scripts périodiques
+      systemd_timers_2: Timers systemd
+      state: État
+      last_run: Dernier passage
+      systemd_timer: Aucun timer systemd.
+      cron_line: Aucune ligne cron.
+      periodic_scripts: Scripts périodiques
+      etc_cron_html: "(/etc/cron.%{period})"
+      scheduled_tasks_inventory_yet: Pas encore d'inventaire des tâches planifiées.
+  server_packages:
+    frame:
+      loading_packages: Chargement des paquets…
+    index:
+      packages_inventory_yet: Pas encore d'inventaire des paquets.
+      search_package: Rechercher un paquet…
+      search_package_2: Rechercher un paquet
+      all_types: Tous les types
+      package_type: Type de paquet
+      filter: Filtrer
+      installed: installés
+      update: à mettre à jour
+      including: ", dont"
+      security_html: "%{security} de sécurité"
+      updates_only: Mises à jour seulement
+      package: Paquet
+      update_2: Mise à jour
+      security: sécurité
+      up_date: à jour
+      package_matches: Aucun paquet ne correspond.
+  packages:
+    index:
+      package_name: Nom du paquet
+      which_servers_have_package: Quels serveurs ont un paquet, et en quelle version ? D'après le dernier inventaire de chaque serveur.
+      packages_inventory_yet_html: "%{t} pas encore d'inventaire des paquets."
+      update: Mise à jour
+      servers: Serveurs
+      security: sécurité
+      up_date: à jour
+      package_contains_html: Aucun paquet ne contient « %{q} ».
+      pending_security_updates: Mises à jour de sécurité en attente
+      package: Paquet
+      available_version: Version disponible
+      servers_concerned: Serveurs concernés
+      pending_security_update: Aucune mise à jour de sécurité en attente.
+  ports:
+    index:
+      all_groups: Tous les groupes
+      group: Groupe
+      port_e_g_3306: Port (ex. 3306)
+      port: Port
+      filter: Filtrer
+      public_ports: ports publics
+      server_exposes_port: Aucun serveur n'expose le port %{port}.
+      known_public_port: Aucun port public connu.
+      public_ports_2: Ports publics
+      what_each_server_exposes: Ce que chaque serveur expose sur ses adresses publiques, d'après son dernier inventaire. Les ports inattendus et non filtrés en premier.
+      server: Serveur
+      service_container: Service / conteneur
+      without_ports_inventory: 'Sans inventaire des ports :'
+  scheduled_tasks:
+    index:
+      command_timer_file_e: Commande, timer, fichier (ex. backup.sh)
+      search: Rechercher
+      all_groups: Tous les groupes
+      group: Groupe
+      all_states: Tous les états
+      failed: En échec
+      late: En retard
+      state: État
+      filter: Filtrer
+      tasks: tâches
+      scheduled_task_matches: Aucune tâche planifiée ne correspond.
+      known_scheduled_task: Aucune tâche planifiée connue.
+      cron_jobs_systemd_timers: Crontabs et timers systemd de chaque serveur, d'après leur dernier inventaire. Les timers en échec ou en retard en premier.
+      server: Serveur
+      task: Tâche
+      cron_keeps_record_runs: Cron ne garde pas de trace de ses passages lisible sans les journaux.
+      without_scheduled_tasks_inventory: 'Sans inventaire des tâches planifiées :'
+  cron:
+    at_boot: au démarrage
+    every_minute: toutes les minutes
+    every_minutes:
+      one: toutes les minutes
+      other: toutes les %{count} minutes
+    every_minutes_from:
+      one: toutes les minutes à partir de :%{minute}
+      other: toutes les %{count} minutes à partir de :%{minute}
+    every_hour: toutes les heures
+    every_hour_at: toutes les heures à :%{minute}
+    every_hours_at:
+      one: toutes les heures à :%{minute}
+      other: toutes les %{count} heures à :%{minute}
+    time: "%{hour} h %{minute}"
+    at: à %{times}
+    every_day: tous les jours %{at}
+    daily: tous les jours %{at}
+    weekly: le dimanche %{at}
+    weekly_monday: le lundi %{at}
+    monthly: le 1er du mois %{at}
+    yearly: le 1er janvier %{at}
+    quarterly: tous les trimestres
+    semiannually: tous les six mois
+    on_day: le %{day}
+    on_days: "%{days} %{at}"
+    from_to: du %{first} au %{last}
+    on_dates: le %{dates} du mois %{at}
+    first_of_month: 1er
+    quoted: "« %{expression} »"
+    after:
+      boot: "%{span} après le démarrage"
+      activation: "%{span} après l'activation"
+      last_start: "%{span} après le dernier lancement"
+      last_end: "%{span} après la fin du dernier lancement"
+    span:
+      days:
+        one: "%{count} jour"
+        other: "%{count} jours"
+      hours:
+        one: "%{count} heure"
+        other: "%{count} heures"
+      minutes:
+        one: "%{count} minute"
+        other: "%{count} minutes"
+      seconds:
+        one: "%{count} seconde"
+        other: "%{count} secondes"
+  inventory:
+    port_analysis:
+      no_firewall: aucun firewall actif
+      unknown_firewall: firewall inconnu (accès root requis)
+      header: "# Règles ufw suggérées pour %{server_name} (à relire avant de les appliquer)"
+      docker: "# %{key} publié par Docker (%{container}) : ufw ne le filtre pas. Publiez-le sur 127.0.0.1 ou filtrez-le dans la chaîne DOCKER-USER."
+      unexpected: "# %{key} (%{label}) : port inattendu, à fermer ou à ajouter aux ports attendus du groupe"
+      private: "# %{key} (%{comment_for}) écoute sur le réseau privé (%{addresses_join}) : à autoriser depuis ce réseau si besoin"
+      port: port %{port}
+    package:
+      managers:
+        dpkg: Debian (dpkg)
+        snap: Snap
+        docker: Image Docker
+    collection:
+      internal_error: Erreur interne pendant la collecte (%{class})
+    collector:
+      output_too_large: Sortie trop volumineuse pour « %{key} »
+    collectors:
+      docker:
+        not_installed: Docker n'est pas installé
+        needs_root: " Elio a besoin de root (sudo sans mot de passe) ou du groupe docker."
+        not_covered: Système de l'image non couvert
+        unknown_system: Système de l'image inconnu
+        not_in_feed: "%{target_last} pas encore dans la base %{label} (prochaine mise à jour des vulnérabilités)"
+        unreadable_report: Rapport illisible
+        timeout: Analyse trop longue (délai dépassé)
+        unreadable: 'Docker illisible : %{error}.%{hint}'
+        no_answer: pas de réponse
+      health:
+        failed: 'Lecture de la santé impossible : %{exit_status}'
+      network:
+        failed: 'Lecture du réseau impossible : %{exit_status}'
+        no_ip: La commande ip (iproute2) n'est pas disponible
+        unreadable: Sortie de la commande ip illisible
+      os:
+        failed: 'Lecture du système impossible : %{exit_status}'
+      packages:
+        failed: 'Lecture des paquets impossible : %{exit_status}'
+        unsupported: Ni dpkg ni snap sur ce système
+        docker_unreadable: 'Images Docker illisibles : %{truncate}'
+      ports:
+        failed: 'Lecture des ports impossible : %{exit_status}'
+        no_ss: La commande ss n'est pas disponible
+        without_root: 'Sans accès root : processus des autres utilisateurs et firewall inconnus'
+      scheduled_tasks:
+        failed: 'Lecture des tâches planifiées impossible : %{exit_status}'
+        unsupported: Ni cron ni systemd sur ce système
+        crontabs_unreadable: 'Crontabs des utilisateurs illisibles : Elio a besoin de root (sudo sans mot de passe).'
+        crontab_of: crontab de %{user}
+      services:
+        failed: 'Lecture des services impossible : %{exit_status}'
+        unsupported: Ni systemd ni Docker sur ce système
+        docker_unreadable: 'Conteneurs Docker illisibles : %{truncate}'
+    categories:
+      os: Système
+      health: Santé
+      packages: Paquets
+      services: Services
+      ports: Ports
+      network: Réseau
+      scheduled_tasks: Tâches planifiées
+      docker: Docker
+    network_kinds:
+      wireguard: WireGuard
+      ethernet: Ethernet
+      wifi: Wi-Fi
+      bridge: Pont
+      vlan: VLAN
+      bond: Agrégat
+      tun: Tunnel (tun)
+      tap: Tunnel (tap)
+      tunnel: Tunnel
+      vxlan: VXLAN
+      other: Autre
+  inventory_helper:
+    virtualization:
+      none: Machine physique
+      kvm: KVM
+      qemu: QEMU
+      vmware: VMware
+      microsoft: Hyper-V
+      oracle: VirtualBox
+      xen: Xen
+      amazon: AWS
+      lxc: Conteneur LXC
+      docker: Conteneur Docker
+      podman: Conteneur Podman
+      openvz: OpenVZ
+      wsl: WSL
+      unknown: Inconnue
+    privilege:
+      root: connecté en root
+      sudo: sudo sans mot de passe
+      none: aucun (inventaire partiel)
+      unknown: inconnu
+    end_of_life:
+      ended: Plus supporté depuis le %{date}
+      soon: Fin de support le %{date}
+      supported: support jusqu'au %{date}
+    periods:
+      hourly: toutes les heures
+      daily: tous les jours
+      weekly: toutes les semaines
+      monthly: tous les mois
+    timer:
+      failed: en échec
+      last_run: 'Dernier passage : %{result} (code %{code})'
+      late: en retard
+      inactive: inactif
+      ok: ok
+    container:
+      looping: redémarre en boucle
+      unhealthy: mauvaise santé
+      starting: démarre
+      running: en cours
+      stopped: arrêté
+      stopped_code: arrêté (code %{code})
+    image_update:
+      available: nouvelle version
+      current: à jour
+      unknown: Pas encore vérifiée, image sans tag ou privée
+    scanners:
+      trivy: Trivy
+      grype: Grype
+      elio: Elio (paquets de l'image)
+      none: non analysée
+    score:
+      none: Pas encore de note
+      average: Moyenne de %{providers}
+      exploited: exploitée
+      kev: Catalogue CISA KEV
+      kev_since: Catalogue CISA KEV depuis le %{date}
+      epss: Probabilité d'exploitation dans les 30 jours
+    cvss:
+      AV: Vecteur
+      AC: Complexité
+      AT: Prérequis
+      PR: Privilèges requis
+      UI: Interaction
+      S: Portée
+      C: Confidentialité
+      VC: Confidentialité
+      I: Intégrité
+      VI: Intégrité
+      A: Disponibilité
+      VA: Disponibilité
+    cvss_values:
+      AV:
+        "N": réseau
+        A: réseau adjacent
+        L: local
+        P: physique
+      AC:
+        L: faible
+        H: élevée
+      AT:
+        "N": aucun
+        P: présents
+      PR:
+        "N": aucun
+        L: faibles
+        H: élevés
+      UI:
+        "N": aucune
+        R: requise
+        P: passive
+        A: active
+      S:
+        U: inchangée
+        C: changée
+      C:
+        H: forte
+        L: faible
+        "N": aucune
+      I:
+        H: forte
+        L: faible
+        "N": aucune
+      A:
+        H: forte
+        L: faible
+        "N": aucune
+    snapshot:
+      error: Échec de l'inventaire
+      partial: Partiel
+      unsupported: Non disponible
+    scope:
+      public: publique
+      private: privée
+      local: locale

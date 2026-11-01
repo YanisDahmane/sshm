@@ -95,7 +95,7 @@ class Integrations::UptimeKumaTest < ActiveSupport::TestCase
     @integration.update!(settings: @integration.settings.merge("alert_down" => true, "alert_cert" => true, "alert_uptime" => true, "uptime_threshold" => 99,
                                                                  "no_monitor_ignored_groups" => [ server_groups(:production).id.to_s ]))
     assert_equal [ [ "crit", "Sonde « Web ping » hors ligne" ], [ "warn", "Certificat de « Web ping » : expire dans 3 j" ],
-                   [ "warn", "Disponibilité de « Web ping » sur 30 jours : 95,00 %" ] ], reasons.(servers(:web))
+                   [ "warn", "Disponibilité de « Web ping » sur 30 jours : 95,00\u00A0%" ] ], reasons.(servers(:web))
     assert_empty reasons.(servers(:db)), "Database is in an ignored group"
     assert_equal "crit", servers(:web).reload.tap(&:refresh_health!).health_status
   end

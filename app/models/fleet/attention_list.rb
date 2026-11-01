@@ -30,7 +30,7 @@ class AttentionList
       elsif (reasons = Array(server.health_reasons)).any?
         first = reasons.first
         more = reasons.size > 1 ? " (+#{reasons.size - 1})" : ""
-        items << Item.new(first["tone"], first["tone"] == "crit" ? :x_mark : :exclamation_triangle, server.name, "#{first["text"]}#{more}", I18n.t("attention_list.see"), @routes.server_path(server))
+        items << Item.new(first["tone"], first["tone"] == "crit" ? :x_mark : :exclamation_triangle, server.name, "#{Inventory::HealthStatus.text(first)}#{more}", I18n.t("attention_list.see"), @routes.server_path(server))
       elsif server.ssh_ok == false
         items << Item.new("crit", :key, server.name, I18n.t("attention_list.key_refused"), I18n.t("attention_list.install_key"), @routes.server_path(server))
       end

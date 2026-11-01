@@ -3,11 +3,11 @@
 <% os = snapshot&.data || {} %>
 <section id="server-system" class="card mt-6">
   <div class="card-header">
-    <h2 class="flex items-center gap-2 font-semibold"><%= icon :server_stack, class: "h-4 w-4 text-ink-3" %> Système</h2>
+    <h2 class="flex items-center gap-2 font-semibold"><%= icon :server_stack, class: "h-4 w-4 text-ink-3" %> <%= t(".system") %></h2>
     <div class="flex items-center gap-2 text-xs text-ink-3">
       <%= inventory_status_badge(snapshot) %>
       <% if snapshot&.collected_at %>
-        relevé <%= relative_time_tag snapshot.collected_at %>
+        <%= t(".read_html", collected_at: (relative_time_tag snapshot.collected_at)) %>
       <% end %>
     </div>
   </div>
@@ -15,7 +15,7 @@
   <% if snapshot&.collected? %>
     <dl class="system-details divide-y divide-line px-4 text-sm">
       <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2">
-        <dt class="text-ink-3">Système</dt>
+        <dt class="text-ink-3"><%= t(".system") %></dt>
         <dd class="flex flex-wrap items-center justify-end gap-2 text-right">
           <span class="os-name font-medium"><%= os["name"] %></span>
           <%= end_of_life_badge(os["id"], os["version_id"]) %>
@@ -30,41 +30,41 @@
         <dd class="machine text-right">
           <%= virtualization_label(os["virtualization"]) %>
           <% if os["cpus"] %> · <%= t("count.processors", count: os["cpus"]) %><% end %>
-          <% if os["memory_bytes"] %> · <%= human_bytes(os["memory_bytes"]) %> de mémoire<% end %>
+          <% if os["memory_bytes"] %> <%= t(".memory_html", human_bytes: (human_bytes(os["memory_bytes"]))) %><% end %>
         </dd>
       </div>
       <% if os["booted_at"] %>
         <div class="flex justify-between gap-4 py-2">
-          <dt class="text-ink-3">Démarré</dt>
+          <dt class="text-ink-3"><%= t(".started") %></dt>
           <dd><%= relative_time_tag Time.iso8601(os["booted_at"]) %></dd>
         </div>
       <% end %>
       <div class="flex justify-between gap-4 py-2">
-        <dt class="text-ink-3">Nom d'hôte</dt>
+        <dt class="text-ink-3"><%= t(".host_name") %></dt>
         <dd class="font-mono text-xs"><%= os["hostname"] || "—" %></dd>
       </div>
       <% if os["timezone"] %>
         <div class="flex justify-between gap-4 py-2">
-          <dt class="text-ink-3">Fuseau horaire</dt>
+          <dt class="text-ink-3"><%= t(".time_zone") %></dt>
           <dd><%= os["timezone"] %></dd>
         </div>
       <% end %>
       <div class="flex justify-between gap-4 py-2">
-        <dt class="text-ink-3">Accès root</dt>
+        <dt class="text-ink-3"><%= t(".root_access") %></dt>
         <dd class="privilege <%= server.privilege == "none" ? "text-warn-ink" : "text-ink" %>"><%= privilege_label(server.privilege) %></dd>
       </div>
     </dl>
     <% if snapshot.failed? %>
-      <p class="inventory-error border-t border-line px-4 py-2 text-xs text-crit-ink">Dernier essai <%= relative_time_tag snapshot.checked_at %> : <%= snapshot.message %></p>
+      <p class="inventory-error border-t border-line px-4 py-2 text-xs text-crit-ink"><%= t(".last_attempt_html", checked_at: (relative_time_tag snapshot.checked_at), message: snapshot.message) %></p>
     <% end %>
   <% elsif snapshot&.failed? %>
     <p class="inventory-error px-4 py-4 text-sm text-crit-ink"><%= snapshot.message %></p>
   <% else %>
     <div class="system-empty flex flex-wrap items-center justify-between gap-3 px-4 py-4">
-      <p class="text-sm text-ink-3">Aucun inventaire pour le moment : Elio lit le système, la santé et les services du serveur par SSH, en lecture seule.</p>
+      <p class="text-sm text-ink-3"><%= t(".inventory_yet_elio_reads") %></p>
       <% if can?(:operate) %>
         <%= button_to server_inventory_path(server), class: "btn btn-primary" do %>
-          <%= icon :arrow_path %> Lancer l'inventaire
+          <%= icon :arrow_path %> <%= t(".run_inventory") %>
         <% end %>
       <% end %>
     </div>

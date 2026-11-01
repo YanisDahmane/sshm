@@ -1,0 +1,27 @@
+en:
+  integrations:
+    uptime_kuma:
+      health:
+        no_monitor: No Uptime Kuma monitor
+        monitor_down: Monitor “%{name}” down
+        cert_expired: Certificate of “%{name}” expired
+        cert_expiring:
+          one: 'Certificate of “%{name}”: expires in %{count} day'
+          other: 'Certificate of “%{name}”: expires in %{count} days'
+        uptime: 'Uptime of “%{name}” over %{window}: %{ratio}'
+        maintenance:
+          one: Monitor “%{name}” in maintenance for more than %{count} day
+          other: Monitor “%{name}” in maintenance for more than %{count} days
+      windows:
+        w1d: 24 hours
+        w30d: 30 days
+        w365d: 1 year
+    ovh:
+      health:
+        expiring:
+          one: 'OVH service “%{name}”: expires in %{count} day'
+          other: 'OVH service “%{name}”: expires in %{count} days'
+        firewall_disabled: OVH network firewall disabled on %{ip}
+        no_reverse: No reverse DNS for %{ip}
+        reverse_mismatch: Reverse DNS of %{ip} (%{reverse}) ≠ host name
+        no_dns: No OVH DNS record points to this server

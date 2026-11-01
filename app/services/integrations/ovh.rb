@@ -98,31 +98,31 @@ class Integrations::Ovh < Integrations::Base
       reasons = []
       if integration.value(:alert_expiring)
         expiring = expiring_services(integration).where(server: server)
-        expiring.each { |service| reasons << reason(service.days_left.to_i <= 7 ? "crit" : "warn", "Service OVH « #{service.name} » : expire dans #{service.days_left} j") }
+        expiring.each { |service| reasons << reason(service.days_left.to_i <= 7 ? "crit" : "warn", :expiring, name: service.name, count: service.days_left.to_i) }
       end
       ip_blocks = resources.select { |resource| resource.kind == "ip" }
       if integration.value(:alert_firewall_disabled)
         disabled = ip_blocks.flat_map { |block| Array(block.data["firewall"]).select { |_ip, firewall| firewall["enabled"] == false }.map(&:first) }
         missing = ip_blocks.select { |block| block.data.key?("firewall") && block.data["firewall"].empty? }.map(&:name)
-        (disabled + missing).uniq.each { |ip| reasons << reason("warn", "Firewall réseau OVH désactivé sur #{ip}") }
+        (disabled + missing).uniq.each { |ip| reasons << reason("warn", :firewall_disabled, ip: ip) }
       end
       if integration.value(:alert_reverse_mismatch) && server.hostname.present?
         ip_blocks.each do |block|
           Array(block.data["reverse"]).each do |ip, reverse|
             next if reverse.to_s.casecmp?(server.hostname)
 
-            reasons << reason("warn", reverse.blank? ? "Pas de reverse DNS pour #{ip}" : "Reverse DNS de #{ip} (#{reverse}) ≠ hostname")
+            reasons << (reverse.blank? ? reason("warn", :no_reverse, ip: ip) : reason("warn", :reverse_mismatch, ip: ip, reverse: reverse))
           end
         end
       end
       if integration.value(:alert_server_without_dns) && ip_blocks.any? && resources.none? { |resource| resource.kind == "dns_record" }
-        reasons << reason("warn", "Aucun enregistrement DNS OVH ne pointe vers ce serveur")
+        reasons << reason("warn", :no_dns)
       end
       reasons
     end
 
     private
 
-    def reason(tone, text) = Inventory::HealthStatus::Reason.new(tone, text)
+    def reason(tone, key, **params) = Inventory::HealthStatus.reason(tone, "integrations.ovh.health.#{key}", **params)
   end
 end
