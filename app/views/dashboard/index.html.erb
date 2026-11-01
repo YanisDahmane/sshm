@@ -30,7 +30,7 @@
 </div>
 
 <div class="mt-5 grid gap-5 lg:grid-cols-3">
-  <div class="space-y-5 lg:col-span-2">
+  <div class="min-w-0 space-y-5 lg:col-span-2">
     <section id="attention" class="card">
       <div class="card-header">
         <h2 class="font-semibold">À traiter</h2>
@@ -65,7 +65,7 @@
     </section>
   </div>
 
-  <div class="space-y-5">
+  <div class="min-w-0 space-y-5">
     <section id="temporary-accesses" class="card">
       <div class="card-header"><h2 class="font-semibold">Accès temporaires</h2><span class="text-xs text-ink-3"><%= @temporary_accesses.size %> en cours</span></div>
       <% if @temporary_accesses.any? %>

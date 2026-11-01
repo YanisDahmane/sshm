@@ -28,7 +28,7 @@
               (pluralize_fr(os["cpus"], "processeur", "processeurs") if os["cpus"]), (human_bytes(os["memory_bytes"]) if os["memory_bytes"]) ].compact.join(" · ") %>
       </p>
     </div>
-    <div class="flex shrink-0 flex-wrap items-center gap-2">
+    <div class="flex flex-wrap items-center gap-2">
       <% if can?(:operate) %>
         <%= button_to server_inventory_path(@server), form: { class: "refresh-inventory" }, class: "btn btn-secondary" do %>
           <%= icon :arrow_path %> Actualiser l'inventaire
