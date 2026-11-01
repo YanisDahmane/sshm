@@ -112,6 +112,8 @@ class ServersController < ApplicationController
     @severity = params[:severity].presence_in(Vulnerability::SEVERITIES.keys)
     scope = scope.fixable if @fixable_only
     scope = scope.at_least(@severity) if @severity
+    @vulnerability_query = params[:q].to_s.strip.first(100).presence
+    scope = scope.search(@vulnerability_query) if @vulnerability_query
     @package = params[:package].to_s.strip.presence&.first(100)
     @vulnerability_view = vulnerability_view
     if @vulnerability_view == "packages"

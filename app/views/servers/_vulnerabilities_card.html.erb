@@ -44,6 +44,8 @@
         <%= hidden_field_tag :view, @vulnerability_view %>
         <% if @sort %><%= hidden_field_tag :sort, @sort %><% end %>
         <% if @package %><%= hidden_field_tag :package, @package %><% end %>
+        <%= search_field_tag :q, @vulnerability_query, placeholder: "CVE ou paquet (ex. linux, CVE-2024-6387)", aria: { label: "Rechercher une CVE ou un paquet" },
+              data: { action: "input->auto-submit#submitLater" }, class: "vulnerability-search input w-64 py-1 text-xs" %>
         <label class="flex items-center gap-1.5"><%= check_box_tag :fixable, "1", @fixable_only, data: { action: "change->auto-submit#submit" } %> Corrigeables seulement</label>
         <%= select_tag :severity, options_for_select([ [ "Toutes gravités", "" ], *Vulnerability::SEVERITIES.except("unknown").map { |key, label| [ "#{label}#{" ou plus" unless key == "critical"}", key ] } ], @severity),
               aria: { label: "Gravité minimale" }, data: { action: "change->auto-submit#submit" }, class: "input w-auto py-1 text-xs" %>
@@ -86,7 +88,7 @@
       </div>
       <% if @pager.multiple_pages? %><div class="px-4 pb-3"><%= render "shared/pagination", pager: @pager, noun: "vulnérabilités" %></div><% end %>
     <% else %>
-      <p class="vulnerabilities-none px-4 py-4 text-sm text-ink-3"><%= counts[:total].zero? ? "Aucune vulnérabilité connue sur ce serveur." : "Aucune vulnérabilité ne correspond aux filtres." %></p>
+      <p class="vulnerabilities-none px-4 py-4 text-sm text-ink-3"><%= counts[:total].zero? ? "Aucune vulnérabilité connue sur ce serveur." : (@vulnerability_query ? "Aucune CVE ni paquet ne correspond à « #{@vulnerability_query} »." : "Aucune vulnérabilité ne correspond aux filtres.") %></p>
     <% end %>
   <% end %>
 </section>

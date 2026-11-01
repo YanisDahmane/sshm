@@ -121,4 +121,26 @@ class VulnerabilitiesTest < ActionDispatch::IntegrationTest
       assert_select ".package-command", 0
     end
   end
+
+  test "the server tab searches a CVE or a package (source or installed binary), in both views" do
+    sign_in users(:viewer)
+
+    get server_path(servers(:web), tab: "vulnerabilities", view: "packages", q: "libssl")
+    assert_select "input.vulnerability-search[value=libssl]"
+    assert_select "li.vulnerability-package", 1
+    assert_select "li.vulnerability-package[data-package=openssl] details[open]"
+
+    get server_path(servers(:web), tab: "vulnerabilities", view: "packages", q: "cve-2024-6387")
+    assert_select "li.vulnerability-package[data-package=openssh]", 1
+    assert_select "li.vulnerability-package .package-cve", 1
+
+    get server_path(servers(:web), tab: "vulnerabilities", view: "cves", q: "openss")
+    assert_select "tr.server-vulnerability", 4
+    assert_select ".vulnerability-view-toggle a[data-view=packages][href*='q=openss']"
+
+    get server_path(servers(:web), tab: "vulnerabilities", view: "cves", q: "zzz")
+    assert_select ".vulnerabilities-none", "Aucune CVE ni paquet ne correspond à « zzz »."
+    get server_path(servers(:web), tab: "vulnerabilities", view: "packages", q: "zzz")
+    assert_select ".vulnerabilities-none", "Aucune CVE ni paquet ne correspond à « zzz »."
+  end
 end
