@@ -1,6 +1,15 @@
 require_relative "boot"
 
-require "rails/all"
+require "rails"
+# The parts of Rails Elio uses (no Active Storage, Action Text, Action Mailbox).
+require "active_model/railtie"
+require "active_job/railtie"
+require "active_record/railtie"
+require "action_controller/railtie"
+require "action_mailer/railtie"
+require "action_view/railtie"
+require "action_cable/engine"
+require "rails/test_unit/railtie"
 require_relative "../lib/elio/secrets"
 require_relative "../lib/elio/version"
 
