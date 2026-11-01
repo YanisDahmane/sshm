@@ -14,7 +14,7 @@ class VulnerabilitiesSystemTest < ApplicationSystemTestCase
   end
 
   test "a click on a CVE of the server opens its detail in a modal, closed with Escape" do
-    visit server_path(servers(:web), tab: "vulnerabilities")
+    visit server_path(servers(:web), tab: "vulnerabilities", view: "cves")
 
     within("tr.server-vulnerability[data-cve='CVE-2024-6387']") do
       assert_selector ".cve-score", text: "8,1"

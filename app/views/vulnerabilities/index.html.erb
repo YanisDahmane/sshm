@@ -21,7 +21,17 @@
   <%= stat_tile "Serveurs touchés", @summary[:servers], nil, icon: :server_stack, id: "stat-affected" %>
 </div>
 
-<%= form_with url: vulnerabilities_path, method: :get, data: { controller: "auto-submit", turbo_action: "advance" }, class: "vulnerability-filters mt-5 flex flex-wrap items-center gap-2" do |f| %>
+<div class="mt-5 flex flex-wrap items-center gap-3">
+<div class="vulnerability-view-toggle flex rounded-lg border border-line bg-surface p-0.5 text-xs" role="group" aria-label="Regrouper">
+  <% [ [ "packages", "Par paquet", :cube ], [ "cves", "Par CVE", :list_bullet ] ].each do |view, label, icon_name| %>
+    <%= link_to vulnerabilities_path(request.query_parameters.except("page").merge("view" => view)), data: { view: view }, aria: { pressed: @view == view },
+          class: "inline-flex items-center gap-1 rounded-md px-2 py-1 #{@view == view ? "bg-subtle font-medium text-ink" : "text-ink-3 hover:text-ink"}" do %>
+      <%= icon icon_name, class: "h-4 w-4" %><%= label %>
+    <% end %>
+  <% end %>
+</div>
+<%= form_with url: vulnerabilities_path, method: :get, data: { controller: "auto-submit", turbo_action: "advance" }, class: "vulnerability-filters flex flex-wrap items-center gap-2" do |f| %>
+  <%= hidden_field_tag :view, @view %>
   <%= f.search_field :q, value: @q, placeholder: "CVE ou paquet (ex. openssl)", aria: { label: "Rechercher" },
         data: { action: "input->auto-submit#submitLater" }, class: "input w-60 py-1 text-xs" %>
   <%= f.select :severity, [ [ "Toutes gravités", "" ], *Vulnerability::SEVERITIES.except("unknown").map { |key, label| [ "#{label}#{" ou plus" unless key == "critical"}", key ] } ],
@@ -33,8 +43,11 @@
   <label class="flex items-center gap-1.5 text-xs"><%= check_box_tag :fixable, "1", @fixable_only, data: { action: "change->auto-submit#submit" } %> Corrigeables seulement</label>
   <noscript><%= f.submit "Filtrer", class: "btn btn-secondary" %></noscript>
 <% end %>
+</div>
 
-<% if @rows.any? %>
+<% if @view == "packages" %>
+  <div class="card mt-3"><%= render "servers/vulnerability_packages", server: nil, groups: @package_groups, pager: @pager %></div>
+<% elsif @rows.any? %>
   <div class="card mt-3 overflow-x-auto" data-controller="modal">
     <table id="vulnerabilities" class="table-dense">
       <thead><tr><th class="pl-4">Gravité</th><th>Note</th><th>CVE</th><th>Paquets</th><th>Serveurs</th><th class="pr-4">Correctif</th></tr></thead>

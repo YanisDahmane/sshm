@@ -17,7 +17,7 @@ class VulnerabilitiesTest < ActionDispatch::IntegrationTest
   test "the server tab lists the CVEs, fixable and most serious first, with filters" do
     sign_in users(:viewer)
 
-    get server_path(servers(:web), tab: "vulnerabilities")
+    get server_path(servers(:web), tab: "vulnerabilities", view: "cves")
 
     assert_select "nav.server-tabs a[data-tab=vulnerabilities][aria-current=page]", text: /Vulnérabilités\s*3/
     assert_select "#server-vulnerabilities" do
@@ -32,22 +32,22 @@ class VulnerabilitiesTest < ActionDispatch::IntegrationTest
       assert_select "tr.server-vulnerability[data-cve=CVE-2024-9143] td[title='libssl3']", "openssl", "the source package only, binaries in the title and the modal"
     end
 
-    get server_path(servers(:web), tab: "vulnerabilities", fixable: "1", severity: "high")
+    get server_path(servers(:web), tab: "vulnerabilities", view: "cves", fixable: "1", severity: "high")
     assert_select "tr.server-vulnerability", 1
   end
 
   test "the tab explains an uncovered distribution or a feed never downloaded" do
     record_os(servers(:web), id: "alpine", version_id: "3.20")
     sign_in users(:one)
-    get server_path(servers(:web), tab: "vulnerabilities")
+    get server_path(servers(:web), tab: "vulnerabilities", view: "cves")
     assert_select "#server-vulnerabilities tr.server-vulnerability", 4, "rows of the previous match stay until the next one"
 
     servers(:web).server_vulnerabilities.delete_all
-    get server_path(servers(:web), tab: "vulnerabilities")
+    get server_path(servers(:web), tab: "vulnerabilities", view: "cves")
     assert_select ".vulnerabilities-empty", /Distribution non couverte/
 
     record_os(servers(:web), id: "ubuntu", codename: "noble", version_id: "24.04")
-    get server_path(servers(:web), tab: "vulnerabilities")
+    get server_path(servers(:web), tab: "vulnerabilities", view: "cves")
     assert_select ".vulnerabilities-empty", /La base Ubuntu \(OSV\) n'a pas encore été téléchargée/
     assert_select ".vulnerabilities-empty a[href=?]", settings_vulnerabilities_path
   end
@@ -55,7 +55,7 @@ class VulnerabilitiesTest < ActionDispatch::IntegrationTest
   test "the fleet page groups by CVE, with the servers touched and the filters" do
     sign_in users(:viewer)
 
-    get vulnerabilities_path
+    get vulnerabilities_path(view: "cves")
     assert_response :success
     assert_select "nav.main-nav a[aria-current=page][href=?]", vulnerabilities_path
     assert_select "#stat-cves .stat-value", "5"
@@ -85,5 +85,40 @@ class VulnerabilitiesTest < ActionDispatch::IntegrationTest
     sign_in users(:viewer)
     get servers_path
     assert_select "##{ActionView::RecordIdentifier.dom_id(servers(:web))} .server-notes", text: /Vulnérabilité CVE-2024-6387 corrigeable/
+  end
+
+  test "by package (the default): one line per package with the update, the command, its worst CVEs" do
+    sign_in users(:viewer)
+    get server_path(servers(:web), tab: "vulnerabilities")
+
+    assert_select ".vulnerability-view-toggle a[data-view=packages][aria-pressed=true]"
+    assert_select ".package-summary", /2 paquets à mettre à jour\s+corrigeraient 3 CVE/
+    assert_select "li.vulnerability-package", 2
+    assert_select "li.vulnerability-package:first-child[data-package=openssh][data-state=pending]" do
+      assert_select ".package-name", "openssh"
+      assert_select ".package-cves", /2 CVE/
+      assert_select ".package-update", /1:9.2p1-2\+deb12u2 → 1:9.2p1-2\+deb12u3.*pas encore dans les dépôts.*corrige 1.*1 sans correctif/m
+      assert_select ".package-details .package-cve", 2
+      assert_select ".package-details a.vulnerability-link[data-turbo-frame=vulnerability-detail]", 2
+    end
+    assert_select "dialog.vulnerability-dialog"
+
+    get server_path(servers(:web), tab: "vulnerabilities", view: "cves", package: "openssh")
+    assert_select ".package-filter", /openssh/
+    assert_select "tr.server-vulnerability", 2
+    get server_path(servers(:web), tab: "vulnerabilities")
+    assert_select ".vulnerability-view-toggle a[data-view=cves][aria-pressed=true]", 1, "the choice is remembered"
+  end
+
+  test "the fleet page by package lists the servers touched" do
+    sign_in users(:viewer)
+    get vulnerabilities_path(view: "packages")
+
+    assert_select "li.vulnerability-package[data-package=openssh]" do
+      assert_select ".package-name", "openssh"
+      assert_select "summary", /2 serveurs/
+      assert_select ".package-servers a", 2
+      assert_select ".package-command", 0
+    end
   end
 end

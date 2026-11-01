@@ -52,6 +52,18 @@ class VulnerabilitiesController < ApplicationController
     scope = scope.where(origin: @origin) if @origin
     scope = scope.where("server_vulnerabilities.cve ILIKE :q OR server_vulnerabilities.source_package ILIKE :q", q: "%#{ServerVulnerability.sanitize_sql_like(@q)}%") if @q.present?
 
+    @view = params[:view].presence_in(%w[packages cves]) || ("cves" if @q.present? && @q.match?(/\ACVE-/i))
+    cookies.permanent[:elio_vulnerability_view] = { value: @view, same_site: :lax, httponly: true } if @view
+    @view ||= cookies[:elio_vulnerability_view].presence_in(%w[packages cves]) || "packages"
+    if @view == "packages"
+      @package_groups = PackageVulnerabilities.new(scope.includes(:server)).groups
+      @summary = { cves: scope.distinct.count(:cve), fixable: scope.fixable.distinct.count(:cve), servers: scope.distinct.count(:server_id),
+                   serious: scope.fixable.at_least("high").distinct.count(:cve) }
+      @pager = paginate(@package_groups, per_page: 50)
+      @package_groups = @pager.records
+      return
+    end
+
     servers = Server.where(id: scope.select(:server_id)).index_by(&:id)
     rows = scope.pluck(:cve, :severity, :source_package, :server_id, :image, :fixed_version, :description, :source).group_by(&:first).map do |cve, entries|
       Row.new(cve: cve, severity: entries.map { |entry| entry[1] }.max_by { |severity| Vulnerability.severity_rank(severity) },

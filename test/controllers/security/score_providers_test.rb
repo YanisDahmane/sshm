@@ -131,7 +131,7 @@ class ScoreProvidersTest < ActionDispatch::IntegrationTest
     assert_redirected_to settings_vulnerabilities_path(anchor: "score-colors")
     assert_equal [ 0.0, 5.5, 9.0 ], AppSetting.current.score_bands.map { |band| band["from"] }
 
-    get server_path(servers(:web), tab: "vulnerabilities")
+    get server_path(servers(:web), tab: "vulnerabilities", view: "cves")
     assert_select "tr.server-vulnerability .score-pill[data-color=blue]", "6,5"
 
     patch settings_vulnerabilities_path, params: { app_setting: { score_bands_form: { "0" => { from: "0", color: "green" }, "1" => { from: "8", color: "orange" }, "2" => { from: "7", color: "pink" } } } }

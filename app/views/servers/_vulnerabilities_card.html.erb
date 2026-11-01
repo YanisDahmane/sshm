@@ -29,16 +29,35 @@
       <% end %>
     </p>
 
-    <%= form_with url: server_path(server), method: :get, data: { controller: "auto-submit", turbo_action: "advance" }, class: "vulnerability-filters flex flex-wrap items-center gap-3 border-b border-line px-4 py-2 text-xs" do |f| %>
-      <%= hidden_field_tag :tab, "vulnerabilities" %>
-      <% if @sort %><%= hidden_field_tag :sort, @sort %><% end %>
-      <label class="flex items-center gap-1.5"><%= check_box_tag :fixable, "1", @fixable_only, data: { action: "change->auto-submit#submit" } %> Corrigeables seulement</label>
-      <%= select_tag :severity, options_for_select([ [ "Toutes gravités", "" ], *Vulnerability::SEVERITIES.except("unknown").map { |key, label| [ "#{label}#{" ou plus" unless key == "critical"}", key ] } ], @severity),
-            aria: { label: "Gravité minimale" }, data: { action: "change->auto-submit#submit" }, class: "input w-auto py-1 text-xs" %>
-      <noscript><%= f.submit "Filtrer", class: "btn btn-secondary" %></noscript>
-    <% end %>
+    <div class="vulnerability-toolbar flex flex-wrap items-center gap-3 border-b border-line px-4 py-2 text-xs">
+      <div class="vulnerability-view-toggle flex rounded-lg border border-line bg-surface p-0.5" role="group" aria-label="Regrouper">
+        <% [ [ "packages", "Par paquet", :cube ], [ "cves", "Par CVE", :list_bullet ] ].each do |view, label, icon_name| %>
+          <%= link_to server_path(server, request.query_parameters.except("page", "package", "sort").merge("tab" => "vulnerabilities", "view" => view)),
+                data: { view: view }, aria: { pressed: @vulnerability_view == view },
+                class: "inline-flex items-center gap-1 rounded-md px-2 py-1 #{@vulnerability_view == view ? "bg-subtle font-medium text-ink" : "text-ink-3 hover:text-ink"}" do %>
+            <%= icon icon_name, class: "h-4 w-4" %><%= label %>
+          <% end %>
+        <% end %>
+      </div>
+      <%= form_with url: server_path(server), method: :get, data: { controller: "auto-submit", turbo_action: "advance" }, class: "vulnerability-filters flex flex-wrap items-center gap-3" do |f| %>
+        <%= hidden_field_tag :tab, "vulnerabilities" %>
+        <%= hidden_field_tag :view, @vulnerability_view %>
+        <% if @sort %><%= hidden_field_tag :sort, @sort %><% end %>
+        <% if @package %><%= hidden_field_tag :package, @package %><% end %>
+        <label class="flex items-center gap-1.5"><%= check_box_tag :fixable, "1", @fixable_only, data: { action: "change->auto-submit#submit" } %> Corrigeables seulement</label>
+        <%= select_tag :severity, options_for_select([ [ "Toutes gravités", "" ], *Vulnerability::SEVERITIES.except("unknown").map { |key, label| [ "#{label}#{" ou plus" unless key == "critical"}", key ] } ], @severity),
+              aria: { label: "Gravité minimale" }, data: { action: "change->auto-submit#submit" }, class: "input w-auto py-1 text-xs" %>
+        <noscript><%= f.submit "Filtrer", class: "btn btn-secondary" %></noscript>
+      <% end %>
+      <% if @package %>
+        <span class="package-filter inline-flex items-center gap-1 rounded-full bg-accent-soft px-2 py-0.5 text-accent">paquet <strong class="font-mono"><%= @package %></strong>
+          <%= link_to server_path(server, request.query_parameters.except("package", "page")), aria: { label: "Retirer le filtre de paquet" }, class: "hover:text-ink" do %><%= icon :x_mark, class: "h-3.5 w-3.5" %><% end %></span>
+      <% end %>
+    </div>
 
-    <% if @vulnerabilities.any? %>
+    <% if @vulnerability_view == "packages" %>
+      <%= render "servers/vulnerability_packages", server: server, groups: @package_groups, pager: @pager %>
+    <% elsif @vulnerabilities.any? %>
       <div data-controller="modal" class="overflow-x-auto">
         <table class="table-dense">
           <thead><tr>

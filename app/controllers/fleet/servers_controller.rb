@@ -37,6 +37,8 @@ class ServersController < ApplicationController
 
   TABS = %w[overview packages vulnerabilities services docker schedules ports keys history].freeze
   VULNERABILITIES_PER_PAGE = 100
+  VULNERABILITY_PACKAGES_PER_PAGE = 50
+  VULNERABILITY_VIEWS = %w[packages cves].freeze
 
   # Tabbed page (?tab=), only the requested tab is rendered.
   def show
@@ -93,6 +95,14 @@ class ServersController < ApplicationController
 
   private
 
+  # By package (default) or by CVE, remembered in a cookie like the fleet view;
+  # a package filter (?package=) asks for the CVE view.
+  def vulnerability_view
+    view = params[:view].presence_in(VULNERABILITY_VIEWS) || ("cves" if params[:package].present?)
+    cookies.permanent[:elio_vulnerability_view] = { value: view, same_site: :lax, httponly: true } if view
+    view || cookies[:elio_vulnerability_view].presence_in(VULNERABILITY_VIEWS) || "packages"
+  end
+
   # Vulnerabilities tab: fixable first, most serious first (?fixable=1, ?severity=, ?origin=).
   def show_vulnerabilities
     scope = @server.server_vulnerabilities
@@ -102,10 +112,19 @@ class ServersController < ApplicationController
     @severity = params[:severity].presence_in(Vulnerability::SEVERITIES.keys)
     scope = scope.fixable if @fixable_only
     scope = scope.at_least(@severity) if @severity
-    @sort = params[:sort] == "score" ? "score" : nil
-    scope = (@sort ? scope.by_score : scope.ranked).includes(:rating)
-    @pager = paginate(scope, per_page: VULNERABILITIES_PER_PAGE)
-    @vulnerabilities = @pager.records
+    @package = params[:package].to_s.strip.presence&.first(100)
+    @vulnerability_view = vulnerability_view
+    if @vulnerability_view == "packages"
+      @package_groups = PackageVulnerabilities.new(scope.includes(:server), server: @server).groups
+      @pager = paginate(@package_groups, per_page: VULNERABILITY_PACKAGES_PER_PAGE)
+      @package_groups = @pager.records
+    else
+      scope = scope.where(source_package: @package) if @package
+      @sort = params[:sort] == "score" ? "score" : nil
+      scope = (@sort ? scope.by_score : scope.ranked).includes(:rating)
+      @pager = paginate(scope, per_page: VULNERABILITIES_PER_PAGE)
+      @vulnerabilities = @pager.records
+    end
   end
 
   # List (dense table) or grid (cards): ?view=, remembered in a cookie.
