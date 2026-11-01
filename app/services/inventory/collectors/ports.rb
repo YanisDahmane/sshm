@@ -14,8 +14,6 @@ class Inventory::Collectors::Ports < Inventory::Collector
     echo "@@elio iptables"; if command -v iptables >/dev/null 2>&1; then iptables -S INPUT 2>&1; else echo absent; fi
   SH
 
-  PRIVATE_RANGES = %w[10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 100.64.0.0/10 169.254.0.0/16 fc00::/7 fe80::/10].map { |range| IPAddr.new(range) }.freeze
-
   # Ports of the usual ufw application profiles.
   UFW_APPS = { "OpenSSH" => [ "22/tcp" ], "Nginx HTTP" => [ "80/tcp" ], "Nginx HTTPS" => [ "443/tcp" ], "Nginx Full" => [ "80/tcp", "443/tcp" ],
                "Apache" => [ "80/tcp" ], "Apache Secure" => [ "443/tcp" ], "Apache Full" => [ "80/tcp", "443/tcp" ], "Postfix" => [ "25/tcp" ] }.freeze
@@ -70,16 +68,7 @@ class Inventory::Collectors::Ports < Inventory::Collector
   end
 
   # public (every interface or a public address), private (LAN, VPN) or local (loopback).
-  def self.scope(address)
-    return "public" if [ "0.0.0.0", "::", "*", "" ].include?(address)
-
-    ip = IPAddr.new(address)
-    return "local" if ip.loopback?
-
-    PRIVATE_RANGES.any? { |range| range.include?(ip) } ? "private" : "public"
-  rescue IPAddr::InvalidAddressError
-    "public"
-  end
+  def self.scope(address) = Inventory::IpScope.of(address)
 
   def self.parse_firewall(sections)
     ufw = sections["ufw"].to_s

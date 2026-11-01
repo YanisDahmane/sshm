@@ -66,6 +66,8 @@
 
     <%= form_with url: servers_path, method: :get, data: { controller: "auto-submit", turbo_action: "advance" }, class: "fleet-filters ml-auto flex flex-wrap items-center gap-2" do |f| %>
       <%= hidden_field_tag :group, @group.id if @group %>
+      <%= f.search_field :q, value: @q, placeholder: "Nom, hostname, IP…", aria: { label: "Rechercher un serveur" },
+            data: { action: "input->auto-submit#submitLater" }, class: "fleet-search input w-44 py-1 text-xs" %>
       <% if @os_names.any? %>
         <span class="os-filter">
           <%= f.select :os, [ [ "Tous les systèmes", "" ], *@os_names.map { |name| [ name, name ] } ], { selected: @os },
@@ -107,6 +109,7 @@
                   <%= render partial: "server_groups/badge", collection: server.server_groups, as: :group %>
                 </div>
                 <p class="server-address font-mono text-[11px] text-ink-3"><%= server.username %>@<%= server.host %><%= ":#{server.port}" unless server.port == 22 %></p>
+                <% if (hostname = server.distinct_hostname) %><p class="server-hostname font-mono text-[11px] text-ink-3" title="Hostname de la machine"><%= hostname %></p><% end %>
               </td>
               <td class="server-os whitespace-nowrap text-xs"><%= render "servers/os", server: server %></td>
               <td class="server-load"><%= sparkline @load_history.fetch(server.id, []), max: 100, width: 60, title: "Charge sur 24 h (en % des processeurs)" %></td>
@@ -158,9 +161,9 @@
   <% else %>
     <div class="card mt-3 border-dashed px-6 py-12 text-center">
       <p class="text-sm text-ink-3">
-        <%= if @state || @os then "Aucun serveur ne correspond à ces filtres." elsif @group then "Aucun serveur dans ce groupe." else "Aucun serveur pour le moment." end %>
+        <%= if @state || @os || @q.present? then "Aucun serveur ne correspond à ces filtres." elsif @group then "Aucun serveur dans ce groupe." else "Aucun serveur pour le moment." end %>
       </p>
-      <% if (@state || @os) %>
+      <% if @state || @os || @q.present? %>
         <%= link_to "Retirer les filtres", servers_path(group: @group&.id), class: "mt-2 inline-block text-sm font-medium text-accent hover:underline" %>
       <% elsif @group && can?(:operate) %>
         <%= link_to "Ajouter des serveurs au groupe", edit_server_group_path(@group), class: "mt-2 inline-block text-sm font-medium text-accent hover:underline" %>

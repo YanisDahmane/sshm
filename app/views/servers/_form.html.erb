@@ -25,6 +25,12 @@
     <%= f.text_field :username, required: true, placeholder: "root", autocomplete: "off", spellcheck: false, class: "#{input_class} font-mono" %>
   </div>
 
+  <div>
+    <%= f.label :extra_addresses_text, class: label_class do %>Adresses supplémentaires <span class="font-normal text-ink-3">(facultatif)</span><% end %>
+    <%= f.text_field :extra_addresses_text, placeholder: "203.0.113.4, 10.8.0.12", autocomplete: "off", spellcheck: false, class: "#{input_class} font-mono" %>
+    <p class="mt-1 text-xs text-ink-3">Adresses IP par lesquelles ce serveur est joint mais qu'il ne voit pas lui-même (NAT, IP de basculement…). Les adresses de ses interfaces sont relevées par l'inventaire.</p>
+  </div>
+
   <% if ServerGroup.exists? %>
     <fieldset>
       <legend class="<%= label_class %>">Groupes</legend>

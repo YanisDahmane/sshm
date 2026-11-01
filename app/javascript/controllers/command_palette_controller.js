@@ -1,6 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Quick search over pages, groups, servers, keyring keys and server tabs
+// Quick search over pages, groups, servers (also by host name and IP, the
+// `keywords`), keyring keys and server tabs
 // (the items marked `typed` only once something is typed), plus a fleet
 // package search and, for a number, the servers exposing that port.
 // Opens with ⌘K / Ctrl+K or the sidebar button; arrows to move, Enter to
@@ -40,7 +41,7 @@ export default class extends Controller {
     const words = normalize(query).split(/\s+/).filter(Boolean)
     this.matches = this.items.filter((item) => {
       if (item.typed && words.length === 0) return false
-      const haystack = normalize(`${item.label} ${item.hint || ""} ${item.group}`)
+      const haystack = normalize(`${item.label} ${item.hint || ""} ${item.group} ${item.keywords || ""}`)
       return words.every((word) => haystack.includes(word))
     })
     this.matches.push(...this.searches(query))

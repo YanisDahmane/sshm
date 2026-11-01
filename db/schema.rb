@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_31_190000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_31_200000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -246,6 +246,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_190000) do
     t.string "os_version"
     t.string "health_status"
     t.jsonb "health_reasons", default: [], null: false
+    t.jsonb "ip_addresses", default: [], null: false
+    t.jsonb "extra_addresses", default: [], null: false
+    t.index ["ip_addresses"], name: "index_servers_on_ip_addresses", using: :gin
     t.index ["name"], name: "index_servers_on_name", unique: true
   end
 

@@ -13,6 +13,7 @@ fr:
         host: Hôte
         port: Port
         username: Utilisateur
+        extra_addresses_text: Les adresses supplémentaires
       server_group:
         name: Nom
         color: Couleur
@@ -40,6 +41,10 @@ fr:
         password_confirmation: Confirmation du mot de passe
     errors:
       models:
+        server:
+          attributes:
+            extra_addresses_text:
+              invalid_ips: "contiennent des valeurs qui ne sont pas des adresses IP : %{addresses}"
         notification_channel:
           attributes:
             recipients:

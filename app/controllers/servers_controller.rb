@@ -15,7 +15,11 @@ class ServersController < ApplicationController
     @summary = FleetSummary.new(Server.includes(:inventory_snapshots))
     servers = (@group ? Server.in_group(@group) : Server.all).order(:name).includes(:server_groups, :inventory_snapshots)
     servers = servers.where(os_name: @os) if @os
-    @pager = paginate(@state ? servers.select { |server| server.health_state == @state } : servers, per_page: PER_PAGE)
+    @q = params[:q].to_s.strip.first(100)
+    servers = servers.to_a if @state || @q.present?
+    servers = servers.select { |server| server.health_state == @state } if @state
+    servers = servers.select { |server| server.matches_search?(@q) } if @q.present?
+    @pager = paginate(servers, per_page: PER_PAGE)
     @servers = @pager.records
     @load_history = Inventory::HealthSample.where(server_id: @servers.map(&:id)).since(24.hours.ago)
                                            .pluck(:server_id, :load_percent).group_by(&:first).transform_values { |rows| rows.map(&:last).compact }
@@ -82,6 +86,6 @@ class ServersController < ApplicationController
   end
 
   def server_params
-    params.expect(server: [ :name, :host, :port, :username, server_group_ids: [] ])
+    params.expect(server: [ :name, :host, :port, :username, :extra_addresses_text, server_group_ids: [] ])
   end
 end

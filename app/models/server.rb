@@ -30,6 +30,11 @@ class Server < ApplicationRecord
   validates :port, numericality: { only_integer: true, in: 1..65_535 }
   validates :username, presence: true
   validate :host_must_be_an_ip_or_hostname
+  validate :extra_addresses_must_be_ips
+
+  # Matching with external resources (probes, provider IPs): every address
+  # by which the server is known.
+  scope :with_address, ->(address) { where("servers.ip_addresses @> ?::jsonb OR servers.extra_addresses @> ?::jsonb OR servers.host = ?", [ address ].to_json, [ address ].to_json, address) }
 
   before_update :reset_reachability, if: -> { will_save_change_to_host? || will_save_change_to_port? }
 
@@ -56,6 +61,34 @@ class Server < ApplicationRecord
   end
 
   def inventory(category) = inventory_snapshots.find { |snapshot| snapshot.category == category.to_s }
+
+  # Host name of the machine (os inventory), nil until collected.
+  def hostname = inventory(:os)&.data&.dig("hostname")
+
+  # Shown next to the name when it says something more (not the same name).
+  def distinct_hostname
+    hostname if hostname.present? && hostname.split(".").first.casecmp?(name.parameterize) == false && !hostname.casecmp?(name)
+  end
+
+  # Every address of the server: collected by the network inventory, added by
+  # hand, and the SSH host when it is an IP. Public addresses first.
+  def addresses
+    ([ host ].select { |value| Inventory::IpScope.ip?(value) } + ip_addresses + extra_addresses).uniq
+  end
+
+  # Search of the fleet page: name, SSH host, host name or any address (part of it).
+  def matches_search?(query)
+    words = query.to_s.downcase.split
+    haystack = [ name, host, hostname, *addresses ].compact.join(" ").downcase
+    words.all? { |word| haystack.include?(word) }
+  end
+
+  # Text field of the form: "203.0.113.4, 2001:db8::1".
+  def extra_addresses_text = extra_addresses.join(", ")
+
+  def extra_addresses_text=(text)
+    self.extra_addresses = text.to_s.split(/[\s,;]+/).map(&:strip).compact_blank.uniq
+  end
 
   # Health shown in the interface: "off" when the last ping failed, otherwise
   # the state computed from the inventory (ok, warn, crit, unknown).
@@ -85,6 +118,11 @@ class Server < ApplicationRecord
     self.last_checked_at = nil
     self.ssh_ok = nil
     self.ssh_checked_at = nil
+  end
+
+  def extra_addresses_must_be_ips
+    invalid = extra_addresses.reject { |address| Inventory::IpScope.ip?(address) }
+    errors.add(:extra_addresses_text, :invalid_ips, addresses: invalid.join(", ")) if invalid.any?
   end
 
   def host_must_be_an_ip_or_hostname

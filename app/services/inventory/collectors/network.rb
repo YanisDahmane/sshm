@@ -1,0 +1,94 @@
+require "json"
+require "shellwords"
+
+# Network of a server: every interface with its addresses (IPv4 / IPv6,
+# prefix, public / private / local) and its kind (ethernet, WireGuard,
+# bridge, VLAN, tunnel…), from `ip -j` (iproute2), read-only, without root.
+# Loopback and link-local addresses, and the interfaces of containers
+# (Docker bridges, veth), are left out: they say nothing about how to reach
+# the server. The addresses feed the matching of external resources
+# (Uptime Kuma probes, OVH IPs) with the servers.
+class Inventory::Collectors::Network < Inventory::Collector
+  SCRIPT = <<~SH.freeze
+    echo "@@elio addr"; ip -j addr 2>/dev/null || echo unsupported
+    echo "@@elio link"; ip -d -j link 2>/dev/null || true
+  SH
+
+  KINDS = { "wireguard" => "WireGuard", "ethernet" => "Ethernet", "wifi" => "Wi-Fi", "bridge" => "Pont", "vlan" => "VLAN", "bond" => "Agrégat",
+            "tun" => "Tunnel (tun)", "tap" => "Tunnel (tap)", "tunnel" => "Tunnel", "vxlan" => "VXLAN", "other" => "Autre" }.freeze
+  VPN_KINDS = %w[wireguard tun tap tunnel].freeze
+  CONTAINER_INTERFACE = /\A(docker\d*|br-[0-9a-f]{12}|veth|cni|flannel|cali|vethwe|lxcbr|virbr)/
+
+  def collect
+    result = run("sh -c #{Shellwords.escape(SCRIPT)}")
+    raise Error, "Lecture du réseau impossible : #{result.stderr.strip.presence || "code #{result.exit_status}"}" if result.stdout.blank?
+
+    sections = result.stdout.split(/^@@elio (\S+)\n/).drop(1).each_slice(2).to_h { |name, body| [ name, body.to_s ] }
+    return unsupported("La commande ip (iproute2) n'est pas disponible") if sections["addr"].to_s.strip == "unsupported"
+
+    ok(self.class.parse(sections))
+  rescue JSON::ParserError
+    raise Error, "Sortie de la commande ip illisible"
+  end
+
+  def self.parse(sections)
+    kinds = parse_links(sections["link"].to_s)
+    interfaces = JSON.parse(sections["addr"].to_s.presence || "[]").filter_map do |entry|
+      name = entry["ifname"].to_s
+      kind = kinds[name] || kind_from_link_type(entry["link_type"])
+      next if entry["link_type"] == "loopback" || kind == "veth" || name.match?(CONTAINER_INTERFACE)
+
+      addresses = Array(entry["addr_info"]).filter_map do |info|
+        next unless %w[inet inet6].include?(info["family"]) && info["local"]
+        next if info["scope"] == "link" || info["scope"] == "host"
+
+        { "address" => info["local"], "family" => info["family"] == "inet" ? "ipv4" : "ipv6", "prefix" => info["prefixlen"],
+          "scope" => Inventory::IpScope.of(info["local"]), "temporary" => (true if info["temporary"]) }.compact
+      end
+      { "name" => name, "kind" => kind, "state" => entry["operstate"], "mac" => entry["address"].presence,
+        "up" => Array(entry["flags"]).include?("UP"), "addresses" => addresses }.compact
+    end
+    { "interfaces" => interfaces, "addresses" => interfaces.flat_map { |interface| interface["addresses"].map { |address| address.merge("interface" => interface["name"], "kind" => interface["kind"]) } } }
+  end
+
+  # ifname => kind, from `ip -d -j link` (linkinfo.info_kind).
+  def self.parse_links(text)
+    JSON.parse(text.presence || "[]").to_h do |entry|
+      info_kind = entry.dig("linkinfo", "info_kind")
+      kind = case info_kind
+      when nil then kind_from_link_type(entry["link_type"], wireless: entry["ifname"].to_s.start_with?("wl"))
+      when "wireguard", "bridge", "vlan", "bond", "veth", "vxlan" then info_kind
+      when "tun" then entry.dig("linkinfo", "info_data", "type") == "tap" ? "tap" : "tun"
+      when "ipip", "gre", "sit", "ip6tnl", "gretap" then "tunnel"
+      else "other"
+      end
+      [ entry["ifname"].to_s, kind ]
+    end
+  rescue JSON::ParserError
+    {}
+  end
+
+  def self.kind_from_link_type(link_type, wireless: false)
+    case link_type
+    when "ether" then wireless ? "wifi" : "ethernet"
+    when "none" then "tunnel"
+    else "other"
+    end
+  end
+
+  # Summary kept on the server for matching: every address, public ones first.
+  def self.server_attributes(data)
+    addresses = Array(data["addresses"]).sort_by { |address| [ address["scope"] == "public" ? 0 : 1, address["family"] == "ipv4" ? 0 : 1 ] }
+    { ip_addresses: addresses.map { |address| address["address"] }.uniq }
+  end
+
+  # Public addresses that appeared or disappeared (temporary IPv6 privacy addresses aside).
+  def self.changes(previous, data)
+    public_addresses = ->(entries) { Array(entries).select { |address| address["scope"] == "public" && !address["temporary"] }.map { |address| address["address"] }.to_set }
+    before = public_addresses.(previous["addresses"])
+    after = public_addresses.(data["addresses"])
+
+    (after - before).sort.map { |address| { kind: :ip_address_added, data: { address: address } } } +
+      (before - after).sort.map { |address| { kind: :ip_address_removed, data: { address: address } } }
+  end
+end

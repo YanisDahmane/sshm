@@ -38,6 +38,17 @@ module InventoryHelper
     end
   end
 
+  def network_kind_label(kind) = Inventory::Collectors::Network::KINDS.fetch(kind.to_s, kind.to_s.capitalize)
+
+  # Reach of an address: public, private (LAN, VPN) or local.
+  def address_scope_badge(scope)
+    case scope
+    when "public" then status_badge(:warn, "publique", icon: :globe, class: "address-scope")
+    when "private" then status_badge(:neutral, "privée", class: "address-scope")
+    else status_badge(:neutral, "locale", class: "address-scope")
+    end
+  end
+
   # "Debian GNU/Linux 12 (bookworm)" → "Debian 12", for dense lists (full name in a title).
   def short_os_name(name) = name.to_s.sub("GNU/Linux ", "").sub(/\s*\([^)]*\)\z/, "").squish
 end

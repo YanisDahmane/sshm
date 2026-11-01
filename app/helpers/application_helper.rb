@@ -58,8 +58,9 @@ module ApplicationHelper
     pages = pages.map { |page| page.merge(group: "Pages") }
 
     groups = ServerGroup.order(:name).map { |group| { group: "Groupes", label: group.name, hint: "serveurs du groupe", url: servers_path(group: group.id) } }
-    servers = Server.order(:name).includes(:server_groups).map do |server|
-      { group: "Serveurs", label: server.name, hint: [ "#{server.username}@#{server.host}", *server.server_groups.map(&:name) ].join(" · "), url: server_path(server) }
+    servers = Server.order(:name).includes(:server_groups, :inventory_snapshots).map do |server|
+      { group: "Serveurs", label: server.name, hint: [ "#{server.username}@#{server.host}", server.distinct_hostname, *server.server_groups.map(&:name) ].compact.join(" · "),
+        url: server_path(server), keywords: ([ server.hostname ] + server.addresses).compact.uniq.join(" ").presence }.compact
     end
     public_keys = PublicKey.order(:name).map { |public_key| { group: "Trousseau", label: public_key.name, hint: public_key.kind_label, url: public_key_path(public_key) } }
     tabs = Server.order(:name).flat_map do |server|

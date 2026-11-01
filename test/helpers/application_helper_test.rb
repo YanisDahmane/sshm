@@ -45,12 +45,22 @@ class ApplicationHelperTest < ActionView::TestCase
     assert_equal [ "Pages", "Groupes", "Serveurs", "Trousseau", "Onglets des serveurs" ], items.map { |item| item[:group] }.uniq
     assert_includes items, { group: "Pages", label: "Parc", hint: "serveurs", url: servers_path }
     assert_includes items, { group: "Groupes", label: "Production", hint: "serveurs du groupe", url: servers_path(group: server_groups(:production).id) }
-    assert_includes items, { group: "Serveurs", label: "Web", hint: "deploy@192.168.1.10 · Production", url: server_path(servers(:web)) }
-    assert_includes items, { group: "Serveurs", label: "Backup", hint: "root@10.0.0.5", url: server_path(servers(:backup)) }
+    assert_includes items, { group: "Serveurs", label: "Web", hint: "deploy@192.168.1.10 · Production", url: server_path(servers(:web)), keywords: "192.168.1.10" }
+    assert_includes items, { group: "Serveurs", label: "Backup", hint: "root@10.0.0.5", url: server_path(servers(:backup)), keywords: "10.0.0.5" }
     assert_includes items, { group: "Trousseau", label: "Alice", hint: "Personne", url: public_key_path(public_keys(:alice)) }
     assert_includes items, { group: "Trousseau", label: "CI", hint: "Serveur", url: public_key_path(public_keys(:ci)) }
     assert_includes items, { group: "Onglets des serveurs", label: "Web › Ports", url: server_path(servers(:web), tab: "ports"), typed: true }
     assert_equal 5 * Server.count, items.count { |item| item[:typed] }
+  end
+
+  test "command_palette_items finds a server by host name and every address" do
+    servers(:db).update!(extra_addresses_text: "203.0.113.9")
+    servers(:db).inventory_snapshots.create!(category: "os", status: "ok", data: { "hostname" => "pg-main.example.internal" }, collected_at: Time.current, checked_at: Time.current)
+    servers(:db).update_columns(ip_addresses: [ "10.8.0.12" ])
+
+    item = command_palette_items.find { |candidate| candidate[:label] == "Database" }
+    assert_equal "admin@db.example.com · pg-main.example.internal · Production", item[:hint]
+    assert_equal "pg-main.example.internal 10.8.0.12 203.0.113.9", item[:keywords]
   end
 
   test "ssh_key_install_command appends the public key with strict permissions" do
