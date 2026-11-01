@@ -183,3 +183,13 @@ en:
     two_factor:
       mandatory: 'Two-factor authentication is mandatory for your role: turn it on to continue.'
       mandatory_role: Two-factor authentication is mandatory for your role (%{role}).
+  nouns:
+    servers: servers
+    monitors: monitors
+    resources: resources
+    images: images
+    packages: packages
+  words:
+    none: none
+    'yes': 'yes'
+    'no': 'no'

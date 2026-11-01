@@ -56,6 +56,7 @@ en:
       servers_affected_html: Servers affected (%{count})
       fixes_release: Fixes by release
       derived: 'not rated by %{distribution}: derived from the score'
+      exploited_since: ", since %{date}"
     debian_tracker:
       not_tracker: This file is not the Debian Security Tracker one
       unreadable: 'Unreadable Debian Security Tracker file: %{truncate}'

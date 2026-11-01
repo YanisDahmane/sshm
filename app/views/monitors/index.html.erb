@@ -52,7 +52,7 @@
         </tbody>
       </table>
     </div>
-    <%= render "shared/pagination", pager: @pager, noun: "serveurs" %>
+    <%= render "shared/pagination", pager: @pager, noun: t("nouns.servers") %>
   <% else %>
     <p class="card mt-3 px-4 py-6 text-sm text-good-ink"><%= t(".each_server_watched_least") %></p>
   <% end %>
@@ -63,7 +63,7 @@
       <tbody><%= render partial: "integrations/uptime_kuma/monitor_row", collection: @pager.records, as: :monitor, locals: { base_url: base_url, show_server: true } %></tbody>
     </table>
   </div>
-  <%= render "shared/pagination", pager: @pager, noun: "sondes" %>
+  <%= render "shared/pagination", pager: @pager, noun: t("nouns.monitors") %>
 <% else %>
   <p class="card mt-3 px-4 py-6 text-sm text-ink-3"><%= @integration.last_synced_at ? t(".monitor_matches") : t(".not_synchronized_uptime_kuma") %></p>
 <% end %>

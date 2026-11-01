@@ -298,6 +298,7 @@ en:
       integration_enabled: Extension %{integration} turned on
       integration_disabled: Extension %{integration} turned off
       integration_sync_failed: "%{integration} sync failed: %{error}"
+      automation_run: "%{automation}: %{result}"
   automation:
     whole_fleet: The whole fleet
     extension_off: 'Extension turned off: nothing to do'

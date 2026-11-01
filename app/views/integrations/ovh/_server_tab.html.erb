@@ -41,7 +41,7 @@
             <span class="text-xs text-ink-3"><%= [ block.data["type"], block.data["service"] ].compact.join(" · ") %></span>
           </p>
           <% Array(block.data["reverse"]).each do |ip, reverse| %>
-            <p class="mt-1 text-xs text-ink-2"><%= t(".reverse") %> <span class="font-mono"><%= ip %></span> : <span class="ovh-reverse font-mono"><%= reverse.presence || "aucun" %></span></p>
+            <p class="mt-1 text-xs text-ink-2"><%= t(".reverse") %> <span class="font-mono"><%= ip %></span> : <span class="ovh-reverse font-mono"><%= reverse.presence || t("words.none") %></span></p>
           <% end %>
           <% if block.data.key?("firewall") %>
             <% firewalls = block.data["firewall"] %>

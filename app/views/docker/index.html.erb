@@ -64,7 +64,7 @@
       </tbody>
     </table>
   </div>
-  <%= render "shared/pagination", pager: @pager, noun: "images" %>
+  <%= render "shared/pagination", pager: @pager, noun: t("nouns.images") %>
 <% else %>
   <p class="card mt-3 px-4 py-6 text-sm text-ink-3"><%= @q.present? || @updates_only ? t(".image_matches") : t(".known_docker_image") %></p>
 <% end %>

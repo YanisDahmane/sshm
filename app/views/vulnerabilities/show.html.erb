@@ -10,7 +10,7 @@
           <% if (row = @server_rows.first || @rows.first)&.severity_from_score? %>
             <span class="text-xs text-ink-3"><%= t(".derived", distribution: row.source == "ubuntu" ? "Ubuntu" : "Debian") %></span>
           <% end %>
-          <% if @rating&.exploited %><%= status_badge :crit, t(".exploited", date: (", depuis le #{l(@rating.exploited_since, format: :long)}" if @rating.exploited_since)), class: "detail-exploited" %><% end %>
+          <% if @rating&.exploited %><%= status_badge :crit, t(".exploited", date: (t(".exploited_since", date: l(@rating.exploited_since, format: :long)) if @rating.exploited_since)), class: "detail-exploited" %><% end %>
         </div>
       </div>
       <div class="text-right">

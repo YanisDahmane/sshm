@@ -89,7 +89,7 @@
       </tbody>
     </table>
   </div>
-  <%= render "shared/pagination", pager: @pager, noun: "ressources" %>
+  <%= render "shared/pagination", pager: @pager, noun: t("nouns.resources") %>
 <% else %>
   <p class="card mt-3 px-4 py-6 text-sm text-ink-3"><%= @integration.last_synced_at ? t(".resource_matches") : t(".not_synchronized_ovhcloud_yet") %></p>
 <% end %>

@@ -54,7 +54,7 @@
         </section>
       <% end %>
     </div>
-    <%= render "shared/pagination", pager: @pager, noun: "paquets" %>
+    <%= render "shared/pagination", pager: @pager, noun: t("nouns.packages") %>
   <% else %>
     <p class="card mt-5 px-4 py-6 text-sm text-ink-3"><%= t(".package_contains_html", q: @q) %></p>
   <% end %>
@@ -83,7 +83,7 @@
           <% end %>
         </tbody>
       </table>
-      <% if @pager.multiple_pages? %><div class="border-t border-line px-4 pb-3"><%= render "shared/pagination", pager: @pager, noun: "paquets" %></div><% end %>
+      <% if @pager.multiple_pages? %><div class="border-t border-line px-4 pb-3"><%= render "shared/pagination", pager: @pager, noun: t("nouns.packages") %></div><% end %>
     <% else %>
       <p class="flex items-center gap-2 px-4 py-4 text-sm text-good-ink"><%= icon :check_circle %> <%= t(".pending_security_update") %></p>
     <% end %>

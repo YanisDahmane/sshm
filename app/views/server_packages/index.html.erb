@@ -49,7 +49,7 @@
           <% end %>
         </tbody>
       </table>
-      <% if @pager.multiple_pages? %><div class="border-t border-line px-4 pb-3"><%= render "shared/pagination", pager: @pager, noun: "paquets" %></div><% end %>
+      <% if @pager.multiple_pages? %><div class="border-t border-line px-4 pb-3"><%= render "shared/pagination", pager: @pager, noun: t("nouns.packages") %></div><% end %>
     <% else %>
       <p class="px-4 py-4 text-sm text-ink-3"><%= t(".package_matches") %></p>
     <% end %>

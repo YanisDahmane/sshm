@@ -68,7 +68,7 @@
                   <span class="block font-mono text-[11px] text-ink-3"><%= image["id"].delete_prefix("sha256:").first(12) %><% if image.dig("os", "name") %> · <%= image.dig("os", "name") %><% end %></span></td>
                 <td class="text-xs whitespace-nowrap"><%= image["created_at"] ? relative_time_tag(Time.zone.parse(image["created_at"])) : "—" %></td>
                 <td class="text-right text-xs tabular-nums"><%= human_bytes(image["size"]) %></td>
-                <td class="text-xs"><%= image["used"] ? "oui" : tag.span("non", class: "text-warn-ink") %></td>
+                <td class="text-xs"><%= image["used"] ? t("words.yes") : tag.span(t("words.no"), class: "text-warn-ink") %></td>
                 <td class="text-xs"><%= image_update_badge(ImageUpdate.state_for(image, updates)) %></td>
                 <td class="pr-4 text-xs">
                   <% if total.to_i.positive? %>
