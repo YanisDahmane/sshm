@@ -19,4 +19,8 @@ class ElioSecretsTest < ActiveSupport::TestCase
   test "the tests do not depend on the credentials of an installation" do
     assert_equal "test-primary-key-0123456789abcdef", ActiveRecord::Encryption.config.primary_key
   end
+
+  test "the version follows semantic versioning and is shown in the sidebar" do
+    assert_match(/\A\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?\z/, Elio::VERSION)
+  end
 end

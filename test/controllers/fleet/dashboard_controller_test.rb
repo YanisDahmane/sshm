@@ -76,6 +76,7 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_select "nav.main-nav a[aria-current=page]", text: "Vue d'ensemble"
     assert_select "nav.main-nav a[href=?]", servers_path, text: /Parc\s*3/
     assert_select "nav.main-nav a[href=?]", public_keys_path, text: /Trousseau\s*2/
+    assert_select ".sidebar a.elio-version", "Elio #{Elio::VERSION}"
     assert_select "nav.main-nav a[href=?]", settings_automations_path, text: "Automatisations"
     assert_select "nav.sidebar-groups a[href=?]", servers_path(group: server_groups(:production).id), text: /Production/
 
