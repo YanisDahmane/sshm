@@ -1,0 +1,45 @@
+# Elio with PostgreSQL, from the published image.
+#
+#   1. bin/elio-keys > .env   (or: docker run --rm ghcr.io/elio-fleet/elio bin/elio-keys > .env)
+#      then add to .env: ELIO_DATABASE_PASSWORD=<a password>
+#   2. docker compose up -d
+#   3. open http://localhost:8080 and create the first (administrator) account
+#
+# Behind a reverse proxy with HTTPS, set ELIO_HOST (your domain) and remove
+# ELIO_FORCE_SSL. Keep .env and the volumes safe: without the keys of .env,
+# the encrypted data (Elio's SSH key, secrets) cannot be read.
+services:
+  elio:
+    image: ghcr.io/elio-fleet/elio:${ELIO_VERSION:-beta}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    env_file: .env
+    environment:
+      PGHOST: db
+      SOLID_QUEUE_IN_PUMA: "true"
+      # Plain HTTP for a first try on this machine; remove behind an HTTPS proxy.
+      ELIO_FORCE_SSL: "false"
+      # ELIO_HOST: elio.example.com
+    volumes:
+      - elio_storage:/rails/storage
+
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: elio
+      POSTGRES_PASSWORD: ${ELIO_DATABASE_PASSWORD:?set ELIO_DATABASE_PASSWORD in .env}
+    volumes:
+      - elio_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U elio"]
+      interval: 5s
+      retries: 10
+
+volumes:
+  elio_storage:
+  elio_db:

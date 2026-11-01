@@ -24,11 +24,12 @@ Rails.application.configure do
   # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :local
 
-  # Assume all access to the app is happening through a SSL-terminating reverse proxy.
-  config.assume_ssl = true
-
-  # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  config.force_ssl = true
+  # HTTPS through a TLS-terminating reverse proxy (or Kamal's): forced, with
+  # Strict-Transport-Security and secure cookies. ELIO_FORCE_SSL=false only to
+  # try Elio over plain HTTP (http://localhost) — never on a reachable server.
+  https = ENV.fetch("ELIO_FORCE_SSL", "true") != "false"
+  config.assume_ssl = https
+  config.force_ssl = https
 
   # Skip http-to-https redirect for the default health check endpoint.
   # config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
