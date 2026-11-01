@@ -210,6 +210,12 @@ Les rattachements utilisent toutes les adresses relevées par l'inventaire du sy
 
 ## Développement et tests
 
+Organisation du code :
+
+- `config/ssh_commands.yml` : **toutes** les commandes envoyées aux serveurs (lues par `Ssh::Commands`).
+- `app/models`, `app/controllers`, `app/jobs` (et leurs tests) : un dossier par domaine — `fleet` (parc, serveurs, groupes), `access` (trousseau, clé d'Elio, accès temporaires), `accounts` (utilisateurs, invitations, 2FA), `activity_log` (journal, notifications), `operations` (automatisations, tâches), `extensions` (Uptime Kuma, OVHcloud), `core`. Ces dossiers ne sont pas des namespaces (`config/initializers/autoloading.rb`) : `Server` reste `Server`.
+- `app/services` : la logique par namespace — `Ssh::` (connexion, commandes, empreintes), `Inventory::` (collecteurs), `Keys::` (fichiers authorized_keys), `Notifications::` (Slack, Discord, webhook, email), `Servers::` (ping, import), `Integrations::` (extensions).
+
 ```bash
 bin/rails test          # tests unitaires et d'intégration
 bin/rails test:system   # tests système (Chrome)

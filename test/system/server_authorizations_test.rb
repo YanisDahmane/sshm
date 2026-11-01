@@ -23,7 +23,7 @@ class ServerAuthorizationsTest < ApplicationSystemTestCase
         visit server_path(servers(:web), tab: "keys")
 
         assert_selector "li.authorized-key", count: 1
-        click_on "Ajouter une clé"
+        open_add_key_dialog
         within("dialog.add-key-dialog[open]") do
           select "CI", from: "Clé du trousseau"
           click_on "Ajouter sur le serveur"
@@ -50,7 +50,7 @@ class ServerAuthorizationsTest < ApplicationSystemTestCase
       stub_method(Keys::PublicKeyAuthorization, :call, authorizer) do
         visit server_path(servers(:web), tab: "keys")
 
-        click_on "Ajouter une clé"
+        open_add_key_dialog
         within("dialog.add-key-dialog[open]") do
           select "CI", from: "Clé du trousseau"
           select "10 minutes", from: "Durée"
@@ -83,7 +83,7 @@ class ServerAuthorizationsTest < ApplicationSystemTestCase
         visit server_path(servers(:web), tab: "keys")
         assert_selector "li.authorized-key", count: 1
 
-        click_on "Ajouter une clé"
+        open_add_key_dialog
         within("dialog.add-key-dialog[open]") do
           choose "Nouvelle clé", allow_label_click: true
           assert_no_field "Clé du trousseau"
@@ -105,5 +105,17 @@ class ServerAuthorizationsTest < ApplicationSystemTestCase
         assert PublicKey.exists?(name: "Bob")
       end
     end
+  end
+
+  private
+
+  # The button only works once Stimulus has connected the dialog: click again
+  # until it opens (a click right after the visit can come too early).
+  def open_add_key_dialog
+    3.times do
+      click_on "Ajouter une clé"
+      return if has_selector?("dialog.add-key-dialog[open]", wait: 1)
+    end
+    assert_selector "dialog.add-key-dialog[open]"
   end
 end
