@@ -12,6 +12,7 @@ require "action_cable/engine"
 require "rails/test_unit/railtie"
 require_relative "../lib/elio/secrets"
 require_relative "../lib/elio/version"
+require_relative "../lib/elio/locales"
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -33,8 +34,11 @@ module Elio
     # in config/environments, which are processed later.
     #
     config.time_zone = "Europe/Paris"
-    config.i18n.default_locale = :fr
-    config.i18n.available_locales = %i[fr en]
+    # The interface languages: one folder per language in config/locales
+    # (Elio::Locales). Each user picks one, else the browser's, else the
+    # instance's (Settings → General); English when nothing decides.
+    config.i18n.available_locales = Elio::Locales.available
+    config.i18n.default_locale = Elio::Locales::DEFAULT
     # config.eager_load_paths << Rails.root.join("extras")
 
     # Database encryption keys from the environment (lib/elio/secrets.rb),

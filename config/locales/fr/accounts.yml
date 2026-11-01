@@ -1,0 +1,11 @@
+fr:
+  accounts:
+    language:
+      title: Langue
+      hint: La langue de l'interface pour vous. Automatique suit votre navigateur, sinon la langue de cet Elio.
+      label: Langue de l'interface
+      automatic: Automatique (navigateur)
+      save: Enregistrer
+    locale:
+      saved: Langue enregistrée.
+      invalid: Cette langue n'est pas disponible.

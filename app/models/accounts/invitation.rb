@@ -3,6 +3,9 @@
 # (deterministic, so it can be looked up) and kept so admins can copy the
 # link again while the invitation is pending.
 class Invitation < ApplicationRecord
+  include Localized
+  localized # the invitation email and the new account's language
+
   VALIDITY = 7.days
 
   belongs_to :invited_by, class_name: "User"

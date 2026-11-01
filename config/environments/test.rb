@@ -41,7 +41,10 @@ Rails.application.configure do
   config.active_support.deprecation = :stderr
 
   # Raises error for missing translations.
-  # config.i18n.raise_on_missing_translations = true
+  config.i18n.raise_on_missing_translations = true
+  # The tests read the interface in French (the language of the fixtures'
+  # instance); test/integration/english_interface_test.rb reads it in English.
+  config.i18n.default_locale = :fr
 
   # Annotate rendered view with file names.
   # config.action_view.annotate_rendered_view_with_filenames = true

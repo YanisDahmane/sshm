@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_01_190000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_02_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -57,6 +57,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_190000) do
     t.boolean "docker_alert_updates", default: false, null: false
     t.text "docker_registry_credentials"
     t.jsonb "score_bands", default: [{"from" => 0, "color" => "green"}, {"from" => 4, "color" => "orange"}, {"from" => 7, "color" => "red"}], null: false
+    t.string "default_locale", default: "en", null: false
   end
 
   create_table "automations", force: :cascade do |t|
@@ -216,6 +217,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_190000) do
     t.datetime "revoked_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "locale"
     t.index ["email"], name: "index_invitations_on_email"
     t.index ["invited_by_id"], name: "index_invitations_on_invited_by_id"
     t.index ["token"], name: "index_invitations_on_token", unique: true
@@ -265,6 +267,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_190000) do
     t.text "signing_secret"
     t.boolean "daily_digest", default: false, null: false
     t.datetime "last_digest_at"
+    t.string "locale"
     t.index ["name"], name: "index_notification_channels_on_name", unique: true
   end
 
@@ -444,6 +447,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_190000) do
     t.integer "failed_attempts", default: 0, null: false
     t.string "unlock_token"
     t.datetime "locked_at"
+    t.string "locale"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true

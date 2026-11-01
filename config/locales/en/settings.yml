@@ -1,0 +1,11 @@
+en:
+  settings:
+    language:
+      title: Language
+      label: Default language
+      save: Save
+      hint: For users who have not chosen a language and whose browser asks for one Elio does not have, for the results of background tasks, and for the notification channels without a language of their own.
+    languages:
+      update:
+        saved: Default language saved.
+        invalid: This language is not available.

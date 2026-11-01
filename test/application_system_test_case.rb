@@ -5,6 +5,9 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   # mode) after a form with "password1234" is submitted and swallow the next
   # clicks: turn them off.
   driven_by :selenium, using: :headless_chrome, screen_size: [ 1400, 1400 ] do |options|
+    # The tests read the interface in French (see config/environments/test.rb).
+    options.add_preference("intl.accept_languages", "fr-FR,fr")
+    options.add_argument("--lang=fr-FR")
     options.add_preference("credentials_enable_service", false)
     options.add_preference("profile.password_manager_enabled", false)
     options.add_preference("profile.password_manager_leak_detection", false)

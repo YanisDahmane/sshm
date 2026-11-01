@@ -3,6 +3,7 @@ Rails.application.routes.draw do
   resource :two_factor_challenge, only: %i[new create]
   resource :account, only: %i[show] do
     patch :password
+    patch :locale
   end
   resource :two_factor, only: %i[new create destroy], path: "account/two_factor", controller: "two_factor_settings" do
     post :backup_codes
@@ -47,6 +48,7 @@ Rails.application.routes.draw do
     resources :invitations, only: %i[create destroy]
     resource :security, only: :update
     resource :health_thresholds, only: :update
+    resource :language, only: :update
     resource :docker, only: %i[show update], controller: "docker" do
       post :check
     end

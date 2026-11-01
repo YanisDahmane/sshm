@@ -1,0 +1,5 @@
+# Texts of the JavaScript controllers (app/javascript/i18n.js).
+en:
+  js:
+    clipboard:
+      copied: Copied

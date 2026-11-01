@@ -3,6 +3,9 @@
 # picks the activity kinds it receives (Activity::KINDS), whether messages
 # mention everyone (Slack, Discord), and whether it gets a daily digest.
 class NotificationChannel < ApplicationRecord
+  include Localized
+  localized # nil: the instance's language
+
   KINDS = { "slack" => "Slack", "discord" => "Discord", "webhook" => "Webhook (JSON signé)", "email" => "Email" }.freeze
   NOTIFIERS = { "slack" => "Notifications::Slack", "discord" => "Notifications::Discord", "webhook" => "Notifications::Webhook", "email" => "Notifications::Email" }.freeze
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" class="h-full">
+<html lang="<%= I18n.locale %>" class="h-full">
   <head>
     <title><%= content_for(:title) || "Elio" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -37,5 +37,6 @@
         <%= yield %>
       </div>
     </main>
+    <%= js_translations_tag %>
   </body>
 </html>

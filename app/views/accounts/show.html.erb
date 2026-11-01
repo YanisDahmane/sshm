@@ -42,6 +42,8 @@
     <% end %>
   </section>
 
+  <%= render "accounts/language" %>
+
   <section id="password" class="mt-6 rounded-xl border border-line bg-surface p-6 shadow-sm">
     <h2 class="text-base font-semibold">Mot de passe</h2>
     <%= form_with model: current_user, url: password_account_path, method: :patch, scope: :user, class: "mt-4 space-y-4" do |f| %>

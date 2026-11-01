@@ -1,4 +1,7 @@
 class User < ApplicationRecord
+  include Localized
+  localized # nil: the browser's language, else the instance's
+
   # No public sign up: the first admin is created through SetupsController,
   # everyone else through an Invitation.
   # Sessions expire after 30 minutes of inactivity (unless remembered); 10

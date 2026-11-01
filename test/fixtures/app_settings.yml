@@ -3,3 +3,5 @@
 main:
   require_admin_two_factor: false
   require_operator_two_factor: false
+  # The tests read the interface in French (see config/environments/test.rb).
+  default_locale: fr

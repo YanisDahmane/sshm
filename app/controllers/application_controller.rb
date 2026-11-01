@@ -4,6 +4,7 @@ class ApplicationController < ActionController::Base
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
 
+  around_action :switch_locale
   before_action :require_setup
   before_action :authenticate_user!, unless: :devise_controller?
   # Not in Devise controllers: during the sign in, current_user would
@@ -16,6 +17,20 @@ class ApplicationController < ActionController::Base
   layout :layout_by_resource
 
   private
+
+  # The user's language, else the browser's, else the instance's.
+  def switch_locale(&action)
+    I18n.with_locale(request_locale, &action)
+  end
+
+  def request_locale
+    # The session only (warden.user runs no strategy): in Devise
+    # controllers, current_user would sign in from the form.
+    Elio::Locales.find(warden.user(:user)&.locale) ||
+      Elio::Locales.from_accept_language(request.headers["Accept-Language"]) ||
+      Elio::Locales.find(AppSetting.current.default_locale) ||
+      I18n.default_locale
+  end
 
   # One page of a list (?page=), see Paginator and shared/_pagination.
   def paginate(collection, per_page:)

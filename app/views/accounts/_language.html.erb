@@ -1,0 +1,11 @@
+<section id="language" class="mt-6 rounded-xl border border-line bg-surface p-6 shadow-sm">
+  <h2 class="text-base font-semibold"><%= t(".title") %></h2>
+  <p class="mt-1 text-sm text-ink-3"><%= t(".hint") %></p>
+  <%= form_with model: current_user, url: locale_account_path, method: :patch, scope: :user, class: "mt-4 flex flex-wrap items-end gap-3" do |f| %>
+    <div>
+      <%= f.label :locale, t(".label"), class: "label" %>
+      <%= f.select :locale, locale_options(blank: t(".automatic")), {}, class: "input mt-1 w-auto" %>
+    </div>
+    <%= f.submit t(".save"), class: "btn btn-secondary" %>
+  <% end %>
+</section>

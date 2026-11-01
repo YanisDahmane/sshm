@@ -24,6 +24,7 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
   REQUESTS = {
     view: {
       "dashboard" => -> { get root_path },
+      "own language" => -> { patch locale_account_path, params: { user: { locale: "en" } } },
       "servers index" => -> { get servers_path },
       "server page" => -> { get server_path(servers(:web)) },
       "server port check" => -> { get server_ping_path(servers(:web)) },
@@ -118,7 +119,8 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
       "retry a key rotation" => -> { post retry_settings_key_rotation_path(KeyRotation.start!(by: users(:one))) },
       "finalize a key rotation" => -> { post finalize_settings_key_rotation_path(KeyRotation.start!(by: users(:one))) },
       "require 2FA for admins" => -> { patch settings_security_path, params: { app_setting: { require_admin_two_factor: "0" } } },
-      "health thresholds" => -> { patch settings_health_thresholds_path, params: { app_setting: { health_disk_warn: 80 } } }
+      "health thresholds" => -> { patch settings_health_thresholds_path, params: { app_setting: { health_disk_warn: 80 } } },
+      "default language" => -> { patch settings_language_path, params: { app_setting: { default_locale: "en" } } }
     }
   }.freeze
 

@@ -13,4 +13,14 @@ class AccountsController < ApplicationController
       render :show, status: :unprocessable_entity
     end
   end
+
+  # The interface language of the user (blank: the browser's).
+  def locale
+    current_user.update!(locale: params.expect(user: [ :locale ])[:locale])
+    I18n.with_locale(request_locale) do # the new choice
+      redirect_to account_path(anchor: "language"), notice: t(".saved")
+    end
+  rescue ActiveRecord::RecordInvalid
+    redirect_to account_path(anchor: "language"), alert: t(".invalid")
+  end
 end

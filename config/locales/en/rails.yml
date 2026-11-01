@@ -1,0 +1,79 @@
+en:
+  activerecord:
+    models:
+      server: Server
+      server_group: Server group
+      public_key: Keyring key
+      user: User
+      notification_channel: Notification channel
+      automation: Automation
+    attributes:
+      server:
+        name: Name
+        host: Host
+        port: Port
+        username: User
+        extra_addresses_text: The extra addresses
+      server_group:
+        name: Name
+        color: Color
+        expected_ports: The expected ports
+      public_key:
+        name: Name
+        kind: Type
+        content: Public SSH key
+        description: Description
+        fingerprint: This key
+      notification_channel:
+        name: Name
+        webhook_url: The webhook URL
+        recipients: The recipients
+        activity_kinds: The activities
+      automation:
+        interval_minutes: The frequency
+      invitation:
+        email: The email
+        role: The role
+      user:
+        role: The role
+        email: Email
+        password: Password
+        password_confirmation: Password confirmation
+    errors:
+      models:
+        server:
+          attributes:
+            extra_addresses_text:
+              invalid_ips: "contain values that are not IP addresses: %{addresses}"
+        notification_channel:
+          attributes:
+            recipients:
+              too_many: "cannot be more than %{count} addresses"
+              invalid_emails: "contain invalid addresses: %{emails}"
+        server_group:
+          attributes:
+            expected_ports:
+              invalid_ports: "contain invalid values: %{ports} (for example: “22, 80, 443/tcp, 51820/udp”)"
+        public_key:
+          attributes:
+            content:
+              invalid: "must be a single public key, for example “ssh-ed25519 AAAA… alice@laptop”"
+              private_key: "looks like a private key: paste the public key (.pub file)"
+              app_key: "is Elio's key and cannot be added to the keyring"
+            fingerprint:
+              taken: "is already in the keyring"
+        user:
+          attributes:
+            base:
+              last_admin: "There must always be at least one active administrator."
+        invitation:
+          attributes:
+            email:
+              taken_by_user: "already belongs to a user"
+              already_invited: "already has a pending invitation"
+  devise:
+    failure:
+      deactivated: "This account has been deactivated. Contact an administrator."
+  time:
+    formats:
+      short: "%b %d %H:%M"

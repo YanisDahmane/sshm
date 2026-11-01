@@ -1,0 +1,11 @@
+fr:
+  settings:
+    language:
+      title: Langue
+      label: Langue par défaut
+      save: Enregistrer
+      hint: Pour les utilisateurs qui n'ont pas choisi de langue et dont le navigateur en demande une qu'Elio n'a pas, pour les résultats des tâches de fond, et pour les canaux de notification sans langue propre.
+    languages:
+      update:
+        saved: Langue par défaut enregistrée.
+        invalid: Cette langue n'est pas disponible.
