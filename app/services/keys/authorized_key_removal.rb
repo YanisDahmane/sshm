@@ -1,5 +1,3 @@
-require "shellwords"
-
 # Removes a public key from the authorized_keys file of an account (see
 # AuthorizedKeysAccount). The protected keys (Elio's, by default) are refused:
 # every line whose key blob is `blob` is dropped, other lines (comments,
@@ -20,7 +18,7 @@ class Keys::AuthorizedKeyRemoval
     return error("Suppression interdite", "La clé Elio ne peut pas être supprimée : l'application perdrait l'accès au serveur.") if Array(protected_keys).any? { |key| key.blob == blob }
 
     output = Ssh::Connection.open(server, **connection_options) do |ssh|
-      ssh.exec!(account.command(remove_script(blob, home: account.home))).stdout
+      ssh.run_command!("keys.remove", blob: blob).stdout
     end
 
     Result.new(status: output.include?("removed") ? :removed : :absent, error_title: nil, error_details: nil)
@@ -28,21 +26,8 @@ class Keys::AuthorizedKeyRemoval
     error(*account.error_for(e))
   end
 
-  # POSIX sh script: prints "absent" when no line holds the blob as one of
-  # its fields, otherwise rewrites the file in place (keeping its owner and
-  # permissions) without those lines and prints "removed".
-  def self.remove_script(blob, home: "$HOME")
-    blob = Shellwords.escape(blob)
-
-    Keys::AuthorizedKeysScript.prelude(home) + <<~SH
-      file="$home/.ssh/authorized_keys"
-      if [ ! -f "$file" ]; then echo absent; exit 0; fi
-      matches=$(awk -v blob=#{blob} '{ for (i = 1; i <= NF; i++) if ($i == blob) { n++; break } } END { print n + 0 }' "$file")
-      if [ "$matches" -eq 0 ]; then echo absent; exit 0; fi
-      #{Keys::AuthorizedKeysScript.drop_lines(blob)}
-      echo removed
-    SH
-  end
+  # The command sent (config/ssh_commands.yml: keys.remove), also run locally by the tests.
+  def self.command(blob) = Ssh::Commands.render("keys.remove", blob: blob)
 
   def self.error(title, details)
     Result.new(status: :error, error_title: title, error_details: details)

@@ -18,7 +18,7 @@ class RotateSshKeyJobTest < ActiveJob::TestCase
       raise Ssh::Connection::ConnectionError, "refused" if @failures[server.name] == "install"
 
       @installs << [ server.name, key.map(&:state) ]
-      yield Object.new.tap { |ssh| def ssh.exec!(*) = true }
+      yield Object.new.tap { |ssh| def ssh.run_command!(*, **) = true }
     end
 
     def check(server, key:, **)

@@ -1,25 +1,12 @@
-require "shellwords"
-
 # System of a server: distribution (/etc/os-release), kernel, architecture,
 # host name, virtualization, boot time, CPUs, memory and time zone. One
 # read-only command, its sections separated by "@@elio <name>" lines.
 class Inventory::Collectors::Os < Inventory::Collector
-  SCRIPT = <<~SH.freeze
-    echo "@@elio os-release"; cat /etc/os-release 2>/dev/null || cat /usr/lib/os-release 2>/dev/null
-    echo "@@elio uname"; uname -srm
-    echo "@@elio hostname"; hostname -f 2>/dev/null || hostname
-    echo "@@elio virt"; systemd-detect-virt 2>/dev/null || true
-    echo "@@elio uptime"; cat /proc/uptime
-    echo "@@elio cpus"; nproc 2>/dev/null || getconf _NPROCESSORS_ONLN
-    echo "@@elio meminfo"; grep -E '^MemTotal:' /proc/meminfo
-    echo "@@elio timezone"; timedatectl show -p Timezone --value 2>/dev/null || cat /etc/timezone 2>/dev/null || true
-  SH
-
   # A boot time that moves by less than this is the same boot (rounding of /proc/uptime).
   REBOOT_TOLERANCE = 5.minutes
 
   def collect
-    result = run("sh -c #{Shellwords.escape(SCRIPT)}")
+    result = run("inventory.os")
     raise Error, "Lecture du système impossible : #{result.stderr.strip.presence || "code #{result.exit_status}"}" if result.stdout.blank?
 
     ok(self.class.parse(result.stdout))

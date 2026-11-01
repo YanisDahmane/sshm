@@ -30,7 +30,7 @@ class Inventory::Collectors::PackagesTest < ActiveSupport::TestCase
                  packages.select { |package| package["manager"] == "docker" }.map { |package| package.values_at("name", "version") }
     assert_equal({ "dpkg" => 7, "docker" => 3 }, outcome.data["by_manager"])
     assert_equal [ 10, 4, 3 ], outcome.data.values_at("total", "upgradable", "security")
-    assert_includes commands, "sudo -n #{Collector::DOCKER_IMAGES}"
+    assert_includes commands, "sudo -n #{Ssh::Commands.render("inventory.docker_images")}"
   end
 
   test "Docker images that cannot be read make the collection partial" do

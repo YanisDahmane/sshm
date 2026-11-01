@@ -1,21 +1,10 @@
-require "shellwords"
-
 # Packages of a server: dpkg packages with the updates apt knows about
 # (security ones flagged), snaps, and Docker images when Docker can be read
 # (docker group or root). The full list goes to Inventory::Package (replaced
 # at each collection); the snapshot only keeps the counts.
 class Inventory::Collectors::Packages < Inventory::Collector
-  SCRIPT = <<~'SH'.freeze
-    echo "@@elio dpkg"; if command -v dpkg-query >/dev/null 2>&1; then dpkg-query -W -f='${db:Status-Abbrev}\t${Package}\t${Version}\t${Architecture}\n' 2>/dev/null; else echo unsupported; fi
-    echo "@@elio upgradable"; if command -v apt >/dev/null 2>&1; then apt list --upgradable 2>/dev/null; fi
-    echo "@@elio snap"; if command -v snap >/dev/null 2>&1; then snap list 2>/dev/null; else echo unsupported; fi
-    echo "@@elio docker"; if command -v docker >/dev/null 2>&1; then echo present; fi
-  SH
-
-  DOCKER_IMAGES = "docker image ls --format '{{.Repository}}\t{{.Tag}}\t{{.ID}}'".freeze
-
   def collect
-    result = run("sh -c #{Shellwords.escape(SCRIPT)}")
+    result = run("inventory.packages")
     raise Error, "Lecture des paquets impossible : #{result.stderr.strip.presence || "code #{result.exit_status}"}" if result.stdout.blank?
 
     sections = self.class.sections(result.stdout)
@@ -24,7 +13,7 @@ class Inventory::Collectors::Packages < Inventory::Collector
     packages = self.class.parse_dpkg(sections["dpkg"], self.class.parse_upgradable(sections["upgradable"])) + self.class.parse_snap(sections["snap"])
     docker_error = nil
     if sections["docker"].strip == "present"
-      images = run(DOCKER_IMAGES, privileged: true)
+      images = run("inventory.docker_images")
       images.success? ? packages.concat(self.class.parse_docker(images.stdout)) : docker_error = "Images Docker illisibles : #{images.stderr.strip.truncate(120)}"
     end
 

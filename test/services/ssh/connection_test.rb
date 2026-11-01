@@ -299,4 +299,41 @@ class Ssh::ConnectionTest < ActiveSupport::TestCase
       assert_equal "ss -tln", ssh.privileged("ss -tln")
     end
   end
+
+  test "run_command: the variant of the distribution, read once per session and only when needed" do
+    fake = FakeSsh.new(handler: lambda { |command|
+      if command.start_with?(". /etc/os-release") then FakeSsh::Response.new("ubuntu debian\n", "", 0)
+      else FakeSsh::Response.new("ok", "", 0)
+      end
+    })
+    connect(servers(:web), fake) do |ssh|
+      ssh.run_command("inventory.os")
+      2.times { ssh.run_command("inventory.health") }
+      assert_equal %w[ubuntu debian], ssh.distros
+    end
+
+    os_release, os, health, health_again = fake.commands
+    assert_equal Ssh::Commands.render("inventory.os"), os_release, "inventory.os has no variant: no os-release read before it"
+    assert_equal Ssh::Commands.render("connection.os_release"), os
+    assert_equal Ssh::Commands.render("inventory.health", distros: %w[ubuntu debian]), health
+    assert_equal health, health_again
+  end
+
+  test "run_command: root commands through sudo, values escaped, an unknown system gets the default variant" do
+    fake = FakeSsh.new(responses: { "sudo -n true" => FakeSsh::Response.new("", "", 0) })
+    connect(servers(:web), fake) do |ssh|
+      ssh.run_command("inventory.ports")
+      ssh.run_command("connection.check", token: "a b")
+      ssh.run_command("inventory.packages")
+    end
+
+    assert_includes fake.commands, "sudo -n #{Ssh::Commands.render("inventory.ports")}"
+    assert_includes fake.commands, "echo a\\ b"
+    assert_includes fake.commands, Ssh::Commands.render("inventory.packages")
+  end
+
+  test "run_command! raises with the name of the command" do
+    error = assert_raises(Ssh::Connection::CommandError) { connect(servers(:web), FakeSsh.new) { |ssh| ssh.run_command!("keys.read") } }
+    assert_match(/\A`keys.read` exited with status 127/, error.message)
+  end
 end

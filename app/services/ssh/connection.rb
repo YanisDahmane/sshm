@@ -1,9 +1,10 @@
 require "net/ssh"
 
 # Opens an SSH session to a Server to run commands (no interactive shell).
+# The commands come from config/ssh_commands.yml (see Ssh::Commands):
 #
 #   Ssh::Connection.open(server) do |ssh|
-#     ssh.exec!("cat /root/.ssh/authorized_keys").stdout
+#     ssh.run_command!("keys.read").stdout
 #   end
 #
 # Authentication only uses the app's SSH keys (SshKey.app_keys: the active key,
@@ -103,6 +104,7 @@ class Ssh::Connection
     ensure
       @session = nil
       @privilege = nil
+      @distros = nil
       @timed_out = false
     end
   rescue Net::SSH::AuthenticationFailed => e
@@ -146,11 +148,34 @@ class Ssh::Connection
     exec(command, **options).tap { |result| raise CommandError.new(command, result) unless result.success? }
   end
 
+  # Runs a command of config/ssh_commands.yml (key "role.name"): the variant
+  # of the server's distribution family, through sudo when it needs root
+  # (as is without root access: it runs with the user's rights), values
+  # shell-escaped. Returns its Result whatever the exit status.
+  def run_command(key, timeout: nil, **values)
+    command = Ssh::Commands.fetch(key)
+    line = command.render(distros: (command.distro_specific? ? distros : []), **values)
+    line = privileged(line) if command.root?
+    exec(line, timeout: timeout || [ command.timeout, @command_timeout ].min)
+  end
+
+  # Same, raising CommandError unless it succeeds.
+  def run_command!(key, **options)
+    run_command(key, **options).tap { |result| raise CommandError.new(key, result) unless result.success? }
+  end
+
+  # Distribution family of the server (ID then ID_LIKE of /etc/os-release, e.g.
+  # ["ubuntu", "debian"]), read once per session when a command has variants;
+  # [] when unknown (the default variants are used).
+  def distros
+    @distros ||= Ssh::Commands.parse_distros(run_command("connection.os_release").then { |result| result.success? ? result.stdout : "" })
+  end
+
   # How commands needing root can run on this server, checked once per session:
   # :root (logged in as root), :sudo (passwordless `sudo -n`) or :none.
   def privilege
     @privilege ||= if server.username == "root" then :root
-    elsif exec("sudo -n true", timeout: 10).success? then :sudo
+    elsif run_command("connection.sudo_probe").success? then :sudo
     else :none
     end
   end

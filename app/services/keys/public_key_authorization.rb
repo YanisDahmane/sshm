@@ -1,5 +1,3 @@
-require "shellwords"
-
 # Authorizes a keyring key on a server by appending its public key to the
 # authorized_keys file of the login account (see AuthorizedKeysAccount), unless the
 # key is already there. The line's comment is the key name in the keyring, so it shows
@@ -16,9 +14,9 @@ class Keys::PublicKeyAuthorization
   def self.call(server, public_key, account: nil, expires_at: nil, replace: false, **connection_options)
     account ||= AuthorizedKeysAccount.login(server)
     key = public_key.authorized_key
-    script = append_script(line_for(public_key, expires_at), key.key, home: account.home, replace: replace)
-
-    output = Ssh::Connection.open(server, **connection_options) { |ssh| ssh.exec!(account.command(script)).stdout }
+    output = Ssh::Connection.open(server, **connection_options) do |ssh|
+      ssh.run_command!(replace ? "keys.replace" : "keys.append", line: line_for(public_key, expires_at), blob: key.key).stdout
+    end
 
     Result.new(status: output.include?("present") ? :already_present : :added, error_title: nil, error_details: nil)
   rescue Ssh::Connection::Error => e
@@ -32,27 +30,7 @@ class Keys::PublicKeyAuthorization
     "#{options}#{key.type} #{key.key} #{public_key.name}"
   end
 
-  # POSIX sh script: creates <home>/.ssh (700) and authorized_keys (600) if
-  # needed, optionally drops the lines holding
-  # the key blob, then prints "present" when the blob is still in the file,
-  # otherwise appends the line (adding a newline first if the file does not
-  # end with one) and prints "added".
-  def self.append_script(line, blob, home: "$HOME", replace: false)
-    blob = Shellwords.escape(blob)
-
-    Keys::AuthorizedKeysScript.prelude(home) + <<~SH
-      umask 077
-      mkdir -p "$home/.ssh"
-      file="$home/.ssh/authorized_keys"
-      touch "$file"
-      #{Keys::AuthorizedKeysScript.drop_lines(blob) if replace}
-      if grep -qF -- #{blob} "$file"; then
-        echo present
-      else
-        if [ -s "$file" ] && [ -n "$(tail -c 1 "$file")" ]; then echo >> "$file"; fi
-        printf '%s\\n' #{Shellwords.escape(line)} >> "$file"
-        echo added
-      fi
-    SH
-  end
+  # The command sent (config/ssh_commands.yml: keys.append / keys.replace),
+  # also run locally by the tests.
+  def self.command(line, blob, replace: false) = Ssh::Commands.render(replace ? "keys.replace" : "keys.append", line: line, blob: blob)
 end

@@ -18,7 +18,7 @@ class Keys::PublicKeyAuthorizationTest < ActiveSupport::TestCase
   def authorized_keys = authorized_keys_file
 
   def run_script(line: "#{@type} #{@blob} Alice", blob: @blob)
-    run_local_script(Keys::PublicKeyAuthorization.append_script(line, blob))
+    run_local_script(Keys::PublicKeyAuthorization.command(line, blob))
   end
 
   def authorize(fake, public_key: @public_key)
@@ -113,16 +113,6 @@ class Keys::PublicKeyAuthorizationTest < ActiveSupport::TestCase
     assert_equal "Connexion impossible", result.error_title
   end
 
-  test "the script honours the home parameter" do
-    custom = @home.join("other")
-    custom.mkpath
-
-    run_local_script(Keys::PublicKeyAuthorization.append_script("#{@type} #{@blob} Alice", @blob, home: Shellwords.escape(custom.to_s)))
-
-    assert custom.join(".ssh", "authorized_keys").exist?
-    assert_not authorized_keys.exist?
-  end
-
   test "an expiring line carries an OpenSSH expiry-time option in UTC" do
     expires_at = Time.zone.parse("2026-10-03 16:42:18 +02:00")
 
@@ -143,7 +133,7 @@ class Keys::PublicKeyAuthorizationTest < ActiveSupport::TestCase
     authorized_keys.dirname.mkpath
     authorized_keys.write(%(# team\nexpiry-time="20261003144218Z" #{@type} #{@blob} Alice\n#{other}\n))
 
-    output = run_local_script(Keys::PublicKeyAuthorization.append_script("#{@type} #{@blob} Alice", @blob, replace: true))
+    output = run_local_script(Keys::PublicKeyAuthorization.command("#{@type} #{@blob} Alice", @blob, replace: true))
 
     assert_equal "added", output
     assert_equal "# team\n#{other}\n#{@type} #{@blob} Alice\n", authorized_keys.read

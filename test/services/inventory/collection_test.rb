@@ -3,7 +3,7 @@ require "test_helper"
 # Fake collectors: each reads one command over the (fake) SSH session.
 class FakeReleaseCollector < Inventory::Collector
   def collect
-    ok({ "release" => run("cat /etc/release").stdout.strip })
+    ok({ "release" => run("test.release").stdout.strip })
   end
 
   def self.changes(previous, data)
@@ -15,7 +15,7 @@ end
 
 class FakeListeningCollector < Inventory::Collector
   def collect
-    output = run("ss -tlnp", privileged: true).stdout
+    output = run("test.listening").stdout
     privileged? ? ok({ "ports" => output.split }) : partial({ "ports" => output.split }, "Processus inconnus sans accès root")
   end
 end
@@ -29,12 +29,17 @@ class FakeFailingCollector < Inventory::Collector
 end
 
 class FakeHangingCollector < Inventory::Collector
-  def collect = ok({ "out" => run("sleep 99", timeout: 0.1).stdout })
+  def collect = ok({ "out" => run("test.hang", timeout: 0.1).stdout })
 end
 
 class Inventory::CollectionTest < ActiveSupport::TestCase
   include InventoryHelpers
   include StubHelpers
+  include SshCommandHelpers
+
+  COMMANDS = { test: { release: { default: "cat /etc/release" }, listening: { run_as: "root", default: "ss -tlnp" }, hang: { default: "sleep 99" } } }.freeze
+
+  def run(...) = with_ssh_commands(COMMANDS) { super }
 
   REGISTRY = { "release" => "FakeReleaseCollector", "listening" => "FakeListeningCollector" }.freeze
 

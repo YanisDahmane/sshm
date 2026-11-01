@@ -1,22 +1,12 @@
-require "shellwords"
-
 # Services of a server: systemd units (state, enabled at boot) and Docker
 # containers with their Compose project, read from the labels Docker Compose
 # sets (no need to parse the compose files). Docker needs the docker group or
 # root: without them the collection is partial.
 class Inventory::Collectors::Services < Inventory::Collector
-  SCRIPT = <<~SH.freeze
-    echo "@@elio units"; systemctl list-units --type=service --all --no-legend --plain --no-pager 2>/dev/null || echo unsupported
-    echo "@@elio unit-files"; systemctl list-unit-files --type=service --no-legend --plain --no-pager 2>/dev/null || true
-    echo "@@elio docker"; if command -v docker >/dev/null 2>&1; then echo present; fi
-  SH
-
   LABELS = %w[com.docker.compose.project com.docker.compose.project.working_dir com.docker.compose.project.config_files com.docker.compose.service].freeze
-  CONTAINERS = "docker ps -a --no-trunc --format '#{([ "{{.ID}}", "{{.Names}}", "{{.Image}}", "{{.State}}", "{{.Status}}", "{{.Ports}}" ] +
-                                                  LABELS.map { |label| %({{.Label "#{label}"}}) }).join('\t')}'".freeze
 
   def collect
-    result = run("sh -c #{Shellwords.escape(SCRIPT)}")
+    result = run("inventory.services")
     raise Error, "Lecture des services impossible : #{result.stderr.strip.presence || "code #{result.exit_status}"}" if result.stdout.blank?
 
     sections = result.stdout.split(/^@@elio (\S+)\n/).drop(1).each_slice(2).to_h { |name, body| [ name, body.to_s ] }
@@ -26,7 +16,7 @@ class Inventory::Collectors::Services < Inventory::Collector
 
     data = { "units" => units || [], "containers" => [], "docker" => (docker_present ? "ok" : "absent") }
     if docker_present
-      containers = run(CONTAINERS, privileged: true)
+      containers = run("inventory.docker_containers")
       return partial(data.merge("docker" => "unreadable"), "Conteneurs Docker illisibles : #{containers.stderr.strip.truncate(120)}") unless containers.success?
 
       data["containers"] = self.class.parse_containers(containers.stdout)

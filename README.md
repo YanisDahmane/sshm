@@ -154,6 +154,8 @@ Elio vérifie l'accès avec `sudo -n true` à chaque inventaire et l'indique sur
 
 Tout passe par SSH, avec la clé d'Elio uniquement (jamais votre agent ni vos clés). Chaque commande a un délai maximum (60 s), et un serveur qui ne répond plus ne bloque pas les autres.
 
+**Toutes les commandes sont dans [`config/ssh_commands.yml`](config/ssh_commands.yml)**, rangées par rôle puis par distribution : c'est le seul endroit où elles sont écrites, l'application les lit de là (aucune commande n'est construite ailleurs dans le code). Les valeurs insérées (clé, ligne…) sont toujours échappées. Résumé :
+
 | Pour | Commandes (lecture seule) |
 |---|---|
 | Système | `cat /etc/os-release`, `uname -srm`, `hostname -f`, `systemd-detect-virt`, `/proc/uptime`, `nproc`, `/proc/meminfo`, `timedatectl` |

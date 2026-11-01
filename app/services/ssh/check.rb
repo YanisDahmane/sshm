@@ -8,7 +8,7 @@ class Ssh::Check
 
   def self.call(server, **connection_options)
     token = "elio-check-#{SecureRandom.hex(4)}"
-    output = Ssh::Connection.open(server, **connection_options) { |ssh| ssh.exec!("echo #{token}").stdout.strip }
+    output = Ssh::Connection.open(server, **connection_options) { |ssh| ssh.run_command!("connection.check", token: token).stdout.strip }
 
     if output == token
       Result.new(success: true, message: "Connexion SSH réussie", details: "#{server.username}@#{server.host} a répondu à `echo #{token}`.")

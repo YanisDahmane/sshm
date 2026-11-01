@@ -13,12 +13,7 @@ class AuthorizedKeysAccountTest < ActiveSupport::TestCase
   end
 
   test "works in the login user's home" do
-    assert_equal "$HOME", @account.home
     assert_equal "~deploy/.ssh/authorized_keys", @account.path
-  end
-
-  test "runs scripts with sh, escaped" do
-    assert_equal "sh -c echo\\ \\'hi\\'", @account.command("echo 'hi'")
   end
 
   test "shows connection errors as they are" do

@@ -1,5 +1,4 @@
 require "json"
-require "shellwords"
 
 # Network of a server: every interface with its addresses (IPv4 / IPv6,
 # prefix, public / private / local) and its kind (ethernet, WireGuard,
@@ -9,18 +8,13 @@ require "shellwords"
 # the server. The addresses feed the matching of external resources
 # (Uptime Kuma probes, OVH IPs) with the servers.
 class Inventory::Collectors::Network < Inventory::Collector
-  SCRIPT = <<~SH.freeze
-    echo "@@elio addr"; ip -j addr 2>/dev/null || echo unsupported
-    echo "@@elio link"; ip -d -j link 2>/dev/null || true
-  SH
-
   KINDS = { "wireguard" => "WireGuard", "ethernet" => "Ethernet", "wifi" => "Wi-Fi", "bridge" => "Pont", "vlan" => "VLAN", "bond" => "Agrégat",
             "tun" => "Tunnel (tun)", "tap" => "Tunnel (tap)", "tunnel" => "Tunnel", "vxlan" => "VXLAN", "other" => "Autre" }.freeze
   VPN_KINDS = %w[wireguard tun tap tunnel].freeze
   CONTAINER_INTERFACE = /\A(docker\d*|br-[0-9a-f]{12}|veth|cni|flannel|cali|vethwe|lxcbr|virbr)/
 
   def collect
-    result = run("sh -c #{Shellwords.escape(SCRIPT)}")
+    result = run("inventory.network")
     raise Error, "Lecture du réseau impossible : #{result.stderr.strip.presence || "code #{result.exit_status}"}" if result.stdout.blank?
 
     sections = result.stdout.split(/^@@elio (\S+)\n/).drop(1).each_slice(2).to_h { |name, body| [ name, body.to_s ] }

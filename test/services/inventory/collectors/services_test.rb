@@ -32,7 +32,7 @@ class Inventory::Collectors::ServicesTest < ActiveSupport::TestCase
                    "config_files" => [ "/opt/ops-tools/compose.yml", "/opt/ops-tools/compose.prod.yml" ], "service" => "pgbouncer" }, containers.first)
     assert_equal({ "id" => "aaaabbbbcccc", "name" => "backup-once", "image" => "alpine:3.20", "state" => "exited", "status" => "Exited (0) 2 days ago" }, containers.last)
     assert_equal "ok", outcome.data["docker"]
-    assert_includes commands, "sudo -n #{Collector::CONTAINERS}"
+    assert_includes commands, "sudo -n #{Ssh::Commands.render("inventory.docker_containers")}"
   end
 
   test "unreadable containers make the collection partial" do

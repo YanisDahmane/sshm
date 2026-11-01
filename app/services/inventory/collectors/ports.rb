@@ -1,25 +1,16 @@
 require "ipaddr"
-require "shellwords"
 
 # Listening ports of a server (ss) with the process and systemd unit behind
 # each one, and the firewall state (ufw, otherwise nftables or iptables).
 # Processes of other users and the firewall need root: without it the
 # collection is partial. Elio never changes the firewall.
 class Inventory::Collectors::Ports < Inventory::Collector
-  SCRIPT = <<~'SH'.freeze
-    echo "@@elio ss"; ss -H -tulpn 2>/dev/null || ss -H -tuln 2>/dev/null || echo unsupported
-    echo "@@elio cgroups"; for pid in $(ss -H -tulpn 2>/dev/null | grep -o 'pid=[0-9]*' | cut -d= -f2 | sort -u); do printf '%s ' "$pid"; head -n 1 "/proc/$pid/cgroup" 2>/dev/null || echo; done
-    echo "@@elio ufw"; if command -v ufw >/dev/null 2>&1; then ufw status verbose 2>&1; else echo absent; fi
-    echo "@@elio nft"; if command -v nft >/dev/null 2>&1; then nft list ruleset 2>&1 | head -c 200000; else echo absent; fi
-    echo "@@elio iptables"; if command -v iptables >/dev/null 2>&1; then iptables -S INPUT 2>&1; else echo absent; fi
-  SH
-
   # Ports of the usual ufw application profiles.
   UFW_APPS = { "OpenSSH" => [ "22/tcp" ], "Nginx HTTP" => [ "80/tcp" ], "Nginx HTTPS" => [ "443/tcp" ], "Nginx Full" => [ "80/tcp", "443/tcp" ],
                "Apache" => [ "80/tcp" ], "Apache Secure" => [ "443/tcp" ], "Apache Full" => [ "80/tcp", "443/tcp" ], "Postfix" => [ "25/tcp" ] }.freeze
 
   def collect
-    result = run("sh -c #{Shellwords.escape(SCRIPT)}", privileged: true)
+    result = run("inventory.ports")
     raise Error, "Lecture des ports impossible : #{result.stderr.strip.presence || "code #{result.exit_status}"}" if result.stdout.blank?
 
     sections = result.stdout.split(/^@@elio (\S+)\n/).drop(1).each_slice(2).to_h { |name, body| [ name, body.to_s ] }

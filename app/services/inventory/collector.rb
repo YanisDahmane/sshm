@@ -64,10 +64,11 @@ class Inventory::Collector
 
   # Runs a read-only command, through `sudo -n` when `privileged` and root is
   # available. Raises Error when the output is unreasonably large.
-  def run(command, privileged: false, timeout: Ssh::Connection::DEFAULT_COMMAND_TIMEOUT)
-    command = ssh.privileged(command) if privileged
-    ssh.exec(command, timeout: timeout).tap do |result|
-      raise Error, "Sortie trop volumineuse pour « #{command.truncate(60)} »" if result.stdout.bytesize > MAX_OUTPUT
+  # Runs a command of config/ssh_commands.yml ("inventory.health"…), through
+  # sudo when it needs root (see Ssh::Connection#run_command).
+  def run(key, **values)
+    ssh.run_command(key, **values).tap do |result|
+      raise Error, "Sortie trop volumineuse pour « #{key} »" if result.stdout.bytesize > MAX_OUTPUT
     end
   end
 

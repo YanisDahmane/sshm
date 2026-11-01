@@ -37,7 +37,7 @@ class RotateSshKeyJob < ApplicationJob
 
   def rotate(rotation, server)
     account = AuthorizedKeysAccount.login(server)
-    install(rotation, server, account)
+    install(rotation, server)
     verify(rotation, server)
     cleanup(rotation, server, account)
     rotation.steps.create!(server: server, server_name: server.name, status: :rotated)
@@ -45,10 +45,9 @@ class RotateSshKeyJob < ApplicationJob
     rotation.steps.create!(server: server, server_name: server.name, status: :failed, phase: e.phase, error_message: e.message)
   end
 
-  def install(rotation, server, account)
+  def install(rotation, server)
     new_key = rotation.new_key
-    script = Keys::PublicKeyAuthorization.append_script(new_key.public_key, new_key.blob, home: account.home)
-    Ssh::Connection.open(server, key: [ rotation.old_key, new_key ]) { |ssh| ssh.exec!(account.command(script)) }
+    Ssh::Connection.open(server, key: [ rotation.old_key, new_key ]) { |ssh| ssh.run_command!("keys.append", line: new_key.public_key, blob: new_key.blob) }
   rescue Ssh::Connection::Error => e
     raise StepFailed.new("install", "#{e.title} — #{e.message}")
   end

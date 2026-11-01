@@ -1,5 +1,3 @@
-require "shellwords"
-
 # Health of a server: load, memory, swap, disks (space and inodes), reboot
 # required, failed systemd units, pending updates (apt simulation) and clock
 # synchronization. One read-only command (no root needed), its sections
@@ -8,21 +6,8 @@ require "shellwords"
 class Inventory::Collectors::Health < Inventory::Collector
   EXCLUDED_FILESYSTEMS = %w[tmpfs devtmpfs overlay squashfs efivarfs ramfs nsfs].freeze
 
-  SCRIPT = <<~SH.freeze
-    excluded="#{EXCLUDED_FILESYSTEMS.map { |type| "-x #{type}" }.join(" ")}"
-    echo "@@elio loadavg"; cat /proc/loadavg
-    echo "@@elio cpus"; nproc 2>/dev/null || getconf _NPROCESSORS_ONLN
-    echo "@@elio meminfo"; grep -E '^(MemTotal|MemAvailable|SwapTotal|SwapFree):' /proc/meminfo
-    echo "@@elio df"; df -P -T -k $excluded 2>/dev/null
-    echo "@@elio inodes"; df -P -T -i $excluded 2>/dev/null
-    echo "@@elio reboot"; if [ -f /var/run/reboot-required ]; then echo yes; else echo no; fi
-    echo "@@elio failed"; systemctl --failed --no-legend --plain 2>/dev/null || true
-    echo "@@elio updates"; if command -v apt-get >/dev/null 2>&1; then apt-get -s -o Debug::NoLocking=true dist-upgrade 2>/dev/null | grep '^Inst ' || true; else echo unsupported; fi
-    echo "@@elio ntp"; timedatectl show -p NTPSynchronized --value 2>/dev/null || true
-  SH
-
   def collect
-    result = run("sh -c #{Shellwords.escape(SCRIPT)}")
+    result = run("inventory.health")
     raise Error, "Lecture de la santé impossible : #{result.stderr.strip.presence || "code #{result.exit_status}"}" if result.stdout.blank?
 
     ok(self.class.parse(result.stdout))

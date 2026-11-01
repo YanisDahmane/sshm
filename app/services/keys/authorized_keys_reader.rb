@@ -10,7 +10,7 @@ class Keys::AuthorizedKeysReader
   def self.call(server, account: nil, **connection_options)
     account ||= AuthorizedKeysAccount.login(server)
     output = Ssh::Connection.open(server, **connection_options) do |ssh|
-      ssh.exec!(account.command(read_script(account.home))).stdout
+      ssh.run_command!("keys.read").stdout
     end
 
     Result.new(keys: AuthorizedKey.parse(output), error_title: nil, error_details: nil)
@@ -19,10 +19,6 @@ class Keys::AuthorizedKeysReader
     Result.new(keys: [], error_title: title, error_details: details, reason: e.reason)
   end
 
-  def self.read_script(home)
-    Keys::AuthorizedKeysScript.prelude(home) + <<~SH
-      file="$home/.ssh/authorized_keys"
-      if [ -f "$file" ]; then cat "$file"; fi
-    SH
-  end
+  # The command sent (config/ssh_commands.yml: keys.read), also run locally by the tests.
+  def self.command = Ssh::Commands.render("keys.read")
 end

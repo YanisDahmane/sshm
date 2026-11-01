@@ -2,8 +2,12 @@ require "test_helper"
 
 class Inventory::CollectorTest < ActiveSupport::TestCase
   class Echo < Inventory::Collector
-    def collect = ok({ "out" => run("cat /big").stdout.size })
+    def collect = ok({ "out" => run("test.big").stdout.size })
   end
+
+  include SshCommandHelpers
+
+  def run(...) = with_ssh_commands({ test: { big: { default: "cat /big" } } }) { super }
 
   def connect(fake, &block)
     known_hosts = Rails.root.join("tmp", "test", "collector-#{SecureRandom.hex(4)}", "known_hosts")
@@ -17,7 +21,7 @@ class Inventory::CollectorTest < ActiveSupport::TestCase
     fake = FakeSsh.new(responses: { "cat /big" => FakeSsh::Response.new(huge, "", 0) })
 
     error = assert_raises(Inventory::Collector::Error) { connect(fake) { |ssh| Echo.new(ssh).collect } }
-    assert_equal "Sortie trop volumineuse pour « cat /big »", error.message
+    assert_equal "Sortie trop volumineuse pour « test.big »", error.message
   end
 
   test "outcomes carry a status, data and a message" do

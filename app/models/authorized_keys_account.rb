@@ -1,5 +1,3 @@
-require "shellwords"
-
 # The Unix account whose authorized_keys file Elio manages on a server: always
 # the SSH user Elio logs in as (`server.username`).
 class AuthorizedKeysAccount
@@ -14,14 +12,7 @@ class AuthorizedKeysAccount
 
   def name = unix_user
 
-  # Shell expression of the home directory, assigned to `home=` at the top of
-  # scripts.
-  def home = "$HOME"
-
   def path = "~#{unix_user}/.ssh/authorized_keys"
-
-  # Command running `script` with sh.
-  def command(script) = "sh -c #{Shellwords.escape(script)}"
 
   # [title, details] to display for an Ssh::Connection error.
   def error_for(error) = [ error.title, error.message ]

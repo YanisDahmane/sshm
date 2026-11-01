@@ -6,7 +6,7 @@ class KeyRotationTest < ApplicationSystemTestCase
   include ActiveJob::TestHelper
 
   test "rotating the Elio key without downtime" do
-    stub_method_until_teardown(Ssh::Connection, :open, ->(*, **, &block) { block.call(Object.new.tap { |ssh| def ssh.exec!(*) = true }) })
+    stub_method_until_teardown(Ssh::Connection, :open, ->(*, **, &block) { block.call(Object.new.tap { |ssh| def ssh.run_command!(*, **) = true }) })
     stub_method_until_teardown(Ssh::Check, :call, Ssh::Check::Result.new(success: true, message: "ok", details: "ok"))
     stub_method_until_teardown(Keys::AuthorizedKeyRemoval, :call, Keys::AuthorizedKeyRemoval::Result.new(status: :removed, error_title: nil, error_details: nil))
     old_fingerprint = ssh_keys(:main).fingerprint
