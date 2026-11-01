@@ -132,3 +132,5 @@ fr:
       succeeded: Terminée
       partial: Terminée avec erreurs
       failed: En échec
+  background_task:
+    orphaned: 'Interrompue : le job n''existe plus'

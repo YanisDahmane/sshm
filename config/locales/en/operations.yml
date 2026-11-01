@@ -132,3 +132,5 @@ en:
       succeeded: Done
       partial: Done with errors
       failed: Failed
+  background_task:
+    orphaned: 'Interrupted: the job no longer exists'

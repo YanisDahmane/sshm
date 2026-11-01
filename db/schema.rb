@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_02_110000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_02_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -84,6 +84,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_110000) do
     t.datetime "finished_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "active_job_id"
     t.index ["background_task_id"], name: "index_background_task_items_on_background_task_id"
     t.index ["server_id"], name: "index_background_task_items_on_server_id"
   end
@@ -99,6 +100,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_110000) do
     t.datetime "finished_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "active_job_id"
     t.index ["automation_id"], name: "index_background_tasks_on_automation_id"
     t.index ["created_at"], name: "index_background_tasks_on_created_at"
     t.index ["status", "created_at"], name: "index_background_tasks_on_status_and_created_at"

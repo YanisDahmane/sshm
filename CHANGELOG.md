@@ -8,6 +8,8 @@ All notable changes to Elio. The format follows [Keep a Changelog](https://keepa
 
 - The interface in **English and French**, and any other language by adding a folder of translations (`config/locales/<language>/`). Each user picks a language in My account; otherwise Elio follows the browser, then the default language of the installation (Settings → General: English on a new installation, French on an existing one). Notification channels have their own language, and an invitation is sent in the language chosen for it.
 
+- Tasks left “queued” or “running” for more than 3 hours by a job that no longer exists (a killed worker, a reset queue) are finished every 15 minutes: their items fail with “Interrupted: the job no longer exists”. A task whose job still waits or runs is never touched.
+
 ### Changed
 
 - Health reasons are stored as translation keys and written in the reader's language; the reasons of an existing installation are computed again at the upgrade.

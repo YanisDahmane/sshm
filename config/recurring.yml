@@ -28,6 +28,9 @@ shared: &shared
   purge_background_tasks:
     class: PurgeBackgroundTasksJob
     schedule: every day at 4:15am
+  sweep_stale_tasks:
+    class: SweepStaleTasksJob
+    schedule: every 15 minutes
 
 development:
   <<: *shared
