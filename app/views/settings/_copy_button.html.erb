@@ -1,5 +1,5 @@
 <button type="button" data-action="clipboard#copy"
         class="btn btn-secondary shrink-0">
-  <span data-clipboard-target="idle" class="inline-flex items-center gap-1.5"><%= icon :clipboard %> Copier</span>
-  <span data-clipboard-target="copied" class="inline-flex items-center gap-1.5 text-good-ink" hidden><%= icon :check %> Copié</span>
+  <span data-clipboard-target="idle" class="inline-flex items-center gap-1.5"><%= icon :clipboard %> <%= t(".copy") %></span>
+  <span data-clipboard-target="copied" class="inline-flex items-center gap-1.5 text-good-ink" hidden><%= icon :check %> <%= t(".copied") %></span>
 </button>

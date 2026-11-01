@@ -1,37 +1,41 @@
-<% content_for :title, "Utilisateurs · Paramètres · Elio" %>
+<% content_for :title, t("title", page: "#{t(".title")} · #{t("settings.nav.title")}") %>
 <%= render "settings/nav" %>
 
 <section id="invite" class="mt-8 rounded-xl border border-line bg-surface p-6 shadow-sm">
-  <h2 class="text-base font-semibold">Inviter un utilisateur</h2>
-  <p class="mt-1 text-sm text-ink-3">Un lien à usage unique, valable <%= Invitation::VALIDITY.inspect.sub("days", "jours") %>, est créé : copiez-le et envoyez-le à la personne.</p>
+  <h2 class="text-base font-semibold"><%= t(".invite") %></h2>
+  <p class="mt-1 text-sm text-ink-3"><%= t(".invite_intro", count: Invitation::VALIDITY.in_days.to_i) %></p>
   <%= form_with model: @invitation, url: settings_invitations_path, class: "mt-4 flex flex-wrap items-end gap-3" do |f| %>
     <div class="min-w-60 flex-1">
-      <%= f.label :email, "Email", class: "label" %>
+      <%= f.label :email, t(".email"), class: "label" %>
       <%= f.email_field :email, required: true, placeholder: "alice@example.com",
             class: "input mt-1" %>
     </div>
     <div>
-      <%= f.label :role, "Rôle", class: "label" %>
+      <%= f.label :role, t(".role"), class: "label" %>
       <%= f.select :role, User.role_options, {},
             class: "input w-auto mt-1" %>
     </div>
-    <%= f.submit "Créer l'invitation", class: "btn btn-primary" %>
+    <div>
+      <%= f.label :locale, t(".language"), class: "label" %>
+      <%= f.select :locale, locale_options, { selected: @invitation.locale || I18n.locale.to_s }, class: "input w-auto mt-1" %>
+    </div>
+    <%= f.submit t(".create_invitation"), class: "btn btn-primary" %>
   <% end %>
 
   <% if @invitations.any? %>
-    <h3 class="mt-6 text-sm font-semibold text-ink-2">Invitations en attente</h3>
+    <h3 class="mt-6 text-sm font-semibold text-ink-2"><%= t(".pending") %></h3>
     <ul id="pending-invitations" class="mt-2 divide-y divide-line rounded-md border border-line">
       <% @invitations.each do |invitation| %>
         <li id="<%= dom_id(invitation) %>" class="pending-invitation flex flex-wrap items-center gap-3 px-4 py-3 text-sm" data-controller="clipboard">
           <div class="min-w-0 flex-1">
             <p class="font-medium"><%= invitation.email %> <span class="ml-1 rounded-full bg-subtle px-2 py-0.5 text-xs font-medium text-ink-2"><%= invitation.role_label %></span></p>
-            <p class="text-xs text-ink-3">Par <%= invitation.invited_by.email %> · <%= relative_time_tag invitation.expires_at, prefix: "expire " %></p>
-            <input type="text" readonly value="<%= invitation_acceptance_url(invitation.token) %>" data-clipboard-target="source" aria-label="Lien d'invitation"
+            <p class="text-xs text-ink-3"><%= t(".invited_by_html", email: invitation.invited_by.email, expiry: relative_time_tag(invitation.expires_at, prefix: t(".expires"))) %></p>
+            <input type="text" readonly value="<%= invitation_acceptance_url(invitation.token) %>" data-clipboard-target="source" aria-label="<%= t(".link") %>"
                    class="invitation-link mt-2 block w-full rounded-md border border-line bg-subtle px-2 py-1 font-mono text-xs text-ink-2">
           </div>
           <%= render "settings/copy_button" %>
-          <%= button_to settings_invitation_path(invitation), method: :delete, title: "Révoquer", aria: { label: "Révoquer l'invitation de #{invitation.email}" },
-                form: { data: { turbo_confirm: "Le lien d'invitation de #{invitation.email} ne fonctionnera plus.", confirm_label: "Révoquer", confirm_variant: "danger" } },
+          <%= button_to settings_invitation_path(invitation), method: :delete, title: t(".revoke"), aria: { label: t(".revoke_label", email: invitation.email) },
+                form: { data: { turbo_confirm: t(".revoke_confirm", email: invitation.email), confirm_label: t(".revoke"), confirm_variant: "danger" } },
                 class: "cursor-pointer rounded-md p-1.5 text-ink-3 hover:bg-crit-soft hover:text-crit-ink" do %>
             <%= icon :trash %>
           <% end %>
@@ -42,59 +46,59 @@
 </section>
 
 <section id="security" class="mt-6 rounded-xl border border-line bg-surface p-6 shadow-sm">
-  <h2 class="text-base font-semibold">Sécurité</h2>
+  <h2 class="text-base font-semibold"><%= t(".security") %></h2>
   <%= form_with model: @setting, url: settings_security_path, method: :patch, class: "mt-3 flex flex-wrap items-center gap-3" do |f| %>
     <label class="flex cursor-pointer items-center gap-2 text-sm text-ink-2">
       <%= f.check_box :require_admin_two_factor, class: "h-4 w-4 rounded border-line text-accent" %>
-      Double authentification obligatoire pour les administrateurs
+      <%= t(".admin_two_factor") %>
     </label>
     <label class="flex cursor-pointer items-center gap-2 text-sm text-ink-2">
       <%= f.check_box :require_operator_two_factor, class: "h-4 w-4 rounded border-line text-accent" %>
-      … et pour les opérateurs (ils modifient les clés des serveurs)
+      <%= t(".operator_two_factor") %>
     </label>
     <%= f.submit "Enregistrer", class: "btn btn-secondary" %>
   <% end %>
 </section>
 
 <section id="users" class="mt-6 rounded-xl border border-line bg-surface p-6 shadow-sm">
-  <h2 class="text-base font-semibold">Utilisateurs</h2>
-  <p class="mt-1 text-sm text-ink-3">Rôle et accès à Elio.</p>
+  <h2 class="text-base font-semibold"><%= t(".title") %></h2>
+  <p class="mt-1 text-sm text-ink-3"><%= t(".users_intro") %></p>
   <% select_class = "input w-auto px-2 py-1.5" %>
   <ul class="mt-4 divide-y divide-line rounded-md border border-line">
     <% @users.each do |user| %>
       <li id="<%= dom_id(user) %>" class="user-row flex flex-wrap items-center gap-3 px-4 py-3 text-sm <%= "is-deactivated bg-subtle" if user.deactivated? %>">
         <div class="min-w-48 flex-1">
-          <p class="font-medium <%= "text-ink-3 line-through" if user.deactivated? %>"><%= user.email %><%= " (vous)" if user == current_user %></p>
+          <p class="font-medium <%= "text-ink-3 line-through" if user.deactivated? %>"><%= user.email %><%= t(".you") if user == current_user %></p>
           <p class="text-xs text-ink-3">
             <% if user.deactivated? %>
-              <span class="user-state font-medium text-crit-ink">Désactivé</span> <%= relative_time_tag user.deactivated_at %>
+              <span class="user-state font-medium text-crit-ink"><%= t(".deactivated") %></span> <%= relative_time_tag user.deactivated_at %>
             <% elsif user.last_sign_in_at %>
-              Dernière connexion <%= relative_time_tag user.last_sign_in_at %>
+              <%= t(".last_sign_in") %> <%= relative_time_tag user.last_sign_in_at %>
             <% else %>
-              Jamais connecté
+              <%= t(".never_signed_in") %>
             <% end %>
-            · <span class="user-two-factor"><%= user.two_factor_enabled? ? "2FA activée" : "2FA désactivée" %></span>
+            · <span class="user-two-factor"><%= user.two_factor_enabled? ? t(".two_factor_on") : t(".two_factor_off") %></span>
           </p>
         </div>
         <%= form_with model: user, url: settings_user_path(user), class: "flex flex-wrap items-center gap-2" do |f| %>
-          <%= f.select :role, User.role_options, {}, aria: { label: "Rôle de #{user.email}" }, class: select_class %>
+          <%= f.select :role, User.role_options, {}, aria: { label: t(".role_of", email: user.email) }, class: select_class %>
           <%= f.submit "Enregistrer", class: "btn btn-secondary" %>
         <% end %>
         <% if user.two_factor_enabled? && user != current_user %>
-          <%= button_to "Réinitialiser la 2FA", reset_two_factor_settings_user_path(user),
-                form: { data: { turbo_confirm: "La double authentification de #{user.email} sera désactivée : à faire seulement s'il a perdu son application et ses codes de secours.", confirm_label: "Réinitialiser", confirm_variant: "danger" } },
+          <%= button_to t(".reset_two_factor"), reset_two_factor_settings_user_path(user),
+                form: { data: { turbo_confirm: t(".reset_two_factor_confirm", email: user.email), confirm_label: t(".reset"), confirm_variant: "danger" } },
                 class: "btn btn-secondary" %>
         <% end %>
         <% if user.deactivated? %>
-          <%= button_to "Réactiver", reactivate_settings_user_path(user),
+          <%= button_to t(".reactivate"), reactivate_settings_user_path(user),
                 class: "cursor-pointer rounded-md border border-good/40 bg-surface px-3 py-1.5 text-sm font-medium text-good-ink shadow-sm hover:bg-good-soft" %>
         <% elsif user != current_user %>
-          <%= button_to "Désactiver", deactivate_settings_user_path(user),
-                form: { data: { turbo_confirm: "#{user.email} ne pourra plus se connecter et sera déconnecté immédiatement.", confirm_label: "Désactiver", confirm_variant: "danger" } },
+          <%= button_to t(".deactivate"), deactivate_settings_user_path(user),
+                form: { data: { turbo_confirm: t(".deactivate_confirm", email: user.email), confirm_label: t(".deactivate"), confirm_variant: "danger" } },
                 class: "cursor-pointer rounded-md border border-crit/40 bg-surface px-3 py-1.5 text-sm font-medium text-crit-ink shadow-sm hover:bg-crit-soft" %>
         <% end %>
       </li>
     <% end %>
   </ul>
-  <%= render "shared/pagination", pager: @pager, noun: "utilisateurs" %>
+  <%= render "shared/pagination", pager: @pager, noun: t(".users") %>
 </section>

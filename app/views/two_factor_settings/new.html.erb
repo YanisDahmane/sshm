@@ -1,25 +1,25 @@
-<% content_for :title, "Activer la double authentification · Elio" %>
+<% content_for :title, t("title", page: t(".title")) %>
 
 <div class="mx-auto max-w-xl">
-  <%= link_to "← Mon compte", account_path, class: "text-sm text-ink-3 hover:text-ink-2" %>
-  <h1 class="mt-2 text-2xl font-bold tracking-tight">Activer la double authentification</h1>
+  <%= link_to t(".back"), account_path, class: "text-sm text-ink-3 hover:text-ink-2" %>
+  <h1 class="mt-2 text-2xl font-bold tracking-tight"><%= t(".title") %></h1>
 
   <div class="mt-6 rounded-xl border border-line bg-surface p-6 shadow-sm">
     <ol class="space-y-6 text-sm text-ink-2">
       <li>
-        <p class="font-medium">1. Scannez ce QR code avec votre application d'authentification</p>
+        <p class="font-medium"><%= t(".scan") %></p>
         <div class="two-factor-qr mt-3 inline-block rounded-md border border-line bg-surface p-3">
-          <%= image_tag "data:image/svg+xml;base64,#{Base64.strict_encode64(@qr_code)}", alt: "QR code de double authentification", class: "h-48 w-48" %>
+          <%= image_tag "data:image/svg+xml;base64,#{Base64.strict_encode64(@qr_code)}", alt: t(".qr_alt"), class: "h-48 w-48" %>
         </div>
-        <p class="mt-2 text-xs text-ink-3">Impossible de scanner ? Saisissez cette clé : <code class="two-factor-secret select-all font-mono text-ink-2"><%= @secret.scan(/.{4}/).join(" ") %></code></p>
+        <p class="mt-2 text-xs text-ink-3"><%= t(".manual") %> <code class="two-factor-secret select-all font-mono text-ink-2"><%= @secret.scan(/.{4}/).join(" ") %></code></p>
       </li>
       <li>
-        <p class="font-medium">2. Saisissez le code affiché par l'application</p>
+        <p class="font-medium"><%= t(".enter") %></p>
         <%# Plain submit: the response shows the backup codes directly (Turbo only accepts redirects after a form). %>
         <%= form_with url: two_factor_path, data: { turbo: false }, class: "mt-3 flex flex-wrap items-end gap-3" do |f| %>
-          <%= f.text_field :code, required: true, autofocus: true, autocomplete: "one-time-code", inputmode: "numeric", placeholder: "123 456", aria: { label: "Code de confirmation" },
+          <%= f.text_field :code, required: true, autofocus: true, autocomplete: "one-time-code", inputmode: "numeric", placeholder: "123 456", aria: { label: t(".code") },
                 class: "input w-40 text-center font-mono tracking-widest" %>
-          <%= f.submit "Activer", class: "btn btn-primary" %>
+          <%= f.submit t(".submit"), class: "btn btn-primary" %>
         <% end %>
       </li>
     </ol>

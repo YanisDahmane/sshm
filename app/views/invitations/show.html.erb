@@ -1,15 +1,15 @@
-<% content_for :title, "Invitation · Elio" %>
+<% content_for :title, t("title", page: t(".title")) %>
 
-<h2 class="text-xl font-semibold">Rejoindre Elio</h2>
+<h2 class="text-xl font-semibold"><%= t(".heading") %></h2>
 <p class="mt-1 mb-6 text-sm text-ink-3">
-  <%= @invitation.invited_by.email %> vous invite avec le rôle <strong><%= @invitation.role_label %></strong>. Choisissez votre mot de passe.
+  <%= t(".intro_html", inviter: @invitation.invited_by.email, role: @invitation.role_label) %>
 </p>
 
 <%= form_with model: @user, url: invitation_acceptance_path(params[:token]), method: :post, scope: :user, class: "space-y-5" do |f| %>
   <%= render "shared/form_errors", record: @user %>
-  <%= render "shared/auth_field", f: f, attribute: :email, label: "Email", type: :email_field, readonly: true %>
-  <%= render "shared/auth_field", f: f, attribute: :password, label: "Mot de passe", type: :password_field, autocomplete: "new-password", autofocus: true,
-             hint: "#{Devise.password_length.min} caractères minimum" %>
-  <%= render "shared/auth_field", f: f, attribute: :password_confirmation, label: "Confirmation du mot de passe", type: :password_field, autocomplete: "new-password" %>
-  <%= f.submit "Créer mon compte", class: "btn btn-primary w-full" %>
+  <%= render "shared/auth_field", f: f, attribute: :email, label: t("auth.fields.email"), type: :email_field, readonly: true %>
+  <%= render "shared/auth_field", f: f, attribute: :password, label: t("auth.fields.password"), type: :password_field, autocomplete: "new-password", autofocus: true,
+             hint: t("auth.fields.min_length", count: Devise.password_length.min) %>
+  <%= render "shared/auth_field", f: f, attribute: :password_confirmation, label: t("auth.fields.password_confirmation"), type: :password_field, autocomplete: "new-password" %>
+  <%= f.submit t(".submit"), class: "btn btn-primary w-full" %>
 <% end %>

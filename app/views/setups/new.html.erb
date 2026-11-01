@@ -1,20 +1,20 @@
-<% content_for :title, "Premier lancement · Elio" %>
+<% content_for :title, t("title", page: t(".title")) %>
 
-<h2 class="text-xl font-semibold">Créer le compte administrateur</h2>
-<p class="mt-1 mb-6 text-sm text-ink-3">Premier lancement d'Elio : ce compte aura tous les droits. Les autres utilisateurs seront invités ensuite.</p>
+<h2 class="text-xl font-semibold"><%= t(".heading") %></h2>
+<p class="mt-1 mb-6 text-sm text-ink-3"><%= t(".intro") %></p>
 
 <%= form_with model: @user, url: setup_path, scope: :user, class: "space-y-5" do |f| %>
   <%= render "shared/form_errors", record: @user %>
-  <%= render "shared/auth_field", f: f, attribute: :email, label: "Email", type: :email_field, autocomplete: "email", autofocus: true %>
-  <%= render "shared/auth_field", f: f, attribute: :password, label: "Mot de passe", type: :password_field, autocomplete: "new-password",
-             hint: "#{Devise.password_length.min} caractères minimum" %>
-  <%= render "shared/auth_field", f: f, attribute: :password_confirmation, label: "Confirmation du mot de passe", type: :password_field, autocomplete: "new-password" %>
+  <%= render "shared/auth_field", f: f, attribute: :email, label: t("auth.fields.email"), type: :email_field, autocomplete: "email", autofocus: true %>
+  <%= render "shared/auth_field", f: f, attribute: :password, label: t("auth.fields.password"), type: :password_field, autocomplete: "new-password",
+             hint: t("auth.fields.min_length", count: Devise.password_length.min) %>
+  <%= render "shared/auth_field", f: f, attribute: :password_confirmation, label: t("auth.fields.password_confirmation"), type: :password_field, autocomplete: "new-password" %>
   <% if ENV["ELIO_SETUP_TOKEN"].present? %>
     <div>
-      <%= label_tag :setup_token, "Jeton de premier lancement", class: "label" %>
+      <%= label_tag :setup_token, t(".token"), class: "label" %>
       <%= password_field_tag :setup_token, nil, required: true, autocomplete: "off", class: "input mt-1" %>
-      <p class="mt-1 text-xs text-ink-3">La valeur de la variable <code class="font-mono">ELIO_SETUP_TOKEN</code> du serveur.</p>
+      <p class="mt-1 text-xs text-ink-3"><%= t(".token_hint_html", variable: tag.code("ELIO_SETUP_TOKEN", class: "font-mono")) %></p>
     </div>
   <% end %>
-  <%= f.submit "Créer le compte", class: "btn btn-primary w-full" %>
+  <%= f.submit t(".submit"), class: "btn btn-primary w-full" %>
 <% end %>

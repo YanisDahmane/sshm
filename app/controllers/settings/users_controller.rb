@@ -22,18 +22,18 @@ module Settings
         if @user.saved_change_to_role?
           Activity.record!(:user_role_changed, email: @user.email, from: previous_role, to: @user.role_label)
         end
-        redirect_to settings_users_path, notice: "#{@user.email} a été mis à jour."
+        redirect_to settings_users_path, notice: t("flash.users.updated", email: @user.email)
       else
-        redirect_to settings_users_path, alert: "Impossible de modifier #{@user.email} : #{@user.errors.full_messages.to_sentence}"
+        redirect_to settings_users_path, alert: t("flash.users.update_failed", email: @user.email, errors: @user.errors.full_messages.to_sentence)
       end
     end
 
     def deactivate
-      return redirect_to(settings_users_path, alert: "Vous ne pouvez pas désactiver votre propre compte.") if @user == current_user
+      return redirect_to(settings_users_path, alert: t("flash.users.cannot_deactivate_self")) if @user == current_user
 
       @user.deactivate!
       Activity.record!(:user_deactivated, email: @user.email)
-      redirect_to settings_users_path, notice: "#{@user.email} est désactivé : il ne peut plus se connecter."
+      redirect_to settings_users_path, notice: t("flash.users.deactivated", email: @user.email)
     rescue ActiveRecord::RecordInvalid
       redirect_to settings_users_path, alert: @user.errors.full_messages.to_sentence
     end
@@ -41,14 +41,14 @@ module Settings
     def reactivate
       @user.reactivate!
       Activity.record!(:user_reactivated, email: @user.email)
-      redirect_to settings_users_path, notice: "#{@user.email} peut de nouveau se connecter."
+      redirect_to settings_users_path, notice: t("flash.users.reactivated", email: @user.email)
     end
 
     # For someone who lost their authenticator and backup codes.
     def reset_two_factor
       @user.disable_two_factor!
       Activity.record!(:two_factor_disabled, email: @user.email, reset_by: current_user.email)
-      redirect_to settings_users_path, notice: "La double authentification de #{@user.email} est réinitialisée."
+      redirect_to settings_users_path, notice: t("flash.users.two_factor_reset", email: @user.email)
     end
 
     private

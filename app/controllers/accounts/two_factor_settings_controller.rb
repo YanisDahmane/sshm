@@ -4,7 +4,7 @@ class TwoFactorSettingsController < ApplicationController
   skip_before_action :require_two_factor_setup, only: %i[new create]
 
   def new
-    return redirect_to(account_path, alert: "La double authentification est déjà activée.") if current_user.two_factor_enabled?
+    return redirect_to(account_path, alert: t("flash.two_factor.already_enabled")) if current_user.two_factor_enabled?
 
     session[:pending_otp_secret] ||= User.generate_otp_secret
     @secret = session[:pending_otp_secret]
@@ -19,10 +19,10 @@ class TwoFactorSettingsController < ApplicationController
     if @backup_codes
       session.delete(:pending_otp_secret)
       Activity.record!(:two_factor_enabled, email: current_user.email)
-      flash.now[:notice] = "Double authentification activée."
+      flash.now[:notice] = t("flash.two_factor.enabled")
       render :backup_codes
     else
-      redirect_to new_two_factor_path, alert: "Code invalide : vérifiez l'heure de votre téléphone et réessayez."
+      redirect_to new_two_factor_path, alert: t("flash.two_factor.wrong_setup_code")
     end
   end
 
@@ -30,18 +30,18 @@ class TwoFactorSettingsController < ApplicationController
     if current_user.two_factor_mandatory?
       return redirect_to(account_path, alert: "La double authentification est obligatoire pour votre rôle (#{current_user.role_label.downcase}).")
     end
-    return redirect_to(account_path, alert: "Code invalide.") unless current_user.verify_two_factor(params[:code])
+    return redirect_to(account_path, alert: t("flash.two_factor.invalid")) unless current_user.verify_two_factor(params[:code])
 
     current_user.disable_two_factor!
     Activity.record!(:two_factor_disabled, email: current_user.email)
-    redirect_to account_path, notice: "Double authentification désactivée."
+    redirect_to account_path, notice: t("flash.two_factor.disabled")
   end
 
   def backup_codes
-    return redirect_to(account_path, alert: "Code invalide.") unless current_user.verify_two_factor(params[:code])
+    return redirect_to(account_path, alert: t("flash.two_factor.invalid")) unless current_user.verify_two_factor(params[:code])
 
     @backup_codes = current_user.regenerate_backup_codes!
-    flash.now[:notice] = "Nouveaux codes de secours générés : les anciens ne fonctionnent plus."
+    flash.now[:notice] = t("flash.two_factor.new_codes")
     render :backup_codes
   end
 end

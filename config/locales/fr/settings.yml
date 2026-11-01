@@ -9,3 +9,51 @@ fr:
       update:
         saved: Langue par défaut enregistrée.
         invalid: Cette langue n'est pas disponible.
+    nav:
+      title: Paramètres
+      general: Général
+      notifications: Notifications
+      users: Utilisateurs
+      vulnerabilities: Vulnérabilités
+      docker: Docker
+      extensions: Extensions
+    users:
+      index:
+        title: Utilisateurs
+        invite: Inviter un utilisateur
+        invite_intro:
+          one: 'Un lien à usage unique, valable %{count} jour, est créé : copiez-le et envoyez-le à la personne.'
+          other: 'Un lien à usage unique, valable %{count} jours, est créé : copiez-le et envoyez-le à la personne.'
+        email: Email
+        role: Rôle
+        language: Langue
+        create_invitation: Créer l'invitation
+        pending: Invitations en attente
+        invited_by_html: Par %{email} · %{expiry}
+        expires: 'expire '
+        link: Lien d'invitation
+        revoke: Révoquer
+        revoke_label: Révoquer l'invitation de %{email}
+        revoke_confirm: Le lien d'invitation de %{email} ne fonctionnera plus.
+        security: Sécurité
+        admin_two_factor: Double authentification obligatoire pour les administrateurs
+        operator_two_factor: "… et pour les opérateurs (ils modifient les clés des serveurs)"
+        save: Enregistrer
+        users_intro: Rôle et accès à Elio.
+        you: " (vous)"
+        deactivated: Désactivé
+        last_sign_in: Dernière connexion
+        never_signed_in: Jamais connecté
+        two_factor_on: 2FA activée
+        two_factor_off: 2FA désactivée
+        role_of: Rôle de %{email}
+        reset_two_factor: Réinitialiser la 2FA
+        reset_two_factor_confirm: 'La double authentification de %{email} sera désactivée : à faire seulement s''il a perdu son application et ses codes de secours.'
+        reset: Réinitialiser
+        reactivate: Réactiver
+        deactivate: Désactiver
+        deactivate_confirm: "%{email} ne pourra plus se connecter et sera déconnecté immédiatement."
+        users: utilisateurs
+    copy_button:
+      copy: Copier
+      copied: Copié

@@ -1,7 +1,7 @@
-Bonjour,
+<%= t(".hello") %>
 
-<%= @invitation.invited_by&.email || "Un administrateur" %> vous invite à rejoindre Elio, le gestionnaire du parc de serveurs, avec le rôle <%= @invitation.role_label %>.
+<%= t(".text", inviter: @invitation.invited_by&.email || t(".an_admin"), role: @invitation.role_label) %>
 
-Choisissez votre mot de passe : <%= @url %>
+<%= t(".choose_text", url: @url) %>
 
-Ce lien est personnel, utilisable une seule fois et valable jusqu'au <%= l(@invitation.expires_at, format: :long) %>.
+<%= t(".validity", date: l(@invitation.expires_at, format: :long)) %>

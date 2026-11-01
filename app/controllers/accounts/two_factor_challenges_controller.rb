@@ -9,7 +9,7 @@ class TwoFactorChallengesController < ApplicationController
 
   skip_before_action :authenticate_user!, :authorize_view!
   before_action :set_pending_user
-  rate_limit to: 10, within: 1.minute, only: :create, store: Throttled::STORE, with: -> { abandon("Trop de tentatives : reconnectez-vous.") }
+  rate_limit to: 10, within: 1.minute, only: :create, store: Throttled::STORE, with: -> { abandon(t("flash.two_factor.too_many")) }
 
   def new
   end
@@ -18,7 +18,7 @@ class TwoFactorChallengesController < ApplicationController
     method = @user.verify_two_factor(params[:code])
     unless method
       @user.register_failed_two_factor_attempt!
-      return abandon("Trop d'essais ratés : votre compte est verrouillé pendant 15 minutes.") if @user.access_locked?
+      return abandon(t("flash.two_factor.locked")) if @user.access_locked?
 
       return render(:new, status: :unprocessable_entity)
     end
@@ -32,7 +32,7 @@ class TwoFactorChallengesController < ApplicationController
       Activity.record!(:two_factor_backup_code_used, user: @user, email: @user.email, left: @user.backup_codes_left)
     end
 
-    redirect_to after_sign_in_path_for(@user), notice: "Connexion réussie."
+    redirect_to after_sign_in_path_for(@user), notice: t("flash.two_factor.signed_in")
   end
 
   private
@@ -42,7 +42,7 @@ class TwoFactorChallengesController < ApplicationController
     @user = User.find_by(id: pending["user_id"])
     expired = pending["started_at"].to_i < TIMEOUT.ago.to_i
 
-    abandon("Session de connexion expirée : reconnectez-vous.") if @user.nil? || expired || !@user.active_for_authentication? || !@user.two_factor_enabled? || @user.access_locked?
+    abandon(t("flash.two_factor.expired")) if @user.nil? || expired || !@user.active_for_authentication? || !@user.two_factor_enabled? || @user.access_locked?
   end
 
   def abandon(message)

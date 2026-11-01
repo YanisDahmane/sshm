@@ -51,7 +51,7 @@ class Invitation < ApplicationRecord
     raise ActiveRecord::RecordInvalid, self unless pending?
 
     transaction do
-      account = User.create!(email: email, role: role, password: password, password_confirmation: password_confirmation)
+      account = User.create!(email: email, role: role, locale: locale, password: password, password_confirmation: password_confirmation)
       update!(user: account, accepted_at: Time.current)
       account
     end

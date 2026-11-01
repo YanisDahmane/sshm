@@ -3,18 +3,18 @@ module Settings
     require_permission :administer
 
     def create
-      @invitation = Invitation.new(params.expect(invitation: %i[email role]).merge(invited_by: current_user))
+      @invitation = Invitation.new(params.expect(invitation: %i[email role locale]).merge(invited_by: current_user))
 
       if @invitation.save
         Activity.record!(:user_invited, email: @invitation.email, role_label: @invitation.role_label)
         if Rails.configuration.x.mail_enabled
           InvitationMailer.invite(@invitation).deliver_later
-          redirect_to settings_users_path, notice: "Invitation envoyée par email à #{@invitation.email}. Le lien reste copiable ci-dessous."
+          redirect_to settings_users_path, notice: t("flash.invitations.emailed", email: @invitation.email)
         else
-          redirect_to settings_users_path, notice: "Invitation créée pour #{@invitation.email}. Copiez le lien et envoyez-le-lui."
+          redirect_to settings_users_path, notice: t("flash.invitations.created", email: @invitation.email)
         end
       else
-        redirect_to settings_users_path, alert: "Invitation impossible : #{@invitation.errors.full_messages.to_sentence}"
+        redirect_to settings_users_path, alert: t("flash.invitations.failed", errors: @invitation.errors.full_messages.to_sentence)
       end
     end
 
@@ -22,7 +22,7 @@ module Settings
       invitation = Invitation.pending.find(params[:id])
       invitation.revoke!
       Activity.record!(:invitation_revoked, email: invitation.email)
-      redirect_to settings_users_path, notice: "L'invitation de #{invitation.email} a été révoquée.", status: :see_other
+      redirect_to settings_users_path, notice: t("flash.invitations.revoked", email: invitation.email), status: :see_other
     end
   end
 end

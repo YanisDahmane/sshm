@@ -79,7 +79,7 @@ class LocaleTest < ActionDispatch::IntegrationTest
   test "the page carries the texts of the JavaScript controllers in its language" do
     sign_in users(:one)
     get account_path, headers: { "Accept-Language" => "en" }
-    assert_equal "Copied", JSON.parse(css_select("script#elio-i18n").first.text).dig("clipboard", "copied")
+    assert_equal "Confirm", JSON.parse(css_select("script#elio-i18n").first.text).dig("confirm", "accept")
   end
 
   test "jobs run in the instance's language, whoever started them" do

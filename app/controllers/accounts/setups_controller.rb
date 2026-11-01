@@ -15,13 +15,13 @@ class SetupsController < ApplicationController
   def create
     @user = User.new(params.expect(user: %i[email password password_confirmation]).merge(role: :admin))
     unless setup_token_valid?
-      @user.errors.add(:base, "Jeton de premier lancement incorrect (variable ELIO_SETUP_TOKEN du serveur).")
+      @user.errors.add(:base, t("flash.setups.wrong_token"))
       return render :new, status: :unprocessable_entity
     end
 
     if create_first_admin
       sign_in(@user)
-      redirect_to root_path, notice: "Bienvenue ! Votre compte administrateur est créé."
+      redirect_to root_path, notice: t("flash.setups.welcome")
     else
       render :new, status: :unprocessable_entity
     end

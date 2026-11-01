@@ -62,6 +62,12 @@ class InvitationTest < ActiveSupport::TestCase
     assert_equal [ :expired, :revoked, :accepted ], [ expired, revoked, accepted.reload ].map(&:status)
   end
 
+  test "the account gets the invitation's language" do
+    invitation = Invitation.create!(email: "dave@example.com", role: "viewer", invited_by: users(:one), locale: "en")
+    assert_equal "en", invitation.accept!(password: "password1234", password_confirmation: "password1234").locale
+    assert_not Invitation.new(email: "erin@example.com", role: "viewer", invited_by: users(:one), locale: "xx").valid?
+  end
+
   test "accept! creates the account with the invitation's email and role" do
     invitation = invite(role: :operator)
 

@@ -9,8 +9,140 @@ fr:
     locale:
       saved: Langue enregistrée.
       invalid: Cette langue n'est pas disponible.
+    show:
+      title: Mon compte
+      two_factor: Double authentification
+      two_factor_intro: Un code de votre application d'authentification (Google Authenticator, 1Password, Bitwarden…) est demandé après le mot de passe.
+      enabled: Activée
+      disabled: Désactivée
+      enabled_since_html: Activée %{time} · %{codes}.
+      codes_left:
+        one: "%{count} code de secours restant"
+        other: "%{count} codes de secours restants"
+      new_codes: Nouveaux codes de secours
+      current_code: Code actuel
+      code_to_regenerate: Code pour régénérer les codes de secours
+      regenerate: Régénérer
+      mandatory: 'La double authentification est obligatoire pour votre rôle : elle ne peut pas être désactivée.'
+      turn_off: Désactiver
+      code_to_turn_off: Code pour désactiver la double authentification
+      turn_off_submit: Désactiver la 2FA
+      turn_on: Activer la double authentification
+      password: Mot de passe
+      current_password: Mot de passe actuel
+      change_password: Changer le mot de passe
   users:
     roles:
       admin: Admin
       operator: Opérateur
       viewer: Lecture
+  auth:
+    fields:
+      email: Email
+      password: Mot de passe
+      new_password: Nouveau mot de passe
+      confirmation: Confirmation
+      password_confirmation: Confirmation du mot de passe
+      min_length: "%{count} caractères minimum"
+    back_to_sign_in: Retour à la connexion
+    sign_in:
+      title: Connexion
+      remember_me: Se souvenir de moi
+      submit: Se connecter
+      forgot: Mot de passe oublié ?
+      no_account: Pas encore de compte ? Demandez une invitation à un administrateur.
+    forgot:
+      title: Mot de passe oublié
+      intro: 'Indiquez votre email : si un compte existe, vous recevrez un lien pour choisir un nouveau mot de passe (valable 2 heures).'
+      submit: Recevoir le lien
+    reset:
+      title: Nouveau mot de passe
+      heading: Choisir un nouveau mot de passe
+      submit: Enregistrer le mot de passe
+  setups:
+    new:
+      title: Premier lancement
+      heading: Créer le compte administrateur
+      intro: 'Premier lancement d''Elio : ce compte aura tous les droits. Les autres utilisateurs seront invités ensuite.'
+      token: Jeton de premier lancement
+      token_hint_html: La valeur de la variable %{variable} du serveur.
+      submit: Créer le compte
+  two_factor_challenges:
+    new:
+      title: Double authentification
+      intro: Saisissez le code à 6 chiffres de votre application d'authentification, ou un code de secours.
+      invalid: Code invalide ou déjà utilisé.
+      code: Code
+      submit: Vérifier
+      cancel: Annuler et revenir à la connexion
+  invitations:
+    invalid:
+      title: Invitation invalide
+      text: Ce lien d'invitation n'existe pas, a expiré, a été révoqué ou a déjà été utilisé.
+      ask: Demandez une nouvelle invitation à un administrateur.
+      sign_in: Aller à la connexion
+    show:
+      title: Invitation
+      heading: Rejoindre Elio
+      intro_html: "%{inviter} vous invite avec le rôle <strong>%{role}</strong>. Choisissez votre mot de passe."
+      submit: Créer mon compte
+  two_factor_settings:
+    backup_codes:
+      title: Codes de secours
+      keep_html: Conservez ces codes en lieu sûr (gestionnaire de mots de passe). Chacun permet <strong>une</strong> connexion si vous perdez votre téléphone. <strong>Ils ne seront plus affichés.</strong>
+      saved: J'ai enregistré mes codes
+    new:
+      title: Activer la double authentification
+      back: "← Mon compte"
+      scan: 1. Scannez ce QR code avec votre application d'authentification
+      qr_alt: QR code de double authentification
+      manual: 'Impossible de scanner ? Saisissez cette clé :'
+      enter: 2. Saisissez le code affiché par l'application
+      code: Code de confirmation
+      submit: Activer
+  invitation_mailer:
+    invite:
+      subject: Invitation à rejoindre Elio
+      hello: Bonjour,
+      an_admin: Un administrateur
+      text_html: "%{inviter} vous invite à rejoindre Elio, le gestionnaire du parc de serveurs, avec le rôle <strong>%{role}</strong>."
+      text: "%{inviter} vous invite à rejoindre Elio, le gestionnaire du parc de serveurs, avec le rôle %{role}."
+      choose: Choisir mon mot de passe
+      choose_text: 'Choisissez votre mot de passe : %{url}'
+      validity: Ce lien est personnel, utilisable une seule fois et valable jusqu'au %{date}.
+  flash:
+    accounts:
+      password_changed: Mot de passe modifié.
+    invitations:
+      welcome: Bienvenue sur Elio !
+      signed_in: 'Vous êtes déjà connecté : déconnectez-vous pour accepter cette invitation.'
+      emailed: Invitation envoyée par email à %{email}. Le lien reste copiable ci-dessous.
+      created: Invitation créée pour %{email}. Copiez le lien et envoyez-le-lui.
+      failed: 'Invitation impossible : %{errors}'
+      revoked: L'invitation de %{email} a été révoquée.
+    two_factor:
+      signed_in: Connexion réussie.
+      too_many: 'Trop de tentatives : reconnectez-vous.'
+      locked: 'Trop d''essais ratés : votre compte est verrouillé pendant 15 minutes.'
+      expired: 'Session de connexion expirée : reconnectez-vous.'
+      already_enabled: La double authentification est déjà activée.
+      enabled: Double authentification activée.
+      wrong_setup_code: 'Code invalide : vérifiez l''heure de votre téléphone et réessayez.'
+      invalid: Code invalide.
+      disabled: Double authentification désactivée.
+      new_codes: 'Nouveaux codes de secours générés : les anciens ne fonctionnent plus.'
+    setups:
+      wrong_token: Jeton de premier lancement incorrect (variable ELIO_SETUP_TOKEN du serveur).
+      welcome: Bienvenue ! Votre compte administrateur est créé.
+    users:
+      updated: "%{email} a été mis à jour."
+      update_failed: 'Impossible de modifier %{email} : %{errors}'
+      cannot_deactivate_self: Vous ne pouvez pas désactiver votre propre compte.
+      deactivated: "%{email} est désactivé : il ne peut plus se connecter."
+      reactivated: "%{email} peut de nouveau se connecter."
+      two_factor_reset: La double authentification de %{email} est réinitialisée.
+    security:
+      mandatory_admins: Double authentification obligatoire pour les administrateurs.
+      mandatory_operators: Double authentification obligatoire pour les opérateurs.
+      mandatory_both: Double authentification obligatoire pour les administrateurs et opérateurs.
+      optional: Double authentification facultative pour tous.

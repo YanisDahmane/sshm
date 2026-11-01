@@ -17,6 +17,7 @@ class EnglishInterfaceTest < ActionDispatch::IntegrationTest
     roots.flat_map do |root|
       except.each { |selector| root.css(selector).each(&:remove) }
       root.css("script, style, template").each(&:remove)
+      root.css("[lang]:not([lang^=en])").each(&:remove) # written in another language on purpose
       texts = root.xpath(".//text()").map(&:text)
       texts += root.css("[title], [aria-label], [placeholder], [alt]").flat_map { |node| %w[title aria-label placeholder alt].filter_map { node[_1] } }
       texts.map(&:squish).reject(&:empty?).select { |text| text.match?(FRENCH) }
@@ -40,6 +41,26 @@ class EnglishInterfaceTest < ActionDispatch::IntegrationTest
 
   test "the layout of the signed-in pages" do
     assert_english root_path, scope: LAYOUT.join(", "), except: [ ".sidebar-groups", ".account-link" ]
+  end
+
+  test "the account pages" do
+    assert_english account_path, except: [ ".sidebar-groups", ".account-link" ]
+    assert_english new_two_factor_path, except: [ ".sidebar-groups", ".account-link", ".two-factor-secret" ]
+    Invitation.create!(email: "dave@example.com", role: "viewer", invited_by: users(:one))
+    assert_english settings_users_path, except: [ ".sidebar-groups", ".account-link" ]
+  end
+
+  test "the public pages" do
+    sign_out :user
+    get new_user_session_path, headers: { "Accept-Language" => "en" }
+    assert_empty self.class.french_texts(response.body)
+    get new_user_password_path, headers: { "Accept-Language" => "en" }
+    assert_empty self.class.french_texts(response.body)
+    invitation = Invitation.create!(email: "dave@example.com", role: "viewer", invited_by: users(:one))
+    get invitation_acceptance_path(invitation.token), headers: { "Accept-Language" => "en" }
+    assert_empty self.class.french_texts(response.body)
+    get invitation_acceptance_path("nope"), headers: { "Accept-Language" => "en" }
+    assert_empty self.class.french_texts(response.body)
   end
 
   test "the check finds French" do

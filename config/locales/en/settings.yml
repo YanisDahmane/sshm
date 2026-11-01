@@ -9,3 +9,51 @@ en:
       update:
         saved: Default language saved.
         invalid: This language is not available.
+    nav:
+      title: Settings
+      general: General
+      notifications: Notifications
+      users: Users
+      vulnerabilities: Vulnerabilities
+      docker: Docker
+      extensions: Extensions
+    users:
+      index:
+        title: Users
+        invite: Invite a user
+        invite_intro:
+          one: 'A single-use link, valid for %{count} day, is created: copy it and send it to the person.'
+          other: 'A single-use link, valid for %{count} days, is created: copy it and send it to the person.'
+        email: Email
+        role: Role
+        language: Language
+        create_invitation: Create the invitation
+        pending: Pending invitations
+        invited_by_html: By %{email} · %{expiry}
+        expires: 'expires '
+        link: Invitation link
+        revoke: Revoke
+        revoke_label: Revoke the invitation of %{email}
+        revoke_confirm: The invitation link of %{email} will no longer work.
+        security: Security
+        admin_two_factor: Two-factor authentication mandatory for administrators
+        operator_two_factor: "… and for operators (they change the keys of the servers)"
+        save: Save
+        users_intro: Role and access to Elio.
+        you: " (you)"
+        deactivated: Deactivated
+        last_sign_in: Last sign in
+        never_signed_in: Never signed in
+        two_factor_on: 2FA on
+        two_factor_off: 2FA off
+        role_of: Role of %{email}
+        reset_two_factor: Reset 2FA
+        reset_two_factor_confirm: 'The two-factor authentication of %{email} will be turned off: only do this if they lost their app and their backup codes.'
+        reset: Reset
+        reactivate: Reactivate
+        deactivate: Deactivate
+        deactivate_confirm: "%{email} will no longer be able to sign in and will be signed out at once."
+        users: users
+    copy_button:
+      copy: Copy
+      copied: Copied

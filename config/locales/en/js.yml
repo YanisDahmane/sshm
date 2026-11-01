@@ -1,7 +1,5 @@
 en:
   js:
-    clipboard:
-      copied: Copied
     relative_time:
       just_now: just now
       within_a_minute: in less than a minute

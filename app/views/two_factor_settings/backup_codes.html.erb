@@ -1,17 +1,16 @@
-<% content_for :title, "Codes de secours · Elio" %>
+<% content_for :title, t("title", page: t(".title")) %>
 
 <div class="mx-auto max-w-xl">
-  <h1 class="text-2xl font-bold tracking-tight">Codes de secours</h1>
+  <h1 class="text-2xl font-bold tracking-tight"><%= t(".title") %></h1>
   <div class="mt-6 rounded-xl border border-warn/40 bg-surface p-6 shadow-sm" data-controller="clipboard">
     <p class="text-sm text-ink-2">
-      Conservez ces codes en lieu sûr (gestionnaire de mots de passe). Chacun permet <strong>une</strong> connexion si vous perdez votre téléphone.
-      <strong>Ils ne seront plus affichés.</strong>
+      <%= t(".keep_html") %>
     </p>
-    <textarea readonly rows="<%= @backup_codes.size / 2 %>" data-clipboard-target="source" aria-label="Codes de secours"
+    <textarea readonly rows="<%= @backup_codes.size / 2 %>" data-clipboard-target="source" aria-label="<%= t(".title") %>"
               class="backup-codes mt-4 block w-full resize-none rounded-md border border-line bg-subtle px-3 py-2 font-mono text-sm leading-7 text-ink"><%= @backup_codes.each_slice(2).map { |pair| pair.join("    ") }.join("\n") %></textarea>
     <div class="mt-4 flex items-center justify-between gap-3">
       <%= render "settings/copy_button" %>
-      <%= link_to "J'ai enregistré mes codes", account_path, class: "btn btn-primary" %>
+      <%= link_to t(".saved"), account_path, class: "btn btn-primary" %>
     </div>
   </div>
 </div>

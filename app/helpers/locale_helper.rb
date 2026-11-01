@@ -1,8 +1,8 @@
 module LocaleHelper
-  # Options of a language select, each in its own language, with an optional
-  # first "automatic" choice (blank value).
+  # Options of a language select, each in its own language (and marked so),
+  # with an optional first "automatic" choice (blank value).
   def locale_options(blank: nil)
-    options = Elio::Locales.names.map { |locale, name| [ name, locale.to_s ] }
+    options = Elio::Locales.names.map { |locale, name| [ name, locale.to_s, { lang: locale.to_s } ] }
     blank ? [ [ blank, "" ], *options ] : options
   end
 

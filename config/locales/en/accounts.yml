@@ -9,8 +9,140 @@ en:
     locale:
       saved: Language saved.
       invalid: This language is not available.
+    show:
+      title: My account
+      two_factor: Two-factor authentication
+      two_factor_intro: A code from your authenticator app (Google Authenticator, 1Password, Bitwarden…) is asked after the password.
+      enabled: true
+      disabled: false
+      enabled_since_html: Turned on %{time} · %{codes}.
+      codes_left:
+        one: "%{count} backup code left"
+        other: "%{count} backup codes left"
+      new_codes: New backup codes
+      current_code: Current code
+      code_to_regenerate: Code to generate new backup codes
+      regenerate: Generate
+      mandatory: 'Two-factor authentication is mandatory for your role: it cannot be turned off.'
+      turn_off: Turn off
+      code_to_turn_off: Code to turn off two-factor authentication
+      turn_off_submit: Turn off 2FA
+      turn_on: Turn on two-factor authentication
+      password: Password
+      current_password: Current password
+      change_password: Change the password
   users:
     roles:
       admin: Admin
       operator: Operator
       viewer: Read-only
+  auth:
+    fields:
+      email: Email
+      password: Password
+      new_password: New password
+      confirmation: Confirmation
+      password_confirmation: Password confirmation
+      min_length: At least %{count} characters
+    back_to_sign_in: Back to sign in
+    sign_in:
+      title: Sign in
+      remember_me: Remember me
+      submit: Sign in
+      forgot: Forgot your password?
+      no_account: No account yet? Ask an administrator for an invitation.
+    forgot:
+      title: Forgot password
+      intro: 'Enter your email: if an account exists, you will receive a link to choose a new password (valid for 2 hours).'
+      submit: Send the link
+    reset:
+      title: New password
+      heading: Choose a new password
+      submit: Save the password
+  setups:
+    new:
+      title: First start
+      heading: Create the administrator account
+      intro: 'First start of Elio: this account will have every permission. The other users will be invited afterwards.'
+      token: First start token
+      token_hint_html: The value of the server's %{variable} variable.
+      submit: Create the account
+  two_factor_challenges:
+    new:
+      title: Two-factor authentication
+      intro: Enter the 6-digit code of your authenticator app, or a backup code.
+      invalid: Invalid or already used code.
+      code: Code
+      submit: Verify
+      cancel: Cancel and go back to sign in
+  invitations:
+    invalid:
+      title: Invalid invitation
+      text: This invitation link does not exist, has expired, has been revoked or has already been used.
+      ask: Ask an administrator for a new invitation.
+      sign_in: Go to sign in
+    show:
+      title: Invitation
+      heading: Join Elio
+      intro_html: "%{inviter} invites you with the role <strong>%{role}</strong>. Choose your password."
+      submit: Create my account
+  two_factor_settings:
+    backup_codes:
+      title: Backup codes
+      keep_html: Keep these codes somewhere safe (a password manager). Each allows <strong>one</strong> sign in if you lose your phone. <strong>They will not be shown again.</strong>
+      saved: I have saved my codes
+    new:
+      title: Turn on two-factor authentication
+      back: "← My account"
+      scan: 1. Scan this QR code with your authenticator app
+      qr_alt: Two-factor authentication QR code
+      manual: 'Cannot scan? Enter this key:'
+      enter: 2. Enter the code shown by the app
+      code: Confirmation code
+      submit: Turn on
+  invitation_mailer:
+    invite:
+      subject: Invitation to join Elio
+      hello: Hello,
+      an_admin: An administrator
+      text_html: "%{inviter} invites you to join Elio, the server fleet manager, with the role <strong>%{role}</strong>."
+      text: "%{inviter} invites you to join Elio, the server fleet manager, with the role %{role}."
+      choose: Choose my password
+      choose_text: 'Choose your password: %{url}'
+      validity: This link is personal, can be used once and is valid until %{date}.
+  flash:
+    accounts:
+      password_changed: Password changed.
+    invitations:
+      welcome: Welcome to Elio!
+      signed_in: 'You are already signed in: sign out to accept this invitation.'
+      emailed: Invitation emailed to %{email}. The link can still be copied below.
+      created: Invitation created for %{email}. Copy the link and send it to them.
+      failed: 'Cannot invite: %{errors}'
+      revoked: The invitation of %{email} has been revoked.
+    two_factor:
+      signed_in: Signed in.
+      too_many: 'Too many attempts: sign in again.'
+      locked: 'Too many failed attempts: your account is locked for 15 minutes.'
+      expired: 'Sign in session expired: sign in again.'
+      already_enabled: Two-factor authentication is already on.
+      enabled: Two-factor authentication turned on.
+      wrong_setup_code: 'Invalid code: check the time of your phone and try again.'
+      invalid: Invalid code.
+      disabled: Two-factor authentication turned off.
+      new_codes: 'New backup codes generated: the old ones no longer work.'
+    setups:
+      wrong_token: Wrong first start token (ELIO_SETUP_TOKEN variable of the server).
+      welcome: Welcome! Your administrator account is created.
+    users:
+      updated: "%{email} has been updated."
+      update_failed: 'Cannot update %{email}: %{errors}'
+      cannot_deactivate_self: You cannot deactivate your own account.
+      deactivated: "%{email} is deactivated: they can no longer sign in."
+      reactivated: "%{email} can sign in again."
+      two_factor_reset: The two-factor authentication of %{email} is reset.
+    security:
+      mandatory_admins: Two-factor authentication is mandatory for administrators.
+      mandatory_operators: Two-factor authentication is mandatory for operators.
+      mandatory_both: Two-factor authentication is mandatory for administrators and operators.
+      optional: Two-factor authentication is optional for everyone.

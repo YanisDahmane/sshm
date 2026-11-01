@@ -12,4 +12,15 @@ class InvitationMailerTest < ActionMailer::TestCase
     assert_match "Opérateur", mail.html_part.body.to_s
     assert_match "http://example.com/invitations/#{invitation.token}", mail.text_part.body.to_s
   end
+
+  test "in the language chosen for the invitation" do
+    invitation = Invitation.create!(email: "dave@example.com", role: "operator", invited_by: users(:one), locale: "en")
+
+    mail = InvitationMailer.invite(invitation)
+
+    assert_equal "Invitation to join Elio", mail.subject
+    assert_match "one@example.com invites you to join Elio", mail.text_part.body.to_s
+    assert_match "Operator", mail.html_part.body.to_s
+    assert_match 'lang="en"', mail.html_part.body.to_s
+  end
 end

@@ -5,7 +5,7 @@ class InvitationsController < ApplicationController
   skip_before_action :authenticate_user!, :authorize_view!
   before_action :redirect_signed_in_user
   rate_limit to: 10, within: 3.minutes, only: :accept, store: Throttled::STORE,
-             with: -> { redirect_to new_user_session_path, alert: "Trop de tentatives : réessayez dans quelques minutes.", status: :see_other }
+             with: -> { redirect_to new_user_session_path, alert: t("throttled.too_many"), status: :see_other }
   before_action :set_invitation
 
   def show
@@ -18,7 +18,7 @@ class InvitationsController < ApplicationController
     Activity.record!(:invitation_accepted, user: @user, email: @user.email, role_label: @user.role_label)
 
     sign_in(@user)
-    redirect_to root_path, notice: "Bienvenue sur Elio !"
+    redirect_to root_path, notice: t("flash.invitations.welcome")
   rescue ActiveRecord::RecordInvalid => e
     @user = e.record.is_a?(User) ? e.record : User.new(email: @invitation.email)
     render :show, status: :unprocessable_entity
@@ -27,7 +27,7 @@ class InvitationsController < ApplicationController
   private
 
   def redirect_signed_in_user
-    redirect_to root_path, alert: "Vous êtes déjà connecté : déconnectez-vous pour accepter cette invitation." if user_signed_in?
+    redirect_to root_path, alert: t("flash.invitations.signed_in") if user_signed_in?
   end
 
   def set_invitation
