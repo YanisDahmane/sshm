@@ -27,7 +27,7 @@ class ReadmeScreenshots < ApplicationSystemTestCase
     server = Server.create!(name: name, host: host, port: 22, username: user, reachable: reachable, ssh_ok: true, ssh_checked_at: Time.current,
                             last_checked_at: Time.current, privilege: "sudo", inventoried_at: AGO.ago)
     server.server_groups = groups
-    os = Inventory::Collectors::Os.parse(File.read(FIX.join("os/#{os_file}.txt")))
+    os = Inventory::Collectors::Os.parse(File.read(FIX.join("os/#{os_file}.txt"))).merge("hostname" => "#{name}.example.internal")
     data = Inventory::Collectors::Health.parse(File.read(FIX.join("health/#{os_file == "ubuntu2204" ? "ubuntu2404" : os_file}.txt"))).merge(health)
     snapshot(server, "os", os)
     snapshot(server, "health", data)
@@ -141,7 +141,17 @@ class ReadmeScreenshots < ApplicationSystemTestCase
       visit path
       before&.call
       sleep 1.2
+      # As tall as the content (720 to 1400 px), not a fixed square with empty
+      # space below: the bottom of the last element of <main>, plus the window
+      # chrome (resize_to sets the outer size).
+      content = evaluate_script(<<~JS).to_i
+        Math.ceil(Math.max(...Array.from(document.querySelectorAll("main *")).map((e) => e.getBoundingClientRect().bottom + window.scrollY)) + 32)
+      JS
+      chrome = evaluate_script("window.outerHeight - window.innerHeight").to_i
+      page.driver.browser.manage.window.resize_to(1400, content.clamp(720, 1400) + chrome)
+      sleep 0.3
       page.save_screenshot(OUT.join("#{name}.png").to_s)
+      page.driver.browser.manage.window.resize_to(1400, 1400)
     end
 
     shoot.("overview", root_path)
