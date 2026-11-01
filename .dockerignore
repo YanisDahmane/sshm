@@ -49,3 +49,12 @@
 # Ignore Docker-related files
 /.dockerignore
 /Dockerfile*
+
+# Not needed to run Elio: documentation, mockups, website, tests (keeps the image small).
+/docs/
+/site/
+/_site/
+/test/
+/PLAN*.md
+/AUDIT.md
+/CLAUDE.md
