@@ -44,11 +44,14 @@ class Inventory::Collectors::Packages < Inventory::Collector
       existing.delete_all
       rows = packages.map do |package|
         { server_id: server.id, manager: package["manager"], name: package["name"], version: package["version"], arch: package["arch"],
+          source_name: package["source"] || (package["name"] if package["manager"] == "dpkg"),
+          source_version: package["source_version"] || (package["version"] if package["manager"] == "dpkg"),
           available_version: package["available_version"], security: package["security"] == true }
       end
       Inventory::Package.insert_all(rows) if rows.any?
     end
     log_package_changes(server, previous, current) if previous.any?
+    Vulnerabilities::Matcher.call(server, refresh_health: false) # Inventory::Collection refreshes the health afterwards
   end
 
   def self.log_package_changes(server, previous, current)
@@ -68,17 +71,21 @@ class Inventory::Collectors::Packages < Inventory::Collector
     [ { kind: :security_updates_available, data: { count: data["security"] } } ]
   end
 
-  # "ii \topenssl\t3.0.14-1~deb12u1\tamd64" (installed or on hold only)
+  # "ii \tlibssl3\t3.0.14-1~deb12u1\tamd64\topenssl\t3.0.14-1~deb12u1" (installed or on hold only).
+  # The source package (what the CVE feeds list) is only kept when it differs.
   def self.parse_dpkg(text, upgradable)
     return [] if text.strip == "unsupported"
 
     text.lines.filter_map do |line|
-      status, name, version, arch = line.chomp.split("\t")
+      status, name, version, arch, source, source_version = line.chomp.split("\t")
       next unless name && status.to_s.match?(/\A[ih]i/)
 
       update = upgradable[name]
-      { "manager" => "dpkg", "name" => name, "version" => version, "arch" => arch,
-        "available_version" => update&.fetch("version"), "security" => update ? update["security"] : false }
+      package = { "manager" => "dpkg", "name" => name, "version" => version, "arch" => arch,
+                  "available_version" => update&.fetch("version"), "security" => update ? update["security"] : false }
+      package["source"] = source if source.present? && source != name
+      package["source_version"] = source_version if source_version.present? && source_version != version
+      package
     end
   end
 

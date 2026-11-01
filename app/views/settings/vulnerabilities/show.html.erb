@@ -1,0 +1,62 @@
+<% content_for :title, "Vulnérabilités · Paramètres · Elio" %>
+<%= render "settings/nav" %>
+
+<section id="vulnerability-feeds" class="card mt-6">
+  <div class="card-header">
+    <div>
+      <h2 class="font-semibold">Bases de vulnérabilités</h2>
+      <p class="mt-0.5 text-xs text-ink-3">Téléchargées chaque jour pour les versions présentes sur le parc, puis rapprochées des paquets inventoriés : aucune commande de plus sur les serveurs.</p>
+    </div>
+    <%= button_to refresh_settings_vulnerabilities_path, class: "btn btn-secondary", form: { class: "shrink-0" } do %>
+      <%= icon :arrow_path %> Mettre à jour maintenant
+    <% end %>
+  </div>
+  <ul class="divide-y divide-line">
+    <% @feeds.each do |feed| %>
+      <li class="vulnerability-feed flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3 text-sm" data-source="<%= feed.source %>">
+        <span class="w-56 font-medium"><%= feed.label %></span>
+        <% releases = @releases.fetch(feed.source) %>
+        <span class="text-xs text-ink-2"><%= releases.any? ? "Versions du parc : #{releases.join(", ")}" : "Aucun serveur concerné" %></span>
+        <span class="ml-auto text-xs">
+          <% if feed.failed? %>
+            <%= status_badge :crit, "Échec", title: feed.last_error, class: "feed-state" %> <span class="text-crit-ink"><%= feed.last_error %></span>
+          <% elsif feed.refreshed_at %>
+            <%= status_badge :good, "#{feed.entries_count} vulnérabilités", class: "feed-state" %>
+            <span class="text-ink-3">mise à jour <%= relative_time_tag feed.refreshed_at %> (<%= feed.origin_label %>)</span>
+          <% else %>
+            <%= status_badge :neutral, "Jamais mise à jour", class: "feed-state" %>
+          <% end %>
+        </span>
+      </li>
+    <% end %>
+  </ul>
+  <p class="border-t border-line px-4 py-2.5 text-xs text-ink-3">
+    Automatisation « <%= @automation.label %> » : <%= @automation.enabled? ? "active, #{Automation::INTERVALS.fetch(@automation.interval_minutes).downcase}" : "désactivée" %>
+    — <%= link_to "Automatisations", settings_automations_path, class: "text-accent hover:underline" %>.
+    Sources : <span class="font-mono"><%= Vulnerabilities::DebianTracker::URL %></span>, <span class="font-mono"><%= Vulnerabilities::UbuntuOsv::URL %></span>.
+  </p>
+</section>
+
+<section id="vulnerability-import" class="card mt-6 p-5">
+  <h2 class="font-semibold">Importer une base à la main</h2>
+  <p class="mt-1 text-xs text-ink-3">Pour un réseau fermé : téléchargez le fichier ailleurs puis envoyez-le ici. Il remplace la base correspondante, reconnue à son contenu.</p>
+  <ul class="mt-2 list-disc pl-5 text-xs text-ink-2">
+    <li>Debian : <span class="font-mono"><%= Vulnerabilities::DebianTracker::URL %></span> (JSON)</li>
+    <li>Ubuntu : <span class="font-mono"><%= Vulnerabilities::UbuntuOsv::URL %></span> (zip)</li>
+  </ul>
+  <%= form_with url: import_settings_vulnerabilities_path, multipart: true, data: { turbo: false }, class: "mt-4 flex flex-wrap items-center gap-3" do |f| %>
+    <%= f.file_field :file, accept: ".json,.zip,application/json,application/zip", required: true, class: "text-sm", aria: { label: "Fichier de la base" } %>
+    <%= f.submit "Importer", class: "btn btn-secondary" %>
+  <% end %>
+</section>
+
+<section id="vulnerability-alerts" class="card mt-6 p-5">
+  <h2 class="font-semibold">Alertes</h2>
+  <p class="mt-1 text-xs text-ink-3">Une vulnérabilité <strong>corrigeable</strong> (une version qui la corrige existe) à partir de cette gravité rend le serveur critique et enregistre l'activité « Vulnérabilité corrigeable » (notifiable).</p>
+  <p class="mt-1 text-xs text-ink-3">Debian n'évalue qu'une petite partie de ses vulnérabilités (la plupart restent « non évaluées ») : pour être prévenu de toutes celles qu'une mise à jour corrige, choisissez « Toutes les corrigeables ». Ubuntu donne une priorité à presque toutes.</p>
+  <%= form_with model: @setting, url: settings_vulnerabilities_path, method: :patch, class: "mt-4 flex flex-wrap items-center gap-3" do |f| %>
+    <%= f.label :vulnerability_alert_severity, "Gravité minimale", class: "label mb-0" %>
+    <%= f.select :vulnerability_alert_severity, AppSetting::VULNERABILITY_ALERTS.invert, {}, class: "input w-auto" %>
+    <%= f.submit "Enregistrer", class: "btn btn-primary" %>
+  <% end %>
+</section>

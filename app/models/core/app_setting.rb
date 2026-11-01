@@ -4,6 +4,11 @@ class AppSetting < ApplicationRecord
             numericality: { only_integer: true, greater_than: 0, less_than_or_equal_to: 100 }
   validates :health_load_warn, numericality: { greater_than: 0, less_than_or_equal_to: 50 }
   validate :warning_thresholds_below_critical
+  # From which severity a fixable CVE is a critical health reason and an activity ("none": never).
+  # Debian rates few issues (most are "not yet assigned"): "any" alerts on every fixable one.
+  VULNERABILITY_ALERTS = { "critical" => "Critique", "high" => "Haute ou critique", "medium" => "Moyenne ou plus",
+                           "any" => "Toutes les corrigeables", "none" => "Jamais" }.freeze
+  validates :vulnerability_alert_severity, inclusion: { in: VULNERABILITY_ALERTS.keys }
 
   def self.current = first || create!
 

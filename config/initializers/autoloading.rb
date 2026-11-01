@@ -4,9 +4,9 @@
 # fleet. Folders that ARE namespaces (Inventory::, Settings::, Users::,
 # Integrations::) are not listed here.
 DOMAIN_FOLDERS = {
-  "app/models" => %w[fleet access accounts activity_log operations extensions core],
-  "app/controllers" => %w[fleet access accounts activity_log operations extensions core],
-  "app/jobs" => %w[access activity_log operations]
+  "app/models" => %w[fleet access accounts activity_log operations extensions security core],
+  "app/controllers" => %w[fleet access accounts activity_log operations extensions security core],
+  "app/jobs" => %w[access activity_log operations security]
 }.freeze
 
 DOMAIN_FOLDERS.each do |root, folders|

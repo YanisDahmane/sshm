@@ -1,0 +1,62 @@
+<% content_for :title, "Vulnérabilités · Elio" %>
+
+<div class="flex flex-wrap items-end justify-between gap-3">
+  <div>
+    <h1 class="text-xl font-semibold">Vulnérabilités</h1>
+    <p class="text-xs text-ink-3">CVE des paquets du parc et des images Docker, d'après les bases de Debian et d'Ubuntu. Les corrigeables et les plus graves en premier.</p>
+  </div>
+  <p class="vulnerability-feeds-state text-xs text-ink-3">
+    <% if @feeds.any? %>
+      <%= safe_join(@feeds.map { |feed| safe_join([ feed.label, " : ", relative_time_tag(feed.refreshed_at) ]) }, " · ") %>
+    <% else %>
+      Bases pas encore téléchargées<% if can?(:administer) %> — <%= link_to "Paramètres → Vulnérabilités", settings_vulnerabilities_path, class: "text-accent hover:underline" %><% end %>.
+    <% end %>
+  </p>
+</div>
+
+<div class="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+  <%= stat_tile "Vulnérabilités", @summary[:cves], "CVE distinctes", icon: :shield_exclamation, id: "stat-cves" %>
+  <%= stat_tile "Corrigeables", @summary[:fixable], "une mise à jour existe", tone: (:warn if @summary[:fixable].positive?), id: "stat-fixable" %>
+  <%= stat_tile "Graves et corrigeables", @summary[:serious], "haute ou critique", tone: (:crit if @summary[:serious].positive?), id: "stat-serious" %>
+  <%= stat_tile "Serveurs touchés", @summary[:servers], nil, icon: :server_stack, id: "stat-affected" %>
+</div>
+
+<%= form_with url: vulnerabilities_path, method: :get, data: { controller: "auto-submit", turbo_action: "advance" }, class: "vulnerability-filters mt-5 flex flex-wrap items-center gap-2" do |f| %>
+  <%= f.search_field :q, value: @q, placeholder: "CVE ou paquet (ex. openssl)", aria: { label: "Rechercher" },
+        data: { action: "input->auto-submit#submitLater" }, class: "input w-60 py-1 text-xs" %>
+  <%= f.select :severity, [ [ "Toutes gravités", "" ], *Vulnerability::SEVERITIES.except("unknown").map { |key, label| [ "#{label}#{" ou plus" unless key == "critical"}", key ] } ],
+        { selected: @severity }, aria: { label: "Gravité minimale" }, data: { action: "change->auto-submit#submit" }, class: "input w-auto py-1 text-xs" %>
+  <%= f.select :group, [ [ "Tous les groupes", "" ], *@groups.map { |group| [ group.name, group.id ] } ], { selected: @group&.id },
+        aria: { label: "Groupe" }, data: { action: "change->auto-submit#submit" }, class: "input w-auto py-1 text-xs" %>
+  <%= f.select :origin, [ [ "Systèmes et images", "" ], *ServerVulnerability::ORIGINS.map { |key, label| [ label, key ] } ], { selected: @origin },
+        aria: { label: "Origine" }, data: { action: "change->auto-submit#submit" }, class: "input w-auto py-1 text-xs" %>
+  <label class="flex items-center gap-1.5 text-xs"><%= check_box_tag :fixable, "1", @fixable_only, data: { action: "change->auto-submit#submit" } %> Corrigeables seulement</label>
+  <noscript><%= f.submit "Filtrer", class: "btn btn-secondary" %></noscript>
+<% end %>
+
+<% if @rows.any? %>
+  <div class="card mt-3 overflow-x-auto">
+    <table id="vulnerabilities" class="table-dense">
+      <thead><tr><th class="pl-4">Gravité</th><th>CVE</th><th>Paquets</th><th>Serveurs</th><th>Correctif</th><th class="pr-4">Description</th></tr></thead>
+      <tbody>
+        <% @rows.each do |row| %>
+          <tr class="fleet-vulnerability" data-cve="<%= row.cve %>">
+            <td class="pl-4"><%= severity_badge(row.severity) %></td>
+            <td class="font-mono text-xs whitespace-nowrap"><%= link_to row.cve, row.url, target: "_blank", rel: "noopener", class: "hover:text-accent hover:underline" %></td>
+            <td class="font-mono text-xs"><%= row.packages.join(", ") %>
+              <% if row.images.any? %><span class="block text-[11px] text-ink-3">images : <%= row.images.first(3).join(", ") %><%= " …" if row.images.size > 3 %></span><% end %></td>
+            <td class="text-xs">
+              <span class="font-medium"><%= row.servers.size %></span> ·
+              <%= safe_join(row.servers.first(3).map { |server| link_to(server.name, server_path(server, tab: "vulnerabilities"), class: "hover:text-accent hover:underline") }, ", ") %><%= " …" if row.servers.size > 3 %>
+            </td>
+            <td class="text-xs"><%= row.fixable ? status_badge(:good, "corrigeable") : tag.span("pas de correctif", class: "text-ink-3") %></td>
+            <td class="max-w-sm truncate pr-4 text-xs text-ink-3" title="<%= row.description %>"><%= row.description %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <%= render "shared/pagination", pager: @pager, noun: "vulnérabilités" %>
+<% else %>
+  <p class="card mt-3 px-4 py-6 text-sm text-ink-3"><%= @q.present? || @severity || @fixable_only || @origin || @group ? "Aucune vulnérabilité ne correspond." : "Aucune vulnérabilité connue sur le parc." %></p>
+<% end %>

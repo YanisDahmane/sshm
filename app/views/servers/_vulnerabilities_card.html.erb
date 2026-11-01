@@ -1,0 +1,67 @@
+<%# Vulnerabilities (CVE) of the server, see Vulnerabilities::Matcher: its packages and its Docker images. %>
+<% target = Vulnerabilities.target(server.inventory("os")&.data) %>
+<% feed = target && VulnerabilityFeed.for(target.first) %>
+<section id="server-vulnerabilities" class="card mt-6">
+  <div class="card-header">
+    <h2 class="flex items-center gap-2 font-semibold"><%= icon :shield_exclamation, class: "h-4 w-4 text-ink-3" %> Vulnérabilités</h2>
+    <div class="flex items-center gap-3 text-xs text-ink-3">
+      <% if server.vulnerabilities_checked_at %><span>vérifié <%= relative_time_tag server.vulnerabilities_checked_at %></span><% end %>
+      <%= link_to "Tout le parc", vulnerabilities_path, class: "font-medium text-accent hover:underline" %>
+    </div>
+  </div>
+
+  <% if target.nil? && @vulnerability_counts[:total].zero? %>
+    <p class="vulnerabilities-empty px-4 py-4 text-sm text-ink-3">
+      <%= server.inventory("os")&.collected? ? "Distribution non couverte : Elio connaît les vulnérabilités de Debian et d'Ubuntu." : "Pas encore d'inventaire du système." %>
+    </p>
+  <% elsif feed && feed.refreshed_at.nil? %>
+    <p class="vulnerabilities-empty px-4 py-4 text-sm text-ink-3">
+      La base <%= feed.label %> n'a pas encore été téléchargée.
+      <% if can?(:administer) %><%= link_to "Paramètres → Vulnérabilités", settings_vulnerabilities_path, class: "text-accent hover:underline" %><% end %>
+    </p>
+  <% else %>
+    <% counts = @vulnerability_counts %>
+    <p class="vulnerabilities-summary border-b border-line px-4 py-2.5 text-xs text-ink-2">
+      <strong class="text-ink"><%= counts[:total] %></strong> vulnérabilités connues
+      · <strong class="<%= counts[:fixable].positive? ? "text-crit-ink" : "text-ink" %>"><%= counts[:fixable] %> corrigeables</strong> par une mise à jour
+      <% Vulnerability::SEVERITIES.each_key do |severity| %>
+        <% if (count = counts[:by_severity][severity].to_i).positive? %>· <%= count %> <%= Vulnerability.severity_label(severity).downcase %><%= "s" if count > 1 && severity != "unknown" %><% end %>
+      <% end %>
+    </p>
+
+    <%= form_with url: server_path(server), method: :get, data: { controller: "auto-submit", turbo_action: "advance" }, class: "vulnerability-filters flex flex-wrap items-center gap-3 border-b border-line px-4 py-2 text-xs" do |f| %>
+      <%= hidden_field_tag :tab, "vulnerabilities" %>
+      <label class="flex items-center gap-1.5"><%= check_box_tag :fixable, "1", @fixable_only, data: { action: "change->auto-submit#submit" } %> Corrigeables seulement</label>
+      <%= select_tag :severity, options_for_select([ [ "Toutes gravités", "" ], *Vulnerability::SEVERITIES.except("unknown").map { |key, label| [ "#{label}#{" ou plus" unless key == "critical"}", key ] } ], @severity),
+            aria: { label: "Gravité minimale" }, data: { action: "change->auto-submit#submit" }, class: "input w-auto py-1 text-xs" %>
+      <noscript><%= f.submit "Filtrer", class: "btn btn-secondary" %></noscript>
+    <% end %>
+
+    <% if @vulnerabilities.any? %>
+      <div class="overflow-x-auto">
+        <table class="table-dense">
+          <thead><tr><th class="pl-4">Gravité</th><th>CVE</th><th>Paquet</th><th>Installée → corrigée</th><th class="pr-4">Description</th></tr></thead>
+          <tbody>
+            <% @vulnerabilities.each do |vulnerability| %>
+              <tr class="server-vulnerability" data-cve="<%= vulnerability.cve %>" data-fixable="<%= vulnerability.fixable? %>">
+                <td class="pl-4"><%= severity_badge(vulnerability.severity) %></td>
+                <td class="font-mono text-xs whitespace-nowrap"><%= link_to vulnerability.cve, vulnerability.url(vulnerability.source), target: "_blank", rel: "noopener", class: "hover:text-accent hover:underline" %></td>
+                <td class="text-xs">
+                  <span class="font-mono"><%= vulnerability.source_package %></span>
+                  <% if vulnerability.image %><span class="block text-[11px] text-ink-3">image <%= vulnerability.image %></span><% end %>
+                  <% if vulnerability.packages != [ vulnerability.source_package ] %><span class="block max-w-48 truncate text-[11px] text-ink-3" title="<%= vulnerability.packages.join(", ") %>"><%= vulnerability.packages.join(", ") %></span><% end %>
+                </td>
+                <td class="font-mono text-xs whitespace-nowrap"><%= vulnerability.installed_version %> →
+                  <% if vulnerability.fixable? %><span class="text-good-ink"><%= vulnerability.fixed_version %></span><% else %><span class="text-ink-3">pas de correctif</span><% end %></td>
+                <td class="max-w-md truncate pr-4 text-xs text-ink-3" title="<%= vulnerability.description %>"><%= vulnerability.description %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <% if @pager.multiple_pages? %><div class="px-4 pb-3"><%= render "shared/pagination", pager: @pager, noun: "vulnérabilités" %></div><% end %>
+    <% else %>
+      <p class="vulnerabilities-none px-4 py-4 text-sm text-ink-3"><%= counts[:total].zero? ? "Aucune vulnérabilité connue sur ce serveur." : "Aucune vulnérabilité ne correspond aux filtres." %></p>
+    <% end %>
+  <% end %>
+</section>

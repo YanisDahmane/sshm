@@ -35,7 +35,8 @@ class ServersController < ApplicationController
     end
   end
 
-  TABS = %w[overview packages services schedules ports keys history].freeze
+  TABS = %w[overview packages vulnerabilities services schedules ports keys history].freeze
+  VULNERABILITIES_PER_PAGE = 100
 
   # Tabbed page (?tab=), only the requested tab is rendered.
   def show
@@ -45,6 +46,7 @@ class ServersController < ApplicationController
       @pager = paginate(Activity.recent.where(server: @server).includes(:user, :server, :public_key), per_page: HISTORY_PER_PAGE)
       @activities = @pager.records
     end
+    show_vulnerabilities if @tab == "vulnerabilities"
     @health_history = @server.health_samples.since(24.hours.ago).pluck(:collected_at, :load_percent, :memory_percent, :disk_percent) if @tab == "overview"
   end
 
@@ -90,6 +92,20 @@ class ServersController < ApplicationController
   end
 
   private
+
+  # Vulnerabilities tab: fixable first, most serious first (?fixable=1, ?severity=, ?origin=).
+  def show_vulnerabilities
+    scope = @server.server_vulnerabilities
+    @vulnerability_counts = { total: scope.distinct.count(:cve), fixable: scope.fixable.distinct.count(:cve),
+                              by_severity: scope.group(:severity).distinct.count(:cve) }
+    @fixable_only = params[:fixable] == "1"
+    @severity = params[:severity].presence_in(Vulnerability::SEVERITIES.keys)
+    scope = scope.fixable if @fixable_only
+    scope = scope.at_least(@severity) if @severity
+    scope = scope.order(Arel.sql("fixed_version IS NULL")).in_order_of(:severity, Vulnerability::SEVERITIES.keys).order(cve: :desc)
+    @pager = paginate(scope, per_page: VULNERABILITIES_PER_PAGE)
+    @vulnerabilities = @pager.records
+  end
 
   # List (dense table) or grid (cards): ?view=, remembered in a cookie.
   def fleet_view

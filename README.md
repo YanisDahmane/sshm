@@ -42,6 +42,7 @@ Santé, système, paquets, services, ports et firewall de chaque serveur, et les
 | **Système** | Distribution, noyau, machine (virtualisation, processeurs, mémoire), démarrage, avec la **date de fin de support** Debian / Ubuntu. |
 | **Paquets** | Paquets Debian, snaps et images Docker de chaque serveur, mises à jour disponibles (sécurité en évidence). Recherche sur tout le parc : « quels serveurs ont openssl, et en quelle version ? » |
 | **Services** | Services systemd et conteneurs Docker, regroupés par projet Docker Compose (avec le chemin des fichiers compose). |
+| **Vulnérabilités (CVE)** | Les CVE qui touchent les paquets de chaque serveur, d'après le **Debian Security Tracker** et les avis **Ubuntu** (OSV), téléchargés chaque jour (ou importés à la main sur un réseau fermé) et rapprochés des paquets déjà inventoriés : aucune commande de plus sur les serveurs. Corrigeables (une mise à jour existe) et plus graves en premier, page du parc par CVE, alerte au choix à partir d'une gravité. |
 | **Tâches planifiées** | Crontabs (système et utilisateurs), scripts `cron.daily`… et timers systemd de chaque serveur, en clair (« tous les jours à 3 h 00 »), avec le dernier passage des timers : **en échec** ou **en retard** signalés. Recherche sur tout le parc : « quels serveurs lancent backup.sh ? » |
 | **Ports et firewall** | Ports en écoute avec le processus, le service ou le conteneur derrière, exposition (public, privé, local), état du firewall (ufw, nftables, iptables), **règles ufw suggérées à copier**, ports inattendus par groupe. |
 | **Trousseau** | Les clés SSH de l'équipe et des machines (CI, sauvegardes…), à ajouter ou retirer sur chaque serveur — depuis le trousseau ou en collant une nouvelle clé directement sur la fiche du serveur —, pour toujours ou pour une durée limitée. Les clés inconnues trouvées sur les serveurs sont signalées. |
@@ -108,6 +109,7 @@ Le projet est prêt pour [Kamal](https://kamal-deploy.org) (`config/deploy.yml`,
 | `ELIO_SETUP_TOKEN` | **Recommandé en production** : jeton demandé pour créer le premier compte administrateur (sans lui, la première personne qui atteint une installation neuve devient admin). |
 | `ELIO_ACTIVITY_RETENTION_DAYS` | Durée de conservation du journal d'activité (365 jours par défaut, `0` = tout garder). |
 | `ELIO_MAIL_FROM` | Expéditeur des emails (ex. `elio@acme.fr`). |
+| `ELIO_DEBIAN_TRACKER_URL`, `ELIO_UBUNTU_OSV_URL` | Adresses des bases de vulnérabilités (par défaut celles de Debian et d'OSV ; un miroir interne par exemple). |
 | `ELIO_PARALLEL_LIMIT` | Nombre de serveurs traités en même temps par les inventaires et scans (4 par défaut). |
 
 ### Clés de chiffrement
@@ -164,7 +166,7 @@ Tout passe par SSH, avec la clé d'Elio uniquement (jamais votre agent ni vos cl
 | Système | `cat /etc/os-release`, `uname -srm`, `hostname -f`, `systemd-detect-virt`, `/proc/uptime`, `nproc`, `/proc/meminfo`, `timedatectl` |
 | Réseau | `ip -j addr`, `ip -d -j link` |
 | Santé | `/proc/loadavg`, `/proc/meminfo`, `df -P -T` (espace et inodes), `/var/run/reboot-required`, `systemctl --failed`, `apt-get -s dist-upgrade` (simulation), `timedatectl` |
-| Paquets | `dpkg-query -W`, `apt list --upgradable`, `snap list`, `docker image ls` |
+| Paquets | `dpkg-query -W` (avec le paquet source, pour les CVE), `apt list --upgradable`, `snap list`, `docker image ls` |
 | Services | `systemctl list-units`, `systemctl list-unit-files`, `docker ps -a` |
 | Tâches planifiées | `cat /etc/crontab /etc/cron.d/*`, liste de `/etc/cron.{hourly,daily,weekly,monthly}`, crontabs de `/var/spool/cron` (root), `systemctl show` des timers |
 | Ports | `ss -tulpn`, `/proc/<pid>/cgroup`, `ufw status verbose`, `nft list ruleset`, `iptables -S INPUT` |
@@ -198,6 +200,8 @@ Les rattachements utilisent toutes les adresses relevées par l'inventaire du sy
 - La clé d'Elio peut être **remplacée sans coupure** (rotation serveur par serveur) ou régénérée en urgence.
 - Les empreintes des serveurs sont mémorisées à la première connexion ; un changement bloque la connexion jusqu'à ce qu'un admin l'accepte.
 - Les accès temporaires utilisent l'option OpenSSH `expiry-time` **et** un job de suppression : la clé est refusée à l'heure prévue même si Elio est arrêté. Une session déjà ouverte n'est pas coupée.
+- Accès sortants d'Elio : les bases de vulnérabilités (`security-tracker.debian.org`, `osv-vulnerabilities.storage.googleapis.com`, une fois par jour, seulement les versions présentes sur le parc), les extensions activées et les registres Docker. Sans accès Internet, importez les bases dans **Paramètres → Vulnérabilités**.
+- Les vulnérabilités Debian suivent l'urgence donnée par Debian (basse, moyenne, haute) ; celles qu'il juge sans importance (« unimportant ») ou hors support (« end-of-life ») ne sont pas listées. Côté Ubuntu, la priorité d'Ubuntu, sans les éditions Pro / FIPS.
 - L'inventaire complet vise **Debian et Ubuntu**. Sur d'autres distributions, Elio relève la santé et le système ; les paquets apparaissent « non disponibles ».
 
 ---

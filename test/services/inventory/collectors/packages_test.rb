@@ -82,4 +82,16 @@ class Inventory::Collectors::PackagesTest < ActiveSupport::TestCase
     assert_empty Collector.changes({ "security" => 2 }, { "security" => 3 })
     assert_empty Collector.changes({ "security" => 2 }, { "security" => 0 })
   end
+
+  test "keeps the source package when it differs (vulnerability feeds), stored for every dpkg package" do
+    text = "ii \tlibssl3\t3.0.14-1~deb12u1\tamd64\topenssl\t3.0.14-1~deb12u1\n" \
+           "ii \tlibc6\t2.36-9+deb12u10+b1\tamd64\tglibc\t2.36-9+deb12u10\n" \
+           "ii \tcurl\t7.88.1-10+deb12u12\tamd64\tcurl\t7.88.1-10+deb12u12\n"
+    packages = Collector.parse_dpkg(text, {})
+
+    assert_equal [ [ "openssl", nil ], [ "glibc", "2.36-9+deb12u10" ], [ nil, nil ] ], packages.map { |package| package.values_at("source", "source_version") }
+    Collector.record(servers(:web), Collector.summarize(packages), Time.current)
+    assert_equal [ [ "curl", "curl", "7.88.1-10+deb12u12" ], [ "libc6", "glibc", "2.36-9+deb12u10" ], [ "libssl3", "openssl", "3.0.14-1~deb12u1" ] ],
+                 servers(:web).packages.order(:name).pluck(:name, :source_name, :source_version)
+  end
 end

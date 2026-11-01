@@ -45,10 +45,28 @@ class AttentionList
   end
 
   def fleet_items
-    return [] unless @summary.security_updates.positive?
+    [ security_updates_item, vulnerabilities_item ].compact
+  end
+
+  def security_updates_item
+    return unless @summary.security_updates.positive?
 
     servers = @summary.servers_with_security_updates
-    [ Item.new("warn", :shield_check, "#{servers} serveur#{"s" if servers > 1}", "#{@summary.security_updates} mise(s) à jour de sécurité en attente",
-               "Voir les paquets", @routes.packages_path) ]
+    Item.new("warn", :shield_check, "#{servers} serveur#{"s" if servers > 1}", "#{@summary.security_updates} mise(s) à jour de sécurité en attente",
+             "Voir les paquets", @routes.packages_path)
+  end
+
+  # Fixable CVEs at the alert severity of the settings, on the whole fleet.
+  def vulnerabilities_item
+    minimum = AppSetting.current.vulnerability_alert_severity
+    return if minimum == "none"
+
+    scope = ServerVulnerability.fixable.at_least(minimum)
+    cves = scope.distinct.count(:cve)
+    return if cves.zero?
+
+    servers = scope.distinct.count(:server_id)
+    Item.new("crit", :shield_exclamation, "#{servers} serveur#{"s" if servers > 1}", "#{cves} vulnérabilité#{"s" if cves > 1} grave#{"s" if cves > 1} corrigeable#{"s" if cves > 1}",
+             "Voir les vulnérabilités", @routes.vulnerabilities_path(fixable: 1, severity: minimum))
   end
 end

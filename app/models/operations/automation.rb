@@ -27,6 +27,8 @@ class Automation < ApplicationRecord
                    description: "Relit les services systemd, les conteneurs Docker et les tâches planifiées (cron, timers) ; signale ceux qui tombent ou échouent."),
     Definition.new(key: :inventory_ports, label: "Inventaire des ports", default_interval: 60, categories: %w[ports],
                    description: "Relit les ports en écoute et le firewall ; signale les ports publics qui s'ouvrent."),
+    Definition.new(key: :vulnerabilities_update, label: "Mise à jour des vulnérabilités", default_interval: 1440, default_enabled: true,
+                   description: "Télécharge les bases de vulnérabilités (Debian Security Tracker, Ubuntu) pour les versions du parc et les rapproche des paquets installés."),
     Definition.new(key: :keys_scan, label: "Scan des clés", default_interval: 360,
                    description: "Lit les clés de tous les serveurs et signale les clés inconnues ou disparues."),
     Definition.new(key: :uptime_kuma_sync, label: "Synchronisation Uptime Kuma", default_interval: 15, default_enabled: true, quiet: true, integration: "uptime_kuma",
@@ -143,6 +145,19 @@ class Automation < ApplicationRecord
     integration.sync!
   rescue Integrations::Error => e
     "Échec : #{e.message}"
+  end
+
+  # Downloads the feeds of the releases used on the fleet. A failure is
+  # logged once (vulnerability_feed_failed), until a download works again.
+  def run_vulnerabilities_update
+    Vulnerability::SOURCES.keys.map do |source|
+      feed = VulnerabilityFeed.for(source)
+      failing = feed.failed?
+      Vulnerabilities::Update.call(source)
+    rescue Vulnerabilities::Error => e
+      Activity.record!(:vulnerability_feed_failed, user: nil, feed: feed.label, error: e.message) unless failing
+      "#{feed.label} : échec (#{e.message})"
+    end.join(" · ")
   end
 
   def run_servers_ping

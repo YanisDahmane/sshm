@@ -15,9 +15,9 @@ class SettingsPagesTest < ActionDispatch::IntegrationTest
     sign_in users(:one)
 
     { settings_path => "Général", settings_notifications_path => "Notifications", settings_users_path => "Utilisateurs",
-      settings_integrations_path => "Extensions" }.each do |path, label|
+      settings_vulnerabilities_path => "Vulnérabilités", settings_integrations_path => "Extensions" }.each do |path, label|
       get path
-      assert_select "nav.settings-nav a", 4
+      assert_select "nav.settings-nav a", 5
       assert_select "nav.settings-nav a[aria-current=page]", label
       assert_select "nav.main-nav a[aria-current=page]", "Paramètres"
     end
@@ -43,7 +43,7 @@ class SettingsPagesTest < ActionDispatch::IntegrationTest
 
     get settings_automations_path
 
-    assert_select "section.automation", 7
+    assert_select "section.automation", 8
     scan = Automation.find_by!(kind: "keys_scan")
     assert_select "##{ActionView::RecordIdentifier.dom_id(scan)}" do
       assert_select ".automation-state", "Activée"

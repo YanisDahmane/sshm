@@ -80,6 +80,8 @@ gem "rotp", "~> 6.3"
 gem "rqrcode", "~> 3.1"
 # CSV import of servers (no longer a default gem since Ruby 3.4)
 gem "csv"
+# Ubuntu vulnerability feed (OSV archive, read entry by entry)
+gem "rubyzip", "~> 3.0", require: "zip"
 
 gem "mission_control-jobs", "~> 1.3"
 

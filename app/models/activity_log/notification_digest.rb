@@ -22,6 +22,11 @@ class NotificationDigest
     lines = [ "Parc : #{summary.online}/#{summary.total} en ligne, #{summary.to_watch} à surveiller, #{summary.critical} critique(s), " \
               "#{summary.security_updates} mise(s) à jour de sécurité en attente.",
               "Activité : #{activities.size} événement(s) dont #{counts[:critical]} critique(s) et #{counts[:warning]} avertissement(s)." ]
+    if (cves = ServerVulnerability.distinct.count(:cve)).positive?
+      fixable = ServerVulnerability.fixable.distinct.count(:cve)
+      serious = ServerVulnerability.fixable.at_least("high").distinct.count(:cve)
+      lines << "Vulnérabilités : #{cves} connue(s), #{fixable} corrigeable(s) dont #{serious} grave(s), sur #{ServerVulnerability.distinct.count(:server_id)} serveur(s)."
+    end
     highlights = activities.reject { |activity| activity.severity == :info }.first(HIGHLIGHTS)
     lines += highlights.map { |activity| "- #{activity.label} : #{activity.summary}" }
     lines << "Rien à signaler." if activities.empty?

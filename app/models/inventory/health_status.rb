@@ -15,7 +15,7 @@ class Inventory::HealthStatus
   end
 
   def evaluate
-    reasons = [ *access_reasons, *disk_reasons, *memory_reasons, *load_reasons, *system_reasons, *scheduled_task_reasons, *port_reasons, *Integration.health_reasons(@server) ]
+    reasons = [ *access_reasons, *disk_reasons, *memory_reasons, *load_reasons, *system_reasons, *scheduled_task_reasons, *vulnerability_reasons, *port_reasons, *Integration.health_reasons(@server) ]
     reasons = reasons.sort_by { |reason| reason.tone == "crit" ? 0 : 1 }
     state = if reasons.any? { |reason| reason.tone == "crit" } then "crit"
     elsif reasons.any? then "warn"
@@ -71,6 +71,17 @@ class Inventory::HealthStatus
 
       Reason.new("warn", list.one? ? "Tâche planifiée #{list.first["name"].delete_suffix(".timer")} #{state}" : "#{list.size} tâches planifiées #{state}")
     end
+  end
+
+  # Fixable CVEs from the alert severity of the settings: critical.
+  def vulnerability_reasons
+    minimum = @settings.vulnerability_alert_severity
+    return [] if minimum == "none"
+
+    cves = @server.server_vulnerabilities.fixable.at_least(minimum).distinct.pluck(:cve)
+    return [] if cves.empty?
+
+    [ Reason.new("crit", cves.one? ? "Vulnérabilité #{cves.first} corrigeable" : "#{cves.size} vulnérabilités graves corrigeables") ]
   end
 
   def port_reasons

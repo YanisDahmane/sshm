@@ -49,6 +49,12 @@ module InventoryHelper
 
   def timer_time(value) = value ? relative_time_tag(Time.zone.parse(value)) : tag.span("—", class: "text-ink-3")
 
+  SEVERITY_TONES = { "critical" => :crit, "high" => :crit, "medium" => :warn, "low" => :neutral, "unknown" => :neutral }.freeze
+
+  def severity_badge(severity)
+    status_badge(SEVERITY_TONES.fetch(severity.to_s, :neutral), Vulnerability.severity_label(severity), class: "severity", data: { severity: severity })
+  end
+
   # Badge of an inventory snapshot that is not plainly ok.
   def inventory_status_badge(snapshot)
     case snapshot&.status

@@ -31,6 +31,11 @@ module Activity::Summaries
     container_started: proc { "Le conteneur #{data["container"]} tourne à nouveau sur « #{server_name} »" },
     scheduled_task_failed: proc { "La tâche planifiée #{data["task"]} a échoué sur « #{server_name} »" },
     scheduled_task_late: proc { "La tâche planifiée #{data["task"]} n'a pas tourné à temps sur « #{server_name} »" },
+    vulnerability_found: proc do
+      where = data["image"] ? "l'image #{data["image"]} de « #{server_name} »" : "« #{server_name} »"
+      "#{data["count"]} vulnérabilité(s) corrigeable(s) sur #{where} : #{Array(data["cves"]).join(", ")}#{" (#{Array(data["packages"]).join(", ")})" if Array(data["packages"]).any?}"
+    end,
+    vulnerability_feed_failed: proc { "Base de vulnérabilités #{data["feed"]} non mise à jour : #{data["error"]}" },
     port_opened: proc { "Port #{data["port"]} ouvert publiquement sur « #{server_name} »#{" (#{data["process"]})" if data["process"]}" },
     port_closed: proc { "Port #{data["port"]} fermé sur « #{server_name} »" },
     ip_address_added: proc { "Nouvelle adresse publique #{data["address"]} sur « #{server_name} »" },

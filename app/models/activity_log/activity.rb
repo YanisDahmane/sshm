@@ -30,6 +30,8 @@ class Activity < ApplicationRecord
     Kind.new(:container_started, "Conteneur redémarré", :servers, :info, "Un conteneur Docker arrêté tourne à nouveau."),
     Kind.new(:scheduled_task_failed, "Tâche planifiée en échec", :servers, :warning, "Le dernier passage d'un timer systemd a échoué (inventaire)."),
     Kind.new(:scheduled_task_late, "Tâche planifiée en retard", :servers, :warning, "Un timer systemd n'a pas tourné depuis plus de deux fois sa période."),
+    Kind.new(:vulnerability_found, "Vulnérabilité corrigeable", :security, :warning, "Une vulnérabilité (CVE) grave et corrigeable touche un serveur ou une de ses images Docker (gravité choisie dans les paramètres)."),
+    Kind.new(:vulnerability_feed_failed, "Base de vulnérabilités non mise à jour", :configuration, :warning, "Le téléchargement ou l'import d'une base de vulnérabilités a échoué (signalé une fois, jusqu'au retour à la normale)."),
     Kind.new(:port_opened, "Port public ouvert", :security, :warning, "Un nouveau port écoute sur une adresse publique d'un serveur."),
     Kind.new(:port_closed, "Port public fermé", :security, :info, "Un port public n'écoute plus sur un serveur."),
     Kind.new(:ip_address_added, "Nouvelle adresse IP publique", :servers, :info, "Une adresse IP publique apparaît sur une interface d'un serveur."),

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_01_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_01_150000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -51,6 +51,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_140000) do
     t.integer "health_memory_crit", default: 95, null: false
     t.decimal "health_load_warn", precision: 4, scale: 1, default: "2.0", null: false
     t.boolean "require_operator_two_factor", default: true, null: false
+    t.string "vulnerability_alert_severity", default: "high", null: false
   end
 
   create_table "automations", force: :cascade do |t|
@@ -142,6 +143,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_140000) do
     t.string "arch"
     t.string "available_version"
     t.boolean "security", default: false, null: false
+    t.string "source_name"
+    t.string "source_version"
     t.index ["name"], name: "index_inventory_packages_on_name"
     t.index ["server_id"], name: "index_inventory_packages_on_server_id"
   end
@@ -271,6 +274,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_140000) do
     t.index "lower((name)::text)", name: "index_server_groups_on_lower_name", unique: true
   end
 
+  create_table "server_vulnerabilities", force: :cascade do |t|
+    t.bigint "server_id", null: false
+    t.string "origin", default: "host", null: false
+    t.string "source", null: false
+    t.string "image"
+    t.string "cve", null: false
+    t.string "source_package", null: false
+    t.string "packages", default: [], null: false, array: true
+    t.string "installed_version"
+    t.string "fixed_version"
+    t.string "severity", null: false
+    t.string "description"
+    t.index ["cve"], name: "index_server_vulnerabilities_on_cve"
+    t.index ["server_id", "origin"], name: "index_server_vulnerabilities_on_server_id_and_origin"
+    t.index ["server_id"], name: "index_server_vulnerabilities_on_server_id"
+  end
+
   create_table "servers", force: :cascade do |t|
     t.string "name", null: false
     t.string "host", null: false
@@ -291,6 +311,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_140000) do
     t.jsonb "health_reasons", default: [], null: false
     t.jsonb "ip_addresses", default: [], null: false
     t.jsonb "extra_addresses", default: [], null: false
+    t.datetime "vulnerabilities_checked_at"
     t.index "lower((name)::text)", name: "index_servers_on_lower_name", unique: true
     t.index ["ip_addresses"], name: "index_servers_on_ip_addresses", using: :gin
   end
@@ -371,6 +392,29 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_140000) do
     t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
   end
 
+  create_table "vulnerabilities", force: :cascade do |t|
+    t.string "source", null: false
+    t.string "release", null: false
+    t.string "package", null: false
+    t.string "cve", null: false
+    t.string "fixed_version"
+    t.string "severity", default: "unknown", null: false
+    t.string "description"
+    t.index ["cve"], name: "index_vulnerabilities_on_cve"
+    t.index ["source", "release", "package", "cve"], name: "index_vulnerabilities_uniqueness", unique: true
+  end
+
+  create_table "vulnerability_feeds", force: :cascade do |t|
+    t.string "source", null: false
+    t.datetime "refreshed_at"
+    t.string "origin"
+    t.integer "entries_count", default: 0, null: false
+    t.jsonb "releases", default: [], null: false
+    t.datetime "failed_at"
+    t.string "last_error"
+    t.index ["source"], name: "index_vulnerability_feeds_on_source", unique: true
+  end
+
   add_foreign_key "account_snapshots", "servers", on_delete: :cascade
   add_foreign_key "activities", "public_keys", on_delete: :nullify
   add_foreign_key "activities", "servers", on_delete: :nullify
@@ -395,6 +439,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_140000) do
   add_foreign_key "ovh_resources", "servers", on_delete: :nullify
   add_foreign_key "server_group_memberships", "server_groups", on_delete: :cascade
   add_foreign_key "server_group_memberships", "servers", on_delete: :cascade
+  add_foreign_key "server_vulnerabilities", "servers", on_delete: :cascade
   add_foreign_key "temporary_accesses", "public_keys", on_delete: :nullify
   add_foreign_key "temporary_accesses", "servers", on_delete: :cascade
   add_foreign_key "uptime_kuma_monitors", "servers", on_delete: :nullify

@@ -47,6 +47,10 @@ Rails.application.routes.draw do
     resources :invitations, only: %i[create destroy]
     resource :security, only: :update
     resource :health_thresholds, only: :update
+    resource :vulnerabilities, only: %i[show update] do
+      post :refresh
+      post :import
+    end
     resources :key_rotations, only: %i[create show] do
       member do
         post :retry
@@ -72,6 +76,7 @@ Rails.application.routes.draw do
   resources :packages, only: :index
   resources :ports, only: :index
   resources :scheduled_tasks, only: :index, path: "scheduled-tasks"
+  resources :vulnerabilities, only: :index
   # Uptime Kuma extension.
   resources :monitors, only: :index do
     resource :link, only: %i[create destroy], controller: "monitor_links"

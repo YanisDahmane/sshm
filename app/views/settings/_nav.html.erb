@@ -1,11 +1,12 @@
 <%# Tabs of the settings pages. %>
 <h1 class="text-2xl font-bold tracking-tight">Paramètres</h1>
-<nav class="settings-nav mt-6 flex gap-1 border-b border-line" aria-label="Paramètres">
+<nav class="settings-nav scrollbar-none mt-6 flex gap-1 overflow-x-auto border-b border-line" aria-label="Paramètres">
   <% [ [ "Général", settings_path, controller_path == "settings" ],
        [ "Notifications", settings_notifications_path, controller_path.start_with?("settings/notification") ],
        [ "Utilisateurs", settings_users_path, controller_path.in?(%w[settings/users settings/invitations]) ],
+       [ "Vulnérabilités", settings_vulnerabilities_path, controller_path == "settings/vulnerabilities" ],
        [ "Extensions", settings_integrations_path, controller_path == "settings/integrations" ] ].each do |label, path, active| %>
     <%= link_to label, path, aria: { current: (active ? "page" : nil) },
-          class: "-mb-px border-b-2 px-4 py-2 text-sm font-medium #{active ? "border-accent text-accent" : "border-transparent text-ink-3 hover:border-line hover:text-ink-2"}" %>
+          class: "-mb-px shrink-0 border-b-2 px-4 py-2 whitespace-nowrap text-sm font-medium #{active ? "border-accent text-accent" : "border-transparent text-ink-3 hover:border-line hover:text-ink-2"}" %>
   <% end %>
 </nav>
