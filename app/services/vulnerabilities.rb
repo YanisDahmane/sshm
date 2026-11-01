@@ -22,4 +22,18 @@ module Vulnerabilities
     targets = systems.filter_map { |data| target(data) }.uniq
     Vulnerability::SOURCES.keys.index_with { |source| targets.select { |feed, _| feed == source }.map(&:last).sort }
   end
+
+  # A server on a release that its feed does not hold yet — the first server
+  # of a new installation, an upgrade to a new release — gets its
+  # vulnerabilities now rather than at the next daily download. Not again
+  # within an hour of a download, nor after a failure (a closed network).
+  def self.cover(server)
+    source, release = target(server.inventory("os")&.data)
+    return unless source
+
+    feed = VulnerabilityFeed.for(source)
+    return if Array(feed.releases).include?(release) || feed.failed? || feed.refreshed_at&.after?(1.hour.ago)
+
+    Automation.trigger(:vulnerabilities_update)
+  end
 end

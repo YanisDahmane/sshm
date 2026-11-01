@@ -64,6 +64,18 @@ class Automation < ApplicationRecord
 
   def definition = KINDS.fetch(kind.to_sym)
 
+  # Runs an automation now because something needs it (a release new to the
+  # fleet needs the vulnerability feeds, new CVEs need their scores), unless
+  # it is disabled — a closed network turns it off — or already waiting or
+  # running. Returns the task, or nil.
+  def self.trigger(kind)
+    automation = all_kinds.find { |candidate| candidate.kind == kind.to_s }
+    start = automation.with_lock do
+      automation.enabled? && automation.available? && !BackgroundTask.unfinished.exists?(automation: automation)
+    end
+    automation.enqueue!(tracked: true) if start
+  end
+
   delegate :label, :description, :inventory?, :available?, to: :definition
 
   def server_groups = ServerGroup.where(id: server_group_ids).order(:name)
@@ -161,7 +173,11 @@ class Automation < ApplicationRecord
     rescue Vulnerabilities::Error => e
       Activity.record!(:vulnerability_feed_failed, user: nil, feed: feed.label, error: e.message) unless failing
       "#{feed.label} : échec (#{e.message})"
-    end.join(" · ")
+    end.join(" · ").tap do
+      # CVEs never asked to the score providers (the first download, a new
+      # release): their scores now, not at the next run in a few hours.
+      Automation.trigger(:cve_scores_update) if ServerVulnerability.where.not(cve: CveScore.select(:cve)).exists?
+    end
   end
 
   def run_docker_image_updates = ImageRegistry::UpdateCheck.call

@@ -90,7 +90,7 @@ jobs:
           RAILS_ENV: test
           DATABASE_URL: postgres://postgres:postgres@localhost:5432
           # REDIS_URL: redis://localhost:6379/0
-        run: bin/rails db:test:prepare test test:system
+        run: bin/rails zeitwerk:check && bin/rails db:test:prepare test test:system
 
       - name: Keep screenshots from failed system tests
         uses: actions/upload-artifact@v4
@@ -99,3 +99,26 @@ jobs:
           name: screenshots
           path: ${{ github.workspace }}/tmp/screenshots
           if-no-files-found: ignore
+
+  # The production image starts: built for amd64 as the release builds it,
+  # run with PostgreSQL as docker-compose.yml runs it, then /up and the first
+  # page must answer. Production eager-loads all the code, the tests don't.
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build the image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: elio:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Start it with PostgreSQL
+        run: bin/smoke-image elio:ci

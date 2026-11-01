@@ -4,6 +4,13 @@ All notable changes to Elio. The format follows [Keep a Changelog](https://keepa
 
 ## [Unreleased]
 
+## [0.1.0-beta.2] — 2026-11-01
+
+### Fixed
+
+- The Docker image of 0.1.0-beta.1 did not start: production loads all the code at boot, and a file of `lib/` stopped it (`uninitialized constant Elio::Version`). The CI now checks the code loading (`zeitwerk:check`) and starts the built image with PostgreSQL before every release (`bin/smoke-image`).
+- A new installation showed no vulnerabilities for a day: the feeds were downloaded at the first start, before any server was added. Now the first inventory of a server on a release that the feeds don't hold yet downloads them at once, and new CVEs get their scores right after, instead of waiting for the next daily (or six-hourly) run.
+
 ## [0.1.0-beta.1] — 2026-11-01
 
 The first public version of Elio, the self-hosted fleet manager for Linux servers: agentless, read-only, over SSH. Previously an internal tool named SSHM.
@@ -62,5 +69,6 @@ The first public version of Elio, the self-hosted fleet manager for Linux server
 - Image CVEs without Trivy or Grype: Debian and Ubuntu based images only.
 - The interface is in French.
 
-[Unreleased]: https://github.com/elio-fleet/elio/compare/v0.1.0-beta.1...HEAD
+[Unreleased]: https://github.com/elio-fleet/elio/compare/v0.1.0-beta.2...HEAD
+[0.1.0-beta.2]: https://github.com/elio-fleet/elio/releases/tag/v0.1.0-beta.2
 [0.1.0-beta.1]: https://github.com/elio-fleet/elio/releases/tag/v0.1.0-beta.1

@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Starts a built Elio image the way docker-compose.yml does (PostgreSQL next
+# to it, secrets from bin/elio-keys) and checks that it answers: /up, then the
+# first page, which sends a new installation to the setup page.
+#
+#   bin/smoke-image ghcr.io/elio-fleet/elio:beta
+set -euo pipefail
+
+image="${1:?usage: bin/smoke-image <image>}"
+name="elio-smoke-$$"
+password="$(openssl rand -hex 16)"
+
+cleanup() {
+  status=$?
+  if [ "$status" -ne 0 ]; then docker logs "$name-app" 2>&1 | tail -60 || true; fi
+  docker rm -f "$name-app" "$name-db" >/dev/null 2>&1 || true
+  docker network rm "$name" >/dev/null 2>&1 || true
+  exit "$status"
+}
+trap cleanup EXIT
+
+docker network create "$name" >/dev/null
+docker run -d --name "$name-db" --network "$name" --network-alias db \
+  -e POSTGRES_USER=elio -e POSTGRES_PASSWORD="$password" postgres:17 >/dev/null
+
+env_file="$(mktemp)"
+docker run --rm "$image" bin/elio-keys > "$env_file"
+echo "ELIO_DATABASE_PASSWORD=$password" >> "$env_file"
+
+until docker exec "$name-db" pg_isready -U elio >/dev/null 2>&1; do sleep 1; done
+
+docker run -d --name "$name-app" --network "$name" --env-file "$env_file" \
+  -e PGHOST=db -e SOLID_QUEUE_IN_PUMA=true -e ELIO_FORCE_SSL=false -p 127.0.0.1::80 "$image" >/dev/null
+rm -f "$env_file"
+port="$(docker port "$name-app" 80 | head -1 | sed 's/.*://')"
+
+for _ in $(seq 1 90); do
+  if [ "$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$port/up")" = 200 ]; then break; fi
+  if [ "$(docker inspect -f '{{.State.Running}}' "$name-app")" != true ]; then echo "The container stopped."; exit 1; fi
+  sleep 2
+done
+test "$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$port/up")" = 200 || { echo "/up never answered 200"; exit 1; }
+
+location="$(curl -s -o /dev/null -w '%{redirect_url}' "http://127.0.0.1:$port/")"
+case "$location" in
+  */setup*) echo "OK: $image answers, and a new installation goes to $location" ;;
+  *) echo "The first page should lead to the setup page, got: '$location'"; exit 1 ;;
+esac

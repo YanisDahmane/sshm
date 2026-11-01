@@ -26,6 +26,16 @@ jobs:
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
 
+      - name: The image starts (amd64)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: elio:release
+          cache-from: type=gha
+
+      - run: bin/smoke-image elio:release
+
       - name: Log in to the GitHub Container Registry
         uses: docker/login-action@v3
         with:
