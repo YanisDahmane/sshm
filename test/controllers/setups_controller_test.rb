@@ -22,7 +22,7 @@ class SetupsControllerTest < ActionDispatch::IntegrationTest
     get new_setup_path
     assert_select "h2", "Créer le compte administrateur"
 
-    post setup_path, params: { user: { email: "admin@example.com", password: "password123", password_confirmation: "password123" } }
+    post setup_path, params: { user: { email: "admin@example.com", password: "password1234", password_confirmation: "password1234" } }
 
     assert_redirected_to root_path
     user = User.sole
@@ -47,7 +47,7 @@ class SetupsControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
 
     assert_no_difference "User.count" do
-      post setup_path, params: { user: { email: "intruder@example.com", password: "password123", password_confirmation: "password123" } }
+      post setup_path, params: { user: { email: "intruder@example.com", password: "password1234", password_confirmation: "password1234" } }
     end
     assert_response :not_found
   end

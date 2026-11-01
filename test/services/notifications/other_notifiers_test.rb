@@ -44,7 +44,10 @@ class Notifications::OtherNotifiersTest < ActiveSupport::TestCase
     assert_equal [ "port_opened", "warning", "Web" ], post[:body]["data"].values_at("kind", "severity", "server")
     assert_equal "activity", post[:headers]["X-Elio-Event"]
     body = { event: "activity", sent_at: post[:body]["sent_at"], data: post[:body]["data"] }.to_json
-    assert_equal "sha256=#{OpenSSL::HMAC.hexdigest("SHA256", hook.signing_secret, body)}", post[:headers]["X-Elio-Signature"]
+    timestamp = post[:headers]["X-Elio-Timestamp"]
+    assert_in_delta Time.current.to_i, timestamp.to_i, 2
+    assert_equal "sha256=#{OpenSSL::HMAC.hexdigest("SHA256", hook.signing_secret, "#{timestamp}.#{body}")}", post[:headers]["X-Elio-Signature"],
+                 "the timestamp is signed with the body (a replayed message can be refused)"
   end
 
   test "email: the activity, a test and a digest to the recipients" do

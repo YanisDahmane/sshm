@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_01_110000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_01_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -247,8 +247,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_110000) do
     t.datetime "updated_at", null: false
     t.string "kind", default: "person", null: false
     t.text "description"
+    t.index "lower((name)::text)", name: "index_public_keys_on_lower_name", unique: true
     t.index ["fingerprint"], name: "index_public_keys_on_fingerprint", unique: true
-    t.index ["name"], name: "index_public_keys_on_name", unique: true
   end
 
   create_table "server_group_memberships", force: :cascade do |t|
@@ -290,8 +290,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_110000) do
     t.jsonb "health_reasons", default: [], null: false
     t.jsonb "ip_addresses", default: [], null: false
     t.jsonb "extra_addresses", default: [], null: false
+    t.index "lower((name)::text)", name: "index_servers_on_lower_name", unique: true
     t.index ["ip_addresses"], name: "index_servers_on_ip_addresses", using: :gin
-    t.index ["name"], name: "index_servers_on_name", unique: true
   end
 
   create_table "ssh_keys", force: :cascade do |t|

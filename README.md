@@ -103,7 +103,9 @@ Le projet est prêt pour [Kamal](https://kamal-deploy.org) (`config/deploy.yml`,
 | `RAILS_MASTER_KEY` | Déchiffre `config/credentials.yml.enc` (clés de chiffrement de la base). |
 | `ELIO_DATABASE_PASSWORD` | Mot de passe PostgreSQL de l'utilisateur `elio` (production). |
 | `SMTP_ADDRESS`, `SMTP_PORT` (587), `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_AUTHENTICATION` (plain) | Envoi d'emails : mot de passe oublié, invitations, canaux de notification email. Sans `SMTP_ADDRESS`, rien n'est envoyé et le lien « Mot de passe oublié » n'apparaît pas. |
-| `ELIO_HOST` | Adresse d'Elio utilisée dans les liens des emails (ex. `elio.acme.fr`). |
+| `ELIO_HOST` | Adresse d'Elio utilisée dans les liens des emails (ex. `elio.acme.fr`). En production, Elio ne répond alors qu'à ce nom (protection contre les en-têtes Host forgés). |
+| `ELIO_SETUP_TOKEN` | **Recommandé en production** : jeton demandé pour créer le premier compte administrateur (sans lui, la première personne qui atteint une installation neuve devient admin). |
+| `ELIO_ACTIVITY_RETENTION_DAYS` | Durée de conservation du journal d'activité (365 jours par défaut, `0` = tout garder). |
 | `ELIO_MAIL_FROM` | Expéditeur des emails (ex. `elio@acme.fr`). |
 | `ELIO_PARALLEL_LIMIT` | Nombre de serveurs traités en même temps par les inventaires et scans (4 par défaut). |
 
@@ -182,6 +184,11 @@ Les rattachements utilisent toutes les adresses relevées par l'inventaire du sy
 ---
 
 ## Sécurité et limites
+
+- Mots de passe de 12 caractères minimum ; connexion, mot de passe oublié, invitations et premier lancement limités en débit par adresse IP, en plus du verrouillage du compte après 10 échecs.
+- Content Security Policy stricte (scripts d'Elio seulement, avec nonce), HTTPS forcé en production, secrets (clé SSH, webhooks, clés d'API, secret 2FA) chiffrés en base et masqués dans les journaux.
+- Webhooks signés : `X-Elio-Signature: sha256=` HMAC SHA-256 de `"<X-Elio-Timestamp>.<corps>"` avec le secret du canal ; refusez les messages trop anciens.
+- Dépendances vérifiées à chaque CI (`bundler-audit`, `importmap audit`, Brakeman).
 
 - Pas d'inscription publique : premier compte au premier lancement, puis invitations. Double authentification obligatoire pour les administrateurs (réglable).
 - Rôles : **lecture** (tout voir), **opérateur** (serveurs, clés, inventaires), **admin** (paramètres, utilisateurs, notifications, automatisations, rotation de la clé d'Elio).

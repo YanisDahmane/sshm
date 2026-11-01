@@ -7,7 +7,7 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
     @invitation = Invitation.create!(email: "dave@example.com", role: :operator, invited_by: users(:one))
   end
 
-  def accept(password: "password123", confirmation: password)
+  def accept(password: "password1234", confirmation: password)
     post invitation_acceptance_path(@invitation.token), params: { user: { password: password, password_confirmation: confirmation } }
   end
 
@@ -34,7 +34,7 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "an invalid password re-renders the form" do
-    accept(password: "password123", confirmation: "different")
+    accept(password: "password1234", confirmation: "different")
 
     assert_response :unprocessable_entity
     assert_select "#error_explanation li"
@@ -42,7 +42,7 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "the email cannot be changed" do
-    post invitation_acceptance_path(@invitation.token), params: { user: { email: "evil@example.com", password: "password123", password_confirmation: "password123" } }
+    post invitation_acceptance_path(@invitation.token), params: { user: { email: "evil@example.com", password: "password1234", password_confirmation: "password1234" } }
 
     assert User.exists?(email: "dave@example.com")
     assert_not User.exists?(email: "evil@example.com")

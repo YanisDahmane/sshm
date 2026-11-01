@@ -3,18 +3,18 @@ require "test_helper"
 class UserTest < ActiveSupport::TestCase
   include ActionMailer::TestHelper
   test "is valid with an email and a password" do
-    user = User.new(email: "valid@example.com", password: "password123")
+    user = User.new(email: "valid@example.com", password: "password1234")
     assert user.valid?
   end
 
   test "requires an email" do
-    user = User.new(password: "password123")
+    user = User.new(password: "password1234")
     assert_not user.valid?
     assert user.errors.added?(:email, :blank)
   end
 
   test "requires a unique email (case insensitive)" do
-    user = User.new(email: users(:one).email.upcase, password: "password123")
+    user = User.new(email: users(:one).email.upcase, password: "password1234")
     assert_not user.valid?
     assert user.errors.added?(:email, :taken, value: users(:one).email)
   end
@@ -26,7 +26,7 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "authenticates with the correct password only" do
-    assert users(:one).valid_password?("password123")
+    assert users(:one).valid_password?("password1234")
     assert_not users(:one).valid_password?("wrong")
   end
 
@@ -35,7 +35,7 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "rejects an unknown role" do
-    user = User.new(email: "x@example.com", password: "password123", role: "root")
+    user = User.new(email: "x@example.com", password: "password1234", role: "root")
     assert_not user.valid?
     assert user.errors.key?(:role)
   end

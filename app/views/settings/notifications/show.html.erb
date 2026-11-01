@@ -35,7 +35,7 @@
             <p class="mt-1 break-all font-mono text-xs text-ink-3"><%= channel.masked_destination %></p>
             <% if channel.kind == "webhook" %>
               <details class="channel-secret mt-2 text-xs" data-controller="clipboard">
-                <summary class="cursor-pointer text-ink-3 hover:text-ink">Secret de signature (HMAC SHA-256 du corps, en-tête <code class="font-mono">X-Elio-Signature: sha256=…</code>)</summary>
+                <summary class="cursor-pointer text-ink-3 hover:text-ink">Secret de signature (HMAC SHA-256 de <code class="font-mono">«&nbsp;horodatage.corps&nbsp;»</code>, en-têtes <code class="font-mono">X-Elio-Timestamp</code> et <code class="font-mono">X-Elio-Signature: sha256=…</code> ; refusez les messages trop anciens)</summary>
                 <div class="mt-2 flex items-center gap-2">
                   <input readonly value="<%= channel.signing_secret %>" data-clipboard-target="source" aria-label="Secret de signature" class="input py-1 font-mono text-xs">
                   <%= render "settings/copy_button" %>

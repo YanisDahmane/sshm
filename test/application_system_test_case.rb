@@ -2,13 +2,15 @@ require "test_helper"
 
 class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   # Chrome's password manager and leak detection pop up (invisibly in headless
-  # mode) after a form with "password123" is submitted and swallow the next
+  # mode) after a form with "password1234" is submitted and swallow the next
   # clicks: turn them off.
   driven_by :selenium, using: :headless_chrome, screen_size: [ 1400, 1400 ] do |options|
     options.add_preference("credentials_enable_service", false)
     options.add_preference("profile.password_manager_enabled", false)
     options.add_preference("profile.password_manager_leak_detection", false)
     options.add_argument("--disable-features=PasswordLeakDetection,PasswordManagerOnboarding,PasswordCheck")
+    # Browser console, read by the tests (Content Security Policy violations).
+    options.add_option("goog:loggingPrefs", { browser: "ALL" })
   end
 
   include TcpHelpers

@@ -21,7 +21,7 @@ class TwoFactorTest < ApplicationSystemTestCase
 
     find(".sidebar button[title='Déconnexion']").click
     fill_in "Email", with: "operator@example.com"
-    fill_in "Mot de passe", with: "password123"
+    fill_in "Mot de passe", with: "password1234"
     click_on "Se connecter"
 
     assert_selector "h2", text: "Double authentification"

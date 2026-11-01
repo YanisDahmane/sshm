@@ -20,7 +20,7 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
 
     assert_no_difference "User.count" do
-      post "/users", params: { user: { email: "new@example.com", password: "password123", password_confirmation: "password123" } }
+      post "/users", params: { user: { email: "new@example.com", password: "password1234", password_confirmation: "password1234" } }
     end
     assert_response :not_found
   end

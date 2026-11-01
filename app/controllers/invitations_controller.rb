@@ -4,6 +4,8 @@ class InvitationsController < ApplicationController
 
   skip_before_action :authenticate_user!, :authorize_view!
   before_action :redirect_signed_in_user
+  rate_limit to: 10, within: 3.minutes, only: :accept, store: Throttled::STORE,
+             with: -> { redirect_to new_user_session_path, alert: "Trop de tentatives : réessayez dans quelques minutes.", status: :see_other }
   before_action :set_invitation
 
   def show

@@ -119,13 +119,13 @@ class SettingsUsersTest < ActionDispatch::IntegrationTest
     get root_path
     assert_redirected_to new_user_session_path
 
-    post user_session_path, params: { user: { email: "operator@example.com", password: "password123" } }
+    post user_session_path, params: { user: { email: "operator@example.com", password: "password1234" } }
     follow_redirect! while response.redirect?
     assert_select "#flash", text: /Ce compte a été désactivé/
   end
 
   test "signing in records the last sign in" do
-    post user_session_path, params: { user: { email: "viewer@example.com", password: "password123" } }
+    post user_session_path, params: { user: { email: "viewer@example.com", password: "password1234" } }
 
     assert_equal 1, users(:viewer).reload.sign_in_count
     assert_not_nil users(:viewer).last_sign_in_at

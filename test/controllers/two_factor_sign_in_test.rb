@@ -4,7 +4,7 @@ class TwoFactorSignInTest < ActionDispatch::IntegrationTest
   include TwoFactorHelpers
 
   def sign_in_with_password(email, remember: false)
-    post user_session_path, params: { user: { email: email, password: "password123", remember_me: remember ? "1" : "0" } }
+    post user_session_path, params: { user: { email: email, password: "password1234", remember_me: remember ? "1" : "0" } }
   end
 
   test "without 2FA the password signs in directly" do

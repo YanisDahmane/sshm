@@ -2,6 +2,10 @@ module Users
   # Sign in, with a second step (TwoFactorChallengesController) for accounts
   # that enabled 2FA: the password alone never opens a session for them.
   class SessionsController < Devise::SessionsController
+    include Throttled
+
+    throttle only: :create, to: 20, within: 5.minutes, redirect: :new_user_session_path # (above the per-account lock: 10)
+
     def create
       # Check the password without opening a session nor counting a sign in
       # (trackable): that happens once the sign in really completes.

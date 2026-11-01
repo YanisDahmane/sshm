@@ -2,8 +2,11 @@
 class SetupsController < ApplicationController
   layout "auth"
 
+  SETUP_LOCK = 0x456c696f # "Elio": PostgreSQL advisory lock key
+
   skip_before_action :require_setup, :authenticate_user!, :authorize_view!
   before_action { raise ActionController::RoutingError, "Setup already done" if User.exists? }
+  throttle only: :create, to: 5, within: 1.minute, redirect: :new_setup_path
 
   def new
     @user = User.new
@@ -11,12 +14,35 @@ class SetupsController < ApplicationController
 
   def create
     @user = User.new(params.expect(user: %i[email password password_confirmation]).merge(role: :admin))
+    unless setup_token_valid?
+      @user.errors.add(:base, "Jeton de premier lancement incorrect (variable ELIO_SETUP_TOKEN du serveur).")
+      return render :new, status: :unprocessable_entity
+    end
 
-    if @user.save
+    if create_first_admin
       sign_in(@user)
       redirect_to root_path, notice: "Bienvenue ! Votre compte administrateur est créé."
     else
       render :new, status: :unprocessable_entity
+    end
+  end
+
+  private
+
+  # With ELIO_SETUP_TOKEN set (recommended in production), the first account
+  # needs it: otherwise whoever reaches a fresh installation first becomes admin.
+  def setup_token_valid?
+    expected = ENV["ELIO_SETUP_TOKEN"].to_s
+    expected.empty? || ActiveSupport::SecurityUtils.secure_compare(params[:setup_token].to_s, expected)
+  end
+
+  # Under a lock: two simultaneous submissions cannot both create an admin.
+  def create_first_admin
+    User.transaction do
+      User.connection.execute(User.sanitize_sql_array([ "SELECT pg_advisory_xact_lock(?)", SETUP_LOCK ]))
+      raise ActionController::RoutingError, "Setup already done" if User.exists?
+
+      @user.save
     end
   end
 end

@@ -17,7 +17,7 @@ class Integrations::UptimeKuma < Integrations::Base
     def fields
       [
         Field.new(key: :url, label: "Adresse de l'instance", type: :url, required: true, placeholder: "https://uptime.example.com",
-                  hint: "Elio lit <adresse>/metrics."),
+                  hint: "Elio lit <adresse>/metrics. En https de préférence : en http, la clé API circule en clair."),
         Field.new(key: :api_key, label: "Clé API", secret: true, required: true, hint: "Uptime Kuma → Paramètres → Clés API. Elle ne donne accès qu'à /metrics."),
         Field.new(key: :allow_self_signed, label: "Accepter un certificat auto-signé", type: :boolean, default: false,
                   hint: "seulement pour une instance interne dont vous connaissez le certificat."),
@@ -48,7 +48,9 @@ class Integrations::UptimeKuma < Integrations::Base
 
     def test_connection(integration)
       result = fetch(integration)
-      "#{result.monitors.size} sonde(s) trouvée(s)#{" (Uptime Kuma #{result.version})" if result.version}"
+      message = "#{result.monitors.size} sonde(s) trouvée(s)#{" (Uptime Kuma #{result.version})" if result.version}"
+      message += ". ⚠ Adresse en http : la clé API circule en clair sur le réseau, préférez https" if integration.value(:url).to_s.start_with?("http://")
+      message
     end
 
     def sync(integration)

@@ -54,7 +54,7 @@ class InvitationTest < ActiveSupport::TestCase
     expired = invite(email: "a@example.com").tap { |i| i.update_columns(expires_at: 1.minute.ago) }
     revoked = invite(email: "b@example.com").tap(&:revoke!)
     accepted = invite(email: "c@example.com")
-    accepted.accept!(password: "password123", password_confirmation: "password123")
+    accepted.accept!(password: "password1234", password_confirmation: "password1234")
 
     [ "nope", "", nil, expired.token, revoked.token, accepted.token ].each do |token|
       assert_nil Invitation.find_pending_by_token(token), token.inspect
@@ -65,7 +65,7 @@ class InvitationTest < ActiveSupport::TestCase
   test "accept! creates the account with the invitation's email and role" do
     invitation = invite(role: :operator)
 
-    user = invitation.accept!(password: "password123", password_confirmation: "password123")
+    user = invitation.accept!(password: "password1234", password_confirmation: "password1234")
 
     assert_equal [ "dave@example.com", "operator" ], [ user.email, user.role ]
     assert_equal user, invitation.reload.user
@@ -83,8 +83,8 @@ class InvitationTest < ActiveSupport::TestCase
 
   test "an invitation cannot be accepted twice" do
     invitation = invite
-    invitation.accept!(password: "password123", password_confirmation: "password123")
+    invitation.accept!(password: "password1234", password_confirmation: "password1234")
 
-    assert_raises(ActiveRecord::RecordInvalid) { invitation.accept!(password: "password123", password_confirmation: "password123") }
+    assert_raises(ActiveRecord::RecordInvalid) { invitation.accept!(password: "password1234", password_confirmation: "password1234") }
   end
 end

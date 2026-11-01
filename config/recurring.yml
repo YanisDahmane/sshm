@@ -22,6 +22,9 @@ shared: &shared
   purge_health_samples:
     class: Inventory::PurgeHealthSamplesJob
     schedule: every day at 4am
+  purge_activities:
+    class: PurgeActivitiesJob
+    schedule: every day at 4:30am
   purge_background_tasks:
     class: PurgeBackgroundTasksJob
     schedule: every day at 4:15am

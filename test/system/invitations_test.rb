@@ -20,8 +20,8 @@ class InvitationsTest < ApplicationSystemTestCase
 
     visit URI(link).path
     assert_text "one@example.com vous invite avec le rôle Opérateur"
-    fill_in "Mot de passe", with: "password123", match: :prefer_exact
-    fill_in "Confirmation du mot de passe", with: "password123"
+    fill_in "Mot de passe", with: "password1234", match: :prefer_exact
+    fill_in "Confirmation du mot de passe", with: "password1234"
     click_on "Créer mon compte"
 
     assert_text "Bienvenue sur Elio !"

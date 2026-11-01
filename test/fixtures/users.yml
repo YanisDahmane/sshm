@@ -2,15 +2,15 @@
 
 one:
   email: one@example.com
-  encrypted_password: <%= Devise::Encryptor.digest(User, "password123") %>
+  encrypted_password: <%= Devise::Encryptor.digest(User, "password1234") %>
   role: admin
 
 operator:
   email: operator@example.com
-  encrypted_password: <%= Devise::Encryptor.digest(User, "password123") %>
+  encrypted_password: <%= Devise::Encryptor.digest(User, "password1234") %>
   role: operator
 
 viewer:
   email: viewer@example.com
-  encrypted_password: <%= Devise::Encryptor.digest(User, "password123") %>
+  encrypted_password: <%= Devise::Encryptor.digest(User, "password1234") %>
   role: viewer

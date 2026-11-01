@@ -16,14 +16,14 @@ class SessionSecurityTest < ActionDispatch::IntegrationTest
     assert users(:viewer).reload.access_locked?
     assert_equal "viewer@example.com verrouillé après 10 essais ratés", Activity.of_kind(:user_locked).sole.summary
 
-    sign_in_with("password123")
+    sign_in_with("password1234")
     assert_response :unprocessable_entity
     assert_match "verrouillé", flash[:alert].to_s
     get root_path
     assert_redirected_to new_user_session_path
 
     travel 16.minutes do
-      sign_in_with("password123")
+      sign_in_with("password1234")
       assert_redirected_to root_path
       get servers_path
       assert_response :success
@@ -32,14 +32,14 @@ class SessionSecurityTest < ActionDispatch::IntegrationTest
 
   test "a successful sign in resets the failed attempts" do
     5.times { sign_in_with("wrong") }
-    sign_in_with("password123")
+    sign_in_with("password1234")
 
     assert_equal 0, users(:viewer).reload.failed_attempts
   end
 
   test "wrong 2FA codes count as failed attempts and lock the account" do
     enable_two_factor(users(:operator))
-    sign_in_with("password123", email: "operator@example.com")
+    sign_in_with("password1234", email: "operator@example.com")
 
     9.times do
       post two_factor_challenge_path, params: { code: "000000" }
@@ -55,7 +55,7 @@ class SessionSecurityTest < ActionDispatch::IntegrationTest
 
   test "a valid 2FA code resets the failed attempts" do
     enable_two_factor(users(:operator))
-    sign_in_with("password123", email: "operator@example.com")
+    sign_in_with("password1234", email: "operator@example.com")
     3.times { post two_factor_challenge_path, params: { code: "000000" } }
 
     post two_factor_challenge_path, params: { code: next_totp(users(:operator)) }
@@ -66,7 +66,7 @@ class SessionSecurityTest < ActionDispatch::IntegrationTest
 
   test "a locked account cannot finish a pending 2FA step" do
     enable_two_factor(users(:operator))
-    sign_in_with("password123", email: "operator@example.com")
+    sign_in_with("password1234", email: "operator@example.com")
     users(:operator).lock_access!
 
     post two_factor_challenge_path, params: { code: next_totp(users(:operator)) }
@@ -75,7 +75,7 @@ class SessionSecurityTest < ActionDispatch::IntegrationTest
   end
 
   test "the session expires after 30 minutes of inactivity" do
-    sign_in_with("password123")
+    sign_in_with("password1234")
 
     travel 29.minutes do
       get root_path

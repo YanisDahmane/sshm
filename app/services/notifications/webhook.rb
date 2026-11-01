@@ -1,8 +1,10 @@
 require "openssl"
 
 # Sends events to a generic HTTPS webhook as JSON. Each request is signed:
-# X-Elio-Signature: sha256=<hex HMAC SHA-256 of the raw body, with the
-# channel's signing secret>, so the receiver can check it comes from Elio.
+# X-Elio-Timestamp: <unix seconds> and
+# X-Elio-Signature: sha256=<hex HMAC SHA-256 of "<timestamp>.<raw body)>",
+# with the channel's signing secret>: the receiver checks it comes from Elio
+# and refuses old messages (replays), e.g. older than 5 minutes.
 class Notifications::Webhook
   def self.deliver(channel, activity)
     post(channel, "activity", {
@@ -20,10 +22,13 @@ class Notifications::Webhook
   end
 
   def self.post(channel, event, data)
-    body = { event: event, sent_at: Time.current.iso8601, data: data }.to_json
+    now = Time.current
+    body = { event: event, sent_at: now.iso8601, data: data }.to_json
+    timestamp = now.to_i.to_s
     Notifications::Http.post(channel.webhook_url, body, service: "Le webhook",
-                          headers: { "X-Elio-Event" => event, "X-Elio-Delivery" => SecureRandom.uuid, "X-Elio-Signature" => "sha256=#{signature(channel, body)}" })
+                             headers: { "X-Elio-Event" => event, "X-Elio-Delivery" => SecureRandom.uuid, "X-Elio-Timestamp" => timestamp,
+                                        "X-Elio-Signature" => "sha256=#{signature(channel, timestamp, body)}" })
   end
 
-  def self.signature(channel, body) = OpenSSL::HMAC.hexdigest("SHA256", channel.signing_secret, body)
+  def self.signature(channel, timestamp, body) = OpenSSL::HMAC.hexdigest("SHA256", channel.signing_secret, "#{timestamp}.#{body}")
 end

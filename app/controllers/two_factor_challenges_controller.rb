@@ -9,7 +9,7 @@ class TwoFactorChallengesController < ApplicationController
 
   skip_before_action :authenticate_user!, :authorize_view!
   before_action :set_pending_user
-  rate_limit to: 10, within: 1.minute, only: :create, with: -> { abandon("Trop de tentatives : reconnectez-vous.") }
+  rate_limit to: 10, within: 1.minute, only: :create, store: Throttled::STORE, with: -> { abandon("Trop de tentatives : reconnectez-vous.") }
 
   def new
   end

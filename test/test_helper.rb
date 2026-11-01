@@ -16,6 +16,9 @@ module ActiveSupport
     # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
     fixtures :all
 
+    # Rate limits of the public pages are kept in memory across tests: start fresh.
+    setup { Throttled::STORE.clear }
+
     # Add more helper methods to be used by all tests here...
   end
 end

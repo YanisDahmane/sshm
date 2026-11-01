@@ -80,6 +80,13 @@ Rails.application.configure do
   config.active_record.attributes_for_inspect = [ :id ]
 
   # Enable DNS rebinding protection and other `Host` header attacks.
+  # Only answer to Elio's own host name when it is known (DNS rebinding,
+  # forged Host headers); the proxy's health check reaches /up directly.
+  if ENV["ELIO_HOST"].present?
+    config.hosts << ENV["ELIO_HOST"].split(":").first
+    config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+  end
+
   # config.hosts = [
   #   "example.com",     # Allow requests from example.com
   #   /.*\.example\.com/ # Allow requests from subdomains like `www.example.com`

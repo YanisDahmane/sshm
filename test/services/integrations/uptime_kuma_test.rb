@@ -28,6 +28,12 @@ class Integrations::UptimeKumaTest < ActiveSupport::TestCase
     assert_equal [ "https://uptime.example.test/metrics", false ], [ @uptime_kuma_requests.last.first, @uptime_kuma_requests.last.last[:verify_ssl] ]
   end
 
+  test "test_connection warns when the API key would travel in clear (http)" do
+    uptime_kuma_metrics
+    @integration.assign_form("url" => "http://uptime.internal:3001")
+    assert_match "⚠ Adresse en http : la clé API circule en clair", Integrations::UptimeKuma.test_connection(@integration)
+  end
+
   test "a page that is not Uptime Kuma's /metrics" do
     uptime_kuma_metrics("<html>Login</html>")
     error = assert_raises(Integrations::Error) { Integrations::UptimeKuma.test_connection(@integration) }

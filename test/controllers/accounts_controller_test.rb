@@ -23,7 +23,7 @@ class AccountsControllerTest < ActionDispatch::IntegrationTest
   test "changing the password keeps the session" do
     sign_in users(:viewer)
 
-    patch password_account_path, params: { user: { current_password: "password123", password: "new-password-1", password_confirmation: "new-password-1" } }
+    patch password_account_path, params: { user: { current_password: "password1234", password: "new-password-1", password_confirmation: "new-password-1" } }
 
     assert_redirected_to account_path
     assert users(:viewer).reload.valid_password?("new-password-1")
@@ -38,7 +38,7 @@ class AccountsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
     assert_select "#error_explanation li"
-    assert users(:viewer).reload.valid_password?("password123")
+    assert users(:viewer).reload.valid_password?("password1234")
   end
 
   test "enabling 2FA shows a QR code, then the backup codes once" do

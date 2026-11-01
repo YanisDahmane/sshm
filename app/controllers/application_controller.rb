@@ -9,6 +9,7 @@ class ApplicationController < ActionController::Base
   before_action :set_current_user, unless: :devise_controller?
   before_action :require_two_factor_setup, unless: :devise_controller?
   include Authorization
+  include Throttled
 
   layout :layout_by_resource
 
