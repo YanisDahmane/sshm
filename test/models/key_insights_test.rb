@@ -11,7 +11,6 @@ class KeyInsightsTest < ActiveSupport::TestCase
     insights = KeyInsights.new
 
     assert_not insights.scanned?
-    assert_nil insights.last_read_at
     assert_equal 0, insights.orphan_count
     assert_equal({}, insights.orphans_by_server_id)
   end
@@ -28,6 +27,5 @@ class KeyInsightsTest < ActiveSupport::TestCase
     assert_equal [ nil, "bob@desktop" ], insights.orphans_by_server_id[servers(:web).id].map(&:name)
     assert_equal [], insights.orphans_by_server_id[servers(:db).id]
     assert_equal 2, insights.orphan_count
-    assert_in_delta Time.current, insights.last_read_at, 2
   end
 end

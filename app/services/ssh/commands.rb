@@ -24,8 +24,6 @@ module Ssh::Commands
       distros.map(&:to_s).find { |distro| variants.key?(distro) }.then { |distro| variants.fetch(distro || "default") { raise UnknownCommand, "#{key}: no variant for #{distros.inspect}" } }
     end
 
-    def placeholders = variants.values.flat_map { |template| template.scan(PLACEHOLDER).flatten }.uniq
-
     # The command line to send: values escaped, scripts wrapped in `sh -c`.
     def render(distros: [], **values)
       text = template(distros).gsub(PLACEHOLDER) do

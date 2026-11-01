@@ -16,8 +16,7 @@
 
   <nav class="key-kind-filter mt-4 flex flex-wrap gap-2" aria-label="Type de clé">
     <% [ [ "Toutes", nil ], [ "Personnes", "person" ], [ "Serveurs", "server" ] ].each do |label, value| %>
-      <%= link_to label, public_keys_path(kind: value), aria: { current: (@kind == value ? "page" : nil) },
-            class: "rounded-full px-3 py-1 text-sm font-medium ring-1 ring-inset #{@kind == value ? "bg-accent-fill text-white ring-accent-fill" : "bg-surface text-ink-2 ring-line hover:bg-subtle"}" %>
+      <%= filter_pill label, public_keys_path(kind: value), active: @kind == value %>
     <% end %>
   </nav>
 

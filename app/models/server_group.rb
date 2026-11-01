@@ -23,7 +23,6 @@ class ServerGroup < ApplicationRecord
   validates :color, inclusion: { in: COLORS.keys }
   validate :expected_ports_must_be_valid
 
-  def color_label = COLORS.dig(color, 0)
   def badge_classes = COLORS.dig(color, 1)
   def dot_classes = COLORS.dig(color, 2)
 

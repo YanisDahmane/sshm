@@ -9,8 +9,6 @@ class KeyInsights
 
   def scanned? = @snapshots.any?
 
-  def last_read_at = @snapshots.map(&:read_at).max
-
   def orphan_count = orphans_by_server_id.values.sum(&:size)
 
   # { server_id => orphan keys (one per fingerprint, whatever the account) }, only for scanned servers.

@@ -1,7 +1,7 @@
 <%# Manual attachment of an OVHcloud resource (operators). %>
 <div class="flex items-center justify-end gap-1">
   <%= form_with url: ovh_resource_link_path(resource), method: :post, class: "ovh-link-form", data: { controller: "auto-submit" } do |f| %>
-    <%= f.select :server_id, [ [ "— Aucun serveur —", "" ], *Server.order(:name).map { |server| [ server.name, server.id ] } ], { selected: resource.server_id },
+    <%= f.select :server_id, [ [ "— Aucun serveur —", "" ], *server_options ], { selected: resource.server_id },
           aria: { label: "Serveur de #{resource.name}" }, data: { action: "change->auto-submit#submit" }, class: "input w-auto max-w-40 py-1 text-xs" %>
     <noscript><%= f.submit "Rattacher", class: "btn btn-secondary" %></noscript>
   <% end %>

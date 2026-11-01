@@ -119,6 +119,22 @@ class MonitorsControllerTest < ActionDispatch::IntegrationTest
     assert_select "#servers th", text: "Sondes", count: 0
   end
 
+  test "the number of queries does not grow with the number of probes (AUDIT.md D1)" do
+    count_queries = lambda do
+      queries = 0
+      callback = ->(*, payload) { queries += 1 unless payload[:name].in?([ "SCHEMA", "TRANSACTION" ]) || payload[:cached] }
+      ActiveSupport::Notifications.subscribed(callback, "sql.active_record") { get monitors_path }
+      queries
+    end
+    few = count_queries.call
+
+    uptime_kuma_metrics(metrics_page(*Array.new(30) { |index| { id: (100 + index).to_s, name: "Sonde #{index}", hostname: "10.8.0.100" } }))
+    @integration.reload.sync!
+    many = count_queries.call
+
+    assert_operator many - few, :<=, 3, "#{few} queries for 2 probes, #{many} for 30"
+  end
+
   test "quick search lists the probes page" do
     get root_path
     assert_includes response.body, %("label":"Sondes","hint":"extension","url":"/monitors")

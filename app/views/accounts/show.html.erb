@@ -26,7 +26,7 @@
           <%= f.text_field :code, required: true, placeholder: "Code actuel", autocomplete: "one-time-code", aria: { label: "Code pour régénérer les codes de secours" }, class: "#{input_class} font-mono" %>
           <%= f.submit "Régénérer", class: "btn btn-secondary mt-3" %>
         <% end %>
-        <% if current_user.admin? && AppSetting.current.require_admin_two_factor %>
+        <% if current_user.admin? && app_settings.require_admin_two_factor %>
           <p class="rounded-md border border-line p-4 text-sm text-ink-3">La double authentification est obligatoire pour les administrateurs : elle ne peut pas être désactivée.</p>
         <% else %>
           <%= form_with url: two_factor_path, method: :delete, class: "rounded-md border border-crit/40 p-4" do |f| %>

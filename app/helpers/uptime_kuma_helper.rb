@@ -29,4 +29,9 @@ module UptimeKumaHelper
   end
 
   def monitor_match_label(monitor) = UptimeKumaMonitor::MATCHES[monitor.matched_by]
+
+  # Probes attached by hand (to a server or to none), read once per page.
+  def manual_monitor_ids
+    @manual_monitor_ids ||= IntegrationLink.joins(:integration).where(integrations: { kind: "uptime_kuma" }).pluck(:external_id).to_set
+  end
 end

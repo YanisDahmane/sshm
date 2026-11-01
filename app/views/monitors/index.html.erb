@@ -24,8 +24,7 @@
 <div class="mt-5 flex flex-wrap items-center gap-2">
   <nav class="monitor-filters flex flex-wrap gap-2" aria-label="Filtres">
     <% [ [ "Toutes", nil ], [ "Non rattachées", "unattached" ], [ "Hors ligne", "down" ], [ "Serveurs sans sonde", "without" ] ].each do |label, filter| %>
-      <%= link_to label, monitors_path(filter: filter), aria: { current: (@filter == filter ? "page" : nil) }, data: { filter: filter || "all" },
-            class: "rounded-full px-3 py-1 text-sm font-medium ring-1 ring-inset #{@filter == filter ? "bg-accent-fill text-white ring-accent-fill" : "bg-surface text-ink-2 ring-line hover:bg-subtle"}" %>
+      <%= filter_pill label, monitors_path(filter: filter), active: @filter == filter, data: { filter: filter || "all" } %>
     <% end %>
   </nav>
   <% unless @filter == "without" %>

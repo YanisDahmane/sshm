@@ -1,4 +1,17 @@
 module ApplicationHelper
+  # Settings of the instance, read once per page.
+  def app_settings = @app_settings ||= AppSetting.current
+
+  # [name, id] of every server, for the "attach to" menus of long lists (read once per page).
+  def server_options = @server_options ||= Server.order(:name).pluck(:name, :id)
+
+  # Status filters as pills (activity, tasks, keyring, probes…).
+  def filter_pill(label, path, active:, count: nil, **options)
+    classes = "rounded-full px-3 py-1 text-sm font-medium ring-1 ring-inset #{active ? "bg-accent-fill text-white ring-accent-fill" : "bg-surface text-ink-2 ring-line hover:bg-subtle"}"
+    link_to path, class: classes, aria: { current: (active ? "page" : nil) }, **options do
+      safe_join([ label, (tag.span(" #{count}", class: "tabular-nums opacity-70") if count) ].compact)
+    end
+  end
   # French relative time, e.g. "il y a 3 minutes", "dans 2 heures", "à l'instant".
   # Mirrored by app/javascript/controllers/relative_time_controller.js: keep both in sync.
   def relative_time_in_words(time, now: Time.current)

@@ -26,7 +26,6 @@ class ServerGroupTest < ActiveSupport::TestCase
 
   test "exposes the color label and classes" do
     group = server_groups(:production)
-    assert_equal "Rouge", group.color_label
     assert_includes group.badge_classes, "bg-red-50"
     assert_equal "bg-red-500", group.dot_classes
   end
