@@ -13,7 +13,7 @@ class Inventory::Collectors::Ports < Inventory::Collector
     result = run("inventory.ports")
     raise Error, "Lecture des ports impossible : #{result.stderr.strip.presence || "code #{result.exit_status}"}" if result.stdout.blank?
 
-    sections = result.stdout.split(/^@@elio (\S+)\n/).drop(1).each_slice(2).to_h { |name, body| [ name, body.to_s ] }
+    sections = self.class.sections(result.stdout)
     return unsupported("La commande ss n'est pas disponible") if sections["ss"].to_s.strip == "unsupported"
 
     data = self.class.parse(sections)

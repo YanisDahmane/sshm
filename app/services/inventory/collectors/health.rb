@@ -14,7 +14,7 @@ class Inventory::Collectors::Health < Inventory::Collector
   end
 
   def self.parse(output)
-    sections = output.to_s.split(/^@@elio (\S+)\n/).drop(1).each_slice(2).to_h { |name, body| [ name, body.to_s ] }
+    sections = sections(output)
     cpus = sections["cpus"].to_s[/\d+/]&.to_i
     load = sections["loadavg"].to_s.split.first(3).map(&:to_f)
     memory = parse_meminfo(sections["meminfo"])

@@ -4,7 +4,7 @@ class ServerNetworkTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
 
   def record_network(server)
-    sections = file_fixture("inventory/network/debian13-wireguard.txt").read.split(/^@@elio (\S+)\n/).drop(1).each_slice(2).to_h
+    sections = Inventory::Collector.sections(file_fixture("inventory/network/debian13-wireguard.txt").read)
     data = Inventory::Collectors::Network.parse(sections)
     server.inventory_snapshots.create!(category: "network", status: "ok", data: data, collected_at: Time.current, checked_at: Time.current)
     server.update_columns(Inventory::Collectors::Network.server_attributes(data))

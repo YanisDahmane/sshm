@@ -1,5 +1,4 @@
 <% content_for :title, "Parc · Elio" %>
-<% ping_form = ->(badge_id = nil) { { data: { controller: "quiet-submit", action: "turbo:submit-start->server-ping#start turbo:submit-end->server-ping#finish", server_ping_badge_param: badge_id }.compact } } %>
 
 <section data-controller="server-ping">
   <%= render "servers/checking_badge_template" %>
@@ -14,7 +13,7 @@
     </div>
     <div class="flex flex-wrap items-center justify-end gap-2">
       <% if @summary.total.positive? %>
-        <%= button_to server_pings_path, params: { badge: "health" }, form: ping_form.call, title: "Vérifier que chaque serveur répond",
+        <%= button_to server_pings_path, params: { badge: "health" }, form: server_ping_form, title: "Vérifier que chaque serveur répond",
               class: "group btn btn-secondary" do %>
           <%= icon :arrow_path, class: "h-4 w-4 group-disabled:animate-spin" %> Actualiser les statuts
         <% end %>
@@ -100,69 +99,7 @@
           </tr>
         </thead>
         <tbody>
-          <% @servers.each do |server| %>
-            <% health = server.inventory("health")&.data || {} %>
-            <tr id="<%= dom_id(server) %>" class="hover:bg-subtle/60">
-              <td class="pl-4"><%= render "servers/status", server: server, health: true %></td>
-              <td>
-                <div class="flex flex-wrap items-center gap-1.5">
-                  <%= link_to server.name, server_path(server), class: "font-medium hover:text-accent hover:underline" %>
-                  <%= render partial: "server_groups/badge", collection: server.server_groups, as: :group %>
-                </div>
-                <p class="server-address font-mono text-[11px] text-ink-3"><%= server.username %>@<%= server.host %><%= ":#{server.port}" unless server.port == 22 %></p>
-                <% if (hostname = server.distinct_hostname) %><p class="server-hostname font-mono text-[11px] text-ink-3" title="Hostname de la machine"><%= hostname %></p><% end %>
-              </td>
-              <td class="server-os whitespace-nowrap text-xs"><%= render "servers/os", server: server %></td>
-              <td class="server-load"><%= sparkline @load_history.fetch(server.id, []), max: 100, width: 60, title: "Charge sur 24 h (en % des processeurs)" %></td>
-              <td class="server-memory"><%= meter health.dig("memory", "used_percent"), warn: app_settings.health_memory_warn, crit: app_settings.health_memory_crit, width: "w-12" %></td>
-              <td class="server-disk"><%= meter health["disk_max_percent"], warn: app_settings.health_disk_warn, crit: app_settings.health_disk_crit, width: "w-12" %></td>
-              <td class="server-updates whitespace-nowrap text-xs">
-                <% if (updates = health["updates"]) %>
-                  <span class="tabular-nums"><%= updates["total"] %></span>
-                  <% if updates["security"].to_i.positive? %>
-                    <span class="badge bg-crit-soft text-crit-ink"><%= updates["security"] %> sécu</span>
-                  <% end %>
-                <% else %>
-                  <span class="text-ink-3">—</span>
-                <% end %>
-              </td>
-              <% if @monitor_counts %>
-                <td class="server-monitors whitespace-nowrap text-xs">
-                  <% total, down = @monitor_counts.fetch(server.id, [ 0, 0 ]) %>
-                  <%= link_to server_path(server, tab: "monitors"), class: "hover:underline #{total.zero? ? "text-warn-ink" : "text-ink-2"}" do %>
-                    <span class="tabular-nums"><%= total %></span><% if down.positive? %> <span class="badge bg-crit-soft text-crit-ink"><%= down %> hors ligne</span><% end %>
-                  <% end %>
-                </td>
-              <% end %>
-              <td class="server-notes min-w-40 max-w-60 text-xs">
-                <div class="flex flex-wrap items-center gap-1.5">
-                  <% if (reason = server.health_reason_texts.first) %>
-                    <span class="<%= server.health_state == "crit" ? "text-crit-ink" : "text-warn-ink" %>"><%= reason %></span>
-                    <% if server.health_reason_texts.size > 1 %><span class="text-ink-3" title="<%= server.health_reason_texts.drop(1).join(" · ") %>">+<%= server.health_reason_texts.size - 1 %></span><% end %>
-                  <% elsif server.ssh_ok == false %>
-                    <%= render "servers/ssh_status", server: server %>
-                  <% end %>
-                  <% if @insights.orphans_by_server_id[server.id].present? %>
-                    <%= render "servers/orphan_keys", server: server, insights: @insights %>
-                  <% end %>
-                </div>
-              </td>
-              <td class="pr-4">
-                <div class="flex items-center justify-end gap-1">
-                  <%= button_to server_ping_path(server), params: { badge: "health" }, form: ping_form.call(dom_id(server, :status)),
-                        title: "Actualiser le statut", aria: { label: "Actualiser le statut de #{server.name}" },
-                        class: "group btn btn-ghost btn-icon" do %>
-                    <%= icon :arrow_path, class: "h-4 w-4 group-disabled:animate-spin" %>
-                  <% end %>
-                  <% if can?(:operate) %>
-                    <%= link_to edit_server_path(server), title: "Modifier", aria: { label: "Modifier #{server.name}" }, class: "btn btn-ghost btn-icon" do %>
-                      <%= icon :pencil_square %>
-                    <% end %>
-                  <% end %>
-                </div>
-              </td>
-            </tr>
-          <% end %>
+          <%= render partial: "servers/row", collection: @servers, as: :server %>
         </tbody>
       </table>
     </div>

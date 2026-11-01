@@ -9,40 +9,38 @@ class Integrations::UptimeKuma < Integrations::Base
   self.icon = :signal
   self.default_interval = 15
 
-  Field = Integrations::Base::Field # (constants of the superclass are not visible from `class << self`)
-
   WINDOWS = [ [ "1d", "24 heures" ], [ "30d", "30 jours" ], [ "365d", "1 an" ] ].freeze
 
   class << self
     def fields
       [
-        Field.new(key: :url, label: "Adresse de l'instance", type: :url, required: true, placeholder: "https://uptime.example.com",
+        Integrations::Field.new(key: :url, label: "Adresse de l'instance", type: :url, required: true, placeholder: "https://uptime.example.com",
                   hint: "Elio lit <adresse>/metrics. En https de préférence : en http, la clé API circule en clair."),
-        Field.new(key: :api_key, label: "Clé API", secret: true, required: true, hint: "Uptime Kuma → Paramètres → Clés API. Elle ne donne accès qu'à /metrics."),
-        Field.new(key: :allow_self_signed, label: "Accepter un certificat auto-signé", type: :boolean, default: false,
+        Integrations::Field.new(key: :api_key, label: "Clé API", secret: true, required: true, hint: "Uptime Kuma → Paramètres → Clés API. Elle ne donne accès qu'à /metrics."),
+        Integrations::Field.new(key: :allow_self_signed, label: "Accepter un certificat auto-signé", type: :boolean, default: false,
                   hint: "seulement pour une instance interne dont vous connaissez le certificat."),
 
-        Field.new(key: :match_by_ip, label: "Par adresse IP", type: :boolean, default: true, section: "Rattachement des sondes aux serveurs",
+        Integrations::Field.new(key: :match_by_ip, label: "Par adresse IP", type: :boolean, default: true, section: "Rattachement des sondes aux serveurs",
                   hint: "la cible de la sonde est une adresse d'un serveur (publique, réseau local, WireGuard…)."),
-        Field.new(key: :match_by_host, label: "Par nom d'hôte", type: :boolean, default: true, section: "Rattachement des sondes aux serveurs",
+        Integrations::Field.new(key: :match_by_host, label: "Par nom d'hôte", type: :boolean, default: true, section: "Rattachement des sondes aux serveurs",
                   hint: "l'hôte de la sonde ou de son URL est le hostname ou l'hôte SSH d'un serveur."),
-        Field.new(key: :resolve_dns, label: "Résoudre les noms en DNS", type: :boolean, default: false, section: "Rattachement des sondes aux serveurs",
+        Integrations::Field.new(key: :resolve_dns, label: "Résoudre les noms en DNS", type: :boolean, default: false, section: "Rattachement des sondes aux serveurs",
                   hint: "pour les sondes HTTP d'un site hébergé sur un serveur (ex. https://app.example.com → son IP)."),
-        Field.new(key: :match_by_name, label: "Par le nom de la sonde", type: :boolean, default: true, section: "Rattachement des sondes aux serveurs",
+        Integrations::Field.new(key: :match_by_name, label: "Par le nom de la sonde", type: :boolean, default: true, section: "Rattachement des sondes aux serveurs",
                   hint: "le nom du serveur apparaît en mot entier dans celui de la sonde (ex. « [SRV] FR-UTILS-1 »)."),
 
-        Field.new(key: :alert_no_monitor, label: "Serveur sans aucune sonde", type: :boolean, default: true, section: "Alertes"),
-        Field.new(key: :no_monitor_ignored_groups, label: "Groupes dispensés de sonde", type: :checkboxes, default: [], section: "Alertes",
+        Integrations::Field.new(key: :alert_no_monitor, label: "Serveur sans aucune sonde", type: :boolean, default: true, section: "Alertes"),
+        Integrations::Field.new(key: :no_monitor_ignored_groups, label: "Groupes dispensés de sonde", type: :checkboxes, default: [], section: "Alertes",
                   options: ServerGroup.order(:name).map { |group| [ group.id.to_s, group.name ] }),
-        Field.new(key: :alert_down, label: "Sonde hors ligne / de retour", type: :boolean, default: false, section: "Alertes",
+        Integrations::Field.new(key: :alert_down, label: "Sonde hors ligne / de retour", type: :boolean, default: false, section: "Alertes",
                   hint: "complète les notifications d'Uptime Kuma sans les remplacer."),
-        Field.new(key: :alert_cert, label: "Certificat bientôt expiré", type: :boolean, default: false, section: "Alertes"),
-        Field.new(key: :cert_days, label: "Seuil du certificat (jours)", type: :number, default: 14, section: "Alertes"),
-        Field.new(key: :alert_uptime, label: "Disponibilité sous un seuil", type: :boolean, default: false, section: "Alertes"),
-        Field.new(key: :uptime_threshold, label: "Seuil de disponibilité (%)", type: :number, default: 99, section: "Alertes"),
-        Field.new(key: :uptime_window, label: "Sur", type: :select, options: WINDOWS.map(&:reverse), default: "30d", section: "Alertes"),
-        Field.new(key: :alert_maintenance, label: "Sonde en maintenance depuis longtemps", type: :boolean, default: false, section: "Alertes"),
-        Field.new(key: :maintenance_days, label: "Seuil de maintenance (jours)", type: :number, default: 7, section: "Alertes")
+        Integrations::Field.new(key: :alert_cert, label: "Certificat bientôt expiré", type: :boolean, default: false, section: "Alertes"),
+        Integrations::Field.new(key: :cert_days, label: "Seuil du certificat (jours)", type: :number, default: 14, section: "Alertes"),
+        Integrations::Field.new(key: :alert_uptime, label: "Disponibilité sous un seuil", type: :boolean, default: false, section: "Alertes"),
+        Integrations::Field.new(key: :uptime_threshold, label: "Seuil de disponibilité (%)", type: :number, default: 99, section: "Alertes"),
+        Integrations::Field.new(key: :uptime_window, label: "Sur", type: :select, options: WINDOWS.map(&:reverse), default: "30d", section: "Alertes"),
+        Integrations::Field.new(key: :alert_maintenance, label: "Sonde en maintenance depuis longtemps", type: :boolean, default: false, section: "Alertes"),
+        Integrations::Field.new(key: :maintenance_days, label: "Seuil de maintenance (jours)", type: :number, default: 7, section: "Alertes")
       ]
     end
 

@@ -68,10 +68,6 @@ class Inventory::Collectors::Packages < Inventory::Collector
     [ { kind: :security_updates_available, data: { count: data["security"] } } ]
   end
 
-  def self.sections(output)
-    output.to_s.split(/^@@elio (\S+)\n/).drop(1).each_slice(2).to_h { |name, body| [ name, body.to_s ] }.tap { |sections| sections.default = "" }
-  end
-
   # "ii \topenssl\t3.0.14-1~deb12u1\tamd64" (installed or on hold only)
   def self.parse_dpkg(text, upgradable)
     return [] if text.strip == "unsupported"

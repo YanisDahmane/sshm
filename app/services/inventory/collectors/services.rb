@@ -9,7 +9,7 @@ class Inventory::Collectors::Services < Inventory::Collector
     result = run("inventory.services")
     raise Error, "Lecture des services impossible : #{result.stderr.strip.presence || "code #{result.exit_status}"}" if result.stdout.blank?
 
-    sections = result.stdout.split(/^@@elio (\S+)\n/).drop(1).each_slice(2).to_h { |name, body| [ name, body.to_s ] }
+    sections = self.class.sections(result.stdout)
     units = self.class.parse_units(sections["units"].to_s, self.class.parse_unit_files(sections["unit-files"].to_s))
     docker_present = sections["docker"].to_s.strip == "present"
     return unsupported("Ni systemd ni Docker sur ce système") if units.nil? && !docker_present

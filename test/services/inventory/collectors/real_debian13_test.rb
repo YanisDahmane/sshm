@@ -5,7 +5,7 @@ require "test_helper"
 class Inventory::Collectors::RealDebian13Test < ActiveSupport::TestCase
   def output(name) = file_fixture("inventory/debian13-real/#{name}.txt").read
 
-  def sections(name) = output(name).split(/^@@elio (\S+)\n/).drop(1).each_slice(2).to_h { |key, body| [ key, body.to_s ] }
+  def sections(name) = Inventory::Collector.sections(output(name))
 
   test "system" do
     os = Inventory::Collectors::Os.parse(output(:os))

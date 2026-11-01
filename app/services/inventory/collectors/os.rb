@@ -50,10 +50,6 @@ class Inventory::Collectors::Os < Inventory::Collector
     { os_name: data["name"], os_id: data["id"], os_version: data["version_id"] }
   end
 
-  def self.sections(output)
-    output.to_s.split(/^@@elio (\S+)\n/).drop(1).each_slice(2).to_h { |name, body| [ name, body.to_s ] }
-  end
-  private_class_method :sections
 
   # KEY=value lines, values optionally quoted (os-release(5)).
   def self.parse_os_release(text)

@@ -17,7 +17,7 @@ class Inventory::Collectors::Network < Inventory::Collector
     result = run("inventory.network")
     raise Error, "Lecture du réseau impossible : #{result.stderr.strip.presence || "code #{result.exit_status}"}" if result.stdout.blank?
 
-    sections = result.stdout.split(/^@@elio (\S+)\n/).drop(1).each_slice(2).to_h { |name, body| [ name, body.to_s ] }
+    sections = self.class.sections(result.stdout)
     return unsupported("La commande ip (iproute2) n'est pas disponible") if sections["addr"].to_s.strip == "unsupported"
 
     ok(self.class.parse(sections))

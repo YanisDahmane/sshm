@@ -3,7 +3,7 @@ require "test_helper"
 class Inventory::Collectors::PortsTest < ActiveSupport::TestCase
   Collector = Inventory::Collectors::Ports
 
-  def sections(name) = file_fixture("inventory/ports/#{name}.txt").read.split(/^@@elio (\S+)\n/).drop(1).each_slice(2).to_h
+  def sections(name) = Inventory::Collector.sections(file_fixture("inventory/ports/#{name}.txt").read)
 
   def parse(name) = Collector.parse(sections(name))
 

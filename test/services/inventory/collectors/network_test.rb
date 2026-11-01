@@ -2,7 +2,7 @@ require "test_helper"
 
 class Inventory::Collectors::NetworkTest < ActiveSupport::TestCase
   def sections(name = "debian13-wireguard")
-    file_fixture("inventory/network/#{name}.txt").read.split(/^@@elio (\S+)\n/).drop(1).each_slice(2).to_h
+    Inventory::Collector.sections(file_fixture("inventory/network/#{name}.txt").read)
   end
 
   test "parses a real Debian 13 output: ethernet, WireGuard, container bridge left out" do

@@ -10,20 +10,10 @@ class Integrations::UptimeKuma::Matcher
   DNS_TIMEOUT = 2
 
   def initialize(servers, manual_links: {}, by_ip: true, by_host: true, resolve_dns: false, by_name: true)
-    @servers = servers.to_a
-    @servers_by_id = @servers.index_by(&:id)
+    @directory = ServerDirectory.new(servers)
+    @servers_by_id = @directory.servers.index_by(&:id)
     @manual_links = manual_links
     @rules = { by_ip:, by_host:, resolve_dns:, by_name: }
-    @by_address = {}
-    @servers.each { |server| server.addresses.each { |address| @by_address[normalize_ip(address)] ||= server } }
-    @by_host = {}
-    @servers.each do |server|
-      [ server.hostname, server.hostname.to_s.split(".").first, (server.host unless Inventory::IpScope.ip?(server.host)) ].compact_blank.each do |name|
-        @by_host[name.downcase] ||= server
-      end
-    end
-    @by_name = @servers.flat_map { |server| [ server.name, server.hostname.to_s.split(".").first ].compact_blank.uniq.map { |name| [ name, server ] } }
-                       .sort_by { |name, _| -name.length }
     @dns = {}
   end
 
@@ -43,29 +33,25 @@ class Integrations::UptimeKuma::Matcher
     return if host.blank?
 
     if Inventory::IpScope.ip?(host)
-      return unless @rules[:by_ip]
+      found = @directory.by_address(host) if @rules[:by_ip]
+      return found && Match.new(found.server, "ip", host)
+    end
+    return unless @rules[:by_host]
 
-      server = @by_address[normalize_ip(host)]
-      return Match.new(server, "ip", host) if server
-    elsif @rules[:by_host]
-      server = @by_host[host.downcase]
-      return Match.new(server, "url", nil) if server
+    server = @directory.by_host(host)
+    return Match.new(server, "url", nil) if server
+    return unless @rules[:resolve_dns]
 
-      if @rules[:resolve_dns]
-        resolve(host).each do |address|
-          server = @by_address[normalize_ip(address)]
-          return Match.new(server, "dns", address) if server
-        end
-      end
+    resolve(host).each do |address|
+      found = @directory.by_address(address)
+      return Match.new(found.server, "dns", address) if found
     end
     nil
   end
 
   def by_monitor_name(name)
-    return unless @rules[:by_name] && name.present?
-
-    found = @by_name.find { |candidate, _| name.match?(/(?<![\w-])#{Regexp.escape(candidate)}(?![\w-])/i) }
-    Match.new(found.last, "name", nil) if found
+    server = @directory.named_in(name) if @rules[:by_name]
+    Match.new(server, "name", nil) if server
   end
 
   def url_host(url)
@@ -82,6 +68,4 @@ class Integrations::UptimeKuma::Matcher
   rescue Resolv::ResolvError, SocketError, SystemCallError
     @dns[host] = []
   end
-
-  def normalize_ip(address) = IPAddr.new(address.to_s).to_s
 end

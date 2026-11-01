@@ -10,33 +10,31 @@ class Integrations::Ovh < Integrations::Base
   self.icon = :globe
   self.default_interval = 360
 
-  Field = Integrations::Base::Field # (constants of the superclass are not visible from `class << self`)
-
   class << self
     def fields
       [
-        Field.new(key: :endpoint, label: "Point d'accès", type: :select, default: "ovh-eu",
+        Integrations::Field.new(key: :endpoint, label: "Point d'accès", type: :select, default: "ovh-eu",
                   options: [ [ "OVHcloud Europe (ovh-eu)", "ovh-eu" ], [ "OVHcloud Canada (ovh-ca)", "ovh-ca" ], [ "OVHcloud US (ovh-us)", "ovh-us" ] ]),
-        Field.new(key: :application_key, label: "Application Key", required: true),
-        Field.new(key: :application_secret, label: "Application Secret", secret: true, required: true),
-        Field.new(key: :consumer_key, label: "Consumer Key", secret: true, required: true,
+        Integrations::Field.new(key: :application_key, label: "Application Key", required: true),
+        Integrations::Field.new(key: :application_secret, label: "Application Secret", secret: true, required: true),
+        Integrations::Field.new(key: :consumer_key, label: "Consumer Key", secret: true, required: true,
                   hint: "créée avec seulement des droits GET : voir « Droits à donner à la clé API »."),
 
-        Field.new(key: :products, label: "Ressources à lire", type: :checkboxes, section: "Ressources",
+        Integrations::Field.new(key: :products, label: "Ressources à lire", type: :checkboxes, section: "Ressources",
                   options: Integrations::Ovh::Fetch::PRODUCTS, default: Integrations::Ovh::Fetch::PRODUCTS.map(&:first)),
-        Field.new(key: :zones, label: "Zones DNS", type: :list, default: [], section: "Ressources", placeholder: "example.com, example.fr",
+        Integrations::Field.new(key: :zones, label: "Zones DNS", type: :list, default: [], section: "Ressources", placeholder: "example.com, example.fr",
                   hint: "vide = toutes les zones du compte."),
-        Field.new(key: :projects, label: "Projets Public Cloud", type: :list, default: [], section: "Ressources", placeholder: "identifiants de projets",
+        Integrations::Field.new(key: :projects, label: "Projets Public Cloud", type: :list, default: [], section: "Ressources", placeholder: "identifiants de projets",
                   hint: "vide = tous les projets."),
 
-        Field.new(key: :alert_expiring, label: "Service OVH bientôt expiré", type: :boolean, default: true, section: "Alertes"),
-        Field.new(key: :expiring_days, label: "Seuil d'expiration (jours)", type: :number, default: 30, section: "Alertes"),
-        Field.new(key: :expiring_ignore_auto_renew, label: "Ignorer les services en renouvellement automatique", type: :boolean, default: true, section: "Alertes"),
-        Field.new(key: :alert_firewall_disabled, label: "Firewall réseau OVH désactivé sur une IP d'un serveur", type: :boolean, default: false, section: "Alertes"),
-        Field.new(key: :alert_reverse_mismatch, label: "Reverse DNS absent ou différent du hostname", type: :boolean, default: false, section: "Alertes"),
-        Field.new(key: :alert_server_without_dns, label: "Serveur avec une IP OVH mais aucun enregistrement DNS", type: :boolean, default: false, section: "Alertes"),
-        Field.new(key: :alert_dns_outside, label: "Enregistrement DNS vers une IP hors du parc", type: :boolean, default: false, section: "Alertes"),
-        Field.new(key: :alert_unmanaged_service, label: "Service OVH rattaché à aucun serveur du parc", type: :boolean, default: false, section: "Alertes",
+        Integrations::Field.new(key: :alert_expiring, label: "Service OVH bientôt expiré", type: :boolean, default: true, section: "Alertes"),
+        Integrations::Field.new(key: :expiring_days, label: "Seuil d'expiration (jours)", type: :number, default: 30, section: "Alertes"),
+        Integrations::Field.new(key: :expiring_ignore_auto_renew, label: "Ignorer les services en renouvellement automatique", type: :boolean, default: true, section: "Alertes"),
+        Integrations::Field.new(key: :alert_firewall_disabled, label: "Firewall réseau OVH désactivé sur une IP d'un serveur", type: :boolean, default: false, section: "Alertes"),
+        Integrations::Field.new(key: :alert_reverse_mismatch, label: "Reverse DNS absent ou différent du hostname", type: :boolean, default: false, section: "Alertes"),
+        Integrations::Field.new(key: :alert_server_without_dns, label: "Serveur avec une IP OVH mais aucun enregistrement DNS", type: :boolean, default: false, section: "Alertes"),
+        Integrations::Field.new(key: :alert_dns_outside, label: "Enregistrement DNS vers une IP hors du parc", type: :boolean, default: false, section: "Alertes"),
+        Integrations::Field.new(key: :alert_unmanaged_service, label: "Service OVH rattaché à aucun serveur du parc", type: :boolean, default: false, section: "Alertes",
                   hint: "une machine payée mais pas suivie par Elio.")
       ]
     end

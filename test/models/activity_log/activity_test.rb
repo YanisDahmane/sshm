@@ -3,6 +3,10 @@ require "test_helper"
 class ActivityTest < ActiveSupport::TestCase
   teardown { Current.reset }
 
+  test "every kind has a summary, and only those" do
+    assert_equal Activity::KINDS.keys.sort, Activity::Summaries::BY_KIND.keys.sort
+  end
+
   test "every kind has a label, a known category and a known severity" do
     Activity::KINDS.each_value do |kind|
       assert kind.label.present?, kind.key

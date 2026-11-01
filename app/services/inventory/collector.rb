@@ -48,6 +48,12 @@ class Inventory::Collector
 
     # Part of the data kept in the snapshot (big lists can go elsewhere).
     def snapshot_data(data) = data
+
+    # Output of the scripts of config/ssh_commands.yml, cut on its
+    # "@@elio <name>" lines: { name => body }, "" for a missing section.
+    def sections(output)
+      output.to_s.split(/^@@elio (\S+)\n/).drop(1).each_slice(2).to_h { |name, body| [ name, body.to_s ] }.tap { |sections| sections.default = "" }
+    end
   end
 
   attr_reader :ssh
