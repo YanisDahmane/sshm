@@ -75,6 +75,11 @@ Rails.application.routes.draw do
   resources :monitors, only: :index do
     resource :link, only: %i[create destroy], controller: "monitor_links"
   end
+  # OVHcloud extension.
+  get "ovh", to: "ovh#index", as: :ovh
+  resources :ovh_resources, only: [], path: "ovh/resources" do
+    resource :link, only: %i[create destroy], controller: "ovh_links"
+  end
   scope "settings" do
     resource :ssh_key, only: :create
   end

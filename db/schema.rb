@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_01_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_01_110000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -223,6 +223,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_100000) do
     t.index ["name"], name: "index_notification_channels_on_name", unique: true
   end
 
+  create_table "ovh_resources", force: :cascade do |t|
+    t.string "kind", null: false
+    t.string "external_id", null: false
+    t.string "name", null: false
+    t.jsonb "data", default: {}, null: false
+    t.jsonb "addresses", default: [], null: false
+    t.date "expires_at"
+    t.bigint "server_id"
+    t.string "matched_by"
+    t.string "matched_address"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["kind", "external_id"], name: "index_ovh_resources_on_kind_and_external_id", unique: true
+    t.index ["server_id"], name: "index_ovh_resources_on_server_id"
+  end
+
   create_table "public_keys", force: :cascade do |t|
     t.string "name", null: false
     t.text "content", null: false
@@ -375,6 +391,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_100000) do
   add_foreign_key "key_rotations", "ssh_keys", column: "new_key_id", on_delete: :nullify
   add_foreign_key "key_rotations", "ssh_keys", column: "old_key_id", on_delete: :nullify
   add_foreign_key "key_rotations", "users", column: "started_by_id", on_delete: :nullify
+  add_foreign_key "ovh_resources", "servers", on_delete: :nullify
   add_foreign_key "server_group_memberships", "server_groups", on_delete: :cascade
   add_foreign_key "server_group_memberships", "servers", on_delete: :cascade
   add_foreign_key "temporary_accesses", "public_keys", on_delete: :nullify

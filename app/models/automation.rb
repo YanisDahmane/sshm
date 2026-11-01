@@ -30,7 +30,9 @@ class Automation < ApplicationRecord
     Definition.new(key: :keys_scan, label: "Scan des clés", default_interval: 360,
                    description: "Lit les clés de tous les serveurs et signale les clés inconnues ou disparues."),
     Definition.new(key: :uptime_kuma_sync, label: "Synchronisation Uptime Kuma", default_interval: 15, default_enabled: true, quiet: true, integration: "uptime_kuma",
-                   description: "Relit les sondes d'Uptime Kuma, les rattache aux serveurs et lève les alertes choisies dans l'extension.")
+                   description: "Relit les sondes d'Uptime Kuma, les rattache aux serveurs et lève les alertes choisies dans l'extension."),
+    Definition.new(key: :ovh_sync, label: "Synchronisation OVHcloud", default_interval: 360, default_enabled: true, integration: "ovh",
+                   description: "Relit les ressources OVHcloud (IP, firewall, DNS, services), les rattache aux serveurs et lève les alertes choisies.")
   ].index_by(&:key).freeze
 
   INTERVALS = { 5 => "Toutes les 5 minutes", 15 => "Toutes les 15 minutes", 60 => "Toutes les heures", 360 => "Toutes les 6 heures",

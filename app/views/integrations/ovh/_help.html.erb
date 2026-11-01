@@ -1,0 +1,32 @@
+<%# Help of the OVHcloud extension: the rights to give to the API key (GET only), with the prefilled token page. %>
+<div class="integration-help mt-4 rounded-lg border border-line bg-surface px-4 py-3 text-sm text-ink-2" data-controller="modal">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <p>Elio ne fait que <strong class="font-medium text-ink">lire</strong> l'API OVHcloud (requêtes GET). Créez une clé limitée à ces droits.</p>
+    <button type="button" data-action="modal#open" class="btn btn-secondary ovh-rights-button"><%= icon :key, class: "h-4 w-4" %> Droits à donner à la clé API</button>
+  </div>
+
+  <dialog data-modal-target="dialog" data-action="click->modal#backdropClose" aria-labelledby="ovh-rights-title"
+          class="ovh-rights m-auto w-full max-w-xl rounded-xl border border-line bg-surface p-0 text-left text-ink shadow-xl backdrop:bg-neutral-950/40 backdrop:backdrop-blur-sm">
+    <div class="flex items-start justify-between gap-4 border-b border-line px-6 py-4">
+      <h2 id="ovh-rights-title" class="text-base font-semibold">Droits de la clé API OVHcloud</h2>
+      <button type="button" data-action="modal#close" aria-label="Fermer" class="btn btn-ghost btn-icon"><%= icon :x_mark, class: "h-5 w-5" %></button>
+    </div>
+    <div class="space-y-4 px-6 py-5 text-sm">
+      <p class="text-ink-2">Seulement des <strong>GET</strong>, selon les ressources cochées (enregistrez après avoir changé les ressources pour mettre la liste à jour) :</p>
+      <% rights = Integrations::Ovh.rights(integration) %>
+      <div class="space-y-2" data-controller="clipboard">
+        <div class="flex justify-end"><%= render "settings/copy_button" %></div>
+        <pre class="ovh-rights-list overflow-x-auto rounded-lg bg-neutral-950 px-4 py-3 font-mono text-xs text-neutral-100" data-clipboard-target="source"><%= rights.map { |path| "GET #{path}" }.join("\n") %></pre>
+      </div>
+      <ol class="list-decimal space-y-1.5 pl-5 text-ink-2">
+        <li>
+          Ouvrez la page de création de clé d'OVHcloud, déjà remplie avec ces droits :
+          <%= link_to "créer la clé (#{integration.value(:endpoint)})", Integrations::Ovh.token_url(integration), target: "_blank", rel: "noopener", class: "ovh-token-link font-medium text-accent hover:underline" %>.
+        </li>
+        <li>Connectez-vous, choisissez une durée de validité (« Unlimited » ou une date à renouveler), puis validez.</li>
+        <li>Recopiez ici l'<em>Application Key</em>, l'<em>Application Secret</em> et la <em>Consumer Key</em>, puis « Tester la connexion » : Elio vérifie les droits et prévient si la clé permet d'écrire.</li>
+      </ol>
+      <p class="text-xs text-ink-3">Ne donnez jamais de droit POST, PUT ou DELETE : l'extension n'en a pas besoin.</p>
+    </div>
+  </dialog>
+</div>

@@ -1,0 +1,12 @@
+<%# Manual attachment of an OVHcloud resource (operators). %>
+<div class="flex items-center justify-end gap-1">
+  <%= form_with url: ovh_resource_link_path(resource), method: :post, class: "ovh-link-form", data: { controller: "auto-submit" } do |f| %>
+    <%= f.select :server_id, [ [ "— Aucun serveur —", "" ], *Server.order(:name).map { |server| [ server.name, server.id ] } ], { selected: resource.server_id },
+          aria: { label: "Serveur de #{resource.name}" }, data: { action: "change->auto-submit#submit" }, class: "input w-auto max-w-40 py-1 text-xs" %>
+    <noscript><%= f.submit "Rattacher", class: "btn btn-secondary" %></noscript>
+  <% end %>
+  <% if resource.matched_by == "manual" %>
+    <%= button_to ovh_resource_link_path(resource), method: :delete, title: "Revenir au rattachement automatique", aria: { label: "Revenir au rattachement automatique" },
+          class: "btn btn-ghost btn-icon" do %><%= icon :arrow_path, class: "h-4 w-4" %><% end %>
+  <% end %>
+</div>

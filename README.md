@@ -25,6 +25,7 @@ Santé, système, paquets, services, ports et firewall de chaque serveur, et les
 - [Configuration](#configuration)
 - [Préparer les serveurs](#préparer-les-serveurs)
 - [Ce qu'Elio exécute sur vos serveurs](#ce-quelio-exécute-sur-vos-serveurs)
+- [Extensions (Uptime Kuma, OVHcloud)](#extensions-uptime-kuma-ovhcloud)
 - [Sécurité et limites](#sécurité-et-limites)
 - [Mise à jour depuis SSHM](#mise-à-jour-depuis-sshm)
 - [Développement et tests](#développement-et-tests)
@@ -44,6 +45,8 @@ Santé, système, paquets, services, ports et firewall de chaque serveur, et les
 | **Ports et firewall** | Ports en écoute avec le processus, le service ou le conteneur derrière, exposition (public, privé, local), état du firewall (ufw, nftables, iptables), **règles ufw suggérées à copier**, ports inattendus par groupe. |
 | **Trousseau** | Les clés SSH de l'équipe et des machines (CI, sauvegardes…), à ajouter ou retirer sur chaque serveur — depuis le trousseau ou en collant une nouvelle clé directement sur la fiche du serveur —, pour toujours ou pour une durée limitée. Les clés inconnues trouvées sur les serveurs sont signalées. |
 | **Automatisations** | Suivi de la santé, inventaires (système, paquets, services, ports), vérification des serveurs et scan des clés, à la fréquence de votre choix, sur tout le parc ou par groupe. |
+| **Réseau** | Toutes les adresses de chaque serveur (publiques, réseau local, **WireGuard** et autres VPN) et son hostname ; recherche d'un serveur par IP. |
+| **Extensions** | **Uptime Kuma** (les sondes rattachées à chaque serveur, serveurs sans sonde, sondes hors ligne, certificats) et **OVHcloud** (service, IP et reverse, firewall réseau, anti-DDoS, enregistrements DNS vers chaque serveur), en lecture seule, chaque alerte au choix. |
 | **Tâches** | Chaque inventaire, scan ou automatisation lancé en arrière-plan est suivi en direct : à venir, en cours, terminé, en échec, avec le résultat et l'erreur de chaque serveur. Les administrateurs ont aussi la vue technique de la file (Mission Control, `/jobs`). |
 | **Activité et notifications** | Journal de tout ce qui se passe (ajouts de clés, serveurs qui tombent, ports qui s'ouvrent, services en échec…), envoyé sur **Slack, Discord, un webhook signé ou par email**, avec un résumé chaque matin. |
 | **Accès à Elio** | Rôles (admin, opérateur, lecture), invitations, double authentification (TOTP + codes de secours), verrouillage après échecs, expiration de session. |
@@ -154,6 +157,7 @@ Tout passe par SSH, avec la clé d'Elio uniquement (jamais votre agent ni vos cl
 | Pour | Commandes (lecture seule) |
 |---|---|
 | Système | `cat /etc/os-release`, `uname -srm`, `hostname -f`, `systemd-detect-virt`, `/proc/uptime`, `nproc`, `/proc/meminfo`, `timedatectl` |
+| Réseau | `ip -j addr`, `ip -d -j link` |
 | Santé | `/proc/loadavg`, `/proc/meminfo`, `df -P -T` (espace et inodes), `/var/run/reboot-required`, `systemctl --failed`, `apt-get -s dist-upgrade` (simulation), `timedatectl` |
 | Paquets | `dpkg-query -W`, `apt list --upgradable`, `snap list`, `docker image ls` |
 | Services | `systemctl list-units`, `systemctl list-unit-files`, `docker ps -a` |
@@ -161,6 +165,17 @@ Tout passe par SSH, avec la clé d'Elio uniquement (jamais votre agent ni vos cl
 | Clés SSH | lecture de `~/.ssh/authorized_keys` ; **écriture seulement** quand vous ajoutez ou retirez une clé |
 
 Elio **ne modifie jamais le firewall** : les règles ufw sont des suggestions à relire et appliquer vous-même.
+
+---
+
+## Extensions (Uptime Kuma, OVHcloud)
+
+**Paramètres → Extensions** (administrateurs). Une extension désactivée n'apparaît nulle part. Elio n'y fait que **lire** : il ne crée, ne modifie et ne supprime rien.
+
+- **Uptime Kuma** : l'adresse de l'instance et une clé API (*Uptime Kuma → Paramètres → Clés API*). Elio lit la page `/metrics` toutes les 15 minutes et rattache chaque sonde à son serveur : par l'IP visée (y compris une IP WireGuard), par le nom d'hôte (avec résolution DNS en option) ou par le nom de la sonde (`[SRV] FR-UTILS-1`) ; un rattachement peut être corrigé à la main. Onglet **Sondes** sur chaque serveur, page **Sondes** (sondes non rattachées, serveurs sans sonde), alertes au choix.
+- **OVHcloud** : Application Key, Application Secret et Consumer Key **limitée aux requêtes GET**. Le bouton *Droits à donner à la clé API* liste les droits nécessaires selon les ressources cochées et ouvre la page de création de clé d'OVH déjà remplie ; *Tester la connexion* signale les droits manquants et une clé qui permettrait d'écrire. Onglet **OVH** sur chaque serveur (service, IP, reverse, firewall réseau et son effet sur les ports publics, anti-DDoS, enregistrements DNS), page **OVHcloud** (services, IP, DNS ; ressources hors du parc).
+
+Les rattachements utilisent toutes les adresses relevées par l'inventaire du système : lancez-le avant d'activer une extension.
 
 ---
 

@@ -70,7 +70,7 @@ class AutomationJobsTest < ActiveJob::TestCase
   test "on a new installation, the first tick creates the automations and starts the health check" do
     RunDueAutomationsJob.perform_now
 
-    assert_equal 8, Automation.count
+    assert_equal 9, Automation.count
     assert_enqueued_with(job: RunAutomationJob, args: [ Automation.find_by!(kind: "health_check"), nil ])
     assert_enqueued_jobs 1, only: RunAutomationJob
     assert_equal 0, BackgroundTask.count, "the quiet health check is not listed in the tasks"

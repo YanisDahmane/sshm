@@ -12,6 +12,7 @@ class Server < ApplicationRecord
   # Tasks keep the server's name; a server deleted while waiting fails its items.
   has_many :background_task_items, dependent: :nullify
   has_many :uptime_kuma_monitors, -> { by_name }, dependent: :nullify
+  has_many :ovh_resources, dependent: :nullify
   before_destroy(prepend: true) { BackgroundTaskItem.cancel_for_server!(self) }
 
   HEALTH_STATES = %w[ok warn crit unknown].freeze

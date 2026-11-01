@@ -59,6 +59,9 @@ class Activity < ApplicationRecord
     Kind.new(:monitor_up, "Sonde de retour", :servers, :info, "Une sonde Uptime Kuma hors ligne répond de nouveau."),
     Kind.new(:monitor_cert_expiring, "Certificat bientôt expiré", :security, :warning, "Le certificat vérifié par une sonde Uptime Kuma expire bientôt."),
     Kind.new(:server_without_monitor, "Serveur sans sonde", :servers, :warning, "Un serveur n'est surveillé par aucune sonde Uptime Kuma."),
+    Kind.new(:ovh_service_expiring, "Service OVH bientôt expiré", :servers, :warning, "Un service OVHcloud (dédié, VPS) arrive à expiration."),
+    Kind.new(:dns_record_outside_fleet, "DNS vers une IP hors du parc", :security, :warning, "Un enregistrement DNS OVH pointe vers une IP qui n'est à aucun serveur du parc."),
+    Kind.new(:ovh_service_unmanaged, "Service OVH non suivi", :servers, :info, "Un service OVHcloud n'est rattaché à aucun serveur du parc."),
     Kind.new(:integration_enabled, "Extension activée", :configuration, :info, "Un administrateur a activé une extension."),
     Kind.new(:integration_disabled, "Extension désactivée", :configuration, :info, "Un administrateur a désactivé une extension."),
     Kind.new(:integration_sync_failed, "Échec de synchronisation d'une extension", :configuration, :warning, "Une extension n'arrive plus à lire son service (signalé une fois, jusqu'au retour à la normale).")
@@ -160,6 +163,9 @@ class Activity < ApplicationRecord
     when :monitor_up then "Sonde « #{data["monitor"]} » de retour#{" (#{server_name})" if server_name}"
     when :monitor_cert_expiring then "Certificat de « #{data["monitor"]} » : expire dans #{data["days"]} jour(s)"
     when :server_without_monitor then "« #{server_name} » n'est surveillé par aucune sonde Uptime Kuma"
+    when :ovh_service_expiring then "Service OVH « #{data["service"]} » : expire dans #{data["days"]} jour(s)"
+    when :dns_record_outside_fleet then "#{data["record"]} pointe vers #{data["target"]}, hors du parc"
+    when :ovh_service_unmanaged then "#{data["kind_label"]} OVH « #{data["service"]} » rattaché à aucun serveur"
     when :integration_enabled then "Extension #{data["integration_label"]} activée"
     when :integration_disabled then "Extension #{data["integration_label"]} désactivée"
     when :integration_sync_failed then "Synchronisation #{data["integration_label"]} impossible : #{data["error"]}"
