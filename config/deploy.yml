@@ -35,7 +35,19 @@ registry:
 env:
   secret:
     - RAILS_MASTER_KEY
+    - ELIO_DATABASE_PASSWORD
+    # Asked to create the first admin account (see README): set it before the first deploy.
+    - ELIO_SETUP_TOKEN
+    # Uncomment with the SMTP_* settings to send emails (password reset, invitations, notifications).
+    # - SMTP_PASSWORD
   clear:
+    # Elio's own host name: links in the emails, and the only Host it answers to.
+    ELIO_HOST: app.example.com
+    # SMTP_ADDRESS: smtp.example.com
+    # SMTP_USERNAME: elio@example.com
+    # ELIO_MAIL_FROM: elio@example.com
+    # ELIO_ACTIVITY_RETENTION_DAYS: 365
+
     # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.
     # When you start using multiple servers, you should split out job processing to a dedicated machine.
     SOLID_QUEUE_IN_PUMA: true

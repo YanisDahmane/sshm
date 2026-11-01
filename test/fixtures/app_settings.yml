@@ -2,3 +2,4 @@
 # explicitly, so the other tests can sign in as users(:one) without 2FA.
 main:
   require_admin_two_factor: false
+  require_operator_two_factor: false

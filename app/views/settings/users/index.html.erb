@@ -48,6 +48,10 @@
       <%= f.check_box :require_admin_two_factor, class: "h-4 w-4 rounded border-line text-accent" %>
       Double authentification obligatoire pour les administrateurs
     </label>
+    <label class="flex cursor-pointer items-center gap-2 text-sm text-ink-2">
+      <%= f.check_box :require_operator_two_factor, class: "h-4 w-4 rounded border-line text-accent" %>
+      … et pour les opérateurs (ils modifient les clés des serveurs)
+    </label>
     <%= f.submit "Enregistrer", class: "btn btn-secondary" %>
   <% end %>
 </section>

@@ -137,10 +137,26 @@ class SettingsUsersTest < ActionDispatch::IntegrationTest
 
     patch settings_security_path, params: { app_setting: { require_admin_two_factor: "1" } }
     assert AppSetting.current.require_admin_two_factor
-    assert_equal "La double authentification est désormais obligatoire pour les administrateurs.", flash[:notice]
+    assert_equal "Double authentification obligatoire pour les administrateurs.", flash[:notice]
 
-    patch settings_security_path, params: { app_setting: { require_admin_two_factor: "0" } }
+    patch settings_security_path, params: { app_setting: { require_admin_two_factor: "1", require_operator_two_factor: "1" } }
+    assert_equal "Double authentification obligatoire pour les administrateurs et opérateurs.", flash[:notice]
+
+    patch settings_security_path, params: { app_setting: { require_admin_two_factor: "0", require_operator_two_factor: "0" } }
     assert_not AppSetting.current.reload.require_admin_two_factor
+    assert_equal "Double authentification facultative pour tous.", flash[:notice]
+  end
+
+  test "operators must set up 2FA when it is mandatory for them, viewers never (AUDIT.md S20)" do
+    AppSetting.current.update!(require_operator_two_factor: true)
+    sign_in users(:operator)
+    get servers_path
+    assert_redirected_to account_path
+    assert_match "obligatoire pour votre rôle", flash[:alert]
+
+    sign_in users(:viewer)
+    get servers_path
+    assert_response :success
   end
 
   test "an admin resets the 2FA of someone who lost it" do

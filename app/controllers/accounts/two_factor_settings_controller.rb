@@ -27,8 +27,8 @@ class TwoFactorSettingsController < ApplicationController
   end
 
   def destroy
-    if current_user.two_factor_required? || (current_user.admin? && AppSetting.current.require_admin_two_factor)
-      return redirect_to(account_path, alert: "La double authentification est obligatoire pour les administrateurs.")
+    if current_user.two_factor_mandatory?
+      return redirect_to(account_path, alert: "La double authentification est obligatoire pour votre rôle (#{current_user.role_label.downcase}).")
     end
     return redirect_to(account_path, alert: "Code invalide.") unless current_user.verify_two_factor(params[:code])
 

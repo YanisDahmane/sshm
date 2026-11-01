@@ -33,7 +33,14 @@ class User < ApplicationRecord
   def deactivated? = deactivated_at.present?
 
   # Admins must enable 2FA when the setting requires it (see ApplicationController).
-  def two_factor_required? = admin? && !two_factor_enabled? && AppSetting.current.require_admin_two_factor
+  # The settings make the second factor mandatory for this role (admins, and
+  # operators who can change the keys on the servers).
+  def two_factor_mandatory?(settings = AppSetting.current)
+    (admin? && settings.require_admin_two_factor) || (operator? && settings.require_operator_two_factor)
+  end
+
+  # Mandatory but not set up yet: the account is sent to set it up first.
+  def two_factor_required? = !two_factor_enabled? && two_factor_mandatory?
 
   def deactivate! = update!(deactivated_at: Time.current)
 
