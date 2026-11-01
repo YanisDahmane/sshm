@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_01_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_01_160000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -52,6 +52,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_150000) do
     t.decimal "health_load_warn", precision: 4, scale: 1, default: "2.0", null: false
     t.boolean "require_operator_two_factor", default: true, null: false
     t.string "vulnerability_alert_severity", default: "high", null: false
+    t.boolean "docker_alert_unhealthy", default: true, null: false
+    t.boolean "docker_alert_restarts", default: true, null: false
+    t.boolean "docker_alert_updates", default: false, null: false
+    t.text "docker_registry_credentials"
   end
 
   create_table "automations", force: :cascade do |t|
@@ -97,6 +101,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_150000) do
     t.index ["created_at"], name: "index_background_tasks_on_created_at"
     t.index ["status", "created_at"], name: "index_background_tasks_on_status_and_created_at"
     t.index ["user_id"], name: "index_background_tasks_on_user_id"
+  end
+
+  create_table "image_updates", force: :cascade do |t|
+    t.string "reference", null: false
+    t.string "registry", null: false
+    t.string "repository", null: false
+    t.string "tag", null: false
+    t.string "remote_digest"
+    t.datetime "checked_at"
+    t.string "error"
+    t.index ["reference"], name: "index_image_updates_on_reference", unique: true
   end
 
   create_table "integration_links", force: :cascade do |t|

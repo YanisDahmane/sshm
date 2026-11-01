@@ -60,7 +60,13 @@ class Inventory::Collectors::Os < Inventory::Collector
       [ key, value.delete_prefix('"').delete_suffix('"').delete_prefix("'").delete_suffix("'").gsub('\\"', '"') ]
     end.to_h
   end
-  private_class_method :parse_os_release
+
+  # os-release of a Docker image: the keys Vulnerabilities.target needs.
+  def self.release_summary(text)
+    release = parse_os_release(text)
+    { "id" => release["ID"], "codename" => release["VERSION_CODENAME"].presence || release["UBUNTU_CODENAME"], "version_id" => release["VERSION_ID"],
+      "name" => release["PRETTY_NAME"] }.compact_blank
+  end
 
   # "Linux 6.1.0-25-amd64 x86_64"
   def self.parse_uname(text)

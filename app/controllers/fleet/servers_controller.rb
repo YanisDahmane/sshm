@@ -35,7 +35,7 @@ class ServersController < ApplicationController
     end
   end
 
-  TABS = %w[overview packages vulnerabilities services schedules ports keys history].freeze
+  TABS = %w[overview packages vulnerabilities services docker schedules ports keys history].freeze
   VULNERABILITIES_PER_PAGE = 100
 
   # Tabbed page (?tab=), only the requested tab is rendered.

@@ -5,6 +5,7 @@
        [ "Notifications", settings_notifications_path, controller_path.start_with?("settings/notification") ],
        [ "Utilisateurs", settings_users_path, controller_path.in?(%w[settings/users settings/invitations]) ],
        [ "Vulnérabilités", settings_vulnerabilities_path, controller_path == "settings/vulnerabilities" ],
+       [ "Docker", settings_docker_path, controller_path == "settings/docker" ],
        [ "Extensions", settings_integrations_path, controller_path == "settings/integrations" ] ].each do |label, path, active| %>
     <%= link_to label, path, aria: { current: (active ? "page" : nil) },
           class: "-mb-px shrink-0 border-b-2 px-4 py-2 whitespace-nowrap text-sm font-medium #{active ? "border-accent text-accent" : "border-transparent text-ink-3 hover:border-line hover:text-ink-2"}" %>

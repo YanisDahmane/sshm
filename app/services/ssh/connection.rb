@@ -82,7 +82,9 @@ class Ssh::Connection
 
   # `transport` is the Net::SSH-compatible entry point, swappable in tests.
   # `key`: one SshKey or a list, tried in order (the app keys by default).
-  def initialize(server, key: SshKey.app_keys, timeout: DEFAULT_TIMEOUT, command_timeout: DEFAULT_COMMAND_TIMEOUT,
+  # `command_timeout`: delay of the commands run with #exec, and a ceiling
+  # for those of config/ssh_commands.yml (their own `timeout`) when given.
+  def initialize(server, key: SshKey.app_keys, timeout: DEFAULT_TIMEOUT, command_timeout: nil,
                  known_hosts_file: Ssh::KnownHosts.file, transport: Net::SSH)
     @server = server
     @keys = Array(key).compact
@@ -119,7 +121,7 @@ class Ssh::Connection
 
   # Runs a command and returns its Result, whatever the exit status. Raises
   # CommandTimeoutError (and shuts the session down) after `timeout` seconds.
-  def exec(command, timeout: @command_timeout)
+  def exec(command, timeout: @command_timeout || DEFAULT_COMMAND_TIMEOUT)
     raise CommandTimeoutError, "La session a été fermée après un délai dépassé." if @timed_out
     raise Error, "No open session, call #exec inside Ssh::Connection.open" unless @session
 
@@ -156,7 +158,7 @@ class Ssh::Connection
     command = Ssh::Commands.fetch(key)
     line = command.render(distros: (command.distro_specific? ? distros : []), **values)
     line = privileged(line) if command.root?
-    exec(line, timeout: timeout || [ command.timeout, @command_timeout ].min)
+    exec(line, timeout: timeout || [ command.timeout, @command_timeout ].compact.min)
   end
 
   # Same, raising CommandError unless it succeeds.

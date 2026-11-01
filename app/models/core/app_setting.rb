@@ -9,6 +9,8 @@ class AppSetting < ApplicationRecord
   VULNERABILITY_ALERTS = { "critical" => "Critique", "high" => "Haute ou critique", "medium" => "Moyenne ou plus",
                            "any" => "Toutes les corrigeables", "none" => "Jamais" }.freeze
   validates :vulnerability_alert_severity, inclusion: { in: VULNERABILITY_ALERTS.keys }
+  # "registry user token" lines (ImageRegistry::UpdateCheck.credentials).
+  encrypts :docker_registry_credentials
 
   def self.current = first || create!
 

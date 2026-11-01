@@ -1,0 +1,67 @@
+<% content_for :title, "Docker · Paramètres · Elio" %>
+<%= render "settings/nav" %>
+
+<%= form_with model: @setting, url: settings_docker_path, method: :patch do |f| %>
+  <section id="docker-alerts" class="card mt-6 p-5">
+    <h2 class="font-semibold">Alertes</h2>
+    <p class="mt-1 text-xs text-ink-3">Ce que les conteneurs et les images signalent : raison « à surveiller » sur le serveur et activité (notifiable).</p>
+    <div class="mt-4 space-y-2 text-sm">
+      <label class="flex items-start gap-2"><%= f.check_box :docker_alert_unhealthy, class: "mt-0.5" %>
+        <span>Conteneur en <strong>mauvaise santé</strong> <span class="block text-xs text-ink-3">Son healthcheck échoue.</span></span></label>
+      <label class="flex items-start gap-2"><%= f.check_box :docker_alert_restarts, class: "mt-0.5" %>
+        <span>Conteneur qui <strong>redémarre en boucle</strong> <span class="block text-xs text-ink-3">État « restarting », ou au moins <%= Inventory::Collectors::Docker::LOOP_RESTARTS %> redémarrages et relancé il y a moins de <%= Inventory::Collectors::Docker::LOOP_WINDOW.in_minutes.to_i %> minutes.</span></span></label>
+      <label class="flex items-start gap-2"><%= f.check_box :docker_alert_updates, class: "mt-0.5" %>
+        <span>Image utilisée dont le registre publie une <strong>nouvelle version</strong> du même tag <span class="block text-xs text-ink-3">Pratique pour les tags « latest » ou « 1.27 » ; sans effet sur un tag figé.</span></span></label>
+    </div>
+  </section>
+
+  <section id="docker-registries" class="card mt-6 p-5">
+    <h2 class="font-semibold">Registres privés</h2>
+    <p class="mt-1 text-xs text-ink-3">Elio demande aux registres l'empreinte de chaque tag utilisé (lecture seule, requêtes HEAD qui ne comptent pas dans les limites de Docker Hub). Les images publiques n'ont besoin de rien ; pour une image privée, un jeton <strong>en lecture seule</strong> par registre, une ligne chacun :</p>
+    <pre class="mt-2 rounded-lg bg-subtle px-3 py-2 font-mono text-xs text-ink-2">ghcr.io mon-compte ghp_…
+docker.io mon-compte dckr_pat_…
+registry.example.com:5000 elio jeton</pre>
+    <p class="registries-configured mt-3 text-xs text-ink-2">
+      <%= @registries.any? ? "Identifiants enregistrés pour : #{@registries.join(", ")}. Laissez vide pour les garder." : "Aucun identifiant enregistré." %>
+    </p>
+    <%= f.text_area :docker_registry_credentials, value: "", rows: 3, autocomplete: "off", spellcheck: false, class: "input mt-2 font-mono text-xs",
+          aria: { label: "Identifiants des registres" }, placeholder: "registre utilisateur jeton" %>
+    <% if @registries.any? %>
+      <label class="mt-2 flex items-center gap-2 text-xs"><%= check_box_tag :clear_credentials, "1" %> Supprimer les identifiants enregistrés</label>
+    <% end %>
+  </section>
+
+  <div class="mt-4"><%= f.submit "Enregistrer", class: "btn btn-primary" %></div>
+<% end %>
+
+<section id="docker-image-checks" class="card mt-6">
+  <div class="card-header">
+    <div>
+      <h2 class="font-semibold">Vérification des images</h2>
+      <p class="mt-0.5 text-xs text-ink-3">
+        Automatisation « <%= @automation.label %> » : <%= @automation.enabled? ? "active, #{Automation::INTERVALS.fetch(@automation.interval_minutes).downcase}" : "désactivée" %>
+        <% if @automation.last_result %>— dernier passage : <%= @automation.last_result %><% end %>.
+      </p>
+    </div>
+    <%= button_to check_settings_docker_path, class: "btn btn-secondary", form: { class: "shrink-0" } do %><%= icon :arrow_path %> Vérifier maintenant<% end %>
+  </div>
+  <% if @updates.any? %>
+    <div class="overflow-x-auto">
+      <table class="table-dense">
+        <thead><tr><th class="pl-4">Image</th><th>Registre</th><th>Vérifiée</th><th class="pr-4">Résultat</th></tr></thead>
+        <tbody>
+          <% @updates.each do |update| %>
+            <tr class="image-check">
+              <td class="pl-4 font-mono text-xs"><%= update.reference %></td>
+              <td class="text-xs text-ink-2"><%= update.registry %></td>
+              <td class="text-xs"><%= update.checked_at ? relative_time_tag(update.checked_at) : "—" %></td>
+              <td class="pr-4 text-xs"><%= update.error ? tag.span(update.error, class: "text-crit-ink") : tag.span(update.remote_digest.to_s.first(19), class: "font-mono text-ink-3", title: update.remote_digest) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <p class="px-4 py-4 text-sm text-ink-3">Aucune image vérifiée pour l'instant.</p>
+  <% end %>
+</section>

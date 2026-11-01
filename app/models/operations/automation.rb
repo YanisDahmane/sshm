@@ -23,12 +23,14 @@ class Automation < ApplicationRecord
                    description: "Relit la distribution, le noyau, la machine et ses adresses IP ; signale les mises à niveau, les redémarrages et les adresses publiques qui changent."),
     Definition.new(key: :inventory_packages, label: "Inventaire des paquets", default_interval: 360, categories: %w[packages],
                    description: "Relit les paquets installés et les mises à jour disponibles ; signale les nouvelles mises à jour de sécurité."),
-    Definition.new(key: :inventory_services, label: "Inventaire des services", default_interval: 60, categories: %w[services scheduled_tasks],
-                   description: "Relit les services systemd, les conteneurs Docker et les tâches planifiées (cron, timers) ; signale ceux qui tombent ou échouent."),
+    Definition.new(key: :inventory_services, label: "Inventaire des services", default_interval: 60, categories: %w[services scheduled_tasks docker],
+                   description: "Relit les services systemd, Docker (conteneurs, images et leurs vulnérabilités) et les tâches planifiées (cron, timers) ; signale ceux qui tombent ou échouent."),
     Definition.new(key: :inventory_ports, label: "Inventaire des ports", default_interval: 60, categories: %w[ports],
                    description: "Relit les ports en écoute et le firewall ; signale les ports publics qui s'ouvrent."),
     Definition.new(key: :vulnerabilities_update, label: "Mise à jour des vulnérabilités", default_interval: 1440, default_enabled: true,
                    description: "Télécharge les bases de vulnérabilités (Debian Security Tracker, Ubuntu) pour les versions du parc et les rapproche des paquets installés."),
+    Definition.new(key: :docker_image_updates, label: "Mises à jour des images Docker", default_interval: 360, default_enabled: true,
+                   description: "Demande aux registres (Docker Hub, GHCR…) la dernière version de chaque image utilisée sur le parc, en lecture seule."),
     Definition.new(key: :keys_scan, label: "Scan des clés", default_interval: 360,
                    description: "Lit les clés de tous les serveurs et signale les clés inconnues ou disparues."),
     Definition.new(key: :uptime_kuma_sync, label: "Synchronisation Uptime Kuma", default_interval: 15, default_enabled: true, quiet: true, integration: "uptime_kuma",
@@ -159,6 +161,8 @@ class Automation < ApplicationRecord
       "#{feed.label} : échec (#{e.message})"
     end.join(" · ")
   end
+
+  def run_docker_image_updates = ImageRegistry::UpdateCheck.call
 
   def run_servers_ping
     results = Servers::Ping.check_all!(servers)

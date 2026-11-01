@@ -36,6 +36,9 @@ module Activity::Summaries
       "#{data["count"]} vulnérabilité(s) corrigeable(s) sur #{where} : #{Array(data["cves"]).join(", ")}#{" (#{Array(data["packages"]).join(", ")})" if Array(data["packages"]).any?}"
     end,
     vulnerability_feed_failed: proc { "Base de vulnérabilités #{data["feed"]} non mise à jour : #{data["error"]}" },
+    container_unhealthy: proc { "Le conteneur #{data["container"]} est en mauvaise santé sur « #{server_name} »" },
+    container_restarting: proc { "Le conteneur #{data["container"]} redémarre en boucle sur « #{server_name} »" },
+    image_update_available: proc { "Nouvelle version de l'image #{data["image"]} pour « #{server_name} »" },
     port_opened: proc { "Port #{data["port"]} ouvert publiquement sur « #{server_name} »#{" (#{data["process"]})" if data["process"]}" },
     port_closed: proc { "Port #{data["port"]} fermé sur « #{server_name} »" },
     ip_address_added: proc { "Nouvelle adresse publique #{data["address"]} sur « #{server_name} »" },

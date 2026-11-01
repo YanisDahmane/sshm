@@ -49,6 +49,26 @@ module InventoryHelper
 
   def timer_time(value) = value ? relative_time_tag(Time.zone.parse(value)) : tag.span("—", class: "text-ink-3")
 
+  # State of a Docker container: what goes wrong first.
+  def container_state_badge(container)
+    if container["looping"] then status_badge(:crit, "redémarre en boucle", class: "container-state")
+    elsif container["health"] == "unhealthy" then status_badge(:crit, "mauvaise santé", class: "container-state")
+    elsif container["state"] == "running" then status_badge(:good, container["health"] == "starting" ? "démarre" : "en cours", class: "container-state")
+    elsif container["state"] == "exited" then status_badge(:neutral, container["exit_code"].to_i.zero? ? "arrêté" : "arrêté (code #{container["exit_code"]})", class: "container-state")
+    else status_badge(:warn, container["state"], class: "container-state")
+    end
+  end
+
+  def image_update_badge(state)
+    case state
+    when :available then status_badge(:warn, "nouvelle version", class: "image-update")
+    when :current then tag.span("à jour", class: "image-update text-xs text-ink-3")
+    else tag.span("—", class: "image-update text-xs text-ink-3", title: "Pas encore vérifiée, image sans tag ou privée")
+    end
+  end
+
+  SCAN_LABELS = { "trivy" => "Trivy", "grype" => "Grype", "elio" => "Elio (paquets de l'image)", "none" => "non analysée" }.freeze
+
   SEVERITY_TONES = { "critical" => :crit, "high" => :crit, "medium" => :warn, "low" => :neutral, "unknown" => :neutral }.freeze
 
   def severity_badge(severity)

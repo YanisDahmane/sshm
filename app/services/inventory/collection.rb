@@ -39,7 +39,8 @@ class Inventory::Collection
   private
 
   def collect(category, ssh)
-    Inventory::Collector.for(category).new(ssh).collect
+    snapshot = @server.inventory(category)
+    Inventory::Collector.for(category).new(ssh, previous: (snapshot.data if snapshot&.collected?)).collect
   rescue Ssh::Connection::CommandTimeoutError, Inventory::Collector::Error => e
     error_outcome(e.message)
   rescue Ssh::Connection::Error => e

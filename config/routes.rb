@@ -47,6 +47,9 @@ Rails.application.routes.draw do
     resources :invitations, only: %i[create destroy]
     resource :security, only: :update
     resource :health_thresholds, only: :update
+    resource :docker, only: %i[show update], controller: "docker" do
+      post :check
+    end
     resource :vulnerabilities, only: %i[show update] do
       post :refresh
       post :import
@@ -77,6 +80,7 @@ Rails.application.routes.draw do
   resources :ports, only: :index
   resources :scheduled_tasks, only: :index, path: "scheduled-tasks"
   resources :vulnerabilities, only: :index
+  get "docker", to: "docker#index", as: :docker
   # Uptime Kuma extension.
   resources :monitors, only: :index do
     resource :link, only: %i[create destroy], controller: "monitor_links"

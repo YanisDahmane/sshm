@@ -6,5 +6,7 @@
 Rails.application.config.filter_parameters += [
   :passw, :email, :secret, :token, :_key, :crypt, :salt, :certificate, :otp, :ssn, :cvv, :cvc,
   # Webhook URLs (Slack, Discord) are secrets: anyone who knows them can post.
-  :webhook, :recipients
+  :webhook, :recipients,
+  # Registry tokens (Settings → Docker).
+  :credentials
 ]

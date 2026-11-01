@@ -56,14 +56,14 @@ module ApplicationHelper
     "mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo '#{ssh_key.public_key}' >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
   end
 
-  SERVER_TAB_LABELS = { "packages" => "Paquets", "vulnerabilities" => "Vulnérabilités", "services" => "Services", "schedules" => "Tâches planifiées", "ports" => "Ports", "keys" => "Clés SSH", "history" => "Historique" }.freeze
+  SERVER_TAB_LABELS = { "packages" => "Paquets", "vulnerabilities" => "Vulnérabilités", "services" => "Services", "docker" => "Docker", "schedules" => "Tâches planifiées", "ports" => "Ports", "keys" => "Clés SSH", "history" => "Historique" }.freeze
 
   # Entries of the ⌘K quick search: pages, groups, servers (`server: true`:
   # the browser derives their tabs from SERVER_TAB_LABELS once something is
   # typed, so a big fleet does not weigh on every page) and keyring keys.
   def command_palette_items
     pages = [
-      { label: "Vue d'ensemble", url: root_path }, { label: "Parc", hint: "serveurs", url: servers_path }, { label: "Paquets", hint: "recherche sur tout le parc", url: packages_path }, { label: "Ports", hint: "ports publics du parc", url: ports_path }, { label: "Tâches planifiées", hint: "cron et timers du parc", url: scheduled_tasks_path }, { label: "Vulnérabilités", hint: "CVE du parc", url: vulnerabilities_path }, { label: "Trousseau", hint: "clés SSH", url: public_keys_path },
+      { label: "Vue d'ensemble", url: root_path }, { label: "Parc", hint: "serveurs", url: servers_path }, { label: "Paquets", hint: "recherche sur tout le parc", url: packages_path }, { label: "Ports", hint: "ports publics du parc", url: ports_path }, { label: "Tâches planifiées", hint: "cron et timers du parc", url: scheduled_tasks_path }, { label: "Vulnérabilités", hint: "CVE du parc", url: vulnerabilities_path }, { label: "Docker", hint: "conteneurs et images du parc", url: docker_path }, { label: "Trousseau", hint: "clés SSH", url: public_keys_path },
       { label: "Groupes de serveurs", url: server_groups_path },
       { label: "Activité", url: activities_path },
       { label: "Tâches", hint: "inventaires et scans en arrière-plan", url: tasks_path },
@@ -75,6 +75,7 @@ module ApplicationHelper
       { label: "Notifications", hint: "paramètres", url: settings_notifications_path },
       { label: "Automatisations", hint: "collectes planifiées", url: settings_automations_path },
       { label: "Bases de vulnérabilités", hint: "paramètres, import", url: settings_vulnerabilities_path },
+      { label: "Docker", hint: "paramètres, alertes, registres", url: settings_docker_path },
       { label: "Suivi technique des jobs", hint: "Mission Control", url: "/jobs" }
     ] if can?(:administer)
     pages = pages.map { |page| page.merge(group: "Pages") }

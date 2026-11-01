@@ -3,6 +3,7 @@
 <% packages = @server.inventory("packages")&.data || {} %>
 <% services = @server.inventory("services")&.data || {} %>
 <% schedules = @server.inventory("scheduled_tasks")&.data || {} %>
+<% docker = @server.inventory("docker")&.data || {} %>
 <% ports = @server.inventory("ports") %>
 <% snapshot = @server.account_snapshots.find { |candidate| candidate.unix_user == @server.username } %>
 
@@ -45,6 +46,7 @@
   <nav class="server-tabs scrollbar-none mt-5 flex gap-5 overflow-x-auto border-b border-line text-sm" aria-label="Sections du serveur">
     <% [ [ "overview", "Vue d'ensemble", nil ], [ "packages", "Paquets", packages["total"] ],
          [ "vulnerabilities", "Vulnérabilités", @server.server_vulnerabilities.fixable.distinct.count(:cve).nonzero? ], [ "services", "Services", (Array(services["units"]).count { |unit| unit["active"] == "active" } if services["units"]) ],
+         *([ [ "docker", "Docker", (Array(docker["containers"]).size if docker["docker"] == "ok") ] ] if docker["docker"].in?(%w[ok unreadable])),
          [ "schedules", "Tâches planifiées", (Array(schedules["timers"]).size + Array(schedules["cron"]).size if schedules.any?) ],
          [ "ports", "Ports", (Inventory::PortAnalysis.new(@server).public_ports.size if ports&.collected?) ], [ "keys", "Clés SSH", snapshot&.keys&.size ],
          *@integration_tabs.map { |tab| [ tab[:key], tab[:label], tab[:count]&.call(@server) ] }, [ "history", "Historique", nil ] ].each do |tab, label, count| %>
@@ -73,6 +75,8 @@
     <%= render "servers/vulnerabilities_card", server: @server %>
   <% when "services" %>
     <%= render "servers/services_card", server: @server %>
+  <% when "docker" %>
+    <%= render "servers/docker_card", server: @server %>
   <% when "schedules" %>
     <%= render "servers/scheduled_tasks_card", server: @server %>
   <% when "ports" %>

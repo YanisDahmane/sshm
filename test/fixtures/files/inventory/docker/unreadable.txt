@@ -1,0 +1,7 @@
+@@elio access
+permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock
+@@elio containers
+@@elio stats
+@@elio images
+@@elio df
+@@elio scanners

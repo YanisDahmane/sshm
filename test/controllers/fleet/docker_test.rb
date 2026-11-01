@@ -1,0 +1,122 @@
+require "test_helper"
+
+class DockerTest < ActionDispatch::IntegrationTest
+  include Devise::Test::IntegrationHelpers
+  include ActiveJob::TestHelper
+
+  NOW = Time.zone.parse("2025-11-01 12:25")
+  PULLED = "sha256:#{"1" * 64}"
+
+  def docker(server)
+    data = Inventory::Collectors::Docker.parse(Inventory::Collectors::Docker.sections(file_fixture("inventory/docker/debian13.txt").read), now: NOW)
+    data["images"].each { |image| image["reference"] = image["tags"].first || image["id"] }
+    data["scans"] = { "sha256:#{"a" * 64}" => { "method" => "elio", "at" => NOW.iso8601, "count" => 2 },
+                      "sha256:#{"c" * 64}" => { "method" => "elio", "at" => NOW.iso8601, "error" => "Base Debian Security Tracker pas encore téléchargée" } }
+    server.inventory_snapshots.create!(category: "docker", status: "ok", collected_at: NOW, checked_at: NOW, data: data.merge("docker" => "ok", "version" => "27.3.1"))
+  end
+
+  def cve(server, image, cve, fixed)
+    server.server_vulnerabilities.create!(origin: "image", source: "debian", image: image, cve: cve, source_package: "openssl", packages: [ "libssl3" ],
+                                          installed_version: "3.0.14-1~deb12u1", fixed_version: fixed, severity: "low")
+  end
+
+  setup do
+    docker(servers(:web))
+    cve(servers(:web), "nginx:1.27", "CVE-2024-9143", "3.0.15-1~deb12u1")
+    cve(servers(:web), "nginx:1.27", "CVE-2024-6119", nil)
+    ImageUpdate.create!(reference: "nginx:1.27", registry: "docker.io", repository: "library/nginx", tag: "1.27", remote_digest: "sha256:#{"9" * 64}", checked_at: NOW)
+    ImageUpdate.create!(reference: "postgres:16", registry: "docker.io", repository: "library/postgres", tag: "16", remote_digest: "sha256:#{"3" * 64}", checked_at: NOW)
+  end
+
+  test "the server tab lists the containers (problems first) and the images with their update and vulnerabilities" do
+    sign_in users(:viewer)
+    travel_to(NOW) { get server_path(servers(:web), tab: "docker") }
+
+    assert_select "nav.server-tabs a[data-tab=docker][aria-current=page]", text: /Docker\s*4/
+    assert_select "#server-docker" do
+      assert_select ".docker-summary", text: %r{2/4 conteneurs en cours\s+· 2 en difficulté\s+· 6 images \(2 inutilisées\)\s+· 1,14 Go d'images, 217 Mo récupérables\s+· analyse : Elio}
+      assert_select "tr.docker-container-row:first-child[data-name=db] .container-state", text: "mauvaise santé"
+      assert_select "tr.docker-container-row[data-name=worker] .container-state", text: "redémarre en boucle"
+      assert_select "tr.docker-container-row[data-name=backup-once]", text: /arrêté\s+backup-once.*arrêté il y a 31 jours/m
+      assert_select "tr.docker-container-row[data-name=web]", text: /12,5 Mo/
+      assert_select "tr.docker-image[data-reference='nginx:1.27']", text: /nouvelle version.*2\s+dont 1 corrigeables/m
+      assert_select "tr.docker-image[data-reference='postgres:16'] .image-update", text: "à jour"
+      assert_select "tr.docker-image[data-reference='postgres:16']", text: /pas encore téléchargée/
+      assert_select "tr.docker-image[data-reference='redis:latest']", text: /latest.*non/m
+    end
+  end
+
+  test "an unreadable Docker is explained, no tab without Docker" do
+    servers(:web).inventory("docker").update!(status: "partial", message: "Docker illisible : permission denied", data: { "docker" => "unreadable", "containers" => [], "images" => [] })
+    sign_in users(:viewer)
+    get server_path(servers(:web), tab: "docker")
+    assert_select ".docker-unreadable", /permission denied/
+
+    get server_path(servers(:db))
+    assert_select "nav.server-tabs a[data-tab=docker]", 0
+  end
+
+  test "the fleet page: containers in trouble, images by repository with their tags, updates and vulnerabilities" do
+    sign_in users(:viewer)
+    travel_to(NOW) do
+      get docker_path
+
+      assert_response :success
+      assert_select "nav.main-nav a[aria-current=page][href=?]", docker_path
+      assert_select "#stat-troubled .stat-value", "2"
+      assert_select "#stat-updates .stat-value", "1"
+      assert_select "#troubled-containers li.troubled-container", 3
+      assert_select "#troubled-containers li.troubled-container", text: /redémarre en boucle\s+Web\s+worker.*12 redémarrages/m
+      assert_select "tr.docker-repository-version:first-child[data-repository=nginx]", text: /nginx\s+1.27\s+Web\s+nouvelle version\s+2\s+dont 1 corrigeables/
+      assert_select "tr.docker-repository-version[data-repository=redis]", text: /aucun conteneur/
+
+      get docker_path(updates: "1")
+      assert_select "tr.docker-repository-version", 1
+      get docker_path(q: "postgres")
+      assert_select "tr.docker-repository-version[data-repository=postgres]", 1
+    end
+  end
+
+  test "the Docker alerts of the settings are health reasons" do
+    servers(:web).refresh_health!
+    assert_equal [ "Conteneur db en mauvaise santé", "Conteneur worker redémarre en boucle" ], servers(:web).health_reason_texts.grep(/Conteneur/)
+    assert_empty servers(:web).health_reason_texts.grep(/image Docker/), "updates are off by default"
+
+    AppSetting.current.update!(docker_alert_unhealthy: false, docker_alert_restarts: false, docker_alert_updates: true)
+    servers(:web).refresh_health!
+    assert_empty servers(:web).health_reason_texts.grep(/Conteneur/)
+    assert_includes servers(:web).health_reason_texts, "1 image Docker à mettre à jour"
+  end
+
+  test "settings: alerts, registry credentials kept encrypted and never shown back, check now" do
+    sign_in users(:one)
+    get settings_docker_path
+    assert_select "nav.settings-nav a[aria-current=page]", "Docker"
+    assert_select "input[type=checkbox][name='app_setting[docker_alert_unhealthy]'][checked]"
+    assert_select ".registries-configured", "Aucun identifiant enregistré."
+    assert_select "tr.image-check", 2
+
+    patch settings_docker_path, params: { app_setting: { docker_alert_updates: "1", docker_registry_credentials: "ghcr.io elio ghp_secret" } }
+    assert_redirected_to settings_docker_path
+    setting = AppSetting.current.reload
+    assert setting.docker_alert_updates
+    assert_equal "ghcr.io elio ghp_secret", setting.docker_registry_credentials
+    assert_not_includes AppSetting.connection.select_value("SELECT docker_registry_credentials FROM app_settings"), "ghp_secret"
+
+    get settings_docker_path
+    assert_select ".registries-configured", /Identifiants enregistrés pour : ghcr.io/
+    assert_no_match "ghp_secret", response.body
+
+    patch settings_docker_path, params: { app_setting: { docker_alert_updates: "1", docker_registry_credentials: "" } }
+    assert_equal "ghcr.io elio ghp_secret", AppSetting.current.reload.docker_registry_credentials, "left blank: kept"
+    patch settings_docker_path, params: { app_setting: { docker_registry_credentials: "pas assez" } }
+    assert_match "Identifiants refusés : ligne 1", flash[:alert]
+    patch settings_docker_path, params: { app_setting: { docker_registry_credentials: "" }, clear_credentials: "1" }
+    assert_nil AppSetting.current.reload.docker_registry_credentials
+
+    post check_settings_docker_path
+    task = BackgroundTask.sole
+    assert_redirected_to task_path(task)
+    assert_enqueued_with(job: RunAutomationJob, args: [ Automation.find_by!(kind: "docker_image_updates"), task ])
+  end
+end

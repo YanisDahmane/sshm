@@ -1,0 +1,7 @@
+{"matches": [
+  {"vulnerability": {"id": "CVE-2024-6119", "severity": "High", "description": "Issue summary: Applications performing certificate name checks might attempt to read an invalid memory address.", "fix": {"versions": ["3.3.2-r1"], "state": "fixed"}},
+   "artifact": {"name": "libssl3", "version": "3.3.2-r0", "type": "apk"}},
+  {"vulnerability": {"id": "CVE-2023-0001", "severity": "Negligible", "fix": {"versions": [], "state": "not-fixed"}},
+   "artifact": {"name": "busybox", "version": "1.36.1-r29", "type": "apk"}}
+ ],
+ "distro": {"name": "alpine", "version": "3.20.3"}}

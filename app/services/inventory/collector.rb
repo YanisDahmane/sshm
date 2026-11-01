@@ -21,10 +21,12 @@ class Inventory::Collector
   CATEGORIES = { "os" => "Inventory::Collectors::Os", "health" => "Inventory::Collectors::Health",
                  "packages" => "Inventory::Collectors::Packages", "services" => "Inventory::Collectors::Services",
                  "ports" => "Inventory::Collectors::Ports", "network" => "Inventory::Collectors::Network",
-                 "scheduled_tasks" => "Inventory::Collectors::ScheduledTasks" }.freeze
+                 "scheduled_tasks" => "Inventory::Collectors::ScheduledTasks",
+                 # Last: a scan that times out ends the SSH session.
+                 "docker" => "Inventory::Collectors::Docker" }.freeze
 
   LABELS = { "os" => "Système", "health" => "Santé", "packages" => "Paquets", "services" => "Services", "ports" => "Ports", "network" => "Réseau",
-             "scheduled_tasks" => "Tâches planifiées" }.freeze
+             "scheduled_tasks" => "Tâches planifiées", "docker" => "Docker" }.freeze
 
   MAX_OUTPUT = 8.megabytes
 
@@ -58,10 +60,12 @@ class Inventory::Collector
     end
   end
 
-  attr_reader :ssh
+  attr_reader :ssh, :previous
 
-  def initialize(ssh)
+  # `previous`: data of the last successful collection of this category (or nil).
+  def initialize(ssh, previous: nil)
     @ssh = ssh
+    @previous = previous
   end
 
   def collect

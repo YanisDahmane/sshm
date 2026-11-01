@@ -11,7 +11,7 @@ class Ssh::CommandsTest < ActiveSupport::TestCase
       assert command.description.present?, "#{command.key}: description"
       assert command.variants.key?("default"), "#{command.key}: default variant"
       assert_includes %w[user root], command.run_as, command.key
-      assert_operator command.timeout, :<=, 60, command.key
+      assert_operator command.timeout, :<=, (command.key.end_with?("_scan") ? 300 : 120), command.key
       assert_equal command.key.start_with?("keys.") && command.key != "keys.read", command.writes?, "#{command.key}: writes"
     end
   end

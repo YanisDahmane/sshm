@@ -15,7 +15,7 @@ class Inventory::HealthStatus
   end
 
   def evaluate
-    reasons = [ *access_reasons, *disk_reasons, *memory_reasons, *load_reasons, *system_reasons, *scheduled_task_reasons, *vulnerability_reasons, *port_reasons, *Integration.health_reasons(@server) ]
+    reasons = [ *access_reasons, *disk_reasons, *memory_reasons, *load_reasons, *system_reasons, *scheduled_task_reasons, *vulnerability_reasons, *docker_reasons, *port_reasons, *Integration.health_reasons(@server) ]
     reasons = reasons.sort_by { |reason| reason.tone == "crit" ? 0 : 1 }
     state = if reasons.any? { |reason| reason.tone == "crit" } then "crit"
     elsif reasons.any? then "warn"
@@ -71,6 +71,30 @@ class Inventory::HealthStatus
 
       Reason.new("warn", list.one? ? "Tâche planifiée #{list.first["name"].delete_suffix(".timer")} #{state}" : "#{list.size} tâches planifiées #{state}")
     end
+  end
+
+  # Docker alerts chosen in the settings: unhealthy and looping containers, images to update.
+  def docker_reasons
+    docker = @server.inventory("docker")
+    return [] unless docker&.collected? && docker.data["docker"] == "ok"
+
+    containers = Array(docker.data["containers"])
+    reasons = []
+    reasons << grouped_reason(containers.select { |container| container["health"] == "unhealthy" }, "en mauvaise santé") if @settings.docker_alert_unhealthy
+    reasons << grouped_reason(containers.select { |container| container["looping"] }, "redémarre en boucle", "redémarrent en boucle") if @settings.docker_alert_restarts
+    if @settings.docker_alert_updates
+      images = Array(docker.data["images"]).select { |image| image["used"] }
+      updates = ImageUpdate.for_images(images)
+      count = images.count { |image| ImageUpdate.state_for(image, updates) == :available }
+      reasons << Reason.new("warn", count == 1 ? "1 image Docker à mettre à jour" : "#{count} images Docker à mettre à jour") if count.positive?
+    end
+    reasons.compact
+  end
+
+  def grouped_reason(containers, one, many = one)
+    return if containers.empty?
+
+    Reason.new("warn", containers.one? ? "Conteneur #{containers.first["name"]} #{one}" : "#{containers.size} conteneurs #{many}")
   end
 
   # Fixable CVEs from the alert severity of the settings: critical.
