@@ -7,7 +7,7 @@
        data-state="hidden" data-action="mouseenter->toast#pause mouseleave->toast#resume">
     <%= icon(type == :alert ? :x_mark : :check, class: "mt-0.5 h-4 w-4 shrink-0") %>
     <p class="flex-1"><%= message %></p>
-    <button type="button" data-action="toast#dismiss" aria-label="Fermer"
+    <button type="button" data-action="toast#dismiss" aria-label="<%= t(".close") %>"
             class="-mr-1 shrink-0 cursor-pointer rounded p-0.5 text-ink-3 hover:bg-subtle hover:text-ink-2">
       <%= icon :x_mark %>
     </button>

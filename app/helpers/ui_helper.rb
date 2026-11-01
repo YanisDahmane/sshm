@@ -52,7 +52,7 @@ module UiHelper
     last_x, last_y = points.last
 
     tag.svg(width: width, height: height, viewBox: "0 0 #{width} #{height}", class: "sparkline overflow-visible",
-            role: "img", aria: { label: title || "Tendance" }) do
+            role: "img", aria: { label: title || t("ui.trend") }) do
       safe_join([
         (tag.title(title) if title),
         tag.path(d: path, fill: "none", stroke: color, "stroke-width" => 2, "stroke-linecap" => "round", "stroke-linejoin" => "round"),
@@ -101,7 +101,7 @@ module UiHelper
     zones = [ 0, *zones, 0 ]
 
     svg = tag.svg(viewBox: "0 0 100 100", preserveAspectRatio: "none", class: "block w-full overflow-visible", style: "height: #{height}px",
-                  role: "img", aria: { label: "#{label} sur 24 heures" }) do
+                  role: "img", aria: { label: t("ui.over_24_hours", label: label) }) do
       safe_join([
         *[ 0, 50, 100 ].map { |v| tag.line(x1: 0, x2: 100, y1: y.(v), y2: y.(v), stroke: "var(--color-line)", "vector-effect" => "non-scaling-stroke") },
         (tag.line(x1: 0, x2: 100, y1: y.(threshold), y2: y.(threshold), stroke: "var(--color-warn)", "stroke-dasharray" => "4 3",
@@ -110,7 +110,7 @@ module UiHelper
         *points.each_with_index.map do |(time, value), i|
           left = x.(time) - zones[i]
           tag.rect(x: left, y: 0, width: [ zones[i] + zones[i + 1], 0.5 ].max, height: 100, fill: "transparent", class: "chart-point") do
-            tag.title("#{l(time, format: "%H:%M")} — #{value.round} %")
+            tag.title("#{l(time, format: "%H:%M")} — #{number_to_percentage(value, precision: 0)}")
           end
         end
       ].compact)

@@ -8,40 +8,40 @@
       <span class="grid h-7 w-7 place-items-center rounded-lg bg-accent-fill text-white"><%= icon :server_stack, class: "h-4 w-4" %></span>
       Elio
     <% end %>
-    <button type="button" data-action="sidebar#close" aria-label="Fermer le menu" class="btn btn-ghost btn-icon lg:hidden"><%= icon :x_mark %></button>
+    <button type="button" data-action="sidebar#close" aria-label="<%= t(".close_menu") %>" class="btn btn-ghost btn-icon lg:hidden"><%= icon :x_mark %></button>
   </div>
 
   <%= render "shared/command_palette_button" %>
 
-  <nav class="main-nav mt-4 space-y-0.5" aria-label="Navigation principale">
-    <%= sidebar_link "Vue d'ensemble", root_path, icon: :squares_2x2, active: controller_name == "dashboard" %>
-    <%= sidebar_link "Parc", servers_path, icon: :server_stack, count: Server.count,
+  <nav class="main-nav mt-4 space-y-0.5" aria-label="<%= t(".main_navigation") %>">
+    <%= sidebar_link t("nav.overview"), root_path, icon: :squares_2x2, active: controller_name == "dashboard" %>
+    <%= sidebar_link t("nav.fleet"), servers_path, icon: :server_stack, count: Server.count,
                      active: controller_name.start_with?("server") && controller_name != "server_groups" %>
-    <%= sidebar_link "Paquets", packages_path, icon: :cube, active: controller_name == "packages" %>
-    <%= sidebar_link "Vulnérabilités", vulnerabilities_path, icon: :shield_exclamation, active: controller_name == "vulnerabilities" && !controller_path.start_with?("settings") %>
-    <%= sidebar_link "Docker", docker_path, icon: :container, active: controller_path == "docker" %>
-    <%= sidebar_link "Ports", ports_path, icon: :globe, active: controller_name == "ports" %>
-    <%= sidebar_link "Tâches planifiées", scheduled_tasks_path, icon: :calendar, active: controller_name == "scheduled_tasks" %>
+    <%= sidebar_link t("nav.packages"), packages_path, icon: :cube, active: controller_name == "packages" %>
+    <%= sidebar_link t("nav.vulnerabilities"), vulnerabilities_path, icon: :shield_exclamation, active: controller_name == "vulnerabilities" && !controller_path.start_with?("settings") %>
+    <%= sidebar_link t("nav.docker"), docker_path, icon: :container, active: controller_path == "docker" %>
+    <%= sidebar_link t("nav.ports"), ports_path, icon: :globe, active: controller_name == "ports" %>
+    <%= sidebar_link t("nav.scheduled_tasks"), scheduled_tasks_path, icon: :calendar, active: controller_name == "scheduled_tasks" %>
     <% Integration.sidebar_links.each do |link| %>
       <%= sidebar_link link[:label], public_send(link[:path]), icon: link[:icon], active: controller_path == link[:controller], data: { integration_link: true } %>
     <% end %>
-    <%= sidebar_link "Trousseau", public_keys_path, icon: :key, count: PublicKey.count, active: controller_name == "public_keys" %>
-    <%= sidebar_link "Activité", activities_path, icon: :pulse, active: controller_name == "activities" %>
-    <%= sidebar_link "Tâches", tasks_path, icon: :clock, count: BackgroundTask.unfinished.count.nonzero?, active: controller_name == "tasks",
-                     id: "sidebar-tasks", title: "Tâches en arrière-plan" %>
+    <%= sidebar_link t("nav.keyring"), public_keys_path, icon: :key, count: PublicKey.count, active: controller_name == "public_keys" %>
+    <%= sidebar_link t("nav.activity"), activities_path, icon: :pulse, active: controller_name == "activities" %>
+    <%= sidebar_link t("nav.tasks"), tasks_path, icon: :clock, count: BackgroundTask.unfinished.count.nonzero?, active: controller_name == "tasks",
+                     id: "sidebar-tasks", title: t("nav.tasks_title") %>
     <% if can?(:administer) %>
-      <%= sidebar_link "Automatisations", settings_automations_path, icon: :bolt, active: controller_path == "settings/automations" %>
-      <%= sidebar_link "Paramètres", settings_path, icon: :cog, active: settings_active, title: "Paramètres" %>
+      <%= sidebar_link t("nav.automations"), settings_automations_path, icon: :bolt, active: controller_path == "settings/automations" %>
+      <%= sidebar_link t("nav.settings"), settings_path, icon: :cog, active: settings_active, title: t("nav.settings") %>
     <% end %>
   </nav>
 
   <% groups = sidebar_server_groups %>
   <% if groups.any? %>
     <div class="mt-6 flex items-center justify-between px-2.5">
-      <p class="text-[11px] font-semibold tracking-wider text-ink-3 uppercase">Groupes</p>
-      <%= link_to "Gérer", server_groups_path, class: "text-[11px] text-ink-3 hover:text-ink" %>
+      <p class="text-[11px] font-semibold tracking-wider text-ink-3 uppercase"><%= t(".groups") %></p>
+      <%= link_to t(".manage"), server_groups_path, class: "text-[11px] text-ink-3 hover:text-ink" %>
     </div>
-    <nav class="sidebar-groups mt-1 space-y-0.5" aria-label="Groupes de serveurs">
+    <nav class="sidebar-groups mt-1 space-y-0.5" aria-label="<%= t("nav.server_groups") %>">
       <% groups.each do |group| %>
         <% active = controller_name == "servers" && params[:group].to_s == group.id.to_s %>
         <%= link_to servers_path(group: group.id), aria: { current: (active ? "page" : nil) },
@@ -55,7 +55,7 @@
   <% end %>
 
   <div class="mt-auto space-y-1 border-t border-line pt-3">
-    <%= link_to account_path, title: "Mon compte", aria: { current: (controller_name == "accounts" ? "page" : nil) },
+    <%= link_to account_path, title: t("nav.account"), aria: { current: (controller_name == "accounts" ? "page" : nil) },
           class: "account-link flex items-center gap-2 rounded-lg px-2.5 py-1.5 hover:bg-subtle" do %>
       <span class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-subtle text-xs font-semibold text-ink-2"><%= current_user.email.first(2).upcase %></span>
       <span class="min-w-0 leading-tight">
@@ -67,11 +67,11 @@
       <button type="button" data-controller="theme" data-action="theme#toggle" aria-pressed="false"
               class="theme-toggle btn btn-ghost flex-1 justify-start px-2.5 text-xs">
         <%= icon :moon, class: "h-4 w-4 dark:hidden" %><%= icon :sun, class: "hidden h-4 w-4 dark:block" %>
-        <span data-theme-target="label">Thème sombre</span>
+        <span data-theme-target="label"><%= t(".dark_theme") %></span>
       </button>
-      <%= button_to destroy_user_session_path, method: :delete, title: "Déconnexion", aria: { label: "Déconnexion" },
+      <%= button_to destroy_user_session_path, method: :delete, title: t(".sign_out"), aria: { label: t(".sign_out") },
             class: "btn btn-ghost btn-icon" do %>
-        <%= icon :logout %><span class="sr-only">Déconnexion</span>
+        <%= icon :logout %><span class="sr-only"><%= t(".sign_out") %></span>
       <% end %>
     </div>
     <%= link_to "Elio #{Elio::VERSION}", "https://github.com/elio-fleet/elio/releases", target: "_blank", rel: "noopener",

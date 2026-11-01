@@ -9,3 +9,8 @@ fr:
     locale:
       saved: Langue enregistrée.
       invalid: Cette langue n'est pas disponible.
+  users:
+    roles:
+      admin: Admin
+      operator: Opérateur
+      viewer: Lecture

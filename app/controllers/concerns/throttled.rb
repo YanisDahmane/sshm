@@ -9,9 +9,9 @@ module Throttled
   class_methods do
     # `to` requests per IP `within` the period; then back to `redirect` (a
     # route helper name) with a message, 429.
-    def throttle(only:, to:, within:, redirect:, message: "Trop de tentatives : réessayez dans quelques minutes.")
+    def throttle(only:, to:, within:, redirect:)
       rate_limit to: to, within: within, only: only, store: STORE, name: "#{controller_path}##{Array(only).join(",")}",
-                 with: -> { redirect_to main_app.public_send(redirect), alert: message, status: :see_other }
+                 with: -> { redirect_to main_app.public_send(redirect), alert: I18n.t("throttled.too_many"), status: :see_other }
     end
   end
 end

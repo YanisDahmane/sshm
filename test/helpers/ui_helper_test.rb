@@ -90,7 +90,7 @@ class UiHelperTest < ActionView::TestCase
       assert_select "svg[role=img][aria-label='Mémoire sur 24 heures'] path[d='M50.0,60.0 L100.0,20.0']"
       assert_select "line.chart-threshold[y1='10.0']"
       assert_select "rect.chart-point", 2
-      assert_select "rect.chart-point title", "00:00 — 40 %"
+      assert_select "rect.chart-point title", "00:00 — 40\u00A0%"
     end
   end
 

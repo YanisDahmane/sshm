@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { t } from "i18n"
 
 // Light / dark theme toggle. The choice is remembered in localStorage
 // ("elio-theme"); without one, the OS preference applies (see the inline
@@ -20,6 +21,6 @@ export default class extends Controller {
   update() {
     const dark = document.documentElement.classList.contains("dark")
     this.element.setAttribute("aria-pressed", dark)
-    if (this.hasLabelTarget) this.labelTarget.textContent = dark ? "Thème clair" : "Thème sombre"
+    if (this.hasLabelTarget) this.labelTarget.textContent = t(dark ? "theme.light" : "theme.dark")
   }
 }

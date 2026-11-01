@@ -44,7 +44,7 @@ class Invitation < ApplicationRecord
     end
   end
 
-  def role_label = User::ROLE_LABELS.fetch(role)
+  def role_label = User.role_label(role)
 
   # Creates the account with the invitation's email and role.
   def accept!(password:, password_confirmation:)

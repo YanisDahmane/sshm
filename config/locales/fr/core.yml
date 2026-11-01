@@ -1,0 +1,95 @@
+fr:
+  nav:
+    overview: Vue d'ensemble
+    fleet: Parc
+    packages: Paquets
+    vulnerabilities: Vulnérabilités
+    docker: Docker
+    ports: Ports
+    scheduled_tasks: Tâches planifiées
+    keyring: Trousseau
+    activity: Activité
+    tasks: Tâches
+    tasks_title: Tâches en arrière-plan
+    automations: Automatisations
+    settings: Paramètres
+    server_groups: Groupes de serveurs
+    account: Mon compte
+  command_palette:
+    pages: Pages
+    groups: Groupes
+    servers: Serveurs
+    keyring: Trousseau
+    hints:
+      fleet: serveurs
+      packages: recherche sur tout le parc
+      ports: ports publics du parc
+      scheduled_tasks: cron et timers du parc
+      vulnerabilities: CVE du parc
+      docker: conteneurs et images du parc
+      keyring: clés SSH
+      tasks: inventaires et scans en arrière-plan
+      extension: extension
+      import: CSV, ~/.ssh/config
+      settings: clé SSH d'Elio
+      settings_page: paramètres
+      automations: collectes planifiées
+      vulnerability_feeds: import
+      docker_settings: alerts
+      group: serveurs du groupe
+    import_servers: Importer des serveurs
+    add_server: Ajouter un serveur
+    add_key: Ajouter une clé au trousseau
+    notifications: Notifications
+    vulnerability_feeds: Bases de vulnérabilités
+    jobs: Suivi technique des jobs
+  shared:
+    command_palette:
+      label: Recherche rapide
+      placeholder: key
+      no_results: Aucun résultat.
+      navigate: naviguer
+      open: ouvrir
+      escape: Échap
+      close: fermer
+    command_palette_button:
+      label: Rechercher (⌘K)
+      text: Rechercher…
+    confirm_dialog:
+      title: Êtes-vous sûr ?
+      cancel: Annuler
+      confirm: Confirmer
+    flash:
+      close: Fermer
+    pagination:
+      label: Pagination
+      items: éléments
+      info: "%{from}–%{to} sur %{total} %{items}"
+      previous_label: Page précédente
+      previous: Précédente
+      next_label: Page suivante
+      next: Suivante
+      page: Page %{number}
+  layouts:
+    sidebar:
+      close_menu: Fermer le menu
+      main_navigation: Navigation principale
+      groups: Groupes
+      manage: Gérer
+      dark_theme: Thème sombre
+      sign_out: Déconnexion
+    application:
+      open_menu: Ouvrir le menu
+  errors:
+    forbidden:
+      title: Accès refusé
+      ask: Demandez à un administrateur si vous avez besoin de ce droit.
+      back: Retour à la vue d'ensemble
+  title: "%{page} · Elio"
+  authorization:
+    forbidden: Votre rôle (%{role}) ne permet pas cette action.
+  throttled:
+    too_many: 'Trop de tentatives : réessayez dans quelques minutes.'
+  ui:
+    trend: Tendance
+    over_24_hours: "%{label} sur 24 heures"

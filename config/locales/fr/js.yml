@@ -2,3 +2,27 @@ fr:
   js:
     clipboard:
       copied: Copié
+    relative_time:
+      just_now: à l'instant
+      within_a_minute: dans moins d'une minute
+      ago: il y a %{time}
+      from_now: dans %{time}
+      minutes:
+        one: "%{count} minute"
+        other: "%{count} minutes"
+      hours:
+        one: "%{count} heure"
+        other: "%{count} heures"
+      days:
+        one: "%{count} jour"
+        other: "%{count} jours"
+    theme:
+      light: Thème clair
+      dark: Thème sombre
+    confirm:
+      accept: Confirmer
+    command_palette:
+      server_tabs: Onglets des serveurs
+      search: Rechercher
+      port: Qui expose le port %{port} ?
+      package: Chercher le paquet « %{package} » sur le parc

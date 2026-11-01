@@ -9,3 +9,8 @@ en:
     locale:
       saved: Language saved.
       invalid: This language is not available.
+  users:
+    roles:
+      admin: Admin
+      operator: Operator
+      viewer: Read-only

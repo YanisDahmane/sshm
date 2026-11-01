@@ -30,7 +30,7 @@ module Authorization
   end
 
   def render_forbidden
-    message = "Votre rôle (#{current_user.role_label}) ne permet pas cette action."
+    message = I18n.t("authorization.forbidden", role: current_user.role_label)
 
     respond_to do |format|
       format.turbo_stream do

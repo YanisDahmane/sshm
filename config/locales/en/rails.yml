@@ -44,36 +44,40 @@ en:
         server:
           attributes:
             extra_addresses_text:
-              invalid_ips: "contain values that are not IP addresses: %{addresses}"
+              invalid_ips: 'contain values that are not IP addresses: %{addresses}'
         notification_channel:
           attributes:
             recipients:
-              too_many: "cannot be more than %{count} addresses"
-              invalid_emails: "contain invalid addresses: %{emails}"
+              too_many: cannot be more than %{count} addresses
+              invalid_emails: 'contain invalid addresses: %{emails}'
         server_group:
           attributes:
             expected_ports:
-              invalid_ports: "contain invalid values: %{ports} (for example: “22, 80, 443/tcp, 51820/udp”)"
+              invalid_ports: 'contain invalid values: %{ports} (for example: “22, 80, 443/tcp, 51820/udp”)'
         public_key:
           attributes:
             content:
-              invalid: "must be a single public key, for example “ssh-ed25519 AAAA… alice@laptop”"
-              private_key: "looks like a private key: paste the public key (.pub file)"
-              app_key: "is Elio's key and cannot be added to the keyring"
+              invalid: must be a single public key, for example “ssh-ed25519 AAAA… alice@laptop”
+              private_key: 'looks like a private key: paste the public key (.pub file)'
+              app_key: is Elio's key and cannot be added to the keyring
             fingerprint:
-              taken: "is already in the keyring"
+              taken: is already in the keyring
         user:
           attributes:
             base:
-              last_admin: "There must always be at least one active administrator."
+              last_admin: There must always be at least one active administrator.
         invitation:
           attributes:
             email:
-              taken_by_user: "already belongs to a user"
-              already_invited: "already has a pending invitation"
+              taken_by_user: already belongs to a user
+              already_invited: already has a pending invitation
   devise:
     failure:
-      deactivated: "This account has been deactivated. Contact an administrator."
+      deactivated: This account has been deactivated. Contact an administrator.
   time:
     formats:
       short: "%b %d %H:%M"
+  number:
+    percentage:
+      format:
+        format: "%n%"

@@ -1,0 +1,12 @@
+fr:
+  servers:
+    tabs:
+      overview: Vue d'ensemble
+      packages: Paquets
+      vulnerabilities: Vulnérabilités
+      services: Services
+      docker: Docker
+      schedules: Tâches planifiées
+      ports: Ports
+      keys: Clés SSH
+      history: Historique

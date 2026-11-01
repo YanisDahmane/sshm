@@ -35,7 +35,7 @@ class ServerHealthCardTest < ActionDispatch::IntegrationTest
       assert_select ".health-facts", text: /fail2ban\.service/
       assert_select ".history-chart", 3
       assert_select ".history-chart rect.chart-point", 6
-      assert_select ".history-chart rect.chart-point title", text: /— 94 %/
+      assert_select ".history-chart rect.chart-point title", text: /— 94\u00A0%/
       assert_select ".history-chart line.chart-threshold", 2
       assert_select ".health-disks tbody tr", 3
     end

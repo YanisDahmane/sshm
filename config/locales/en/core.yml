@@ -1,0 +1,95 @@
+en:
+  nav:
+    overview: Overview
+    fleet: Fleet
+    packages: Packages
+    vulnerabilities: Vulnerabilities
+    docker: Docker
+    ports: Ports
+    scheduled_tasks: Scheduled tasks
+    keyring: Keyring
+    activity: Activity
+    tasks: Tasks
+    tasks_title: Background tasks
+    automations: Automations
+    settings: Settings
+    server_groups: Server groups
+    account: My account
+  command_palette:
+    pages: Pages
+    groups: Groups
+    servers: Servers
+    keyring: Keyring
+    hints:
+      fleet: servers
+      packages: search the whole fleet
+      ports: public ports of the fleet
+      scheduled_tasks: cron jobs and timers of the fleet
+      vulnerabilities: CVEs of the fleet
+      docker: containers and images of the fleet
+      keyring: SSH keys
+      tasks: inventories and scans in the background
+      extension: extension
+      import: CSV, ~/.ssh/config
+      settings: Elio's SSH key
+      settings_page: settings
+      automations: scheduled collections
+      vulnerability_feeds: settings
+      docker_settings: settings
+      group: servers of the group
+    import_servers: Import servers
+    add_server: Add a server
+    add_key: Add a key to the keyring
+    notifications: Notifications
+    vulnerability_feeds: Vulnerability feeds
+    jobs: Technical job monitoring
+  shared:
+    command_palette:
+      label: Quick search
+      placeholder: Server
+      no_results: No results.
+      navigate: navigate
+      open: open
+      escape: Esc
+      close: close
+    command_palette_button:
+      label: Search (⌘K)
+      text: Search…
+    confirm_dialog:
+      title: Are you sure?
+      cancel: Cancel
+      confirm: Confirm
+    flash:
+      close: Close
+    pagination:
+      label: Pagination
+      items: items
+      info: "%{from}–%{to} of %{total} %{items}"
+      previous_label: Previous page
+      previous: Previous
+      next_label: Next page
+      next: Next
+      page: Page %{number}
+  layouts:
+    sidebar:
+      close_menu: Close the menu
+      main_navigation: Main navigation
+      groups: Groups
+      manage: Manage
+      dark_theme: Dark theme
+      sign_out: Sign out
+    application:
+      open_menu: Open the menu
+  errors:
+    forbidden:
+      title: Access denied
+      ask: Ask an administrator if you need this permission.
+      back: Back to the overview
+  title: "%{page} · Elio"
+  authorization:
+    forbidden: Your role (%{role}) does not allow this action.
+  throttled:
+    too_many: 'Too many attempts: try again in a few minutes.'
+  ui:
+    trend: Trend
+    over_24_hours: "%{label} over 24 hours"

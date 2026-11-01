@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { t } from "i18n"
 
 // Quick search over pages, groups, servers (also by host name and IP, the
 // `keywords`), keyring keys and the tabs of the servers (built here, listed
@@ -47,26 +48,26 @@ export default class extends Controller {
     this.render()
   }
 
-  // "Web › Paquets"…: the tabs of every server, built here (only listed once
+  // "Web › Packages"…: the tabs of every server, built here (only listed once
   // something is typed) rather than sent for each server in every page.
   serverTabs() {
     if (!this.tabItems) {
       const tabs = Object.entries(JSON.parse(this.dialogTarget.dataset.serverTabs || "{}"))
       this.tabItems = this.items.filter((item) => item.server).flatMap((server) =>
-        tabs.map(([tab, label]) => ({ group: "Onglets des serveurs", label: `${server.label} › ${label}`, url: `${server.url}?tab=${tab}` })))
+        tabs.map(([tab, label]) => ({ group: t("command_palette.server_tabs"), label: `${server.label} › ${label}`, url: `${server.url}?tab=${tab}` })))
     }
     return this.tabItems
   }
 
-  // "Chercher le paquet « … »" and, for a port number, "Qui expose le port … ?".
+  // "Find the package “…”" and, for a port number, "Who exposes port …?".
   searches(query) {
     if (query.length < 2) return []
     const { packagesUrl, portsUrl } = this.dialogTarget.dataset
     const searches = []
     if (/^\d{1,5}$/.test(query) && Number(query) <= 65535) {
-      searches.push({ group: "Rechercher", label: `Qui expose le port ${query} ?`, url: `${portsUrl}?q=${query}` })
+      searches.push({ group: t("command_palette.search"), search: true, label: t("command_palette.port", { port: query }), url: `${portsUrl}?q=${query}` })
     }
-    searches.push({ group: "Rechercher", label: `Chercher le paquet « ${query} » sur le parc`, url: `${packagesUrl}?q=${encodeURIComponent(query)}` })
+    searches.push({ group: t("command_palette.search"), search: true, label: t("command_palette.package", { package: query }), url: `${packagesUrl}?q=${encodeURIComponent(query)}` })
     return searches
   }
 
@@ -90,7 +91,7 @@ export default class extends Controller {
 
   render() {
     this.resultsTarget.replaceChildren()
-    this.emptyTarget.hidden = this.matches.some((item) => item.group !== "Rechercher")
+    this.emptyTarget.hidden = this.matches.some((item) => !item.search)
     let group = null
 
     this.matches.forEach((item, index) => {

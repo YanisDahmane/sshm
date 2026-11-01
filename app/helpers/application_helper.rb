@@ -18,20 +18,21 @@ module ApplicationHelper
       safe_join([ label, (tag.span(" #{count}", class: "tabular-nums opacity-70") if count) ].compact)
     end
   end
-  # French relative time, e.g. "il y a 3 minutes", "dans 2 heures", "à l'instant".
-  # Mirrored by app/javascript/controllers/relative_time_controller.js: keep both in sync.
+  # Relative time, e.g. "3 minutes ago", "in 2 hours", "just now".
+  # Mirrored by app/javascript/controllers/relative_time_controller.js, with
+  # the same texts (js.relative_time): keep both in sync.
   def relative_time_in_words(time, now: Time.current)
     seconds = (time - now).round
-    return (seconds.positive? ? "dans moins d'une minute" : "à l'instant") if seconds.abs < 60
+    return t(seconds.positive? ? "js.relative_time.within_a_minute" : "js.relative_time.just_now") if seconds.abs < 60
 
     minutes = (seconds.abs / 60.0).round
     hours = (minutes / 60.0).round
-    words = if minutes < 60 then pluralize(minutes, "minute", plural: "minutes")
-    elsif hours < 24 then pluralize(hours, "heure", plural: "heures")
-    else pluralize((hours / 24.0).round, "jour", plural: "jours")
+    words = if minutes < 60 then t("js.relative_time.minutes", count: minutes)
+    elsif hours < 24 then t("js.relative_time.hours", count: hours)
+    else t("js.relative_time.days", count: (hours / 24.0).round)
     end
 
-    seconds.positive? ? "dans #{words}" : "il y a #{words}"
+    t(seconds.positive? ? "js.relative_time.from_now" : "js.relative_time.ago", time: words)
   end
 
   # <time> showing `prefix` + the relative time, kept up to date in the browser,
@@ -56,36 +57,42 @@ module ApplicationHelper
     "mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo '#{ssh_key.public_key}' >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
   end
 
-  SERVER_TAB_LABELS = { "packages" => "Paquets", "vulnerabilities" => "Vulnérabilités", "services" => "Services", "docker" => "Docker", "schedules" => "Tâches planifiées", "ports" => "Ports", "keys" => "Clés SSH", "history" => "Historique" }.freeze
+  # Tabs of a server page (but the overview) and their labels, for ⌘K.
+  def server_tab_labels = (ServersController::TABS - [ "overview" ]).index_with { |tab| t("servers.tabs.#{tab}") }
 
   # Entries of the ⌘K quick search: pages, groups, servers (`server: true`:
-  # the browser derives their tabs from SERVER_TAB_LABELS once something is
+  # the browser derives their tabs from server_tab_labels once something is
   # typed, so a big fleet does not weigh on every page) and keyring keys.
   def command_palette_items
+    hint = ->(key) { t("command_palette.hints.#{key}") }
     pages = [
-      { label: "Vue d'ensemble", url: root_path }, { label: "Parc", hint: "serveurs", url: servers_path }, { label: "Paquets", hint: "recherche sur tout le parc", url: packages_path }, { label: "Ports", hint: "ports publics du parc", url: ports_path }, { label: "Tâches planifiées", hint: "cron et timers du parc", url: scheduled_tasks_path }, { label: "Vulnérabilités", hint: "CVE du parc", url: vulnerabilities_path }, { label: "Docker", hint: "conteneurs et images du parc", url: docker_path }, { label: "Trousseau", hint: "clés SSH", url: public_keys_path },
-      { label: "Groupes de serveurs", url: server_groups_path },
-      { label: "Activité", url: activities_path },
-      { label: "Tâches", hint: "inventaires et scans en arrière-plan", url: tasks_path },
-      *Integration.sidebar_links.map { |link| { label: link[:label], hint: "extension", url: public_send(link[:path]) } }
+      { label: t("nav.overview"), url: root_path }, { label: t("nav.fleet"), hint: hint.(:fleet), url: servers_path },
+      { label: t("nav.packages"), hint: hint.(:packages), url: packages_path }, { label: t("nav.ports"), hint: hint.(:ports), url: ports_path },
+      { label: t("nav.scheduled_tasks"), hint: hint.(:scheduled_tasks), url: scheduled_tasks_path }, { label: t("nav.vulnerabilities"), hint: hint.(:vulnerabilities), url: vulnerabilities_path },
+      { label: t("nav.docker"), hint: hint.(:docker), url: docker_path }, { label: t("nav.keyring"), hint: hint.(:keyring), url: public_keys_path },
+      { label: t("nav.server_groups"), url: server_groups_path },
+      { label: t("nav.activity"), url: activities_path },
+      { label: t("nav.tasks"), hint: hint.(:tasks), url: tasks_path },
+      *Integration.sidebar_links.map { |link| { label: link[:label], hint: hint.(:extension), url: public_send(link[:path]) } }
     ]
-    pages += [ { label: "Importer des serveurs", hint: "CSV, ~/.ssh/config", url: new_server_import_path }, { label: "Ajouter un serveur", url: new_server_path }, { label: "Ajouter une clé au trousseau", url: new_public_key_path } ] if can?(:operate)
+    pages += [ { label: t("command_palette.import_servers"), hint: hint.(:import), url: new_server_import_path }, { label: t("command_palette.add_server"), url: new_server_path },
+               { label: t("command_palette.add_key"), url: new_public_key_path } ] if can?(:operate)
     pages += [
-      { label: "Paramètres", hint: "clé SSH d'Elio", url: settings_path },
-      { label: "Notifications", hint: "paramètres", url: settings_notifications_path },
-      { label: "Automatisations", hint: "collectes planifiées", url: settings_automations_path },
-      { label: "Bases de vulnérabilités", hint: "paramètres, import", url: settings_vulnerabilities_path },
-      { label: "Docker", hint: "paramètres, alertes, registres", url: settings_docker_path },
-      { label: "Suivi technique des jobs", hint: "Mission Control", url: "/jobs" }
+      { label: t("nav.settings"), hint: hint.(:settings), url: settings_path },
+      { label: t("command_palette.notifications"), hint: hint.(:settings_page), url: settings_notifications_path },
+      { label: t("nav.automations"), hint: hint.(:automations), url: settings_automations_path },
+      { label: t("command_palette.vulnerability_feeds"), hint: hint.(:vulnerability_feeds), url: settings_vulnerabilities_path },
+      { label: t("nav.docker"), hint: hint.(:docker_settings), url: settings_docker_path },
+      { label: t("command_palette.jobs"), hint: "Mission Control", url: "/jobs" }
     ] if can?(:administer)
-    pages = pages.map { |page| page.merge(group: "Pages") }
+    pages = pages.map { |page| page.merge(group: t("command_palette.pages")) }
 
-    groups = ServerGroup.order(:name).map { |group| { group: "Groupes", label: group.name, hint: "serveurs du groupe", url: servers_path(group: group.id) } }
+    groups = ServerGroup.order(:name).map { |group| { group: t("command_palette.groups"), label: group.name, hint: hint.(:group), url: servers_path(group: group.id) } }
     servers = Server.order(:name).includes(:server_groups, :inventory_snapshots).map do |server|
-      { group: "Serveurs", label: server.name, hint: [ "#{server.username}@#{server.host}", server.distinct_hostname, *server.server_groups.map(&:name) ].compact.join(" · "),
+      { group: t("command_palette.servers"), label: server.name, hint: [ "#{server.username}@#{server.host}", server.distinct_hostname, *server.server_groups.map(&:name) ].compact.join(" · "),
         url: server_path(server), keywords: ([ server.hostname ] + server.addresses).compact.uniq.join(" ").presence, server: true }.compact
     end
-    public_keys = PublicKey.order(:name).map { |public_key| { group: "Trousseau", label: public_key.name, hint: public_key.kind_label, url: public_key_path(public_key) } }
+    public_keys = PublicKey.order(:name).map { |public_key| { group: t("command_palette.keyring"), label: public_key.name, hint: public_key.kind_label, url: public_key_path(public_key) } }
     pages + groups + servers + public_keys
   end
 

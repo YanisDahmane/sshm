@@ -1,19 +1,19 @@
 <%# Quick search (⌘K / Ctrl+K) over pages, servers and keyring keys; see command_palette_controller.js. %>
-<dialog id="command-palette" data-command-palette-target="dialog" aria-label="Recherche rapide"
+<dialog id="command-palette" data-command-palette-target="dialog" aria-label="<%= t(".label") %>"
         data-packages-url="<%= packages_path %>" data-ports-url="<%= ports_path %>"
-        data-server-tabs="<%= ApplicationHelper::SERVER_TAB_LABELS.merge(Integration.server_tabs.to_h { |tab| [ tab[:key], tab[:label] ] }).to_json %>"
+        data-server-tabs="<%= server_tab_labels.merge(Integration.server_tabs.to_h { |tab| [ tab[:key], tab[:label] ] }).to_json %>"
         class="mx-auto mt-24 w-full max-w-lg rounded-xl border border-line bg-surface p-0 shadow-2xl backdrop:bg-neutral-950/40 backdrop:backdrop-blur-sm">
   <div class="flex items-center gap-3 border-b border-line px-4">
     <%= icon :magnifying_glass, class: "h-5 w-5 text-ink-3" %>
     <input type="search" data-command-palette-target="input" data-action="input->command-palette#filter keydown->command-palette#navigate"
-           placeholder="Serveur, clé, page, paquet, port…" autocomplete="off" spellcheck="false"
-           role="combobox" aria-expanded="true" aria-controls="command-palette-results" aria-autocomplete="list" aria-label="Recherche rapide"
+           placeholder="<%= t(".placeholder") %>" autocomplete="off" spellcheck="false"
+           role="combobox" aria-expanded="true" aria-controls="command-palette-results" aria-autocomplete="list" aria-label="<%= t(".label") %>"
            class="w-full border-0 py-4 text-sm text-ink placeholder:text-ink-3 focus:outline-none focus:ring-0">
   </div>
   <ul id="command-palette-results" data-command-palette-target="results" role="listbox" class="max-h-80 overflow-y-auto p-2"></ul>
-  <p data-command-palette-target="empty" hidden class="px-4 py-8 text-center text-sm text-ink-3">Aucun résultat.</p>
+  <p data-command-palette-target="empty" hidden class="px-4 py-8 text-center text-sm text-ink-3"><%= t(".no_results") %></p>
   <div class="flex gap-4 border-t border-line px-4 py-2 text-xs text-ink-3">
-    <span><kbd class="font-sans">↑↓</kbd> naviguer</span><span><kbd class="font-sans">↵</kbd> ouvrir</span><span><kbd class="font-sans">Échap</kbd> fermer</span>
+    <span><kbd class="font-sans">↑↓</kbd> <%= t(".navigate") %></span><span><kbd class="font-sans">↵</kbd> <%= t(".open") %></span><span><kbd class="font-sans"><%= t(".escape") %></kbd> <%= t(".close") %></span>
   </div>
   <script type="application/json" data-command-palette-target="items"><%= raw json_escape(command_palette_items.to_json) %></script>
 </dialog>

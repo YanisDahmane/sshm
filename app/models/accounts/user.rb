@@ -11,7 +11,6 @@ class User < ApplicationRecord
 
   include TwoFactorAuthenticatable
 
-  ROLE_LABELS = { "admin" => "Admin", "operator" => "Opérateur", "viewer" => "Lecture" }.freeze
 
   # What each permission level allows (see Authorization):
   # - view: see everything (dashboard, servers, keys, public_keys, activity)
@@ -31,7 +30,11 @@ class User < ApplicationRecord
 
   def can?(permission) = PERMISSIONS.fetch(permission).include?(role)
 
-  def role_label = ROLE_LABELS.fetch(role)
+  def role_label = I18n.t("users.roles.#{role}")
+
+  def self.role_label(role) = I18n.t("users.roles.#{role}")
+
+  def self.role_options = roles.keys.map { |role| [ role_label(role), role ] }
 
   def deactivated? = deactivated_at.present?
 

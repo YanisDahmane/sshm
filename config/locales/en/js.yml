@@ -1,5 +1,28 @@
-# Texts of the JavaScript controllers (app/javascript/i18n.js).
 en:
   js:
     clipboard:
       copied: Copied
+    relative_time:
+      just_now: just now
+      within_a_minute: in less than a minute
+      ago: "%{time} ago"
+      from_now: in %{time}
+      minutes:
+        one: "%{count} minute"
+        other: "%{count} minutes"
+      hours:
+        one: "%{count} hour"
+        other: "%{count} hours"
+      days:
+        one: "%{count} day"
+        other: "%{count} days"
+    theme:
+      light: Light theme
+      dark: Dark theme
+    confirm:
+      accept: Confirm
+    command_palette:
+      server_tabs: Server tabs
+      search: Search
+      port: Who exposes port %{port}?
+      package: Find the package “%{package}” on the fleet

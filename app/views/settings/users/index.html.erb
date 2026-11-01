@@ -12,7 +12,7 @@
     </div>
     <div>
       <%= f.label :role, "Rôle", class: "label" %>
-      <%= f.select :role, User::ROLE_LABELS.invert, {},
+      <%= f.select :role, User.role_options, {},
             class: "input w-auto mt-1" %>
     </div>
     <%= f.submit "Créer l'invitation", class: "btn btn-primary" %>
@@ -77,7 +77,7 @@
           </p>
         </div>
         <%= form_with model: user, url: settings_user_path(user), class: "flex flex-wrap items-center gap-2" do |f| %>
-          <%= f.select :role, User::ROLE_LABELS.invert, {}, aria: { label: "Rôle de #{user.email}" }, class: select_class %>
+          <%= f.select :role, User.role_options, {}, aria: { label: "Rôle de #{user.email}" }, class: select_class %>
           <%= f.submit "Enregistrer", class: "btn btn-secondary" %>
         <% end %>
         <% if user.two_factor_enabled? && user != current_user %>

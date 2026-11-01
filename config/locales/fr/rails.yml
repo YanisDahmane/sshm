@@ -44,36 +44,40 @@ fr:
         server:
           attributes:
             extra_addresses_text:
-              invalid_ips: "contiennent des valeurs qui ne sont pas des adresses IP : %{addresses}"
+              invalid_ips: 'contiennent des valeurs qui ne sont pas des adresses IP : %{addresses}'
         notification_channel:
           attributes:
             recipients:
-              too_many: "ne peuvent pas dépasser %{count} adresses"
-              invalid_emails: "contiennent des adresses invalides : %{emails}"
+              too_many: ne peuvent pas dépasser %{count} adresses
+              invalid_emails: 'contiennent des adresses invalides : %{emails}'
         server_group:
           attributes:
             expected_ports:
-              invalid_ports: "contiennent des valeurs invalides : %{ports} (exemple : « 22, 80, 443/tcp, 51820/udp »)"
+              invalid_ports: 'contiennent des valeurs invalides : %{ports} (exemple : « 22, 80, 443/tcp, 51820/udp »)'
         public_key:
           attributes:
             content:
-              invalid: 'doit être une seule clé publique, par exemple « ssh-ed25519 AAAA… alice@laptop »'
-              private_key: "ressemble à une clé privée : collez la clé publique (fichier .pub)"
-              app_key: "est la clé d'Elio et ne peut pas être ajoutée au trousseau"
+              invalid: doit être une seule clé publique, par exemple « ssh-ed25519 AAAA… alice@laptop »
+              private_key: 'ressemble à une clé privée : collez la clé publique (fichier .pub)'
+              app_key: est la clé d'Elio et ne peut pas être ajoutée au trousseau
             fingerprint:
-              taken: "est déjà dans le trousseau"
+              taken: est déjà dans le trousseau
         user:
           attributes:
             base:
-              last_admin: "Il doit toujours rester au moins un administrateur actif."
+              last_admin: Il doit toujours rester au moins un administrateur actif.
         invitation:
           attributes:
             email:
-              taken_by_user: "correspond déjà à un utilisateur"
-              already_invited: "a déjà une invitation en attente"
+              taken_by_user: correspond déjà à un utilisateur
+              already_invited: a déjà une invitation en attente
   devise:
     failure:
-      deactivated: "Ce compte a été désactivé. Contactez un administrateur."
+      deactivated: Ce compte a été désactivé. Contactez un administrateur.
   time:
     formats:
       short: "%d %b %H:%M"
+  number:
+    percentage:
+      format:
+        format: "%n %"

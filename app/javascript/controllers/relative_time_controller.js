@@ -1,8 +1,10 @@
 import { Controller } from "@hotwired/stimulus"
+import { t } from "i18n"
 
-// Keeps a <time> showing `prefix` + a French relative time up to date
-// ("il y a 3 minutes", "dans 9 minutes"); shows `expired` once the time has
-// passed when given. Same rules as ApplicationHelper#relative_time_in_words.
+// Keeps a <time> showing `prefix` + a relative time up to date ("3 minutes
+// ago", "in 9 minutes"); shows `expired` once the time has passed when
+// given. Same rules and texts (js.relative_time) as
+// ApplicationHelper#relative_time_in_words.
 export default class extends Controller {
   static values = { datetime: String, prefix: String, expired: String }
 
@@ -27,18 +29,14 @@ export default class extends Controller {
 }
 
 function inWords(seconds) {
-  if (Math.abs(seconds) < 60) return seconds > 0 ? "dans moins d'une minute" : "à l'instant"
+  if (Math.abs(seconds) < 60) return t(seconds > 0 ? "relative_time.within_a_minute" : "relative_time.just_now")
 
   const minutes = Math.round(Math.abs(seconds) / 60)
   const hours = Math.round(minutes / 60)
-  let words
-  if (minutes < 60) words = plural(minutes, "minute")
-  else if (hours < 24) words = plural(hours, "heure")
-  else words = plural(Math.round(hours / 24), "jour")
+  let time
+  if (minutes < 60) time = t("relative_time.minutes", { count: minutes })
+  else if (hours < 24) time = t("relative_time.hours", { count: hours })
+  else time = t("relative_time.days", { count: Math.round(hours / 24) })
 
-  return seconds > 0 ? `dans ${words}` : `il y a ${words}`
-}
-
-function plural(count, unit) {
-  return `${count} ${unit}${count > 1 ? "s" : ""}`
+  return t(seconds > 0 ? "relative_time.from_now" : "relative_time.ago", { time })
 }

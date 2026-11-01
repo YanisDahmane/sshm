@@ -2,13 +2,13 @@
 <dialog id="confirm-dialog" aria-labelledby="confirm-dialog-title"
         class="m-auto w-full max-w-md rounded-xl border border-line bg-surface p-0 shadow-xl backdrop:bg-neutral-950/40 backdrop:backdrop-blur-sm">
   <form method="dialog" class="p-6">
-    <h2 id="confirm-dialog-title" class="text-base font-semibold text-ink">Êtes-vous sûr ?</h2>
+    <h2 id="confirm-dialog-title" class="text-base font-semibold text-ink"><%= t(".title") %></h2>
     <p data-confirm-message class="mt-2 text-sm text-ink-2"></p>
     <div class="mt-6 flex justify-end gap-3">
-      <button value="cancel" class="btn btn-secondary">Annuler</button>
+      <button value="cancel" class="btn btn-secondary"><%= t(".cancel") %></button>
       <button value="confirm" data-confirm-accept data-variant="primary"
               class="btn text-white data-[variant=primary]:bg-accent-fill data-[variant=primary]:hover:bg-accent-fill-hover
-                     data-[variant=danger]:bg-crit data-[variant=danger]:hover:bg-crit-ink">Confirmer</button>
+                     data-[variant=danger]:bg-crit data-[variant=danger]:hover:bg-crit-ink"><%= t(".confirm") %></button>
     </div>
   </form>
 </dialog>

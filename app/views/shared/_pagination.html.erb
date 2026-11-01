@@ -1,13 +1,13 @@
-<%# Pagination of a Paginator, keeping the other query parameters. Local `noun`: plural of the items ("activités"). %>
-<% noun = local_assigns.fetch(:noun, "éléments") %>
+<%# Pagination of a Paginator, keeping the other query parameters. Local `noun`: plural of the items ("activities"). %>
+<% noun = local_assigns[:noun] || t(".items") %>
 <% if pager.multiple_pages? %>
   <% page_url = ->(number) { url_for(request.query_parameters.merge("page" => number)) } %>
-  <nav class="pagination mt-4 flex flex-wrap items-center justify-between gap-3 text-sm" aria-label="Pagination">
-    <p class="pagination-info text-xs text-ink-3 tabular-nums"><%= pager.from %>–<%= pager.to %> sur <%= pager.total %> <%= noun %></p>
+  <nav class="pagination mt-4 flex flex-wrap items-center justify-between gap-3 text-sm" aria-label="<%= t(".label") %>">
+    <p class="pagination-info text-xs text-ink-3 tabular-nums"><%= t(".info", from: pager.from, to: pager.to, total: pager.total, items: noun) %></p>
     <div class="flex items-center gap-1">
       <% if pager.previous_page %>
-        <%= link_to page_url.(pager.previous_page), rel: "prev", class: "btn btn-ghost px-2.5 py-1", aria: { label: "Page précédente" } do %>
-          <%= icon :chevron_left, class: "h-4 w-4" %><span class="hidden sm:inline">Précédente</span>
+        <%= link_to page_url.(pager.previous_page), rel: "prev", class: "btn btn-ghost px-2.5 py-1", aria: { label: t(".previous_label") } do %>
+          <%= icon :chevron_left, class: "h-4 w-4" %><span class="hidden sm:inline"><%= t(".previous") %></span>
         <% end %>
       <% end %>
       <% pager.series.each do |number| %>
@@ -17,12 +17,12 @@
           <span class="page-current grid h-8 min-w-8 place-items-center rounded-md bg-accent-fill px-2 font-medium text-white tabular-nums" aria-current="page"><%= number %></span>
         <% else %>
           <%= link_to number, page_url.(number), class: "grid h-8 min-w-8 place-items-center rounded-md px-2 text-ink-2 tabular-nums hover:bg-subtle hover:text-ink",
-                aria: { label: "Page #{number}" } %>
+                aria: { label: t(".page", number: number) } %>
         <% end %>
       <% end %>
       <% if pager.next_page %>
-        <%= link_to page_url.(pager.next_page), rel: "next", class: "btn btn-ghost px-2.5 py-1", aria: { label: "Page suivante" } do %>
-          <span class="hidden sm:inline">Suivante</span><%= icon :chevron_right, class: "h-4 w-4" %>
+        <%= link_to page_url.(pager.next_page), rel: "next", class: "btn btn-ghost px-2.5 py-1", aria: { label: t(".next_label") } do %>
+          <span class="hidden sm:inline"><%= t(".next") %></span><%= icon :chevron_right, class: "h-4 w-4" %>
         <% end %>
       <% end %>
     </div>
