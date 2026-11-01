@@ -31,6 +31,7 @@
 
     <%= form_with url: server_path(server), method: :get, data: { controller: "auto-submit", turbo_action: "advance" }, class: "vulnerability-filters flex flex-wrap items-center gap-3 border-b border-line px-4 py-2 text-xs" do |f| %>
       <%= hidden_field_tag :tab, "vulnerabilities" %>
+      <% if @sort %><%= hidden_field_tag :sort, @sort %><% end %>
       <label class="flex items-center gap-1.5"><%= check_box_tag :fixable, "1", @fixable_only, data: { action: "change->auto-submit#submit" } %> Corrigeables seulement</label>
       <%= select_tag :severity, options_for_select([ [ "Toutes gravités", "" ], *Vulnerability::SEVERITIES.except("unknown").map { |key, label| [ "#{label}#{" ou plus" unless key == "critical"}", key ] } ], @severity),
             aria: { label: "Gravité minimale" }, data: { action: "change->auto-submit#submit" }, class: "input w-auto py-1 text-xs" %>
@@ -38,26 +39,31 @@
     <% end %>
 
     <% if @vulnerabilities.any? %>
-      <div class="overflow-x-auto">
+      <div data-controller="modal" class="overflow-x-auto">
         <table class="table-dense">
-          <thead><tr><th class="pl-4">Gravité</th><th>CVE</th><th>Paquet</th><th>Installée → corrigée</th><th class="pr-4">Description</th></tr></thead>
+          <thead><tr>
+            <th class="pl-4">Gravité</th>
+            <th><%= link_to (@sort ? "Note ↓" : "Note"), server_path(server, request.query_parameters.merge("tab" => "vulnerabilities", "sort" => (@sort ? nil : "score"), "page" => nil).compact),
+                      class: "hover:text-ink", title: "Trier par note" %></th>
+            <th>CVE</th><th>Paquet</th><th class="pr-4">Installée → corrigée</th>
+          </tr></thead>
           <tbody>
             <% @vulnerabilities.each do |vulnerability| %>
-              <tr class="server-vulnerability" data-cve="<%= vulnerability.cve %>" data-fixable="<%= vulnerability.fixable? %>">
+              <tr class="server-vulnerability relative cursor-pointer hover:bg-subtle" data-cve="<%= vulnerability.cve %>" data-fixable="<%= vulnerability.fixable? %>">
                 <td class="pl-4"><%= severity_badge(vulnerability.severity) %></td>
-                <td class="font-mono text-xs whitespace-nowrap"><%= link_to vulnerability.cve, vulnerability.url(vulnerability.source), target: "_blank", rel: "noopener", class: "hover:text-accent hover:underline" %></td>
-                <td class="text-xs">
-                  <span class="font-mono"><%= vulnerability.source_package %></span>
-                  <% if vulnerability.image %><span class="block text-[11px] text-ink-3">image <%= vulnerability.image %></span><% end %>
-                  <% if vulnerability.packages != [ vulnerability.source_package ] %><span class="block max-w-48 truncate text-[11px] text-ink-3" title="<%= vulnerability.packages.join(", ") %>"><%= vulnerability.packages.join(", ") %></span><% end %>
+                <td><%= cve_score(vulnerability.rating) %></td>
+                <td class="font-mono text-xs whitespace-nowrap">
+                  <%= link_to vulnerability.cve, vulnerability_path(vulnerability.cve, server_id: server.id), class: "vulnerability-link after:absolute after:inset-0 hover:text-accent",
+                        data: { turbo_frame: "vulnerability-detail", action: "modal#open" } %>
                 </td>
-                <td class="font-mono text-xs whitespace-nowrap"><%= vulnerability.installed_version %> →
-                  <% if vulnerability.fixable? %><span class="text-good-ink"><%= vulnerability.fixed_version %></span><% else %><span class="text-ink-3">pas de correctif</span><% end %></td>
-                <td class="max-w-md truncate pr-4 text-xs text-ink-3" title="<%= vulnerability.description %>"><%= vulnerability.description %></td>
+                <td class="font-mono text-xs" title="<%= [ vulnerability.packages.join(", "), ("image #{vulnerability.image}" if vulnerability.image) ].compact.join(" · ") %>"><%= vulnerability.source_package %></td>
+                <td class="pr-4 font-mono text-xs whitespace-nowrap"><%= vulnerability.installed_version %> →
+                  <% if vulnerability.fixable? %><span class="text-good-ink"><%= vulnerability.fixed_version %></span><% else %><span class="font-sans text-ink-3">pas de correctif</span><% end %></td>
               </tr>
             <% end %>
           </tbody>
         </table>
+        <%= render "vulnerabilities/detail_dialog" %>
       </div>
       <% if @pager.multiple_pages? %><div class="px-4 pb-3"><%= render "shared/pagination", pager: @pager, noun: "vulnérabilités" %></div><% end %>
     <% else %>

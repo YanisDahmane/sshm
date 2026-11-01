@@ -69,6 +69,50 @@ module InventoryHelper
 
   SCAN_LABELS = { "trivy" => "Trivy", "grype" => "Grype", "elio" => "Elio (paquets de l'image)", "none" => "non analysée" }.freeze
 
+  # Average CVSS score of a CVE ("8,6"), with the exploitation badges.
+  def cve_score(rating, compact: false)
+    return tag.span("—", class: "cve-score text-xs text-ink-3", title: "Pas encore de note") unless rating&.score || rating&.exploited || rating&.epss
+
+    parts = []
+    if rating.score
+      tone = { "critical" => "text-crit-ink", "high" => "text-crit-ink", "medium" => "text-warn-ink" }.fetch(rating.severity, "text-ink-2")
+      parts << tag.strong(number_with_precision(rating.score, precision: 1), class: "tabular-nums #{tone}",
+                          title: "Moyenne de #{pluralize_fr(rating.scores_count, "fournisseur", "fournisseurs")}")
+    end
+    parts << status_badge(:crit, "exploitée", class: "cve-exploited", title: "Catalogue CISA KEV#{" depuis le #{l(rating.exploited_since, format: :long)}" if rating.exploited_since}") if rating.exploited
+    if rating.epss && rating.epss >= 0.01 && !compact
+      parts << tag.span("EPSS #{epss_percentage(rating.epss)}", class: "text-[11px] text-ink-3", title: "Probabilité d'exploitation dans les 30 jours")
+    end
+    tag.span(safe_join(parts, " "), class: "cve-score inline-flex flex-wrap items-center gap-1.5 text-xs")
+  end
+
+  # "12 %", "99,5 %" (never rounded up to 100 %).
+  def epss_percentage(value)
+    percent = (value.to_f * 100).floor(1)
+    number_to_percentage(percent, precision: 1, strip_insignificant_zeros: true)
+  end
+
+  CVSS_METRICS = {
+    "AV" => [ "Vecteur", { "N" => "réseau", "A" => "réseau adjacent", "L" => "local", "P" => "physique" } ],
+    "AC" => [ "Complexité", { "L" => "faible", "H" => "élevée" } ],
+    "AT" => [ "Prérequis", { "N" => "aucun", "P" => "présents" } ],
+    "PR" => [ "Privilèges requis", { "N" => "aucun", "L" => "faibles", "H" => "élevés" } ],
+    "UI" => [ "Interaction", { "N" => "aucune", "R" => "requise", "P" => "passive", "A" => "active" } ],
+    "S" => [ "Portée", { "U" => "inchangée", "C" => "changée" } ],
+    "C" => [ "Confidentialité", { "H" => "forte", "L" => "faible", "N" => "aucune" } ], "VC" => [ "Confidentialité", { "H" => "forte", "L" => "faible", "N" => "aucune" } ],
+    "I" => [ "Intégrité", { "H" => "forte", "L" => "faible", "N" => "aucune" } ], "VI" => [ "Intégrité", { "H" => "forte", "L" => "faible", "N" => "aucune" } ],
+    "A" => [ "Disponibilité", { "H" => "forte", "L" => "faible", "N" => "aucune" } ], "VA" => [ "Disponibilité", { "H" => "forte", "L" => "faible", "N" => "aucune" } ]
+  }.freeze
+
+  # "CVSS:3.1/AV:N/AC:H/…" → [["Vecteur", "réseau"], ["Complexité", "élevée"], …] (CVSS 3 and 4).
+  def cvss_vector_parts(vector)
+    vector.to_s.split("/").filter_map do |part|
+      key, value = part.split(":")
+      label, values = CVSS_METRICS[key]
+      [ label, values.fetch(value, value) ] if label
+    end
+  end
+
   SEVERITY_TONES = { "critical" => :crit, "high" => :crit, "medium" => :warn, "low" => :neutral, "unknown" => :neutral }.freeze
 
   def severity_badge(severity)

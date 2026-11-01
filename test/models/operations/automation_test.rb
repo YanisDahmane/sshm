@@ -3,16 +3,16 @@ require "test_helper"
 class AutomationTest < ActiveSupport::TestCase
   include StubHelpers
 
-  test "all_kinds creates every automation once, with its default interval; only the health check, the vulnerability feeds, the image checks (and the extensions' syncs) are on" do
+  test "all_kinds creates every automation once, with its default interval; only the health check, the vulnerability feeds and scores, the image checks (and the extensions' syncs) are on" do
     automations = Automation.all_kinds
 
-    assert_equal %w[health_check servers_ping inventory_os inventory_packages inventory_services inventory_ports vulnerabilities_update docker_image_updates keys_scan
-                    uptime_kuma_sync ovh_sync], automations.map(&:kind)
-    assert_equal [ 15, 15, 1440, 360, 60, 60, 1440, 360, 360, 15, 360 ], automations.map(&:interval_minutes)
-    assert_equal %w[health_check vulnerabilities_update docker_image_updates uptime_kuma_sync ovh_sync], automations.select(&:enabled?).map(&:kind)
+    assert_equal %w[health_check servers_ping inventory_os inventory_packages inventory_services inventory_ports vulnerabilities_update cve_scores_update docker_image_updates
+                    keys_scan uptime_kuma_sync ovh_sync], automations.map(&:kind)
+    assert_equal [ 15, 15, 1440, 360, 60, 60, 1440, 360, 360, 360, 15, 360 ], automations.map(&:interval_minutes)
+    assert_equal %w[health_check vulnerabilities_update cve_scores_update docker_image_updates uptime_kuma_sync ovh_sync], automations.select(&:enabled?).map(&:kind)
     assert_equal automations, Automation.all_kinds
-    assert_equal 11, Automation.count
-    assert_equal %w[health_check servers_ping inventory_os inventory_packages inventory_services inventory_ports vulnerabilities_update docker_image_updates keys_scan],
+    assert_equal 12, Automation.count
+    assert_equal %w[health_check servers_ping inventory_os inventory_packages inventory_services inventory_ports vulnerabilities_update cve_scores_update docker_image_updates keys_scan],
                  Automation.available.map(&:kind),
                  "an extension's sync only shows once it is enabled"
   end

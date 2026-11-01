@@ -29,6 +29,8 @@ class Automation < ApplicationRecord
                    description: "Relit les ports en écoute et le firewall ; signale les ports publics qui s'ouvrent."),
     Definition.new(key: :vulnerabilities_update, label: "Mise à jour des vulnérabilités", default_interval: 1440, default_enabled: true,
                    description: "Télécharge les bases de vulnérabilités (Debian Security Tracker, Ubuntu) pour les versions du parc et les rapproche des paquets installés."),
+    Definition.new(key: :cve_scores_update, label: "Notes de gravité des CVE", default_interval: 360, default_enabled: true,
+                   description: "Demande aux fournisseurs de notes (NVD, Red Hat, CVE.org, EPSS, CISA KEV…) la note des CVE du parc pas encore notées, et en déduit la gravité de celles que la distribution n'évalue pas."),
     Definition.new(key: :docker_image_updates, label: "Mises à jour des images Docker", default_interval: 360, default_enabled: true,
                    description: "Demande aux registres (Docker Hub, GHCR…) la dernière version de chaque image utilisée sur le parc, en lecture seule."),
     Definition.new(key: :keys_scan, label: "Scan des clés", default_interval: 360,
@@ -163,6 +165,8 @@ class Automation < ApplicationRecord
   end
 
   def run_docker_image_updates = ImageRegistry::UpdateCheck.call
+
+  def run_cve_scores_update = Vulnerabilities::Scores.update_all
 
   def run_servers_ping
     results = Servers::Ping.check_all!(servers)

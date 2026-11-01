@@ -64,11 +64,34 @@ module Vulnerabilities::Matcher
     scope = server.server_vulnerabilities.where(origin: origin)
     scope = scope.where(image: image) unless image == :all
     known = scope.pluck(:cve).to_set
+    rows = with_severity(rows)
     ServerVulnerability.transaction do
       scope.delete_all
       ServerVulnerability.insert_all(rows) if rows.any?
     end
     log_new(server, rows, known) if log
+  end
+
+  # The severity of the feed (or scanner) is kept as `distro_severity`; when
+  # it did not rate the CVE, the one of its score (CveRating) is used.
+  def self.with_severity(rows)
+    unrated = rows.select { |row| row[:severity] == "unknown" }.map { |row| row[:cve] }
+    ratings = unrated.any? ? CveRating.where(cve: unrated).pluck(:cve, :score).to_h : {}
+    rows.map do |row|
+      severity = row[:severity] == "unknown" ? CveRating.severity_for(ratings[row[:cve]]) : row[:severity]
+      row.merge(distro_severity: row[:severity], severity: severity)
+    end
+  end
+
+  # Logs vulnerability_found for these CVEs of a server (the fixable ones at
+  # the alert severity that were not there before).
+  def self.log_serious(server, cves, image: nil)
+    return if cves.empty?
+
+    rows = server.server_vulnerabilities.where(cve: cves.to_a)
+    ordered = rows.sort_by { |row| -Vulnerability.severity_rank(row.severity) }
+    Activity.record!(:vulnerability_found, server: server, user: nil, count: cves.size, cves: ordered.map(&:cve).uniq.first(5),
+                                           packages: ordered.map(&:source_package).uniq.first(5), image: image || ordered.first&.image)
   end
 
   def self.log_new(server, rows, known)
@@ -78,9 +101,7 @@ module Vulnerabilities::Matcher
     serious = rows.select { |row| row[:fixed_version] && row[:severity].in?(Vulnerability.severities_from(minimum)) && !known.include?(row[:cve]) }
     return if serious.empty?
 
-    cves = serious.sort_by { |row| -Vulnerability.severity_rank(row[:severity]) }.map { |row| row[:cve] }.uniq
-    Activity.record!(:vulnerability_found, server: server, user: nil, count: cves.size, cves: cves.first(5),
-                                           packages: serious.map { |row| row[:source_package] }.uniq.first(5), image: serious.first[:image])
+    log_serious(server, serious.map { |row| row[:cve] }.to_set, image: serious.first[:image])
   end
   private_class_method :log_new
 end

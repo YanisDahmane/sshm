@@ -14,6 +14,10 @@ class Vulnerabilities::JsonObjectStream
 
   def self.each(io, chunk: CHUNK, &block) = new(io, chunk).each(&block)
 
+  # The elements of the array of a top-level key, one at a time (NVD feeds:
+  # { …, "vulnerabilities": [ {…}, {…} ] }).
+  def self.each_element(io, key:, chunk: CHUNK, &block) = new(io, chunk).each_element(key, &block)
+
   def initialize(io, chunk)
     @io = io
     @chunk = chunk
@@ -36,6 +40,32 @@ class Vulnerabilities::JsonObjectStream
         return
       else
         yield member.first, JSON.parse(member.last.force_encoding(Encoding::UTF_8))
+      end
+    end
+  end
+
+  def each_element(key)
+    opening = /"#{Regexp.escape(key)}"\s*:\s*\[/n
+    until (match = opening.match(@buffer, @pos))
+      raise Error, "Clé « #{key} » absente" unless read_more
+    end
+    @pos = match.end(0)
+    loop do
+      scanner = StringScanner.new(@buffer)
+      scanner.pos = @pos
+      scanner.skip(WHITESPACE)
+      if scanner.eos?
+        raise Error, "JSON tronqué" unless read_more
+      elsif scanner.skip(/\]/)
+        return
+      else
+        start = scanner.pos
+        if skip_value(scanner)
+          @pos = scanner.pos
+          yield JSON.parse(@buffer.byteslice(start, scanner.pos - start).force_encoding(Encoding::UTF_8))
+        else
+          raise Error, "JSON tronqué" unless read_more
+        end
       end
     end
   end

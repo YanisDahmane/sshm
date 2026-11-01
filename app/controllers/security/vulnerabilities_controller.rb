@@ -9,6 +9,28 @@ class VulnerabilitiesController < ApplicationController
     def url = Vulnerability.url(cve, source)
   end
 
+  # Everything about a CVE: description, the score of each provider with its
+  # vector, exploitation, the packages and versions on the server it was
+  # opened from (?server_id=), the other servers and images touched. In the
+  # modal of the vulnerabilities lists (turbo-frame), or as a page.
+  def show
+    @cve = params[:cve].to_s.upcase
+    @rows = ServerVulnerability.where(cve: @cve).includes(:server).to_a
+    @feed_entries = Vulnerability.where(cve: @cve).order(:source, :release).to_a
+    return head(:not_found) if @rows.empty? && @feed_entries.empty? && !CveScore.exists?(cve: @cve)
+
+    @server = Server.find_by(id: params[:server_id])
+    @server_rows = @server ? @rows.select { |row| row.server_id == @server.id } : []
+    @rating = CveRating.find_by(cve: @cve)
+    providers = ScoreProvider.all_providers.index_by(&:key)
+    @scores = CveScore.where(cve: @cve).to_a.select { |score| providers[score.provider_key] }.sort_by { |score| providers[score.provider_key].position }
+    @providers = providers
+    @description = @feed_entries.filter_map(&:description).first || @rows.filter_map(&:description).first ||
+                   @scores.filter_map { |score| score.data["description"] }.first
+    @servers = @rows.group_by(&:server).sort_by { |server, _| server.name }
+    render layout: !turbo_frame_request?
+  end
+
   def index
     @groups = ServerGroup.order(:name)
     @group = @groups.find { |group| group.id.to_s == params[:group].to_s } if params[:group].present?
@@ -36,5 +58,6 @@ class VulnerabilitiesController < ApplicationController
                  serious: rows.count { |row| row.fixable && row.severity.in?(%w[critical high]) } }
     @pager = paginate(rows.sort_by(&:rank), per_page: PER_PAGE)
     @rows = @pager.records
+    @ratings = CveRating.for(@rows.map(&:cve))
   end
 end

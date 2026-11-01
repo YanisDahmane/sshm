@@ -22,4 +22,14 @@ class Vulnerabilities::JsonObjectStreamTest < ActiveSupport::TestCase
     assert_raises(Vulnerabilities::JsonObjectStream::Error) { members("[1, 2]") }
     assert_raises(Vulnerabilities::JsonObjectStream::Error) { members("") }
   end
+
+  test "streams the elements of a top-level array (NVD feeds)" do
+    json = %({"format": "NVD_CVE", "vulnerabilities": [{"cve": {"id": "CVE-1", "d": "[é]"}}, {"cve": {"id": "CVE-2"}} ], "after": 1})
+    [ 1, 3, 1 << 20 ].each do |chunk|
+      ids = []
+      Vulnerabilities::JsonObjectStream.each_element(StringIO.new(json.b), key: "vulnerabilities", chunk: chunk) { |item| ids << item.dig("cve", "id") }
+      assert_equal %w[CVE-1 CVE-2], ids, "chunk #{chunk}"
+    end
+    assert_raises(Vulnerabilities::JsonObjectStream::Error) { Vulnerabilities::JsonObjectStream.each_element(StringIO.new("{}"), key: "vulnerabilities") { } }
+  end
 end

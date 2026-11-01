@@ -25,8 +25,11 @@ class VulnerabilitiesTest < ActionDispatch::IntegrationTest
       assert_select "tr.server-vulnerability", 4
       assert_select "tr.server-vulnerability:first-child[data-cve=CVE-2024-6387][data-fixable=true]", text: /Haute.*openssh.*1:9.2p1-2\+deb12u2 →\s+1:9.2p1-2\+deb12u3/m
       assert_select "tr.server-vulnerability:last-child[data-cve=CVE-2023-51767]", text: /pas de correctif/
-      assert_select "tr.server-vulnerability a[href=?][target=_blank]", "https://security-tracker.debian.org/tracker/CVE-2024-6387"
-      assert_select "tr.server-vulnerability[data-cve=CVE-2024-9143]", text: /openssl\s+libssl3/
+      assert_select "tr.server-vulnerability a.vulnerability-link[href=?][data-turbo-frame=vulnerability-detail][data-action='modal#open']",
+                    vulnerability_path("CVE-2024-6387", server_id: servers(:web).id)
+      assert_select "dialog.vulnerability-dialog turbo-frame#vulnerability-detail"
+      assert_select "th", text: "Description", count: 0
+      assert_select "tr.server-vulnerability[data-cve=CVE-2024-9143] td[title='libssl3']", "openssl", "the source package only, binaries in the title and the modal"
     end
 
     get server_path(servers(:web), tab: "vulnerabilities", fixable: "1", severity: "high")

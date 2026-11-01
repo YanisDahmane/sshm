@@ -1,0 +1,11 @@
+<%# Result of « Tester » on a score provider (Settings::ScoreProvidersController#test / #preview). %>
+<% if error %>
+  <p class="score-test-result text-xs text-crit-ink"><%= error %></p>
+<% elsif score %>
+  <p class="score-test-result text-xs text-good-ink">
+    <%= cve %> : <strong><%= provider.cvss? ? number_with_precision(score.score, precision: 1, strip_insignificant_zeros: true) : (provider.kind == "kev" ? "exploitée depuis le #{score.data["date_added"]}" : number_to_percentage(score.score * 100, precision: 2)) %></strong>
+    <% if score.version %>· CVSS <%= score.version %><% end %><% if score.vector %> · <span class="font-mono"><%= score.vector %></span><% end %>
+  </p>
+<% else %>
+  <p class="score-test-result text-xs text-warn-ink"><%= cve %> : aucune note trouvée chez ce fournisseur.</p>
+<% end %>

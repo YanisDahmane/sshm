@@ -50,9 +50,18 @@ Rails.application.routes.draw do
     resource :docker, only: %i[show update], controller: "docker" do
       post :check
     end
+    resources :score_providers, only: %i[new create edit update destroy], path: "vulnerabilities/providers" do
+      member do
+        patch :move
+        patch :toggle
+        post :test
+      end
+      post :preview, on: :collection
+    end
     resource :vulnerabilities, only: %i[show update] do
       post :refresh
       post :import
+      post :scores
     end
     resources :key_rotations, only: %i[create show] do
       member do
@@ -79,7 +88,7 @@ Rails.application.routes.draw do
   resources :packages, only: :index
   resources :ports, only: :index
   resources :scheduled_tasks, only: :index, path: "scheduled-tasks"
-  resources :vulnerabilities, only: :index
+  resources :vulnerabilities, only: %i[index show], param: :cve, constraints: { cve: /[A-Za-z0-9-]+/ }
   get "docker", to: "docker#index", as: :docker
   # Uptime Kuma extension.
   resources :monitors, only: :index do

@@ -13,6 +13,17 @@ module Settings
       @releases = Vulnerabilities.releases
       @automation = Automation.all_kinds.find { |automation| automation.kind == "vulnerabilities_update" }
       @setting = AppSetting.current
+      @providers = ScoreProvider.all_providers
+      @coverage = CveScore.scored.group(:provider_key).count
+      @fleet_cves = Vulnerabilities::Scores.fleet_cves.size
+      @scores_automation = Automation.all_kinds.find { |automation| automation.kind == "cve_scores_update" }
+    end
+
+    # Asks the score providers now (the automation, run once).
+    def scores
+      automation = Automation.all_kinds.find { |candidate| candidate.kind == "cve_scores_update" }
+      task = automation.enqueue!(user: current_user, tracked: true)
+      redirect_to task_path(task), notice: "Mise à jour des notes lancée."
     end
 
     def update

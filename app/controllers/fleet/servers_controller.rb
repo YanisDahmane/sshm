@@ -102,7 +102,8 @@ class ServersController < ApplicationController
     @severity = params[:severity].presence_in(Vulnerability::SEVERITIES.keys)
     scope = scope.fixable if @fixable_only
     scope = scope.at_least(@severity) if @severity
-    scope = scope.order(Arel.sql("fixed_version IS NULL")).in_order_of(:severity, Vulnerability::SEVERITIES.keys).order(cve: :desc)
+    @sort = params[:sort] == "score" ? "score" : nil
+    scope = (@sort ? scope.by_score : scope.ranked).includes(:rating)
     @pager = paginate(scope, per_page: VULNERABILITIES_PER_PAGE)
     @vulnerabilities = @pager.records
   end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_01_160000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_01_170000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -101,6 +101,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_160000) do
     t.index ["created_at"], name: "index_background_tasks_on_created_at"
     t.index ["status", "created_at"], name: "index_background_tasks_on_status_and_created_at"
     t.index ["user_id"], name: "index_background_tasks_on_user_id"
+  end
+
+  create_table "cve_ratings", force: :cascade do |t|
+    t.string "cve", null: false
+    t.decimal "score", precision: 3, scale: 1
+    t.integer "scores_count", default: 0, null: false
+    t.decimal "epss", precision: 6, scale: 5
+    t.decimal "epss_percentile", precision: 6, scale: 5
+    t.boolean "exploited", default: false, null: false
+    t.date "exploited_since"
+    t.datetime "updated_at", null: false
+    t.index ["cve"], name: "index_cve_ratings_on_cve", unique: true
+  end
+
+  create_table "cve_scores", force: :cascade do |t|
+    t.string "cve", null: false
+    t.string "provider_key", null: false
+    t.decimal "score", precision: 6, scale: 5
+    t.string "version"
+    t.string "vector"
+    t.string "severity"
+    t.jsonb "data", default: {}, null: false
+    t.datetime "fetched_at", null: false
+    t.index ["cve", "provider_key"], name: "index_cve_scores_on_cve_and_provider_key", unique: true
+    t.index ["provider_key"], name: "index_cve_scores_on_provider_key"
   end
 
   create_table "image_updates", force: :cascade do |t|
@@ -270,6 +295,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_160000) do
     t.index ["fingerprint"], name: "index_public_keys_on_fingerprint", unique: true
   end
 
+  create_table "score_providers", force: :cascade do |t|
+    t.string "key", null: false
+    t.string "name", null: false
+    t.string "kind", null: false
+    t.boolean "enabled", default: true, null: false
+    t.integer "position", default: 0, null: false
+    t.jsonb "settings", default: {}, null: false
+    t.jsonb "state", default: {}, null: false
+    t.datetime "last_run_at"
+    t.string "last_error"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_score_providers_on_key", unique: true
+  end
+
   create_table "server_group_memberships", force: :cascade do |t|
     t.bigint "server_id", null: false
     t.bigint "server_group_id", null: false
@@ -301,6 +341,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_160000) do
     t.string "fixed_version"
     t.string "severity", null: false
     t.string "description"
+    t.string "distro_severity"
     t.index ["cve"], name: "index_server_vulnerabilities_on_cve"
     t.index ["server_id", "origin"], name: "index_server_vulnerabilities_on_server_id_and_origin"
     t.index ["server_id"], name: "index_server_vulnerabilities_on_server_id"

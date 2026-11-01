@@ -35,26 +35,28 @@
 <% end %>
 
 <% if @rows.any? %>
-  <div class="card mt-3 overflow-x-auto">
+  <div class="card mt-3 overflow-x-auto" data-controller="modal">
     <table id="vulnerabilities" class="table-dense">
-      <thead><tr><th class="pl-4">Gravité</th><th>CVE</th><th>Paquets</th><th>Serveurs</th><th>Correctif</th><th class="pr-4">Description</th></tr></thead>
+      <thead><tr><th class="pl-4">Gravité</th><th>Note</th><th>CVE</th><th>Paquets</th><th>Serveurs</th><th class="pr-4">Correctif</th></tr></thead>
       <tbody>
         <% @rows.each do |row| %>
-          <tr class="fleet-vulnerability" data-cve="<%= row.cve %>">
+          <tr class="fleet-vulnerability hover:bg-subtle" data-cve="<%= row.cve %>">
             <td class="pl-4"><%= severity_badge(row.severity) %></td>
-            <td class="font-mono text-xs whitespace-nowrap"><%= link_to row.cve, row.url, target: "_blank", rel: "noopener", class: "hover:text-accent hover:underline" %></td>
+            <td><%= cve_score(@ratings[row.cve]) %></td>
+            <td class="font-mono text-xs whitespace-nowrap"><%= link_to row.cve, vulnerability_path(row.cve), class: "vulnerability-link hover:text-accent hover:underline",
+                                                                        data: { turbo_frame: "vulnerability-detail", action: "modal#open" } %></td>
             <td class="font-mono text-xs"><%= row.packages.join(", ") %>
               <% if row.images.any? %><span class="block text-[11px] text-ink-3">images : <%= row.images.first(3).join(", ") %><%= " …" if row.images.size > 3 %></span><% end %></td>
             <td class="text-xs">
               <span class="font-medium"><%= row.servers.size %></span> ·
               <%= safe_join(row.servers.first(3).map { |server| link_to(server.name, server_path(server, tab: "vulnerabilities"), class: "hover:text-accent hover:underline") }, ", ") %><%= " …" if row.servers.size > 3 %>
             </td>
-            <td class="text-xs"><%= row.fixable ? status_badge(:good, "corrigeable") : tag.span("pas de correctif", class: "text-ink-3") %></td>
-            <td class="max-w-sm truncate pr-4 text-xs text-ink-3" title="<%= row.description %>"><%= row.description %></td>
+            <td class="pr-4 text-xs"><%= row.fixable ? status_badge(:good, "corrigeable") : tag.span("pas de correctif", class: "text-ink-3") %></td>
           </tr>
         <% end %>
       </tbody>
     </table>
+    <%= render "vulnerabilities/detail_dialog" %>
   </div>
   <%= render "shared/pagination", pager: @pager, noun: "vulnérabilités" %>
 <% else %>

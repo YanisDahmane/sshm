@@ -1,0 +1,113 @@
+<% content_for :title, "#{@cve} · Elio" %>
+<%= turbo_frame_tag "vulnerability-detail" do %>
+  <article class="vulnerability-detail space-y-5" data-cve="<%= @cve %>">
+    <header class="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <h2 class="font-mono text-lg font-semibold"><%= @cve %></h2>
+        <% severity = (@server_rows.first || @rows.first)&.severity || "unknown" %>
+        <div class="mt-1 flex flex-wrap items-center gap-2">
+          <%= severity_badge(severity) %>
+          <% if (row = @server_rows.first || @rows.first)&.severity_from_score? %>
+            <span class="text-xs text-ink-3">non évaluée par <%= row.source == "ubuntu" ? "Ubuntu" : "Debian" %> : déduite de la note</span>
+          <% end %>
+          <% if @rating&.exploited %><%= status_badge :crit, "Exploitée activement (CISA KEV#{", depuis le #{l(@rating.exploited_since, format: :long)}" if @rating.exploited_since})", class: "detail-exploited" %><% end %>
+        </div>
+      </div>
+      <div class="text-right">
+        <% if @rating&.score %>
+          <p class="detail-score text-3xl font-semibold tabular-nums"><%= number_with_precision(@rating.score, precision: 1) %><span class="text-sm font-normal text-ink-3"> / 10</span></p>
+          <p class="text-xs text-ink-3">moyenne de <%= pluralize_fr(@rating.scores_count, "fournisseur", "fournisseurs") %></p>
+        <% else %>
+          <p class="text-sm text-ink-3">Pas encore de note</p>
+        <% end %>
+        <% if @rating&.epss %>
+          <p class="detail-epss mt-1 text-xs text-ink-2">EPSS <strong><%= epss_percentage(@rating.epss) %></strong>
+            <span class="text-ink-3">de risque d'exploitation sous 30 jours, plus que <%= epss_percentage(@rating.epss_percentile) %> des CVE</span></p>
+        <% end %>
+      </div>
+    </header>
+
+    <% if @description %><p class="detail-description text-sm leading-relaxed text-ink-2"><%= @description %></p><% end %>
+
+    <section>
+      <h3 class="text-xs font-semibold tracking-wide text-ink-3 uppercase">Notes par fournisseur</h3>
+      <% cvss = @scores.select { |score| @providers[score.provider_key].cvss? } %>
+      <% if cvss.any? %>
+        <ul class="mt-2 divide-y divide-line rounded-lg border border-line">
+          <% cvss.each do |score| %>
+            <% provider = @providers[score.provider_key] %>
+            <li class="detail-provider-score px-3 py-2 text-sm" data-provider="<%= provider.key %>">
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span class="w-36 font-medium <%= "text-ink-3" unless provider.enabled? %>"><%= provider.name %><% unless provider.enabled? %> (désactivé)<% end %></span>
+                <% if score.score %>
+                  <strong class="tabular-nums"><%= number_with_precision(score.score, precision: 1) %></strong>
+                  <% if score.version %><span class="text-xs text-ink-3">CVSS <%= score.version %></span><% end %>
+                  <% if score.severity %><span class="text-xs text-ink-3"><%= score.severity %></span><% end %>
+                <% else %>
+                  <span class="text-xs text-ink-3">pas de note</span>
+                <% end %>
+                <%= link_to "Voir", provider.page_url(@cve), target: "_blank", rel: "noopener", class: "ml-auto text-xs text-accent hover:underline" %>
+              </div>
+              <% if (parts = cvss_vector_parts(score.vector)).any? %>
+                <p class="mt-1 flex flex-wrap gap-1" title="<%= score.vector %>">
+                  <% parts.each do |label, value| %><span class="badge bg-subtle text-[11px] text-ink-2"><%= label %> : <%= value %></span><% end %>
+                </p>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="mt-2 text-sm text-ink-3">Aucun fournisseur n'a encore noté cette CVE.</p>
+      <% end %>
+    </section>
+
+    <% if @server_rows.any? %>
+      <section class="detail-on-server">
+        <h3 class="text-xs font-semibold tracking-wide text-ink-3 uppercase">Sur <%= @server.name %></h3>
+        <table class="table-dense mt-2">
+          <thead><tr><th>Paquet source</th><th>Paquets installés</th><th>Installée</th><th>Corrigée</th></tr></thead>
+          <tbody>
+            <% @server_rows.each do |row| %>
+              <tr>
+                <td class="font-mono text-xs"><%= row.source_package %><% if row.image %><span class="block font-sans text-[11px] text-ink-3">image <%= row.image %></span><% end %></td>
+                <td class="font-mono text-xs"><%= row.packages.join(", ") %></td>
+                <td class="font-mono text-xs"><%= row.installed_version %></td>
+                <td class="font-mono text-xs"><%= row.fixed_version ? tag.span(row.fixed_version, class: "text-good-ink") : tag.span("pas de correctif", class: "font-sans text-ink-3") %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </section>
+    <% end %>
+
+    <section class="detail-servers">
+      <h3 class="text-xs font-semibold tracking-wide text-ink-3 uppercase">Serveurs touchés (<%= @servers.size %>)</h3>
+      <ul class="mt-2 space-y-1 text-sm">
+        <% @servers.each do |server, rows| %>
+          <li class="flex flex-wrap items-baseline gap-x-2">
+            <%= link_to server.name, server_path(server, tab: "vulnerabilities"), data: { turbo_frame: "_top" }, class: "font-medium hover:text-accent hover:underline" %>
+            <span class="text-xs text-ink-3"><%= rows.map { |row| [ row.image ? "image #{row.image}" : "système", row.installed_version ].join(" ") }.uniq.join(" · ") %></span>
+            <% if rows.any?(&:fixable?) %><%= status_badge :good, "corrigeable" %><% end %>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+
+    <% if @feed_entries.any? %>
+      <section>
+        <h3 class="text-xs font-semibold tracking-wide text-ink-3 uppercase">Correctifs par version</h3>
+        <p class="mt-1 text-xs text-ink-2">
+          <%= safe_join(@feed_entries.map { |entry| "#{entry.source == "ubuntu" ? "Ubuntu" : "Debian"} #{entry.release} : #{entry.fixed_version || "pas de correctif"} (#{Vulnerability.severity_label(entry.severity).downcase})" }, " · ") %>
+        </p>
+      </section>
+    <% end %>
+
+    <footer class="flex flex-wrap gap-3 border-t border-line pt-3 text-xs">
+      <%= link_to "Debian Security Tracker", Vulnerability.url(@cve, "debian"), target: "_blank", rel: "noopener", class: "text-accent hover:underline" %>
+      <%= link_to "Ubuntu", Vulnerability.url(@cve, "ubuntu"), target: "_blank", rel: "noopener", class: "text-accent hover:underline" %>
+      <%= link_to "NVD", "https://nvd.nist.gov/vuln/detail/#{@cve}", target: "_blank", rel: "noopener", class: "text-accent hover:underline" %>
+      <%= link_to "CVE.org", "https://www.cve.org/CVERecord?id=#{@cve}", target: "_blank", rel: "noopener", class: "text-accent hover:underline" %>
+      <%= link_to "Page de la vulnérabilité", vulnerability_path(@cve), data: { turbo_frame: "_top" }, class: "ml-auto text-ink-3 hover:underline" %>
+    </footer>
+  </article>
+<% end %>

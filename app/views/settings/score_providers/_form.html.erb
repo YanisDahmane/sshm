@@ -1,0 +1,63 @@
+<%# Custom score provider: URL template with {cve}, then a JSON path, or a CSS selector and / or regex for an HTML page. %>
+<%= form_with model: provider, url: (provider.persisted? ? settings_score_provider_path(provider) : settings_score_providers_path), scope: :score_provider,
+      data: { controller: "kind-fields" }, class: "score-provider-form card mt-6 space-y-4 p-5" do |f| %>
+  <%= render "shared/form_errors", record: provider %>
+  <div>
+    <%= f.label :name, "Nom", class: "label" %>
+    <%= f.text_field :name, value: provider.name, required: true, class: "input", placeholder: "CVEFind" %>
+  </div>
+  <div>
+    <%= f.label :url_template, "Adresse de la note", class: "label" %>
+    <%= f.url_field :url_template, value: provider.setting("url_template"), required: true, class: "input font-mono text-xs", placeholder: "https://www.cvefind.com/fr/cve/{cve}.html" %>
+    <p class="mt-1 text-xs text-ink-3">HTTPS, avec <code>{cve}</code> à la place de l'identifiant. Requêtes GET uniquement.</p>
+  </div>
+  <div>
+    <%= f.label :page_url_template, "Page à ouvrir (facultatif)", class: "label" %>
+    <%= f.url_field :page_url_template, value: provider.setting("page_url_template"), class: "input font-mono text-xs", placeholder: "Par défaut, l'adresse de la note" %>
+  </div>
+  <fieldset>
+    <legend class="label">Format</legend>
+    <div class="flex flex-wrap gap-4 text-sm">
+      <% ScoreProvider::FORMATS.each do |value, label| %>
+        <label class="flex items-center gap-1.5"><%= f.radio_button :format, value, checked: provider.setting("format") == value, data: { kind_fields_target: "kind", action: "kind-fields#update" } %> <%= label %></label>
+      <% end %>
+    </div>
+  </fieldset>
+  <div data-kind-fields-target="field" data-kinds="json">
+    <%= f.label :json_path, "Chemin JSON de la note", class: "label" %>
+    <%= f.text_field :json_path, value: provider.setting("json_path"), class: "input font-mono text-xs", placeholder: "cvss3.cvss3_base_score  ou  metrics.0.cvssV3_1.baseScore" %>
+  </div>
+  <div data-kind-fields-target="field" data-kinds="html" class="grid gap-4 sm:grid-cols-2">
+    <div>
+      <%= f.label :css_selector, "Sélecteur CSS (facultatif)", class: "label" %>
+      <%= f.text_field :css_selector, value: provider.setting("css_selector"), class: "input font-mono text-xs", placeholder: ".cvss-score" %>
+    </div>
+    <div>
+      <%= f.label :regex, "Regex (facultatif, 1er groupe)", class: "label" %>
+      <%= f.text_field :regex, value: provider.setting("regex"), class: "input font-mono text-xs", placeholder: '"name": "Base Score",\s*"value": "([\d.]+)"' %>
+    </div>
+    <p class="text-xs text-ink-3 sm:col-span-2">Le sélecteur prend le texte d'un élément de la page, la regex y cherche la note (sur toute la page sans sélecteur). Exemple CVEFind : la regex ci-dessus lit la note de ses données structurées.</p>
+  </div>
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div>
+      <%= f.label :delay_ms, "Délai entre deux requêtes (ms)", class: "label" %>
+      <%= f.number_field :delay_ms, value: provider.setting("delay_ms"), min: 200, class: "input" %>
+    </div>
+    <div>
+      <%= f.label :max_per_run, "Requêtes au plus par passage", class: "label" %>
+      <%= f.number_field :max_per_run, value: provider.setting("max_per_run"), min: 1, max: 5000, class: "input" %>
+    </div>
+  </div>
+  <p class="rounded-lg bg-warn-soft px-3 py-2 text-xs text-warn-ink">Lire les pages d'un site tiers peut être contraire à ses conditions d'utilisation : vérifiez-les. Elio respecte le délai et le nombre de requêtes choisis.</p>
+
+  <div class="flex flex-wrap items-center gap-2 border-t border-line pt-4">
+    <%= text_field_tag :cve, "CVE-2024-6387", class: "input w-44 font-mono text-xs", aria: { label: "CVE à tester" } %>
+    <%= f.button "Tester", type: "submit", formaction: preview_settings_score_providers_path, formmethod: "post", name: nil, class: "btn btn-secondary",
+          data: { turbo_stream: true } %>
+    <div id="score-provider-test-new" class="min-w-0"></div>
+  </div>
+  <div class="flex gap-2">
+    <%= f.submit provider.persisted? ? "Enregistrer" : "Ajouter le fournisseur", class: "btn btn-primary" %>
+    <%= link_to "Annuler", settings_vulnerabilities_path(anchor: "score-providers"), class: "btn btn-ghost" %>
+  </div>
+<% end %>

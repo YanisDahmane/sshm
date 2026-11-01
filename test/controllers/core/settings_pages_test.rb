@@ -43,7 +43,7 @@ class SettingsPagesTest < ActionDispatch::IntegrationTest
 
     get settings_automations_path
 
-    assert_select "section.automation", 9
+    assert_select "section.automation", 10
     scan = Automation.find_by!(kind: "keys_scan")
     assert_select "##{ActionView::RecordIdentifier.dom_id(scan)}" do
       assert_select ".automation-state", "Activée"
