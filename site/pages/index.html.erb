@@ -26,7 +26,7 @@
 <section class="mx-auto mt-24 max-w-6xl px-5">
   <p class="eyebrow text-center"><%= t en: "What it does", fr: "Ce qu'il fait" %></p>
   <h2 class="mx-auto mt-3 max-w-2xl text-center text-3xl font-semibold"><%= t en: "One place for the state of all your servers", fr: "Un seul endroit pour l'état de tous vos serveurs" %></h2>
-  <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
     <% [
          [ :pulse, t(en: "Health", fr: "Santé"), t(en: "Load, memory, disks, failed services, reboots and updates pending, with your thresholds and 30 days of history.", fr: "Charge, mémoire, disques, services en échec, redémarrages et mises à jour en attente, avec vos seuils et 30 jours d'historique.") ],
          [ :shield_exclamation, t(en: "Vulnerabilities", fr: "Vulnérabilités"), t(en: "CVEs of every package, grouped by the update that fixes them, scored by NVD, Red Hat and CVE.org.", fr: "Les CVE de chaque paquet, regroupées par la mise à jour qui les corrige, notées par NVD, Red Hat et CVE.org.") ],
@@ -35,7 +35,8 @@
          [ :cube, t(en: "Inventory", fr: "Inventaire"), t(en: "System, packages, services, scheduled tasks, network addresses, listening ports and firewall.", fr: "Système, paquets, services, tâches planifiées, adresses réseau, ports en écoute et firewall.") ],
          [ :exclamation_triangle, t(en: "Alerts", fr: "Alertes"), t(en: "What needs attention first; Slack, Discord, email or webhooks; a daily digest.", fr: "Ce qui demande attention d'abord ; Slack, Discord, email ou webhooks ; un résumé quotidien.") ],
          [ :bolt, t(en: "Automation", fr: "Automatisations"), t(en: "Collections on schedule, per group, followed live; every command in one readable file.", fr: "Des collectes planifiées, par groupe, suivies en direct ; chaque commande dans un seul fichier lisible.") ],
-         [ :shield_check, t(en: "For teams", fr: "En équipe"), t(en: "Roles, invitations, mandatory two-factor authentication, secrets encrypted in the database.", fr: "Rôles, invitations, double authentification obligatoire, secrets chiffrés en base.") ]
+         [ :shield_check, t(en: "For teams", fr: "En équipe"), t(en: "Roles, invitations, mandatory two-factor authentication, secrets encrypted in the database.", fr: "Rôles, invitations, double authentification obligatoire, secrets chiffrés en base.") ],
+         [ :signal, t(en: "Extensions", fr: "Extensions"), t(en: "Uptime Kuma monitors and OVHcloud resources (IPs, network firewall, DNS) next to each server, read-only.", fr: "Les sondes Uptime Kuma et les ressources OVHcloud (IP, firewall réseau, DNS) à côté de chaque serveur, en lecture seule.") ]
        ].each do |icon_name, title, text| -%>
       <div class="card p-5">
         <span class="grid h-9 w-9 place-items-center rounded-lg bg-accent-soft text-accent"><%= icon(icon_name) %></span>

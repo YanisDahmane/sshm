@@ -54,6 +54,14 @@
       <li><%= t en: "The extensions you enable (Uptime Kuma, OVHcloud), read-only. Nothing else: no telemetry.", fr: "Les extensions que vous activez (Uptime Kuma, OVHcloud), en lecture seule. Rien d'autre : aucune télémétrie." %></li>
     </ul>
 
+    <h2 id="extensions"><%= t en: "Extensions", fr: "Extensions" %></h2>
+    <ul>
+      <li><%= t en: "Their HTTP client only knows the GET method: an extension cannot change anything on the service it reads, whatever its key allows. Answers are read in chunks and capped (20 MB), with short timeouts.", fr: "Leur client HTTP ne connaît que la méthode GET : une extension ne peut rien modifier sur le service qu'elle lit, quels que soient les droits de sa clé. Les réponses sont lues par morceaux et plafonnées (20 Mo), avec des délais courts." %></li>
+      <li><strong>Uptime Kuma</strong> — <%= t en: "only the /metrics page is read, with an API key sent over HTTPS; a self-signed certificate is accepted only if you tick the box, and Elio warns about a plain HTTP address.", fr: "seule la page /metrics est lue, avec une clé d'API envoyée en HTTPS ; un certificat auto-signé n'est accepté que si vous cochez la case, et Elio prévient pour une adresse en HTTP simple." %></li>
+      <li><strong>OVHcloud</strong> — <%= t en: "requests are signed with your keys, and Elio asks for a key limited to GET requests: it lists the exact rights, and the connection test warns if the key could write.", fr: "les requêtes sont signées avec vos clés, et Elio demande une clé limitée aux requêtes GET : il liste les droits exacts, et le test de connexion prévient si la clé permet d'écrire." %></li>
+      <li><%= t en: "Their keys are encrypted in the database and never sent back to the browser: a field left empty keeps the saved value.", fr: "Leurs clés sont chiffrées en base et jamais renvoyées au navigateur : un champ laissé vide garde la valeur enregistrée." %></li>
+    </ul>
+
     <h2 id="report"><%= t en: "Reporting a vulnerability", fr: "Signaler une faille" %></h2>
     <p><%= t en: "Please do not open a public issue: report it privately through <a href=\"https://github.com/elio-fleet/elio/security/advisories/new\">a GitHub security advisory</a>. See <a href=\"https://github.com/elio-fleet/elio/blob/main/SECURITY.md\">SECURITY.md</a>.",
              fr: "N'ouvrez pas d'issue publique : signalez-la en privé par <a href=\"https://github.com/elio-fleet/elio/security/advisories/new\">un avis de sécurité GitHub</a>. Voir <a href=\"https://github.com/elio-fleet/elio/blob/main/SECURITY.md\">SECURITY.md</a>." %></p>

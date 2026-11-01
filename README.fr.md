@@ -21,6 +21,7 @@
   <a href="https://elio-fleet.github.io/elio/fr/">Site</a> ·
   <a href="#démarrage-rapide">Démarrage rapide</a> ·
   <a href="#fonctionnalités">Fonctionnalités</a> ·
+  <a href="#extensions">Extensions</a> ·
   <a href="#sécurité">Sécurité</a> ·
   <a href="README.md">English</a>
 </p>
@@ -53,6 +54,8 @@ Elio suit un parc de serveurs Debian et Ubuntu depuis un seul endroit : lesquels
 | **Un serveur** : santé, courbes sur 24 h, système | **Docker** : conteneurs, images, mises à jour, CVE |
 | ![Vue d'ensemble](docs/screenshots/overview.png) | ![Thème sombre](docs/screenshots/fleet-dark.png) |
 | **Ce qui est à traiter**, le plus grave d'abord | **Thème sombre** |
+| ![Sondes Uptime Kuma](docs/screenshots/uptime-kuma-monitors.png) | ![OVHcloud](docs/screenshots/ovh.png) |
+| **Uptime Kuma** : les sondes rattachées à chaque serveur | **OVHcloud** : service, IP, firewall réseau port par port, DNS |
 
 ## Démarrage rapide
 
@@ -93,6 +96,8 @@ Elio est une application Rails avec PostgreSQL. Placez-la derrière un reverse p
 | `ELIO_ACTIVITY_RETENTION_DAYS` | Durée de conservation du journal d'activité (365, `0` = tout garder). |
 | `ELIO_DEBIAN_TRACKER_URL`, `ELIO_UBUNTU_OSV_URL`, `ELIO_NVD_FEED_URL`, `ELIO_EPSS_URL`, `ELIO_KEV_URL` | Miroirs des bases de vulnérabilités, pour un réseau fermé (elles peuvent aussi être importées à la main). |
 
+Tout le reste — seuils, notifications, automatisations, fournisseurs de notes, registres Docker, [extensions](#extensions) — se règle dans l'interface, par un administrateur. Les secrets qui y sont saisis (clés d'API, jetons, webhooks) sont chiffrés en base.
+
 ### Préparer les serveurs
 
 1. Dans *Paramètres → Général*, générez la clé SSH d'Elio (Ed25519, gardée chiffrée).
@@ -119,12 +124,32 @@ Pris en charge : **Debian et Ubuntu** (les autres systèmes : santé et système
 
 Elio **ne modifie jamais le firewall** et n'installe rien : les règles ufw suggérées et les commandes de mise à jour sont à relire et à lancer vous-même.
 
+## Extensions
+
+Elio peut lire ce que savent vos autres outils et l'afficher à côté de chaque serveur. Activez-les dans *Paramètres → Extensions* (administrateurs). Elles **ne font que lire** : Elio ne crée, ne modifie et ne supprime jamais rien sur ces services, et une extension désactivée ne laisse aucune trace dans l'interface. Chaque alerte qu'elles lèvent est au choix, avec son seuil.
+
+### Uptime Kuma
+
+- **Réglage** : l'adresse de votre instance et une clé d'API (*Uptime Kuma → Paramètres → Clés API*). *Tester la connexion* les vérifie avant d'enregistrer.
+- Elio lit la page `/metrics` toutes les 15 minutes (Uptime Kuma 1.x et 2.x) et **rattache chaque sonde à son serveur** : par l'IP surveillée (adresses WireGuard comprises), par le nom d'hôte (avec résolution DNS en option), ou par le nom du serveur dans celui de la sonde (`[SRV] web-prod-1`). Un rattachement se corrige à la main et reste gardé.
+- Un onglet **Sondes** sur chaque serveur (état, temps de réponse, disponibilité sur 24 h et 30 jours, certificat) et une page **Sondes** : sondes rattachées à aucun serveur, serveurs sans sonde.
+- Alertes au choix : serveur sans sonde (avec des groupes à ignorer), sonde hors ligne ou de retour, certificat bientôt expiré, disponibilité sous un seuil, sonde en maintenance depuis trop longtemps.
+
+### OVHcloud
+
+- **Réglage** : le point d'accès de l'API (EU, CA, US), une Application Key, un Application Secret et une Consumer Key **limitée aux requêtes GET**. *Droits à donner à la clé API* liste les droits exacts pour les produits cochés et ouvre la page de création de jeton d'OVH déjà remplie. *Tester la connexion* signale les droits manquants, et **prévient si la clé permet d'écrire** — refaites-en une dans ce cas.
+- Chaque produit est une case à cocher : IP et reverse DNS, firewall réseau, anti-DDoS, zones DNS (toutes ou certaines), serveurs dédiés, VPS, instances Public Cloud (tous les projets ou certains).
+- Un onglet **OVH** sur chaque serveur : le service OVH (offre, datacenter, expiration), ses IP et reverse, les règles du firewall réseau et **si elles laissent passer chaque port public**, l'anti-DDoS, les enregistrements DNS qui pointent vers lui. Une page **OVHcloud** : services, IP, enregistrements DNS, ressources rattachées à aucun serveur.
+- Alertes au choix : service bientôt expiré (renouvellement automatique pris en compte), firewall réseau désactivé, reverse DNS qui ne correspond pas, serveur sans enregistrement DNS, enregistrement DNS vers une IP hors du parc, service OVH non suivi par Elio.
+
+Le client OVH d'Elio ne connaît que la méthode GET : il ne peut pas écrire, quels que soient les droits de la clé.
+
 ## Sécurité
 
 - La clé SSH d'Elio, les clés d'API, les webhooks et les secrets 2FA sont **chiffrés en base** et jamais renvoyés au navigateur.
 - Double authentification (TOTP et codes de secours), obligatoire par défaut pour les administrateurs et les opérateurs ; rôles ; invitations seulement (pas d'inscription publique) ; connexion limitée en débit et verrouillage ; Content Security Policy stricte.
 - L'empreinte de chaque serveur est mémorisée à la première connexion ; un changement bloque la connexion jusqu'à ce qu'un administrateur l'accepte.
-- **Connexions sortantes** d'Elio : les bases de vulnérabilités et fournisseurs de notes (Debian, OSV, NVD, Red Hat, CVE.org, FIRST, CISA — seulement les versions et CVE de votre parc), les registres Docker (requêtes `HEAD` sur les manifestes), et les extensions que vous activez. En réseau fermé, les bases peuvent être importées à la main.
+- **Connexions sortantes** d'Elio : les bases de vulnérabilités et fournisseurs de notes (Debian, OSV, NVD, Red Hat, CVE.org, FIRST, CISA — seulement les versions et CVE de votre parc), les registres Docker (requêtes `HEAD` sur les manifestes), et les extensions que vous activez (votre instance Uptime Kuma, l'API OVH — en lecture seule, voir [Extensions](#extensions)). Rien d'autre, aucune télémétrie. En réseau fermé, les bases peuvent être importées à la main.
 - Vous avez trouvé une faille ? Signalez-la en privé : voir [SECURITY.md](SECURITY.md).
 
 ## Limites connues

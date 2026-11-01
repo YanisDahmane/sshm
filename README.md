@@ -21,6 +21,7 @@
   <a href="https://elio-fleet.github.io/elio/">Website</a> ·
   <a href="#quick-start">Quick start</a> ·
   <a href="#features">Features</a> ·
+  <a href="#extensions">Extensions</a> ·
   <a href="#security">Security</a> ·
   <a href="README.fr.md">Français</a>
 </p>
@@ -53,6 +54,8 @@ Elio watches a fleet of Debian and Ubuntu servers from one place: which ones are
 | **A server**: health, 24-hour charts, system | **Docker**: containers, images, updates, CVEs |
 | ![Overview](docs/screenshots/overview.png) | ![Dark theme](docs/screenshots/fleet-dark.png) |
 | **What needs attention**, most serious first | **Dark theme** |
+| ![Uptime Kuma monitors](docs/screenshots/uptime-kuma-monitors.png) | ![OVHcloud](docs/screenshots/ovh.png) |
+| **Uptime Kuma**: monitors attached to each server | **OVHcloud**: service, IPs, network firewall per port, DNS |
 
 The interface is in French for now.
 
@@ -95,6 +98,8 @@ Elio is a Rails application with PostgreSQL. Put it behind a reverse proxy with 
 | `ELIO_ACTIVITY_RETENTION_DAYS` | How long the activity log is kept (365, `0` = forever). |
 | `ELIO_DEBIAN_TRACKER_URL`, `ELIO_UBUNTU_OSV_URL`, `ELIO_NVD_FEED_URL`, `ELIO_EPSS_URL`, `ELIO_KEV_URL` | Mirrors of the vulnerability feeds, for a closed network (they can also be imported by hand). |
 
+Everything else — thresholds, notifications, automations, score providers, Docker registries, [extensions](#extensions) — is set in the interface, by an administrator. Secrets entered there (API keys, tokens, webhooks) are encrypted in the database.
+
 ### Preparing the servers
 
 1. In *Paramètres → Général*, generate Elio's SSH key (Ed25519, kept encrypted).
@@ -121,12 +126,32 @@ Supported: **Debian and Ubuntu** (others get health and system only), Docker, sn
 
 Elio **never changes the firewall** nor installs anything: suggested ufw rules and update commands are for you to review and run.
 
+## Extensions
+
+Elio can read what your other tools know and show it next to each server. Enable them in *Paramètres → Extensions* (administrators). They **only read**: Elio never creates, changes or deletes anything on these services, and a disabled extension leaves no trace in the interface. Every alert they raise is optional, with its own threshold.
+
+### Uptime Kuma
+
+- **Setup**: the address of your instance and an API key (*Uptime Kuma → Settings → API Keys*). *Tester la connexion* checks them before saving.
+- Elio reads the `/metrics` page every 15 minutes (Uptime Kuma 1.x and 2.x) and **attaches each monitor to its server**: by the IP it watches (WireGuard addresses included), by host name (with DNS resolution as an option), or by the server's name in the monitor's name (`[SRV] web-prod-1`). An attachment can be corrected by hand and is kept.
+- A **Monitors** tab on each server (state, response time, uptime over 24 hours and 30 days, certificate) and a **Monitors** page: monitors attached to no server, servers without any monitor.
+- Optional alerts: server without a monitor (with groups to ignore), monitor down or back, certificate about to expire, uptime under a threshold, monitor in maintenance for too long.
+
+### OVHcloud
+
+- **Setup**: the API endpoint (EU, CA, US), an Application Key, an Application Secret and a Consumer Key **limited to GET requests**. *Droits à donner à la clé API* lists the exact rights for the products you check and opens OVH's token page already filled in. *Tester la connexion* reports missing rights, and **warns if the key could write** — make a new one then.
+- Each product is a checkbox: IPs and reverse DNS, network firewall, anti-DDoS, DNS zones (all or some), dedicated servers, VPS, Public Cloud instances (all projects or some).
+- An **OVH** tab on each server: the OVH service (offer, datacenter, expiration), its IPs and reverse, the network firewall rules and **whether they let each public port through**, anti-DDoS, the DNS records pointing to it. An **OVHcloud** page: services, IPs, DNS records, resources attached to no server.
+- Optional alerts: service about to expire (automatic renewal taken into account), network firewall disabled, reverse DNS that does not match, server without a DNS record, DNS record pointing outside the fleet, OVH service not followed by Elio.
+
+The OVH client of Elio only knows the GET method: it cannot write, whatever the key allows.
+
 ## Security
 
 - Elio's SSH key, API keys, webhooks and 2FA secrets are **encrypted in the database** and never sent back to the browser.
 - Two-factor authentication (TOTP and backup codes), mandatory by default for administrators and operators; roles; invitations only (no public sign-up); rate-limited sign-in and lockout; strict Content Security Policy.
 - Servers' host keys are pinned on first connection; a change blocks the connection until an administrator accepts it.
-- **Outbound connections** of Elio: the vulnerability feeds and score providers (Debian, OSV, NVD, Red Hat, CVE.org, FIRST, CISA — only the releases and CVEs of your fleet), the Docker registries (manifest `HEAD` requests), and the extensions you enable. In a closed network, the feeds can be imported by hand.
+- **Outbound connections** of Elio: the vulnerability feeds and score providers (Debian, OSV, NVD, Red Hat, CVE.org, FIRST, CISA — only the releases and CVEs of your fleet), the Docker registries (manifest `HEAD` requests), and the extensions you enable (your Uptime Kuma instance, the OVH API — read-only, see [Extensions](#extensions)). Nothing else, no telemetry. In a closed network, the feeds can be imported by hand.
 - Found a vulnerability? Please report it privately: see [SECURITY.md](SECURITY.md).
 
 ## Known limits

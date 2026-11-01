@@ -81,20 +81,42 @@
 
 <section id="extensions" class="mx-auto mt-20 max-w-6xl px-5">
   <p class="eyebrow">Extensions</p>
-  <h2 class="mt-3 text-2xl font-semibold"><%= t en: "What your other tools know, next to each server", fr: "Ce que savent vos autres outils, à côté de chaque serveur" %></h2>
-  <div class="mt-6 grid gap-4 md:grid-cols-2">
-    <div class="card p-6">
-      <h3 class="font-semibold">Uptime Kuma</h3>
-      <p class="mt-2 text-sm leading-relaxed text-ink-2"><%= t en: "The monitors of your instance, attached to each server by IP, host name or name; servers without a monitor, monitors down, certificates about to expire.",
-                                                                fr: "Les sondes de votre instance, rattachées à chaque serveur par IP, nom d'hôte ou nom ; serveurs sans sonde, sondes hors ligne, certificats bientôt expirés." %></p>
+  <h2 class="mt-3 max-w-2xl text-2xl font-semibold"><%= t en: "What your other tools know, next to each server", fr: "Ce que savent vos autres outils, à côté de chaque serveur" %></h2>
+  <p class="lead mt-3 max-w-3xl"><%= t en: "Enabled in the settings, they only read: Elio never creates, changes or deletes anything on these services. A disabled extension leaves no trace in the interface, and each of their alerts is optional.",
+                                         fr: "Activées dans les paramètres, elles ne font que lire : Elio ne crée, ne modifie et ne supprime jamais rien sur ces services. Une extension désactivée ne laisse aucune trace dans l'interface, et chacune de leurs alertes est au choix." %></p>
+
+  <div class="mt-10 grid items-start gap-10 lg:grid-cols-5">
+    <div class="lg:col-span-2">
+      <h3 class="text-xl font-semibold">Uptime Kuma</h3>
+      <ul class="mt-4 space-y-3 text-ink-2">
+        <% [ t(en: "Reads the /metrics page of your instance every 15 minutes, with an API key (Uptime Kuma 1.x and 2.x).", fr: "Lit la page /metrics de votre instance toutes les 15 minutes, avec une clé d'API (Uptime Kuma 1.x et 2.x)."),
+             t(en: "Attaches each monitor to its server: by the IP it watches (WireGuard included), by host name — with DNS resolution as an option — or by the server's name in the monitor's name. Corrections by hand are kept.", fr: "Rattache chaque sonde à son serveur : par l'IP surveillée (WireGuard compris), par le nom d'hôte — avec résolution DNS en option — ou par le nom du serveur dans celui de la sonde. Les corrections à la main sont gardées."),
+             t(en: "A Monitors tab on each server; a page with the monitors attached to no server and the servers without any monitor.", fr: "Un onglet Sondes sur chaque serveur ; une page avec les sondes rattachées à aucun serveur et les serveurs sans sonde."),
+             t(en: "Alerts to choose: server without a monitor, monitor down or back, certificate about to expire, uptime under a threshold, maintenance that lasts.", fr: "Alertes au choix : serveur sans sonde, sonde hors ligne ou de retour, certificat bientôt expiré, disponibilité sous un seuil, maintenance qui dure.") ].each do |point| -%>
+          <li class="flex gap-3"><span class="mt-1 text-accent"><%= icon(:check, "h-4 w-4") %></span><span><%= point %></span></li>
+        <% end -%>
+      </ul>
     </div>
-    <div class="card p-6">
-      <h3 class="font-semibold">OVHcloud</h3>
-      <p class="mt-2 text-sm leading-relaxed text-ink-2"><%= t en: "IPs and reverse DNS, the network firewall and what it lets through, anti-DDoS, DNS records pointing to each server, services about to expire — with an API key limited to GET requests.",
-                                                                fr: "IP et reverse DNS, le firewall réseau et ce qu'il laisse passer, l'anti-DDoS, les enregistrements DNS vers chaque serveur, les services bientôt expirés — avec une clé d'API limitée aux requêtes GET." %></p>
-    </div>
+    <figure class="lg:col-span-3"><%= screenshot("uptime-kuma-monitors", t(en: "The Uptime Kuma monitors, attached to the servers", fr: "Les sondes Uptime Kuma, rattachées aux serveurs")) %>
+      <figcaption class="mt-2 text-center text-sm text-ink-3"><%= t en: "The monitors and the server each one watches", fr: "Les sondes et le serveur que chacune surveille" %></figcaption></figure>
   </div>
-  <p class="mt-4 text-sm text-ink-3"><%= t en: "Extensions only read: Elio never creates, changes or deletes anything on these services.", fr: "Les extensions ne font que lire : Elio ne crée, ne modifie et ne supprime jamais rien sur ces services." %></p>
+
+  <div class="mt-16 grid items-start gap-10 lg:grid-cols-5">
+    <div class="lg:order-2 lg:col-span-2">
+      <h3 class="text-xl font-semibold">OVHcloud</h3>
+      <ul class="mt-4 space-y-3 text-ink-2">
+        <% [ t(en: "An API key limited to GET requests: Elio lists the exact rights for the products you check and opens OVH's token page already filled in; the connection test warns if the key could write.", fr: "Une clé d'API limitée aux requêtes GET : Elio liste les droits exacts pour les produits cochés et ouvre la page de création de jeton d'OVH déjà remplie ; le test de connexion prévient si la clé permet d'écrire."),
+             t(en: "Each product is a checkbox: IPs and reverse DNS, network firewall, anti-DDoS, DNS zones, dedicated servers, VPS, Public Cloud instances.", fr: "Chaque produit est une case à cocher : IP et reverse DNS, firewall réseau, anti-DDoS, zones DNS, serveurs dédiés, VPS, instances Public Cloud."),
+             t(en: "An OVH tab on each server: the service and its expiration, the IPs, the network firewall rules and whether they let each public port through, the DNS records pointing to it.", fr: "Un onglet OVH sur chaque serveur : le service et son expiration, les IP, les règles du firewall réseau et si elles laissent passer chaque port public, les enregistrements DNS qui pointent vers lui."),
+             t(en: "Alerts to choose: service about to expire, firewall disabled, reverse DNS that does not match, DNS record pointing outside the fleet, OVH service not followed by Elio.", fr: "Alertes au choix : service bientôt expiré, firewall désactivé, reverse DNS qui ne correspond pas, enregistrement DNS vers une IP hors du parc, service OVH non suivi par Elio.") ].each do |point| -%>
+          <li class="flex gap-3"><span class="mt-1 text-accent"><%= icon(:check, "h-4 w-4") %></span><span><%= point %></span></li>
+        <% end -%>
+      </ul>
+    </div>
+    <figure class="lg:col-span-3"><%= screenshot("ovh", t(en: "The OVH tab of a server: service, IPs, network firewall per port, DNS records", fr: "L'onglet OVH d'un serveur : service, IP, firewall réseau port par port, enregistrements DNS")) %>
+      <figcaption class="mt-2 text-center text-sm text-ink-3"><%= t en: "What OVH knows about a server, and what its network firewall lets through", fr: "Ce qu'OVH sait d'un serveur, et ce que son firewall réseau laisse passer" %></figcaption></figure>
+  </div>
+  <p class="mt-8 text-sm text-ink-3"><%= t en: "Not yet tried on real accounts: built and tested on recorded API answers. Feedback welcome.", fr: "Pas encore essayées sur de vrais comptes : construites et testées sur des réponses d'API enregistrées. Vos retours sont bienvenus." %></p>
 </section>
 
 <section id="team" class="mx-auto mt-20 max-w-6xl px-5">

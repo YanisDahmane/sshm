@@ -12,6 +12,8 @@ class ReadmeScreenshots < ApplicationSystemTestCase
   include Devise::Test::IntegrationHelpers
   include StubHelpers
   include PackageHelpers
+  include UptimeKumaHelpers
+  include OvhHelpers
 
   FIX = Rails.root.join("test/fixtures/files/inventory")
   OUT = Rails.root.join("docs/screenshots")
@@ -123,6 +125,24 @@ class ReadmeScreenshots < ApplicationSystemTestCase
     CveRating.refresh!
     ScoreProvider.all_providers.each { |provider| provider.update!(last_run_at: 3.hours.ago) }
 
+    # Extensions, synchronized for real against fake services (as in the tests).
+    enable_uptime_kuma
+    uptime_kuma_metrics(metrics_page(
+      { id: 1, name: "[SRV] db-prod", hostname: "198.51.100.20", status: 1, uptime: 0.9998 },
+      { id: 2, name: "[SRV] web-prod-1", hostname: "198.51.100.10", status: 1, uptime: 0.9991 },
+      { id: 3, name: "shop.example.com", type: "http", url: "https://shop.example.com", hostname: "null", status: 1, cert_days: 23, uptime: 0.9995 },
+      { id: 4, name: "[SRV] staging", hostname: "198.51.100.77", status: 0, uptime: 0.912 },
+      { id: 5, name: "[SRV] db-prod PostgreSQL", type: "port", hostname: "198.51.100.20", status: 1, uptime: 1.0 },
+      { id: 6, name: "Old VPN gateway", hostname: "192.0.2.44", status: 0, uptime: 0.0 }
+    ))
+    Integration.find_by!(kind: "uptime_kuma").sync!
+    UptimeKumaMonitor.find_by!(monitor_id: "3").update!(server: web, matched_by: "manual")
+    enable_ovh
+    fake_ovh(JSON.parse(ovh_account(expiration: 12.days.from_now.to_date).to_json
+                          .gsub("198.51.100.20", "198.51.100.11").gsub("203.0.113.10", "198.51.100.20").gsub("web.example.com.", "db-prod.example.internal.")
+                          .gsub("198.51.100.7", "198.51.100.40")))
+    Integration.find_by!(kind: "ovh").sync!
+
     Server.find_each(&:refresh_health!)
     Activity.record!(:vulnerability_found, server: db, user: nil, count: 2, cves: %w[CVE-2024-45491 CVE-2024-45492], packages: %w[expat], image: "nginx:1.27")
     Activity.record!(:port_opened, server: db, user: nil, port: "6432/tcp", process: "docker-proxy")
@@ -175,5 +195,7 @@ class ReadmeScreenshots < ApplicationSystemTestCase
     shoot.("packages", packages_path(q: "ssl"))
     shoot.("score-providers", settings_vulnerabilities_path) { find("#score-providers").scroll_to(:top) }
     shoot.("automations", settings_automations_path)
+    shoot.("uptime-kuma-monitors", monitors_path)
+    shoot.("ovh", server_path(db, tab: "ovh"))
   end
 end

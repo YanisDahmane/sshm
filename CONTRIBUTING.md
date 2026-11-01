@@ -41,6 +41,16 @@ Rules that keep Elio safe and readable:
 
 Models, controllers and jobs are grouped by domain (`app/models/fleet`, `access`, `security`, `operations`…; the folders are not namespaces). Inventory collectors live in `app/services/inventory/collectors`, one per category, with a pure Ruby parser.
 
+## Writing an extension
+
+Extensions (Uptime Kuma, OVHcloud) bring what another tool knows next to each server. A new one:
+
+- a class that inherits `Integrations::Base` in `app/services/integrations/`, registered in `Integration::REGISTRY`, with its `fields` (form of the settings, secrets encrypted), `test_connection`, `sync`, and the hooks it needs: `server_tabs` (partial `integrations/<key>/server_tab`), `sidebar_links`, `health_reasons`, `help_partial`;
+- an automation (`Automation::KINDS`, with `integration:`) for its synchronization;
+- **read-only**: requests go through `Integrations::Http`, which only knows `GET`; ask the user for a key with the fewest rights, and say so in the help;
+- every alert optional (a setting each), activities declared in `Activity::KINDS` with their summary;
+- tests on recorded and anonymized API answers (see `test/support/uptime_kuma_helpers.rb`, `ovh_helpers.rb`): no network in the tests.
+
 ## Pull requests
 
 - One topic per pull request, with its tests; `bin/ci` green.

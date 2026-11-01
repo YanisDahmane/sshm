@@ -16,6 +16,6 @@ Elio is in beta: only the latest release (and `main`) receives security fixes.
 
 ## Scope
 
-In scope: the Elio application (authentication, roles, 2FA, the handling of the SSH key and of the secrets, what it runs on the servers — see [`config/ssh_commands.yml`](config/ssh_commands.yml)), the Docker image and the release workflows.
+In scope: the Elio application (authentication, roles, 2FA, the handling of the SSH key and of the secrets, what it runs on the servers — see [`config/ssh_commands.yml`](config/ssh_commands.yml)), the extensions (the Uptime Kuma and OVHcloud clients, which must stay read-only, and the handling of their API keys), the Docker image and the release workflows.
 
 Out of scope: vulnerabilities of the servers Elio monitors (that is what Elio reports to you), and attacks that need an administrator account of Elio or root on the machine running it.

@@ -68,6 +68,22 @@
              fr: "Elio lit ce qu'un compte sans privilège peut lire. Certains détails demandent root : le processus derrière chaque port, le firewall, Docker, les crontabs des utilisateurs. Connectez Elio en root, ou donnez à son compte un <code>sudo</code> sans mot de passe ; sinon ces collectes sont marquées <em>partielles</em>. Voyez exactement ce qui est lancé sur la <a href=\"security.html#commands\">page sécurité</a>." %></p>
     <p><%= t en: "Supported: Debian and Ubuntu (full inventory), any Linux for health and system; Docker and snap.", fr: "Pris en charge : Debian et Ubuntu (inventaire complet), tout Linux pour la santé et le système ; Docker et snap." %></p>
 
+    <h2 id="extensions"><%= t en: "Connecting Uptime Kuma and OVHcloud", fr: "Brancher Uptime Kuma et OVHcloud" %></h2>
+    <p><%= t en: "Optional. In <em>Paramètres → Extensions</em> (administrators), enable an extension, fill in its settings, use <em>Tester la connexion</em>, then choose its alerts. Nothing goes in the environment variables: keys are entered in the interface and encrypted in the database.",
+             fr: "Facultatif. Dans <em>Paramètres → Extensions</em> (administrateurs), activez une extension, remplissez ses réglages, utilisez <em>Tester la connexion</em>, puis choisissez ses alertes. Rien dans les variables d'environnement : les clés se saisissent dans l'interface et sont chiffrées en base." %></p>
+    <h3>Uptime Kuma</h3>
+    <ol>
+      <li><%= t en: "In Uptime Kuma, <em>Settings → API Keys</em>: create a key for Elio.", fr: "Dans Uptime Kuma, <em>Paramètres → Clés API</em> : créez une clé pour Elio." %></li>
+      <li><%= t en: "In Elio: the address of the instance (HTTPS recommended) and the key. A self-signed certificate is only accepted if you tick the box.", fr: "Dans Elio : l'adresse de l'instance (HTTPS conseillé) et la clé. Un certificat auto-signé n'est accepté que si vous cochez la case." %></li>
+      <li><%= t en: "Choose how monitors are attached to servers (by IP, host name, DNS, name). The first synchronization runs right away, then every 15 minutes.", fr: "Choisissez comment les sondes sont rattachées aux serveurs (par IP, nom d'hôte, DNS, nom). La première synchronisation part tout de suite, puis toutes les 15 minutes." %></li>
+    </ol>
+    <h3>OVHcloud</h3>
+    <ol>
+      <li><%= t en: "In Elio, tick the products to read (IPs, firewall, anti-DDoS, DNS zones, dedicated servers, VPS, Public Cloud), then click <em>Droits à donner à la clé API</em>: it lists the GET rights needed and opens OVH's token page already filled in.", fr: "Dans Elio, cochez les produits à lire (IP, firewall, anti-DDoS, zones DNS, serveurs dédiés, VPS, Public Cloud), puis cliquez sur <em>Droits à donner à la clé API</em> : la liste des droits GET nécessaires s'affiche et la page de création de jeton d'OVH s'ouvre déjà remplie." %></li>
+      <li><%= t en: "Create the key there, with <strong>GET rights only</strong>, and paste the Application Key, Application Secret and Consumer Key into Elio.", fr: "Créez-y la clé, avec <strong>des droits GET seulement</strong>, et collez l'Application Key, l'Application Secret et la Consumer Key dans Elio." %></li>
+      <li><%= t en: "<em>Tester la connexion</em> reports the missing rights, and warns if the key could write (POST, PUT, DELETE): make a new one then. Elio itself only sends GET requests, but a key with fewer rights is safer if it leaks.", fr: "<em>Tester la connexion</em> signale les droits manquants, et prévient si la clé permet d'écrire (POST, PUT, DELETE) : refaites-en une dans ce cas. Elio n'envoie que des requêtes GET, mais une clé avec moins de droits est plus sûre si elle fuit." %></li>
+    </ol>
+
     <h2 id="from-source"><%= t en: "From the sources", fr: "Depuis les sources" %></h2>
     <p><%= t en: "To develop or try a change: Ruby (see <code>.ruby-version</code>), PostgreSQL, then <code>bin/setup</code>. See <a href=\"https://github.com/elio-fleet/elio/blob/main/CONTRIBUTING.md\">CONTRIBUTING.md</a>.",
              fr: "Pour développer ou essayer une modification : Ruby (voir <code>.ruby-version</code>), PostgreSQL, puis <code>bin/setup</code>. Voir <a href=\"https://github.com/elio-fleet/elio/blob/main/CONTRIBUTING.md\">CONTRIBUTING.md</a>." %></p>
