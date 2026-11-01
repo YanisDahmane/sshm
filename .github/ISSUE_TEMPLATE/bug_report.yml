@@ -1,0 +1,37 @@
+name: Bug report
+description: Something does not work as expected.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "Thanks for reporting! For a **security issue**, please use a [private advisory](https://github.com/elio-fleet/elio/security/advisories/new) instead."
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, what you got (error message, screenshot).
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      placeholder: "1. Go to …\n2. Click …"
+  - type: input
+    id: version
+    attributes:
+      label: Elio version
+      placeholder: "v0.1.0-beta.1, or a commit"
+    validations:
+      required: true
+  - type: input
+    id: servers
+    attributes:
+      label: Monitored servers
+      description: Distribution and version of the server concerned, if it is about one (e.g. Debian 13, Ubuntu 24.04), and whether Elio logs in as root or through sudo.
+  - type: textarea
+    id: output
+    attributes:
+      label: Command output (optional)
+      description: If a collection is wrong, the output of the command from config/ssh_commands.yml on that server helps a lot. **Remove hostnames, IPs and anything private.**
+      render: shell

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/elio-fleet/elio/security/advisories/new
+    about: Report it privately, never in a public issue.
+  - name: Questions and discussions
+    url: https://github.com/elio-fleet/elio/discussions
+    about: Installing, using, ideas to discuss.

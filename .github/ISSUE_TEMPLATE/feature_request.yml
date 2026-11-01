@@ -1,0 +1,20 @@
+name: Idea
+description: A feature or an improvement.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would it solve?
+      description: The situation you are in, rather than the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like?
+  - type: textarea
+    id: commands
+    attributes:
+      label: Commands on the servers (if any)
+      description: Elio only runs read-only commands, listed in config/ssh_commands.yml. Which ones would this need?

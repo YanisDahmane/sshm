@@ -1,0 +1,50 @@
+# Contributing to Elio
+
+Thanks for your interest! Issues, ideas and pull requests are welcome.
+
+## Before you start
+
+- **Bugs and ideas**: open an [issue](https://github.com/elio-fleet/elio/issues/new/choose). For a larger change, discuss it in an issue first.
+- **Security issues**: never in a public issue, see [SECURITY.md](SECURITY.md).
+- The interface is in **French**; code, comments, commit messages and tests are in **English**.
+
+## Running Elio locally
+
+Requirements: Ruby (version in [`.ruby-version`](.ruby-version)), PostgreSQL, Chrome for the system tests.
+
+```sh
+bin/setup          # gems, database, then starts the app (bin/dev) on http://localhost:3000
+```
+
+The first visit creates the first (administrator) account. Background jobs (Solid Queue) run inside the web server in development.
+
+To try Elio on real machines, add a server whose `~/.ssh/authorized_keys` holds Elio's public key (Settings → General). Disposable virtual machines or containers with `sshd` are ideal.
+
+## Tests
+
+Every change comes with its tests (Minitest): models, controllers (integration), services, jobs, and system tests for the interface.
+
+```sh
+bin/rails test            # unit and integration tests
+bin/rails test:system     # browser tests (Chrome)
+bin/ci                    # everything the CI runs: style, security audits, tests
+```
+
+Rules that keep Elio safe and readable:
+
+- **Every command sent to a server is in [`config/ssh_commands.yml`](config/ssh_commands.yml)**, read-only unless it is one of the `keys.*` commands. Values are inserted with `@{name}` and always shell-escaped. A test fails if a command is sent from elsewhere.
+- Parsers of command outputs are tested on **real outputs** recorded in `test/fixtures/files/`, anonymized (no real hostname, IP, customer name).
+- No network access in the tests: external services (registries, vulnerability feeds, extensions) are stubbed or served by a local test server.
+- Secrets are encrypted in the database (Active Record Encryption) and never sent back to the browser.
+
+## Code layout
+
+Models, controllers and jobs are grouped by domain (`app/models/fleet`, `access`, `security`, `operations`…; the folders are not namespaces). Inventory collectors live in `app/services/inventory/collectors`, one per category, with a pure Ruby parser.
+
+## Pull requests
+
+- One topic per pull request, with its tests; `bin/ci` green.
+- [Conventional Commits](https://www.conventionalcommits.org/) (`feat(inventory): …`, `fix: …`), with a body that explains *why*.
+- Add a line to [CHANGELOG.md](CHANGELOG.md) under *Unreleased*.
+
+By contributing, you agree that your contribution is licensed under the [AGPL-3.0](LICENSE).
