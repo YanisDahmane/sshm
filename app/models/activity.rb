@@ -54,7 +54,10 @@ class Activity < ApplicationRecord
     Kind.new(:ssh_key_generated, "Clé Elio générée", :security, :critical, "La clé SSH d'Elio a été générée ou régénérée."),
     Kind.new(:ssh_key_rotation_started, "Rotation de la clé Elio lancée", :security, :warning, "Une nouvelle clé Elio est en cours d'installation sur les serveurs."),
     Kind.new(:ssh_key_rotated, "Clé Elio remplacée", :security, :critical, "La rotation est terminée : la nouvelle clé Elio est active, l'ancienne supprimée."),
-    Kind.new(:automation_run, "Automatisation exécutée", :configuration, :info, "Une automatisation s'est exécutée.")
+    Kind.new(:automation_run, "Automatisation exécutée", :configuration, :info, "Une automatisation s'est exécutée."),
+    Kind.new(:integration_enabled, "Extension activée", :configuration, :info, "Un administrateur a activé une extension."),
+    Kind.new(:integration_disabled, "Extension désactivée", :configuration, :info, "Un administrateur a désactivé une extension."),
+    Kind.new(:integration_sync_failed, "Échec de synchronisation d'une extension", :configuration, :warning, "Une extension n'arrive plus à lire son service (signalé une fois, jusqu'au retour à la normale).")
   ].index_by(&:key).freeze
 
   belongs_to :user, optional: true
@@ -149,6 +152,9 @@ class Activity < ApplicationRecord
       forced = data["forced"] ? " (finalisée malgré #{data["failed"]} échec(s))" : ""
       "Clé Elio remplacée sur #{data["servers"]} serveur(s)#{forced}"
     when :automation_run then "#{data["automation_label"]} : #{data["result"]}"
+    when :integration_enabled then "Extension #{data["integration_label"]} activée"
+    when :integration_disabled then "Extension #{data["integration_label"]} désactivée"
+    when :integration_sync_failed then "Synchronisation #{data["integration_label"]} impossible : #{data["error"]}"
     end
   end
 end

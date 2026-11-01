@@ -3,7 +3,7 @@
 # server, updated by the jobs; the task's status is derived from its items.
 # The technical view of the queue itself is Mission Control (/jobs, admins).
 class BackgroundTask < ApplicationRecord
-  KINDS = { "inventory" => "Inventaire", "keys_scan" => "Scan des clés", "automation" => "Automatisation" }.freeze
+  KINDS = { "inventory" => "Inventaire", "keys_scan" => "Scan des clés", "automation" => "Automatisation", "integration" => "Extension" }.freeze
   STATUSES = %w[queued running succeeded partial failed].freeze
   FINISHED = %w[succeeded partial failed].freeze
   # Status filters of the page: "à venir", "en cours", "terminées", "en échec".

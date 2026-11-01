@@ -81,6 +81,7 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
       "test channel" => -> { post test_settings_notification_channel_path(create_channel) },
       "delete channel" => -> { delete settings_notification_channel_path(create_channel) },
       "automations" => -> { get settings_automations_path },
+      "extensions" => -> { get settings_integrations_path },
       "update automation" => -> { patch settings_automation_path(Automation.all_kinds.find { |automation| automation.kind == "keys_scan" }), params: { automation: { enabled: "1", interval_minutes: "60" } } },
       "run automation" => -> { post run_settings_automation_path(Automation.all_kinds.find { |automation| automation.kind == "keys_scan" }) },
       "users" => -> { get settings_users_path },

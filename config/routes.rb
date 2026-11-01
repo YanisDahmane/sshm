@@ -60,6 +60,12 @@ Rails.application.routes.draw do
     resources :automations, only: %i[index update] do
       post :run, on: :member
     end
+    resources :integrations, only: %i[index edit update], param: :kind, path: "extensions" do
+      member do
+        match :test, via: %i[post patch] # (the button shares the settings form, sent as PATCH)
+        post :sync
+      end
+    end
   end
   resources :activities, only: :index
   resources :tasks, only: %i[index show]

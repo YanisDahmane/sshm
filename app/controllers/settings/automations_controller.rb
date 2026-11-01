@@ -5,7 +5,7 @@ module Settings
     before_action :set_automation, only: %i[update run]
 
     def index
-      @automations = Automation.all_kinds
+      @automations = Automation.available
       @groups = ServerGroup.order(:name)
     end
 

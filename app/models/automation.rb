@@ -6,9 +6,12 @@ class Automation < ApplicationRecord
   # `categories`: inventory categories collected (Inventory::Collection) by the
   # inventory kinds. `default_enabled`: state of a new installation. `quiet`:
   # frequent tasks whose runs are not logged (what they find still is).
-  Definition = Data.define(:key, :label, :description, :default_interval, :categories, :default_enabled, :quiet) do
-    def initialize(key:, label:, description:, default_interval:, categories: nil, default_enabled: false, quiet: false) = super
+  # `integration`: synchronization of an extension (Integration), only
+  # available while the extension is enabled.
+  Definition = Data.define(:key, :label, :description, :default_interval, :categories, :default_enabled, :quiet, :integration) do
+    def initialize(key:, label:, description:, default_interval:, categories: nil, default_enabled: false, quiet: false, integration: nil) = super
     def inventory? = categories.present?
+    def available? = integration.nil? || Integration.enabled?(integration)
   end
 
   KINDS = [
@@ -37,6 +40,9 @@ class Automation < ApplicationRecord
   validates :interval_minutes, inclusion: { in: INTERVALS.keys }
 
   # Every automation, in KINDS order, created with its default interval and state.
+  # Automations offered in the interface (those of a disabled extension aside).
+  def self.available = all_kinds.select(&:available?)
+
   def self.all_kinds
     KINDS.values.map do |definition|
       find_or_create_by!(kind: definition.key.to_s) do |automation|
@@ -48,7 +54,7 @@ class Automation < ApplicationRecord
 
   def definition = KINDS.fetch(kind.to_sym)
 
-  delegate :label, :description, :inventory?, to: :definition
+  delegate :label, :description, :inventory?, :available?, to: :definition
 
   def server_groups = ServerGroup.where(id: server_group_ids).order(:name)
 
@@ -64,7 +70,7 @@ class Automation < ApplicationRecord
 
   def next_run_at = enabled? ? (last_run_at ? last_run_at + interval : Time.current) : nil
 
-  def due?(now = Time.current) = enabled? && (last_run_at.nil? || last_run_at + interval <= now)
+  def due?(now = Time.current) = enabled? && available? && (last_run_at.nil? || last_run_at + interval <= now)
 
   # Runs the task now, remembers its result and logs an automation_run
   # activity (except for the quiet ones).
@@ -79,7 +85,10 @@ class Automation < ApplicationRecord
   # With a BackgroundTask (see RunAutomationJob), one item per server is followed.
   def run!(task: nil)
     @task = task
-    result = inventory? ? run_inventory : send("run_#{kind}")
+    result = if inventory? then run_inventory
+    elsif definition.integration then run_integration_sync
+    else send("run_#{kind}")
+    end
     update!(last_run_at: Time.current, last_result: result)
     Activity.record!(:automation_run, user: nil, automation: kind, automation_label: label, result: result) unless definition.quiet
     result
@@ -120,6 +129,16 @@ class Automation < ApplicationRecord
       item&.update!(status: "running", started_at: Time.current)
       yield server, item
     end
+  end
+
+  # Synchronization of an extension (does nothing once it is disabled).
+  def run_integration_sync
+    integration = Integration.find_enabled(definition.integration)
+    return "Extension désactivée : rien à faire" unless integration
+
+    integration.sync!
+  rescue Integrations::Error => e
+    "Échec : #{e.message}"
   end
 
   def run_servers_ping

@@ -14,9 +14,10 @@ class SettingsPagesTest < ActionDispatch::IntegrationTest
   test "settings pages share tabs, the current one highlighted" do
     sign_in users(:one)
 
-    { settings_path => "Général", settings_notifications_path => "Notifications", settings_users_path => "Utilisateurs" }.each do |path, label|
+    { settings_path => "Général", settings_notifications_path => "Notifications", settings_users_path => "Utilisateurs",
+      settings_integrations_path => "Extensions" }.each do |path, label|
       get path
-      assert_select "nav.settings-nav a", 3
+      assert_select "nav.settings-nav a", 4
       assert_select "nav.settings-nav a[aria-current=page]", label
       assert_select "nav.main-nav a[aria-current=page]", "Paramètres"
     end

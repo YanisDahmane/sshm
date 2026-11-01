@@ -43,7 +43,8 @@
 
   <nav class="server-tabs scrollbar-none mt-5 flex gap-5 overflow-x-auto border-b border-line text-sm" aria-label="Sections du serveur">
     <% [ [ "overview", "Vue d'ensemble", nil ], [ "packages", "Paquets", packages["total"] ], [ "services", "Services", (Array(services["units"]).count { |unit| unit["active"] == "active" } if services["units"]) ],
-         [ "ports", "Ports", (Inventory::PortAnalysis.new(@server).public_ports.size if ports&.collected?) ], [ "keys", "Clés SSH", snapshot&.keys&.size ], [ "history", "Historique", nil ] ].each do |tab, label, count| %>
+         [ "ports", "Ports", (Inventory::PortAnalysis.new(@server).public_ports.size if ports&.collected?) ], [ "keys", "Clés SSH", snapshot&.keys&.size ],
+         *@integration_tabs.map { |tab| [ tab[:key], tab[:label], tab[:count]&.call(@server) ] }, [ "history", "Historique", nil ] ].each do |tab, label, count| %>
       <% current = tab == @tab %>
       <%= link_to server_path(@server, tab: (tab unless tab == "overview")), aria: { current: (current ? "page" : nil) }, data: { tab: tab },
             class: "flex shrink-0 items-center gap-1.5 border-b-2 px-1 pb-2.5 #{current ? "border-accent font-medium text-ink" : "border-transparent text-ink-3 hover:text-ink"}" do %>
@@ -82,6 +83,9 @@
         <%= render "server_authorized_keys/frame", server: @server %>
       </div>
     </section>
+  <% when *@integration_tabs.map { |tab| tab[:key] } %>
+    <% tab = @integration_tabs.find { |candidate| candidate[:key] == @tab } %>
+    <%= render "integrations/#{tab[:integration].kind}/server_tab", server: @server, integration: tab[:integration] %>
   <% when "history" %>
     <section id="server-activity" class="card mt-6 px-5 pt-4 pb-2">
       <div class="flex items-center justify-between">

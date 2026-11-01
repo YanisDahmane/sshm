@@ -30,7 +30,8 @@ class ServersController < ApplicationController
 
   # Tabbed page (?tab=), only the requested tab is rendered.
   def show
-    @tab = params[:tab].presence_in(TABS) || "overview"
+    @integration_tabs = Integration.server_tabs
+    @tab = params[:tab].presence_in(TABS + @integration_tabs.map { |tab| tab[:key] }) || "overview"
     if @tab == "history"
       @pager = paginate(Activity.recent.where(server: @server).includes(:user, :server, :public_key), per_page: HISTORY_PER_PAGE)
       @activities = @pager.records

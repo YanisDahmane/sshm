@@ -9,7 +9,7 @@ class TasksController < ApplicationController
     @pager = paginate(BackgroundTask.filtered(@filter).recent.includes(:user), per_page: PER_PAGE)
     @tasks = @pager.records
     @counts = BackgroundTask.group(:status).count
-    @upcoming_automations = Automation.where(enabled: true).to_a.sort_by(&:next_run_at)
+    @upcoming_automations = Automation.where(enabled: true).select(&:available?).sort_by(&:next_run_at)
     @workers_running = JobWorkers.running?
   end
 

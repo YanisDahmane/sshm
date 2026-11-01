@@ -1,0 +1,12 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "SSL Verification Bypass",
+      "fingerprint": "6ea74df103a3ad61d97d221a0d031f80a1f2dbb74a9d09b2dd4e8ec7ec8bb13c",
+      "file": "app/services/integrations/http.rb",
+      "line": 15,
+      "note": "Opt-in only: an admin checks \"Accepter un certificat auto-signé\" for an internal service (e.g. a self-hosted Uptime Kuma); verification stays on by default. Read-only GET requests."
+    }
+  ],
+  "brakeman_version": "7.1.1"
+}

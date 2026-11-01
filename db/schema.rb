@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_31_200000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_01_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -95,6 +95,32 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_200000) do
     t.index ["created_at"], name: "index_background_tasks_on_created_at"
     t.index ["status", "created_at"], name: "index_background_tasks_on_status_and_created_at"
     t.index ["user_id"], name: "index_background_tasks_on_user_id"
+  end
+
+  create_table "integration_links", force: :cascade do |t|
+    t.bigint "integration_id", null: false
+    t.string "external_id", null: false
+    t.bigint "server_id"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["integration_id", "external_id"], name: "index_integration_links_on_integration_id_and_external_id", unique: true
+    t.index ["integration_id"], name: "index_integration_links_on_integration_id"
+    t.index ["server_id"], name: "index_integration_links_on_server_id"
+    t.index ["user_id"], name: "index_integration_links_on_user_id"
+  end
+
+  create_table "integrations", force: :cascade do |t|
+    t.string "kind", null: false
+    t.boolean "enabled", default: false, null: false
+    t.jsonb "settings", default: {}, null: false
+    t.text "secrets"
+    t.jsonb "state", default: {}, null: false
+    t.datetime "last_synced_at"
+    t.text "last_error"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["kind"], name: "index_integrations_on_kind", unique: true
   end
 
   create_table "inventory_health_samples", force: :cascade do |t|
@@ -312,6 +338,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_200000) do
   add_foreign_key "background_task_items", "servers", on_delete: :nullify
   add_foreign_key "background_tasks", "automations", on_delete: :nullify
   add_foreign_key "background_tasks", "users", on_delete: :nullify
+  add_foreign_key "integration_links", "integrations", on_delete: :cascade
+  add_foreign_key "integration_links", "servers", on_delete: :cascade
+  add_foreign_key "integration_links", "users", on_delete: :nullify
   add_foreign_key "inventory_health_samples", "servers", on_delete: :cascade
   add_foreign_key "inventory_packages", "servers", on_delete: :cascade
   add_foreign_key "inventory_snapshots", "servers", on_delete: :cascade

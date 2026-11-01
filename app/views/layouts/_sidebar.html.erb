@@ -19,6 +19,9 @@
                      active: controller_name.start_with?("server") && controller_name != "server_groups" %>
     <%= sidebar_link "Paquets", packages_path, icon: :cube, active: controller_name == "packages" %>
     <%= sidebar_link "Ports", ports_path, icon: :globe, active: controller_name == "ports" %>
+    <% Integration.sidebar_links.each do |link| %>
+      <%= sidebar_link link[:label], public_send(link[:path]), icon: link[:icon], active: controller_path == link[:controller], data: { integration_link: true } %>
+    <% end %>
     <%= sidebar_link "Trousseau", public_keys_path, icon: :key, count: PublicKey.count, active: controller_name == "public_keys" %>
     <%= sidebar_link "Activité", activities_path, icon: :pulse, active: controller_name == "activities" %>
     <%= sidebar_link "Tâches", tasks_path, icon: :clock, count: BackgroundTask.unfinished.count.nonzero?, active: controller_name == "tasks",

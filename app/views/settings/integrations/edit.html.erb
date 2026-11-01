@@ -1,0 +1,50 @@
+<% content_for :title, "#{@integration.label} · Extensions · Elio" %>
+<%= render "settings/nav" %>
+
+<div class="mt-6 flex flex-wrap items-start justify-between gap-4">
+  <div class="max-w-2xl">
+    <p class="text-xs text-ink-3"><%= link_to "Extensions", settings_integrations_path, class: "hover:text-ink" %> /</p>
+    <h2 class="mt-1 flex items-center gap-2 text-lg font-semibold"><%= icon @integration.icon, class: "h-5 w-5 text-ink-3" %><%= @integration.label %></h2>
+    <p class="mt-1 text-sm text-ink-2"><%= @integration.description %></p>
+  </div>
+  <% if @integration.enabled? && @integration.persisted? %>
+    <%= button_to sync_settings_integration_path(@integration.kind), class: "btn btn-secondary" do %>
+      <%= icon :arrow_path %> Synchroniser maintenant
+    <% end %>
+  <% end %>
+</div>
+
+<% if @integration.enabled? && @integration.last_error %>
+  <p class="integration-error mt-4 rounded-lg bg-crit-soft px-4 py-2.5 text-sm text-crit-ink">Dernière synchronisation impossible : <%= @integration.last_error %></p>
+<% elsif @integration.enabled? && @integration.last_synced_at %>
+  <p class="mt-4 text-xs text-ink-3">Synchronisée <%= relative_time_tag @integration.last_synced_at %>.</p>
+<% end %>
+
+<% if (help = @integration.definition.help_partial) %>
+  <%= render help, integration: @integration %>
+<% end %>
+
+<%= form_with model: @integration, scope: :integration, url: settings_integration_path(@integration.kind), method: :patch, class: "card mt-5 space-y-6 p-5" do |f| %>
+  <%= render "shared/form_errors", record: @integration %>
+
+  <label class="flex cursor-pointer items-start gap-2 text-sm">
+    <%= hidden_field_tag "integration[enabled]", "0", id: nil %>
+    <%= check_box_tag "integration[enabled]", "1", @integration.enabled?, id: "integration_enabled", class: "mt-0.5 h-4 w-4 rounded border-line text-accent" %>
+    <span><span class="font-semibold">Activer l'extension</span> <span class="text-ink-3">— ses onglets, pages et alertes apparaissent ; une synchronisation est lancée.</span></span>
+  </label>
+
+  <% @integration.fields.group_by(&:section).each do |section, fields| %>
+    <fieldset class="integration-section space-y-4 border-t border-line pt-5">
+      <legend class="text-sm font-semibold text-ink"><%= section %></legend>
+      <%= render partial: "settings/integrations/field", collection: fields, as: :field, locals: { integration: @integration } %>
+    </fieldset>
+  <% end %>
+
+  <div class="flex flex-wrap items-center justify-end gap-2 border-t border-line pt-4">
+    <%= f.button type: "submit", formaction: test_settings_integration_path(@integration.kind), class: "btn btn-secondary test-connection" do %>
+      <%= icon :signal_slash, class: "h-4 w-4" %> Tester la connexion
+    <% end %>
+    <%= f.submit "Enregistrer", class: "btn btn-primary" %>
+  </div>
+  <%= render "settings/integrations/test_result", result: @test_result %>
+<% end %>
