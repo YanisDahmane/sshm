@@ -59,6 +59,13 @@ class CveRatingTest < ActiveSupport::TestCase
     assert_nil provider("redhat").last_error
   end
 
+  test "a score of 10.0 is stored (found on CVE.org)" do
+    CveScore.store("cveorg", [ { cve: "CVE-2024-6387", score: 10.0 } ])
+    CveRating.refresh!
+    assert_equal 10.0, CveScore.find_by!(provider_key: "cveorg").score.to_f
+    assert_equal 9.1, CveRating.find_by!(cve: "CVE-2024-6387").score.to_f, "(8.1 + 9.3 + 10) / 3"
+  end
+
   test "severity from a score" do
     assert_equal %w[critical high medium low unknown], [ 9.0, 7.0, 4.0, 0.1, nil ].map { |score| CveRating.severity_for(score) }
   end
