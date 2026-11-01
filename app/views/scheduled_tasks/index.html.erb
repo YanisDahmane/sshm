@@ -1,0 +1,59 @@
+<% content_for :title, "Tâches planifiées · Elio" %>
+
+<div>
+  <h1 class="text-xl font-semibold">Tâches planifiées</h1>
+  <p class="text-xs text-ink-3">Crontabs et timers systemd de chaque serveur, d'après leur dernier inventaire. Les timers en échec ou en retard en premier.</p>
+</div>
+
+<%= form_with url: scheduled_tasks_path, method: :get, data: { controller: "auto-submit", turbo_action: "advance" }, class: "scheduled-tasks-filters mt-5 flex flex-wrap items-center gap-2" do |f| %>
+  <%= f.search_field :q, value: @q, placeholder: "Commande, timer, fichier (ex. backup.sh)", aria: { label: "Rechercher" },
+        data: { action: "input->auto-submit#submitLater" }, class: "input w-72 py-1 text-xs" %>
+  <%= f.select :group, [ [ "Tous les groupes", "" ], *@groups.map { |group| [ group.name, group.id ] } ], { selected: @group&.id },
+        aria: { label: "Groupe" }, data: { action: "change->auto-submit#submit" }, class: "input w-auto py-1 text-xs" %>
+  <%= f.select :state, [ [ "Tous les états", "" ], [ "En échec", "failed" ], [ "En retard", "late" ] ], { selected: @state },
+        aria: { label: "État" }, data: { action: "change->auto-submit#submit" }, class: "input w-auto py-1 text-xs" %>
+  <noscript><%= f.submit "Filtrer", class: "btn btn-secondary" %></noscript>
+<% end %>
+
+<% if @rows.any? %>
+  <div class="card mt-3 overflow-x-auto">
+    <table id="scheduled-tasks" class="table-dense">
+      <thead><tr><th class="pl-4">Serveur</th><th>Type</th><th>Quand</th><th>Tâche</th><th>Utilisateur</th><th class="pr-4">État</th></tr></thead>
+      <tbody>
+        <% @rows.each do |row| %>
+          <tr class="scheduled-task" data-kind="<%= row.kind %>">
+            <td class="pl-4"><%= link_to row.server.name, server_path(row.server, tab: "schedules"), class: "font-medium hover:text-accent hover:underline" %></td>
+            <td class="text-xs text-ink-2"><%= { "timer" => "timer", "cron" => "cron", "periodic" => "script" }.fetch(row.kind) %></td>
+            <td class="text-xs whitespace-nowrap">
+              <% if row.kind == "timer" %><%= timer_schedule_text(row.timer) %>
+              <% elsif row.kind == "cron" %><span title="<%= row.schedule %>"><%= Inventory::CronSchedule.cron(row.schedule).text %></span>
+              <% else %><%= InventoryHelper::PERIOD_LABELS.fetch(row.schedule, row.schedule) %>
+              <% end %>
+            </td>
+            <td class="max-w-md text-xs">
+              <% if row.kind == "cron" %>
+                <span class="block truncate font-mono" title="<%= row.command %>"><%= row.command %></span>
+              <% else %>
+                <span class="font-mono"><%= row.name.delete_suffix(".timer") %></span>
+                <% if row.command %><span class="text-ink-3"> — <%= row.command %></span><% end %>
+              <% end %>
+              <span class="block text-[11px] text-ink-3"><%= row.source %></span>
+            </td>
+            <td class="font-mono text-xs"><%= row.user || "—" %></td>
+            <td class="pr-4 text-xs">
+              <% if row.timer %><%= timer_state_badge(row.timer) %><% if row.timer["last_at"] %> <span class="text-ink-3">· <%= timer_time(row.timer["last_at"]) %></span><% end %>
+              <% else %><span class="text-ink-3" title="Cron ne garde pas de trace de ses passages lisible sans les journaux.">—</span><% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <%= render "shared/pagination", pager: @pager, noun: "tâches" %>
+<% else %>
+  <p class="card mt-3 px-4 py-6 text-sm text-ink-3"><%= @q.present? || @state ? "Aucune tâche planifiée ne correspond." : "Aucune tâche planifiée connue." %></p>
+<% end %>
+
+<% if @without_inventory.any? %>
+  <p class="mt-3 text-xs text-ink-3">Sans inventaire des tâches planifiées : <%= safe_join(@without_inventory.map { |server| link_to(server.name, server_path(server), class: "hover:underline") }, ", ") %>.</p>
+<% end %>

@@ -32,6 +32,7 @@ class AuthorizationTest < ActionDispatch::IntegrationTest
       "server packages" => -> { get server_packages_path(servers(:web)) },
       "fleet packages" => -> { get packages_path(q: "ssl") },
       "fleet ports" => -> { get ports_path },
+      "fleet scheduled tasks" => -> { get scheduled_tasks_path },
       "ping one server" => -> { post server_ping_path(servers(:web)) },
       "ping all servers" => -> { post server_pings_path },
       "public_keys index" => -> { get public_keys_path },

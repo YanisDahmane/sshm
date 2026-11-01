@@ -15,7 +15,7 @@ class Inventory::HealthStatus
   end
 
   def evaluate
-    reasons = [ *access_reasons, *disk_reasons, *memory_reasons, *load_reasons, *system_reasons, *port_reasons, *Integration.health_reasons(@server) ]
+    reasons = [ *access_reasons, *disk_reasons, *memory_reasons, *load_reasons, *system_reasons, *scheduled_task_reasons, *port_reasons, *Integration.health_reasons(@server) ]
     reasons = reasons.sort_by { |reason| reason.tone == "crit" ? 0 : 1 }
     state = if reasons.any? { |reason| reason.tone == "crit" } then "crit"
     elsif reasons.any? then "warn"
@@ -61,6 +61,16 @@ class Inventory::HealthStatus
       reasons << Reason.new("warn", "#{@os.data["name"]} n'est plus supporté")
     end
     reasons
+  end
+
+  def scheduled_task_reasons
+    tasks = @server.inventory("scheduled_tasks")
+    timers = tasks&.collected? ? Array(tasks.data["timers"]) : []
+    [ [ timers.select { |timer| timer["failed"] }, "en échec" ], [ timers.select { |timer| timer["late"] && !timer["failed"] }, "en retard" ] ].filter_map do |list, state|
+      next if list.empty?
+
+      Reason.new("warn", list.one? ? "Tâche planifiée #{list.first["name"].delete_suffix(".timer")} #{state}" : "#{list.size} tâches planifiées #{state}")
+    end
   end
 
   def port_reasons

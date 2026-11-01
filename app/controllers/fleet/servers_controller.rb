@@ -35,7 +35,7 @@ class ServersController < ApplicationController
     end
   end
 
-  TABS = %w[overview packages services ports keys history].freeze
+  TABS = %w[overview packages services schedules ports keys history].freeze
 
   # Tabbed page (?tab=), only the requested tab is rendered.
   def show

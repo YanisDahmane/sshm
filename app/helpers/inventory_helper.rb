@@ -29,6 +29,26 @@ module InventoryHelper
     end
   end
 
+  PERIOD_LABELS = { "hourly" => "toutes les heures", "daily" => "tous les jours", "weekly" => "toutes les semaines", "monthly" => "tous les mois" }.freeze
+
+  # Readable schedules of a timer ("OnCalendar=*-*-* 06:00:00" → "tous les jours à 6 h 00").
+  def timer_schedule_text(timer)
+    Array(timer["schedules"]).map { |schedule| Inventory::CronSchedule.timer(schedule).text }.join(" · ").presence || "—"
+  end
+
+  def cron_schedule_text(task) = Inventory::CronSchedule.cron(task["schedule"]).text
+
+  # State of a systemd timer: failed, late, inactive or ok.
+  def timer_state_badge(timer)
+    if timer["failed"] then status_badge(:crit, "en échec", title: "Dernier passage : #{timer["result"]} (code #{timer["exit_status"]})", class: "timer-state")
+    elsif timer["late"] then status_badge(:warn, "en retard", class: "timer-state")
+    elsif timer["active"] != "active" then status_badge(:neutral, "inactif", class: "timer-state")
+    else status_badge(:good, "ok", class: "timer-state")
+    end
+  end
+
+  def timer_time(value) = value ? relative_time_tag(Time.zone.parse(value)) : tag.span("—", class: "text-ink-3")
+
   # Badge of an inventory snapshot that is not plainly ok.
   def inventory_status_badge(snapshot)
     case snapshot&.status

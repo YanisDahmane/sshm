@@ -28,6 +28,8 @@ class Activity < ApplicationRecord
     Kind.new(:service_recovered, "Service rétabli", :servers, :info, "Un service systemd en échec fonctionne à nouveau."),
     Kind.new(:container_stopped, "Conteneur arrêté", :servers, :warning, "Un conteneur Docker qui tournait s'est arrêté."),
     Kind.new(:container_started, "Conteneur redémarré", :servers, :info, "Un conteneur Docker arrêté tourne à nouveau."),
+    Kind.new(:scheduled_task_failed, "Tâche planifiée en échec", :servers, :warning, "Le dernier passage d'un timer systemd a échoué (inventaire)."),
+    Kind.new(:scheduled_task_late, "Tâche planifiée en retard", :servers, :warning, "Un timer systemd n'a pas tourné depuis plus de deux fois sa période."),
     Kind.new(:port_opened, "Port public ouvert", :security, :warning, "Un nouveau port écoute sur une adresse publique d'un serveur."),
     Kind.new(:port_closed, "Port public fermé", :security, :info, "Un port public n'écoute plus sur un serveur."),
     Kind.new(:ip_address_added, "Nouvelle adresse IP publique", :servers, :info, "Une adresse IP publique apparaît sur une interface d'un serveur."),

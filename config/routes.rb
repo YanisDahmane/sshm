@@ -71,6 +71,7 @@ Rails.application.routes.draw do
   resources :tasks, only: %i[index show]
   resources :packages, only: :index
   resources :ports, only: :index
+  resources :scheduled_tasks, only: :index, path: "scheduled-tasks"
   # Uptime Kuma extension.
   resources :monitors, only: :index do
     resource :link, only: %i[create destroy], controller: "monitor_links"

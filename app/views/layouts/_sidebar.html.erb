@@ -19,6 +19,7 @@
                      active: controller_name.start_with?("server") && controller_name != "server_groups" %>
     <%= sidebar_link "Paquets", packages_path, icon: :cube, active: controller_name == "packages" %>
     <%= sidebar_link "Ports", ports_path, icon: :globe, active: controller_name == "ports" %>
+    <%= sidebar_link "Tâches planifiées", scheduled_tasks_path, icon: :calendar, active: controller_name == "scheduled_tasks" %>
     <% Integration.sidebar_links.each do |link| %>
       <%= sidebar_link link[:label], public_send(link[:path]), icon: link[:icon], active: controller_path == link[:controller], data: { integration_link: true } %>
     <% end %>

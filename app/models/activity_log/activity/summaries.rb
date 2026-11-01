@@ -29,6 +29,8 @@ module Activity::Summaries
     service_recovered: proc { "#{data["service"]} fonctionne à nouveau sur « #{server_name} »" },
     container_stopped: proc { "Le conteneur #{data["container"]} s'est arrêté sur « #{server_name} »" },
     container_started: proc { "Le conteneur #{data["container"]} tourne à nouveau sur « #{server_name} »" },
+    scheduled_task_failed: proc { "La tâche planifiée #{data["task"]} a échoué sur « #{server_name} »" },
+    scheduled_task_late: proc { "La tâche planifiée #{data["task"]} n'a pas tourné à temps sur « #{server_name} »" },
     port_opened: proc { "Port #{data["port"]} ouvert publiquement sur « #{server_name} »#{" (#{data["process"]})" if data["process"]}" },
     port_closed: proc { "Port #{data["port"]} fermé sur « #{server_name} »" },
     ip_address_added: proc { "Nouvelle adresse publique #{data["address"]} sur « #{server_name} »" },

@@ -1,0 +1,89 @@
+<%# Scheduled tasks of the server from its last inventory (Inventory::Collectors::ScheduledTasks): systemd timers, crontabs, cron.* scripts. %>
+<% snapshot = server.inventory("scheduled_tasks") %>
+<% data = snapshot&.collected? && snapshot.status != "unsupported" ? snapshot.data : nil %>
+<section id="server-scheduled-tasks" class="card mt-6">
+  <div class="card-header">
+    <h2 class="flex items-center gap-2 font-semibold"><%= icon :calendar, class: "h-4 w-4 text-ink-3" %> Tâches planifiées</h2>
+    <div class="flex items-center gap-3 text-xs text-ink-3">
+      <%= inventory_status_badge(snapshot) %>
+      <% if snapshot&.collected_at %><span>relevé <%= relative_time_tag snapshot.collected_at %></span><% end %>
+      <%= link_to "Chercher sur tout le parc", scheduled_tasks_path, class: "font-medium text-accent hover:underline" %>
+    </div>
+  </div>
+
+  <% if data %>
+    <% timers = Array(data["timers"]).sort_by { |timer| [ timer["failed"] ? 0 : timer["late"] ? 1 : timer["active"] == "active" ? 2 : 3, timer["name"] ] } %>
+    <% cron = Array(data["cron"]) %>
+    <% periodic = Array(data["periodic"]) %>
+    <p class="scheduled-tasks-summary border-b border-line px-4 py-2.5 text-xs text-ink-2">
+      <strong class="text-ink"><%= timers.size %></strong> timers systemd
+      <% if (failed = timers.count { |timer| timer["failed"] }).positive? %>· <strong class="text-crit-ink"><%= failed %> en échec</strong><% end %>
+      <% if (late = timers.count { |timer| timer["late"] && !timer["failed"] }).positive? %>· <strong class="text-warn-ink"><%= late %> en retard</strong><% end %>
+      · <strong class="text-ink"><%= cron.size %></strong> lignes cron · <%= periodic.size %> scripts périodiques
+    </p>
+
+    <% if data["user_crontabs"] == "unreadable" %>
+      <p class="crontabs-unreadable border-b border-line px-4 py-2.5 text-xs text-warn-ink"><%= snapshot.message %></p>
+    <% end %>
+
+    <h3 class="px-4 pt-3 text-xs font-semibold tracking-wide text-ink-3 uppercase">Timers systemd</h3>
+    <% if timers.any? %>
+      <div class="overflow-x-auto">
+        <table class="table-dense">
+          <thead><tr><th class="pl-4">État</th><th>Timer</th><th>Quand</th><th>Dernier passage</th><th class="pr-4">Prochain</th></tr></thead>
+          <tbody>
+            <% timers.each do |timer| %>
+              <tr class="systemd-timer" data-name="<%= timer["name"] %>">
+                <td class="pl-4"><%= timer_state_badge(timer) %></td>
+                <td><span class="font-mono text-xs"><%= timer["name"].delete_suffix(".timer") %></span>
+                  <% if timer["description"] %><span class="block text-[11px] text-ink-3"><%= timer["description"] %></span><% end %></td>
+                <td class="text-xs" title="<%= Array(timer["schedules"]).join("\n") %>"><%= timer_schedule_text(timer) %></td>
+                <td class="text-xs"><%= timer_time(timer["last_at"]) %></td>
+                <td class="pr-4 text-xs"><%= timer_time(timer["next_at"]) %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <p class="px-4 py-3 text-sm text-ink-3">Aucun timer systemd.</p>
+    <% end %>
+
+    <h3 class="border-t border-line px-4 pt-3 text-xs font-semibold tracking-wide text-ink-3 uppercase">Cron</h3>
+    <% if cron.any? %>
+      <div class="overflow-x-auto">
+        <table class="table-dense">
+          <thead><tr><th class="pl-4">Quand</th><th>Utilisateur</th><th>Commande</th><th class="pr-4">Fichier</th></tr></thead>
+          <tbody>
+            <% cron.each do |task| %>
+              <tr class="cron-task">
+                <td class="pl-4 text-xs whitespace-nowrap" title="<%= task["schedule"] %>"><%= cron_schedule_text(task) %></td>
+                <td class="font-mono text-xs"><%= task["user"] %></td>
+                <td class="max-w-md truncate font-mono text-xs" title="<%= task["command"] %>"><%= task["command"] %></td>
+                <td class="pr-4 text-xs text-ink-3"><%= task["source"] %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <p class="px-4 py-3 text-sm text-ink-3">Aucune ligne cron.</p>
+    <% end %>
+
+    <% if periodic.any? %>
+      <h3 class="border-t border-line px-4 pt-3 text-xs font-semibold tracking-wide text-ink-3 uppercase">Scripts périodiques</h3>
+      <ul class="periodic-scripts space-y-1 px-4 py-3 text-xs">
+        <% periodic.group_by { |task| task["period"] }.each do |period, tasks| %>
+          <li><span class="text-ink-2"><%= InventoryHelper::PERIOD_LABELS.fetch(period, period).capitalize %></span>
+            <span class="text-ink-3">(/etc/cron.<%= period %>)</span> : <span class="font-mono"><%= tasks.map { |task| task["name"] }.join(", ") %></span></li>
+        <% end %>
+      </ul>
+    <% end %>
+  <% elsif snapshot&.status == "unsupported" %>
+    <p class="scheduled-tasks-empty px-4 py-4 text-sm text-ink-3"><%= snapshot.message %></p>
+  <% elsif snapshot&.failed? %>
+    <p class="inventory-error px-4 py-4 text-sm text-crit-ink"><%= snapshot.message %></p>
+  <% else %>
+    <p class="scheduled-tasks-empty px-4 py-4 text-sm text-ink-3">Pas encore d'inventaire des tâches planifiées.</p>
+  <% end %>
+</section>

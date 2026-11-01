@@ -1,0 +1,19 @@
+@@elio crontab
+17 *	* * *	root	cd / && run-parts --report /etc/cron.hourly
+@@elio cron.d
+@@elio periodic
+daily logrotate
+@@elio users
+unreadable
+@@elio timers
+Id=logrotate.timer
+Description=Daily rotation of log files
+Unit=logrotate.service
+ActiveState=active
+UnitFileState=enabled
+TimersCalendar={ OnCalendar=*-*-* 00:00:00 ; next_elapse=Sun 2025-11-02 00:00:00 CET }
+LastTriggerUSec=Sat 2025-11-01 00:00:03 CET
+NextElapseUSecRealtime=Sun 2025-11-02 00:00:00 CET
+ServiceResult=success
+ServiceExecMainStatus=0
+

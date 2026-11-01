@@ -42,9 +42,10 @@ Santé, système, paquets, services, ports et firewall de chaque serveur, et les
 | **Système** | Distribution, noyau, machine (virtualisation, processeurs, mémoire), démarrage, avec la **date de fin de support** Debian / Ubuntu. |
 | **Paquets** | Paquets Debian, snaps et images Docker de chaque serveur, mises à jour disponibles (sécurité en évidence). Recherche sur tout le parc : « quels serveurs ont openssl, et en quelle version ? » |
 | **Services** | Services systemd et conteneurs Docker, regroupés par projet Docker Compose (avec le chemin des fichiers compose). |
+| **Tâches planifiées** | Crontabs (système et utilisateurs), scripts `cron.daily`… et timers systemd de chaque serveur, en clair (« tous les jours à 3 h 00 »), avec le dernier passage des timers : **en échec** ou **en retard** signalés. Recherche sur tout le parc : « quels serveurs lancent backup.sh ? » |
 | **Ports et firewall** | Ports en écoute avec le processus, le service ou le conteneur derrière, exposition (public, privé, local), état du firewall (ufw, nftables, iptables), **règles ufw suggérées à copier**, ports inattendus par groupe. |
 | **Trousseau** | Les clés SSH de l'équipe et des machines (CI, sauvegardes…), à ajouter ou retirer sur chaque serveur — depuis le trousseau ou en collant une nouvelle clé directement sur la fiche du serveur —, pour toujours ou pour une durée limitée. Les clés inconnues trouvées sur les serveurs sont signalées. |
-| **Automatisations** | Suivi de la santé, inventaires (système, paquets, services, ports), vérification des serveurs et scan des clés, à la fréquence de votre choix, sur tout le parc ou par groupe. |
+| **Automatisations** | Suivi de la santé, inventaires (système, paquets, services et tâches planifiées, ports), vérification des serveurs et scan des clés, à la fréquence de votre choix, sur tout le parc ou par groupe. |
 | **Réseau** | Toutes les adresses de chaque serveur (publiques, réseau local, **WireGuard** et autres VPN) et son hostname ; recherche d'un serveur par IP. |
 | **Extensions** | **Uptime Kuma** (les sondes rattachées à chaque serveur, serveurs sans sonde, sondes hors ligne, certificats) et **OVHcloud** (service, IP et reverse, firewall réseau, anti-DDoS, enregistrements DNS vers chaque serveur), en lecture seule, chaque alerte au choix. |
 | **Tâches** | Chaque inventaire, scan ou automatisation lancé en arrière-plan est suivi en direct : à venir, en cours, terminé, en échec, avec le résultat et l'erreur de chaque serveur. Les administrateurs ont aussi la vue technique de la file (Mission Control, `/jobs`). |
@@ -165,6 +166,7 @@ Tout passe par SSH, avec la clé d'Elio uniquement (jamais votre agent ni vos cl
 | Santé | `/proc/loadavg`, `/proc/meminfo`, `df -P -T` (espace et inodes), `/var/run/reboot-required`, `systemctl --failed`, `apt-get -s dist-upgrade` (simulation), `timedatectl` |
 | Paquets | `dpkg-query -W`, `apt list --upgradable`, `snap list`, `docker image ls` |
 | Services | `systemctl list-units`, `systemctl list-unit-files`, `docker ps -a` |
+| Tâches planifiées | `cat /etc/crontab /etc/cron.d/*`, liste de `/etc/cron.{hourly,daily,weekly,monthly}`, crontabs de `/var/spool/cron` (root), `systemctl show` des timers |
 | Ports | `ss -tulpn`, `/proc/<pid>/cgroup`, `ufw status verbose`, `nft list ruleset`, `iptables -S INPUT` |
 | Clés SSH | lecture de `~/.ssh/authorized_keys` ; **écriture seulement** quand vous ajoutez ou retirez une clé |
 

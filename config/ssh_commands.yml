@@ -117,6 +117,29 @@ inventory:
     run_as: root
     default: "docker ps -a --no-trunc --format '{{.ID}}\t{{.Names}}\t{{.Image}}\t{{.State}}\t{{.Status}}\t{{.Ports}}\t{{.Label \"com.docker.compose.project\"}}\t{{.Label \"com.docker.compose.project.working_dir\"}}\t{{.Label \"com.docker.compose.project.config_files\"}}\t{{.Label \"com.docker.compose.service\"}}'"
 
+  scheduled_tasks:
+    description: "Scheduled tasks: system crontabs (/etc/crontab, /etc/cron.d, cron.hourly…monthly scripts), users' crontabs (root only), systemd timers with their last run and its result."
+    run_as: root
+    shell: true
+    default: |
+      echo "@@elio crontab"; cat /etc/crontab 2>/dev/null || true
+      echo "@@elio cron.d"; for f in /etc/cron.d/*; do [ -f "$f" ] || continue; echo "@@file $f"; cat "$f" 2>/dev/null; done
+      echo "@@elio periodic"; for d in hourly daily weekly monthly; do for f in /etc/cron.$d/*; do if [ -f "$f" ] && [ -x "$f" ]; then echo "$d ${f##*/}"; fi; done; done
+      echo "@@elio users"; for dir in /var/spool/cron/crontabs /var/spool/cron; do
+        [ -d "$dir" ] || continue
+        if ! ls "$dir" >/dev/null 2>&1; then echo unreadable; break; fi
+        for f in "$dir"/*; do [ -f "$f" ] || continue; echo "@@file ${f##*/}"; cat "$f" 2>/dev/null; done; break
+      done
+      echo "@@elio timers"; if command -v systemctl >/dev/null 2>&1; then
+        for t in $(systemctl list-units --type=timer --all --no-legend --plain --no-pager 2>/dev/null | awk '{print $1}'); do
+          props="-p Id -p Description -p Unit -p ActiveState -p UnitFileState -p TimersCalendar -p TimersMonotonic -p LastTriggerUSec -p NextElapseUSecRealtime"
+          systemctl show "$t" --timestamp=unix $props 2>/dev/null || systemctl show "$t" $props 2>/dev/null
+          unit=$(systemctl show "$t" -p Unit --value 2>/dev/null)
+          if [ -n "$unit" ]; then systemctl show "$unit" -p Result -p ExecMainStatus 2>/dev/null | sed 's/^/Service/'; fi
+          echo
+        done
+      else echo unsupported; fi
+
   ports:
     description: "Ports: listening sockets with their process and systemd unit, firewall state (ufw, else nftables, else iptables). Read-only: Elio never changes the firewall."
     run_as: root
