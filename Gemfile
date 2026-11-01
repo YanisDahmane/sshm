@@ -82,3 +82,5 @@ gem "rqrcode", "~> 3.1"
 gem "csv"
 
 gem "mission_control-jobs", "~> 1.3"
+
+gem "bundler-audit", "~> 0.9.3", groups: [ :development, :test ], require: false
