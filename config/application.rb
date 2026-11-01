@@ -1,6 +1,7 @@
 require_relative "boot"
 
 require "rails/all"
+require_relative "../lib/elio/secrets"
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -25,5 +26,9 @@ module Elio
     config.i18n.default_locale = :fr
     config.i18n.available_locales = %i[fr en]
     # config.eager_load_paths << Rails.root.join("extras")
+
+    # Database encryption keys from the environment (lib/elio/secrets.rb),
+    # else Rails credentials. SECRET_KEY_BASE is read by Rails itself.
+    Elio::Secrets.encryption_keys.each { |key, value| config.active_record.encryption.public_send(:"#{key}=", value) }
   end
 end

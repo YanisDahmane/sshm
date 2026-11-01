@@ -34,7 +34,12 @@ registry:
 # Inject ENV variables into containers (secrets come from .kamal/secrets).
 env:
   secret:
-    - RAILS_MASTER_KEY
+    # Secrets of the installation, from bin/elio-keys (keep them: the encrypted data cannot be read without them).
+    - SECRET_KEY_BASE
+    - ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY
+    - ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY
+    - ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT
+    # Or, for an installation that keeps them in Rails credentials: RAILS_MASTER_KEY instead.
     - ELIO_DATABASE_PASSWORD
     # Asked to create the first admin account (see README): set it before the first deploy.
     - ELIO_SETUP_TOKEN

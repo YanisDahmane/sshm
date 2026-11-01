@@ -53,4 +53,8 @@ Rails.application.configure do
 
   # Encrypt attributes declared with `encrypts` when loading fixtures.
   config.active_record.encryption.encrypt_fixtures = true
+  # Fixed keys: the tests run anywhere (GitHub, a fresh clone), without the credentials of an installation.
+  config.active_record.encryption.primary_key = "test-primary-key-0123456789abcdef"
+  config.active_record.encryption.deterministic_key = "test-deterministic-key-0123456789"
+  config.active_record.encryption.key_derivation_salt = "test-key-derivation-salt-0123456"
 end
